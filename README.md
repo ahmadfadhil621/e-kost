@@ -15,17 +15,6 @@ The MVP includes four core features:
 - Payment Recording: Log rent payments with tenant, amount, and date
 - Outstanding Balance Tracking: Calculate and display what each tenant owes based on rent and payments
 
-Out of scope for MVP:
-
-- Automated payment processing or online payment collection
-- Lease management or contract generation
-- Tenant screening or background checks
-- Payment reminders or notifications
-- Multi-property management
-- Role-based access control
-- Receipt generation or printing
-- Integration with banking or accounting systems
-
 ## Tech Stack
 
 To be determined based on implementation requirements. The application must support:
