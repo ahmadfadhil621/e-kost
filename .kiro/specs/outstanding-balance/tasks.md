@@ -189,3 +189,18 @@
 - **Overpayment**: No specific requirements for handling overpayments (when payments exceed rent)
 - **Multiple Rooms**: Assumes tenant assigned to single room at a time
 - **Data Dependencies**: Assumes tenant, room, and payment data available from other features
+
+
+## 4. Internationalization (i18n)
+
+- [ ] 4.1 Extract and translate balance display strings
+  - **Description**: Move all UI text to translation keys for balance features
+  - **Acceptance Criteria**:
+    - All balance labels translated
+    - All status labels translated (paid, unpaid)
+    - All section headers translated
+    - Currency formatting respects locale
+    - Translation keys follow consistent naming convention
+  - **Dependencies**: Tenant i18n setup (6.1 from tenant-room-basics)
+  - **Effort**: S
+  - **Requirements**: Cross-cutting Constraint 2

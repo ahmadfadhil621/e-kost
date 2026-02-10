@@ -229,3 +229,19 @@
 - **Currency**: No currency specification for monthly rent display
 - **Concurrent Access**: No requirements for handling concurrent updates to same room
 - **Status Transitions**: No restrictions on which status changes are allowed (e.g., can occupied go directly to under renovation?)
+
+
+## 5. Internationalization (i18n)
+
+- [ ] 5.1 Extract and translate room management strings
+  - **Description**: Move all UI text to translation keys for room features
+  - **Acceptance Criteria**:
+    - All form labels translated (room number, type, rent)
+    - All validation messages translated
+    - All status labels translated (available, occupied, under renovation)
+    - All confirmation dialogs translated
+    - All success/error messages translated
+    - Translation keys follow consistent naming convention
+  - **Dependencies**: Tenant i18n setup (6.1 from tenant-room-basics)
+  - **Effort**: S
+  - **Requirements**: Cross-cutting Constraint 2

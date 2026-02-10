@@ -107,6 +107,10 @@ Property managers need to maintain an accurate record of rent payments to avoid 
 - The interface must function on mobile devices with screen widths from 320px to 480px
 - Only tenants with active room assignments can have payments recorded
 - Payment dates must be valid calendar dates
+- All user-facing text must be externalized via translation keys (see cross-cutting-constraints.md)
+- Language can be changed by updating a single JSON file without code changes
+- All form labels, validation messages, and confirmation dialogs must use translation keys
+- Currency formatting must respect locale (decimal separators, currency symbols)
 
 ## Success Criteria
 

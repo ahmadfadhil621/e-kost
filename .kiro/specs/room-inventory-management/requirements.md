@@ -105,6 +105,9 @@ Property managers need to maintain an accurate inventory of available rooms and 
 - All timestamps must be recorded in UTC timezone
 - The interface must function on mobile devices with screen widths from 320px to 480px
 - Room numbers/identifiers must be unique within the property
+- All user-facing text must be externalized via translation keys (see cross-cutting-constraints.md)
+- Language can be changed by updating a single JSON file without code changes
+- All form labels, validation messages, and confirmation dialogs must use translation keys
 
 ## Success Criteria
 

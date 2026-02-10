@@ -102,6 +102,9 @@ Property managers need a centralized system to track tenant information and room
 - Move-out operations must preserve historical tenant data (soft delete, not hard delete)
 - All timestamps must be recorded in UTC timezone
 - The interface must function on mobile devices with screen widths from 320px to 480px
+- All user-facing text must be externalized via translation keys (see cross-cutting-constraints.md)
+- Language can be changed by updating a single JSON file without code changes
+- All form labels, validation messages, and confirmation dialogs must use translation keys
 
 ## Success Criteria
 

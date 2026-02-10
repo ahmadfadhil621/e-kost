@@ -229,3 +229,30 @@
 - **Validation Rules**: Phone number format validation not specified
 - **Concurrent Access**: No requirements for handling concurrent updates to same tenant
 - **Data Migration**: No requirements for importing existing tenant data
+
+
+## 6. Internationalization (i18n)
+
+- [ ] 6.1 Set up i18n infrastructure
+  - **Description**: Configure i18n library and translation file structure
+  - **Acceptance Criteria**:
+    - i18n library installed and configured
+    - Translation files directory created (locales/)
+    - Base language JSON file created with all UI strings
+    - Language switching mechanism implemented
+    - No hardcoded strings in components
+  - **Dependencies**: None
+  - **Effort**: M
+  - **Requirements**: Cross-cutting Constraint 2
+
+- [ ] 6.2 Extract and translate tenant management strings
+  - **Description**: Move all UI text to translation keys for tenant features
+  - **Acceptance Criteria**:
+    - All form labels translated (name, phone, email)
+    - All validation messages translated
+    - All confirmation dialogs translated
+    - All success/error messages translated
+    - Translation keys follow consistent naming convention
+  - **Dependencies**: 6.1
+  - **Effort**: S
+  - **Requirements**: Cross-cutting Constraint 2

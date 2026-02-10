@@ -107,6 +107,9 @@ Property managers need to quickly identify which tenants are behind on rent paym
 - Status indicators must use both color and text/icon for accessibility (not color alone)
 - The interface must function on mobile devices with screen widths from 320px to 480px
 - Outstanding balance calculations must be accurate to the nearest currency unit (no rounding errors)
+- All user-facing text must be externalized via translation keys (see cross-cutting-constraints.md)
+- Language can be changed by updating a single JSON file without code changes
+- Currency formatting must respect locale (decimal separators, currency symbols)
 
 ## Success Criteria
 

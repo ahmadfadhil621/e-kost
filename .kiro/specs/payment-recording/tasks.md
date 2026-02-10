@@ -184,3 +184,19 @@
 - **Partial Payments**: No requirements for handling partial payments or payment plans
 - **Date Input**: No specification for date picker vs manual entry
 - **Tenant Selection**: Assumes tenant data available from tenant-room-basics feature
+
+
+## 5. Internationalization (i18n)
+
+- [ ] 5.1 Extract and translate payment recording strings
+  - **Description**: Move all UI text to translation keys for payment features
+  - **Acceptance Criteria**:
+    - All form labels translated (tenant, amount, date)
+    - All validation messages translated
+    - All confirmation dialogs translated
+    - All success/error messages translated
+    - Currency formatting respects locale
+    - Translation keys follow consistent naming convention
+  - **Dependencies**: Tenant i18n setup (6.1 from tenant-room-basics)
+  - **Effort**: S
+  - **Requirements**: Cross-cutting Constraint 2
