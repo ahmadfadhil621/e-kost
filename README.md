@@ -2,7 +2,7 @@
 
 ## Overview
 
-E-Kost is a simple web application that helps small, informal landlords manage rental rooms. It provides a clear, shared overview of tenants, payments, and room availability. The name comes from the Indonesian word for rental rooms and is inspired by real-world property management challenges faced by small landlords.
+E-Kost is a mobile-first web application that helps small, informal landlords manage rental rooms. It provides a clear, shared overview of tenants, payments, and room availability. The name comes from the Indonesian word for rental rooms and is inspired by real-world property management challenges faced by small landlords.
 
 The application solves the problem of scattered information across spreadsheets, notes, and messages by providing a single, mobile-optimized system for tracking who lives where, which rooms are available, and who has paid rent.
 
@@ -10,58 +10,82 @@ The application solves the problem of scattered information across spreadsheets,
 
 The MVP includes four core features:
 
-- Tenant & Room Basics: Add, view, update, and remove tenants with room assignments
-- Room Inventory Management: Create and manage rooms with status tracking (available, occupied, under renovation)
-- Payment Recording: Log rent payments with tenant, amount, and date
-- Outstanding Balance Tracking: Calculate and display what each tenant owes based on rent and payments
+- **Tenant & Room Basics** — Add, view, update, and remove tenants with room assignments
+- **Room Inventory Management** — Create and manage rooms with status tracking (available, occupied, under renovation)
+- **Payment Recording** — Log rent payments with tenant, amount, and date
+- **Outstanding Balance Tracking** — Calculate and display what each tenant owes based on rent and payments
 
 ## Tech Stack
 
-To be determined based on implementation requirements. The application must support:
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18, Vite, Tailwind CSS, shadcn/ui, Lucide React |
+| Forms & Validation | React Hook Form, Zod |
+| Backend | Next.js API Routes (Vercel serverless) |
+| Database | PostgreSQL via Supabase |
+| ORM | Prisma |
+| i18n | react-i18next |
+| Hosting | Vercel + Supabase free tiers ($0/month) |
 
-- Mobile-responsive web interface (320px to 480px screen widths)
-- Database persistence for tenants, rooms, and payments
-- Single-column layouts optimized for smartphone use
-- Touch-friendly interactions (minimum 44x44 pixel touch targets)
+See `specs/technology-stack-decisions.md` for the full evaluation and rationale.
 
 ## Project Structure
 
 ```
-.kiro/specs/
+specs/
 ├── tenant-room-basics/
-│   └── requirements.md
+│   ├── requirements.md
+│   ├── design.md
+│   └── tasks.md
 ├── room-inventory-management/
-│   └── requirements.md
+│   ├── requirements.md
+│   ├── design.md
+│   └── tasks.md
 ├── payment-recording/
-│   └── requirements.md
-└── outstanding-balance/
-    └── requirements.md
+│   ├── requirements.md
+│   ├── design.md
+│   └── tasks.md
+├── outstanding-balance/
+│   ├── requirements.md
+│   ├── design.md
+│   └── tasks.md
+├── user-authentication/
+│   ├── requirements.md
+│   ├── design.md
+│   └── tasks.md
+├── architecture-intent.md
+├── cross-cutting-constraints.md
+├── data-architecture.md
+├── technology-decisions.md
+├── technology-stack-decisions.md
+└── scalability-stress-analysis.md
 ```
 
-Each spec directory contains formal requirements documents with acceptance criteria, constraints, and success metrics.
+Each feature directory contains requirements, design, and task documents. Cross-cutting specs cover architecture, data modeling, technology choices, and scalability analysis.
 
 ## Getting Started
 
 Prerequisites:
 
-- Review the requirements documents in `.kiro/specs/` to understand feature specifications
-- Ensure development environment supports mobile-responsive web development
-- Database system for persistent storage
+- Node.js 18+
+- A Supabase project (free tier) for PostgreSQL
+- Review the specs in `specs/` to understand feature requirements and architecture decisions
 
-Basic setup steps will be added once the tech stack is finalized.
+Setup steps will be added once implementation begins.
 
 ## Development Status
 
-Current phase: MVP requirements complete, implementation pending
+**Current phase:** Specs and architecture complete, implementation pending.
 
 Known limitations:
 
-- Mobile-first design prioritizes smartphone screens (320px-480px width)
-- Single-tenant system (no multi-property support)
+- Mobile-first design targets smartphone screens (320px–480px width)
+- Single-property system (no multi-property support)
 - Manual payment entry only (no automated processing)
 - Basic balance calculation (expected rent minus payments, no late fees or payment plans)
 - No historical reporting or analytics
+- Authentication is post-MVP (via Supabase Auth)
 
 ## Contributing
 
-This project follows a spec-driven development approach. All features are documented in `.kiro/specs/` with formal requirements and acceptance criteria. Review the relevant spec before implementing or suggesting changes to ensure alignment with MVP goals.
+This project follows a spec-driven development approach. All features are documented in `specs/` with formal requirements, design documents, and task breakdowns. Review the relevant spec before implementing or suggesting changes to ensure alignment with MVP goals.
