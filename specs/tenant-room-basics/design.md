@@ -1295,8 +1295,9 @@ function useCreateTenant() {
 - No raw SQL queries in MVP
 - All user inputs validated before database operations
 
-**Authorization** (Post-MVP):
-- Implement row-level security in Supabase
+**Authorization**:
+- Supabase Auth enforces authenticated access to all tenant endpoints
+- Implement row-level security in Supabase to scope data to authenticated user
 - Verify user has permission to access/modify tenants
 - Audit log for all CRUD operations
 

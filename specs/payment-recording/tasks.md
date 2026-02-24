@@ -177,7 +177,7 @@
 ## Open Questions / Assumptions
 
 - **Tech Stack**: Specific technologies (framework, database, language) not defined in requirements
-- **Authentication**: No authentication or authorization requirements specified
+- **Authentication**: Supabase Auth required—all endpoints must verify authenticated session; see user-authentication spec
 - **Payment Editing**: No requirements for editing or deleting payments after recording
 - **Payment Method**: No requirement to track payment method (cash, check, transfer)
 - **Currency**: No currency specification or multi-currency support

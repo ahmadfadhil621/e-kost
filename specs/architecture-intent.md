@@ -14,7 +14,8 @@ This document defines the architectural principles for E-Kost to remain resilien
 4. **Outstanding balance calculation and display** – rent minus payments
 5. **Mobile-responsive user interface** – 320px-480px, 44x44px targets, single-column layouts
 6. **Data persistence and integrity** – UTC timestamps, soft deletes, 1,000+ tenant records
-7. **Internationalization (i18n)** – language-agnostic UI via JSON translation files
+7. **User authentication** – account creation, login, session management, profile display
+8. **Internationalization (i18n)** – language-agnostic UI via JSON translation files
 
 ---
 
@@ -24,7 +25,8 @@ This document defines the architectural principles for E-Kost to remain resilien
 - Mobile UI frameworks and responsive design patterns
 - Balance calculation rules (currently simple; may become complex with late fees, pro-rating)
 - Validation rules and business logic refinements
-- External service integrations (auth, analytics, AI)
+- Authentication provider configuration and policies
+- External service integrations (analytics, AI)
 - Language support (i18n JSON files can be added/updated without code changes)
 - Locale-specific formatting (dates, numbers, currency)
 
@@ -46,7 +48,7 @@ This document defines the architectural principles for E-Kost to remain resilien
 ## External Interactions
 
 - **Database storage** – PostgreSQL or managed service
-- **Future: Authentication provider** – managed auth service (not in MVP)
+- **Authentication provider** – Supabase Auth for account creation, login, sessions
 - **Future: AI services** – for automation, insights, validation (not in MVP)
 - **Future: Analytics/monitoring** – observability (not in MVP)
 - **i18n: Translation files** – JSON files per language (internal, no external dependency)
@@ -123,7 +125,7 @@ This document defines the architectural principles for E-Kost to remain resilien
 - Simple calculator adapter (rent minus payments)
 - Email/SMS adapter for notifications (future)
 - OpenAI/Claude/other adapter for AI (future)
-- Supabase/Firebase adapter for auth (future)
+- Supabase Auth adapter for authentication (current MVP)
 - JSON file adapter for i18n (current MVP)
 - Future: Database-backed translation adapter
 
@@ -133,7 +135,7 @@ This document defines the architectural principles for E-Kost to remain resilien
 
 • **AI Integration Scope**: Requirements contain no AI features, but architecture assumes future AI enhancements for automation, insights, or validation assistance.
 
-• **Authentication Strategy**: No auth requirements in MVP, but architecture assumes future managed auth provider integration.
+• **Authentication Strategy**: MVP uses Supabase Auth for account creation, login, and session management. Row-level security and multi-user collaboration are post-MVP considerations.
 
 • **Multi-tenancy**: Current specs assume single property management, but architecture should consider future multi-property expansion.
 

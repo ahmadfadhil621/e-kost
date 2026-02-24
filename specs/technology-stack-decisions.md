@@ -7,7 +7,7 @@ This document captures the comprehensive technology stack evaluation and final d
 **Date**: February 23, 2026  
 **Context**: E-Kost is a mobile-first property management webapp for Indonesian market  
 **Budget Constraint**: $0-10/month  
-**Key Requirements**: Mobile-first (320px-480px), 2-second response time, i18n support, no authentication in MVP
+**Key Requirements**: Mobile-first (320px-480px), 2-second response time, i18n support, authentication via Supabase Auth
 
 ---
 
@@ -21,7 +21,7 @@ This document captures the comprehensive technology stack evaluation and final d
 | Backend Framework | Next.js (serverless) | 5.5/10 | Express, Fastify | $0 free tier vs $6-12/month VPS |
 | Database Type | SQL (PostgreSQL) | 6/10 | MongoDB, Firebase | Financial data requires ACID guarantees |
 | Database Hosting | Supabase | 3/10 | Neon, Railway | Zero DevOps, 3.5 min setup vs 82 min self-hosted |
-| Authentication | Supabase Auth | N/A | NextAuth, Clerk | Post-MVP only, 5 min setup vs 4-8 hours |
+| Authentication | Supabase Auth | 2/10 | NextAuth, Clerk | 5 min setup vs 4-8 hours, built-in with Supabase |
 
 **Overall Stack Complexity**: Medium (5-6/10)  
 **Total Monthly Cost**: $0 (Vercel + Supabase free tiers)
@@ -230,7 +230,7 @@ Skeptical consultant approach: "Don't use Supabase unless it clearly wins"
 7. **Connection limit**: 60 concurrent connections on free tier
 8. **Geographic limitations**: Limited region selection, may not have Indonesia data center
 9. **Pricing jumps**: Free tier → $25/month Pro tier (no middle ground)
-10. **Feature bloat**: Includes Auth, Storage, Realtime that E-Kost doesn't need in MVP
+10. **Feature bloat**: Includes Storage, Realtime that E-Kost doesn't need in MVP
 
 ### Case FOR Supabase (10 points)
 1. **Zero DevOps**: 3.5 minutes setup vs 82 minutes self-hosted PostgreSQL
@@ -240,7 +240,7 @@ Skeptical consultant approach: "Don't use Supabase unless it clearly wins"
 5. **Generous free tier**: 500 MB sufficient for 1,000 tenants + 10,000 payments
 6. **Prisma integration**: Official Prisma support, connection string works out-of-box
 7. **Real-time capabilities**: Built-in for future features (live balance updates)
-8. **Auth ready**: Supabase Auth available when E-Kost adds authentication post-MVP
+8. **Auth included**: Supabase Auth used for MVP authentication (account creation, login, sessions)
 9. **Cost savings**: $0/month vs $10-20/month self-hosted (saves $120-240/year)
 10. **Community support**: 70,000+ GitHub stars, extensive documentation
 
@@ -272,10 +272,10 @@ Skeptical consultant approach: "Don't use Supabase unless it clearly wins"
 
 ---
 
-## 7. Authentication: Supabase Auth vs NextAuth (Post-MVP)
+## 7. Authentication: Supabase Auth vs NextAuth
 
 ### Context
-E-Kost has NO authentication in MVP (explicitly out of scope). This analysis is for post-MVP planning.
+E-Kost requires authentication in MVP for account creation, login, session management, and profile display.
 
 ### Case AGAINST NextAuth (10 points)
 1. **Overkill for simple needs**: 50-100 lines of configuration for basic email/password auth
@@ -330,7 +330,7 @@ E-Kost has NO authentication in MVP (explicitly out of scope). This analysis is 
 - **ORM**: Prisma
 - **Validation**: Zod (shared with frontend)
 
-### Authentication (Post-MVP)
+### Authentication
 - **Provider**: Supabase Auth
 
 ### Deployment
@@ -385,7 +385,7 @@ E-Kost has NO authentication in MVP (explicitly out of scope). This analysis is 
 - PostgreSQL mature tooling for financial reporting
 
 ### 6. Future-Proofing
-- Supabase Auth ready for post-MVP authentication
+- Supabase Auth handles MVP authentication with room to grow
 - PostgreSQL scales to 40,000-60,000 properties
 - Migration path: Free tier → Pro tier or self-hosted at $10k+/month revenue
 

@@ -15,7 +15,7 @@
 | Component | Decision | Justification |
 |-----------|----------|---------------|
 | Marketing website / landing page | Orchestrate | Not in MVP scope; if needed, use static site generator or no-code tool—no differentiation value |
-| User authentication | Orchestrate | No authentication requirements in any spec; if added later, use managed auth service (Auth0, Supabase Auth) |
+| User authentication | Orchestrate | MVP feature—use Supabase Auth (managed service) for account creation, login, session management, and profile display |
 | Core business logic (tenant/room/payment/balance) | Build | Core differentiation—custom CRUD workflows, mobile-first UX, and balance calculation logic are product-specific (all 4 requirements docs) |
 | Mobile-responsive UI | Assemble | Use responsive CSS framework (Tailwind, Bootstrap) for 320px-480px layouts, 44x44px touch targets—standard mobile patterns (Requirement 6 in all specs) |
 | Data storage (tenants, rooms, payments) | Assemble | Use managed database (PostgreSQL on managed service, Supabase, PlanetScale)—standard relational data with UTC timestamps (Constraints in all specs) |
@@ -35,7 +35,7 @@
 
 **Tech Stack Not Specified**: Requirements state "Tech stack: TBD" (README.md). Decisions above assume modern web stack (React/Vue/Svelte + Node.js/Python + SQL database) but framework choice doesn't affect Build/Assemble/Orchestrate logic.
 
-**No Authentication in MVP**: Zero authentication requirements across all four specs. If added post-MVP, should be Orchestrated (managed service) as it's not differentiating.
+**Authentication in MVP**: Authentication is an MVP feature, Orchestrated via Supabase Auth (managed service). Not differentiating—standard email/password auth with session management.
 
 **Single Property Assumption**: Non-Goals explicitly exclude "Multi-property management" (Tenant & Room Basics). This simplifies data model—no need for complex multi-tenancy architecture.
 
@@ -73,6 +73,6 @@
 
 **Assemble**: Database ORM, form validation, date/time handling, responsive CSS framework, UI component primitives, API routing framework, mobile-first component library.
 
-**Orchestrate**: Authentication (if added), analytics (if added), email notifications (if added), payment processing (explicitly excluded).
+**Orchestrate**: Authentication (Supabase Auth), analytics (if added), email notifications (if added), payment processing (explicitly excluded).
 
 The line is drawn at: **product-specific business logic and UX = Build**, **well-solved technical problems = Assemble**, **commodity services = Orchestrate**.

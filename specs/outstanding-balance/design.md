@@ -553,9 +553,10 @@ const formatCurrency = (amount: number, locale: string) => {
 - Validate query parameters for list endpoints
 - Sanitize all user inputs to prevent SQL injection
 
-**Authorization** (Post-MVP):
+**Authorization**:
+- Supabase Auth enforces authenticated access to all balance endpoints
 - Verify user has permission to view tenant balances
-- Implement row-level security in Supabase
+- Implement row-level security in Supabase to scope data to authenticated user
 - Audit log for balance queries
 
 ### Deployment Considerations

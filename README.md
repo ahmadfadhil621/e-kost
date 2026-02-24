@@ -8,8 +8,9 @@ The application solves the problem of scattered information across spreadsheets,
 
 ## MVP Scope
 
-The MVP includes four core features:
+The MVP includes five core features:
 
+- **User Authentication** — Account creation, login, session management, and profile display via Supabase Auth
 - **Tenant & Room Basics** — Add, view, update, and remove tenants with room assignments
 - **Room Inventory Management** — Create and manage rooms with status tracking (available, occupied, under renovation)
 - **Payment Recording** — Log rent payments with tenant, amount, and date
@@ -24,6 +25,7 @@ The MVP includes four core features:
 | Backend | Next.js API Routes (Vercel serverless) |
 | Database | PostgreSQL via Supabase |
 | ORM | Prisma |
+| Authentication | Supabase Auth |
 | i18n | react-i18next |
 | Hosting | Vercel + Supabase free tiers ($0/month) |
 
@@ -84,7 +86,6 @@ Known limitations:
 - Manual payment entry only (no automated processing)
 - Basic balance calculation (expected rent minus payments, no late fees or payment plans)
 - No historical reporting or analytics
-- Authentication is post-MVP (via Supabase Auth)
 
 ## Contributing
 

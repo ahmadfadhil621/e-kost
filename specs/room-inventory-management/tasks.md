@@ -223,7 +223,7 @@
 ## Open Questions / Assumptions
 
 - **Tech Stack**: Specific technologies (framework, database, language) not defined in requirements
-- **Authentication**: No authentication or authorization requirements specified
+- **Authentication**: Supabase Auth required—all endpoints must verify authenticated session; see user-authentication spec
 - **Room Number Format**: No specific format or validation rules for room numbers
 - **Room Type Values**: No predefined list of room types specified
 - **Currency**: No currency specification for monthly rent display

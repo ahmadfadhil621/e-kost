@@ -181,7 +181,7 @@
 ## Open Questions / Assumptions
 
 - **Tech Stack**: Specific technologies not defined in requirements
-- **Authentication**: No authentication or authorization requirements specified
+- **Authentication**: Supabase Auth required—all endpoints must verify authenticated session; see user-authentication spec
 - **Currency**: No currency specification or formatting rules
 - **Billing Period**: Assumes simple monthly rent model (no pro-rating, no multiple billing periods)
 - **Payment Application**: Assumes all payments apply to current rent (no payment allocation logic)

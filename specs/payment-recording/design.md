@@ -1384,8 +1384,9 @@ CREATE INDEX idx_payments_payment_date ON payments(payment_date DESC);
 - No raw SQL queries in MVP
 - All user inputs validated before database operations
 
-**Authorization** (Post-MVP):
-- Implement row-level security in Supabase
+**Authorization**:
+- Supabase Auth enforces authenticated access to all payment endpoints
+- Implement row-level security in Supabase to scope data to authenticated user
 - Verify user has permission to record payments
 - Audit log for all payment operations
 
