@@ -1,0 +1,63 @@
+---
+description: TDD testing conventions and expectations for E-Kost
+globs: "**/*.test.{ts,tsx}"
+alwaysApply: false
+---
+
+# Testing Standards (TDD)
+
+Tests are written FIRST, before implementation. Tests define the specification. Implementation code is written to make tests pass.
+
+## Libraries
+
+- **Unit/integration tests**: Vitest
+- **Component tests**: React Testing Library + Vitest
+- **API mocking**: MSW (Mock Service Worker)
+- **Property-based tests**: fast-check (one test per correctness property from `specs/<feature>/design.md`)
+- **E2E tests**: Playwright (Phase 3 only)
+
+## File Naming & Location
+
+- Co-locate test files next to source: `<module>.test.ts`, `<component>.test.tsx`
+- Test fixtures: `src/test/fixtures/` (factory functions for rooms, tenants, payments)
+- Test mocks: `src/test/mocks/` (Prisma mock, MSW handlers)
+
+## Test Structure: Good, Bad, Edge
+
+Every test file must cover three categories:
+
+```typescript
+describe("RoomService.create", () => {
+  describe("good cases", () => {
+    it("creates a room with valid data", ...);
+  });
+  describe("bad cases", () => {
+    it("rejects when room number is missing", ...);
+    it("rejects when monthly rent is negative", ...);
+  });
+  describe("edge cases", () => {
+    it("handles duplicate room numbers", ...);
+    it("handles maximum field lengths", ...);
+  });
+});
+```
+
+## What to Test per Layer
+
+- **Domain/services** (`src/lib/`): business rules, validation, calculations, state transitions
+- **API routes** (`src/app/api/`): valid requests (200/201), invalid input (400), not found (404), auth failures (401)
+- **Components** (`src/components/`): rendering, user interactions, form validation feedback, empty/loading/error states, mobile layout (320px)
+- **Property-based** (fast-check): one test per correctness property listed in each feature's `design.md`, minimum 100 iterations
+
+## Conventions
+
+- Arrange-Act-Assert pattern
+- Descriptive test names: `it("returns 400 when tenant name is empty")`
+- Mock external dependencies (Prisma, Supabase Auth, fetch) via MSW and mock modules
+- Never mock internal business logic modules
+- Test accessibility: form labels, ARIA attributes, keyboard navigation
+- Use factory functions from `src/test/fixtures/` for test data, not inline objects
+
+## Subagent Rule
+
+Test files are the source of truth. Implementation subagents must NOT modify test files. They implement code until all tests pass with 0 failures.

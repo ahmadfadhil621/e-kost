@@ -1,0 +1,35 @@
+---
+description: E-Kost project context - tech stack, MVP scope, and constraints
+alwaysApply: true
+---
+
+# E-Kost Project Overview
+
+E-Kost is a mobile-first web application for small, informal landlords to manage rental rooms in Indonesia. It tracks tenants, rooms, payments, and outstanding balances.
+
+## Tech Stack
+
+- **Frontend**: React 18, Vite, Tailwind CSS, shadcn/ui, Lucide React
+- **Forms**: React Hook Form + Zod
+- **Backend**: Next.js API Routes (Vercel serverless)
+- **Database**: PostgreSQL via Supabase
+- **ORM**: Prisma
+- **Auth**: Supabase Auth
+- **i18n**: react-i18next with JSON translation files in `locales/`
+- **Hosting**: Vercel + Supabase free tiers ($0/month)
+
+## MVP Features
+
+1. User Authentication (Supabase Auth)
+2. Room Inventory Management (CRUD + status tracking)
+3. Tenant & Room Basics (CRUD + room assignments)
+4. Payment Recording (log rent payments)
+5. Outstanding Balance Tracking (rent minus payments)
+
+## Key Constraints
+
+- Budget: $0/month (free tiers only)
+- Mobile-first: 320px-480px viewport, 44x44px touch targets
+- Single-property system (no multi-property)
+- Manual payment entry only
+- All specs live in `specs/` -- always check specs before implementing a feature

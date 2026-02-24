@@ -1,0 +1,25 @@
+---
+description: Architecture patterns and code structure for E-Kost
+alwaysApply: true
+---
+
+# Architecture
+
+E-Kost follows a layered architecture with clear boundaries. See `specs/architecture-intent.md` for full details.
+
+## Layers
+
+1. **Domain Layer** -- Entities (Tenant, Room, Payment), business rules, validation. No framework dependencies.
+2. **Service Layer** -- TenantService, RoomService, PaymentService, BalanceService. Depend on repository interfaces, not implementations.
+3. **API Layer** -- Next.js API routes under `app/api/`. Stable REST contracts. Input validation with Zod.
+4. **Data Layer** -- Prisma repository implementations behind interfaces.
+5. **UI Layer** -- React components consuming API. No business logic in components.
+6. **i18n Layer** -- JSON files in `locales/`. All UI text via translation keys.
+
+## Principles
+
+- Domain logic must not import from Next.js, Prisma, or React
+- Repository pattern: define interfaces, implement with Prisma
+- API routes validate input (Zod), call services, return consistent JSON responses
+- UI components are thin: fetch data, render, delegate logic to hooks/services
+- Shared Zod schemas between frontend and backend for validation

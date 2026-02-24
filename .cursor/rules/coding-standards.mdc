@@ -1,0 +1,44 @@
+---
+description: TypeScript and React coding standards for E-Kost
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Coding Standards
+
+## TypeScript
+
+- Strict mode enabled (`"strict": true` in tsconfig)
+- No `any` types -- use `unknown` and narrow, or define proper types
+- Export types/interfaces from dedicated files (e.g., `types.ts`)
+- Use `const` by default, `let` only when reassignment is needed
+- Prefer named exports over default exports
+
+## Validation
+
+- Zod schemas on all API boundaries (request input, response output)
+- Share Zod schemas between frontend and backend via `lib/validations/`
+- Derive TypeScript types from Zod schemas: `type Tenant = z.infer<typeof tenantSchema>`
+
+## Error Handling
+
+- API routes: return `{ error: string }` with appropriate HTTP status codes
+- Never expose internal errors or stack traces to the client
+- No PII (tenant names, emails, phones) in logs or error messages
+
+## React
+
+- Functional components only
+- Custom hooks for reusable logic (prefix with `use`)
+- shadcn/ui for all UI primitives (Button, Card, Dialog, Form, Input, etc.)
+- React Hook Form for all forms
+- No inline styles -- use Tailwind utility classes
+
+## Naming
+
+- Files: `kebab-case.ts` / `kebab-case.tsx`
+- Components: `PascalCase`
+- Functions/variables: `camelCase`
+- Types/interfaces: `PascalCase`
+- Constants: `UPPER_SNAKE_CASE`
+- API routes: `kebab-case` paths (e.g., `/api/tenants`, `/api/rooms`)
