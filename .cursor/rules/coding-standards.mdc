@@ -6,6 +6,16 @@ alwaysApply: false
 
 # Coding Standards
 
+## Design Principles
+
+- **YAGNI** -- Only build what the current spec requires. Do not add infrastructure, abstractions, or parameters for features listed in the "explicitly NOT included" sections of specs.
+- **DRY (Rule of Three)** -- Tolerate duplication twice. Extract a shared abstraction on the third occurrence. Premature abstraction is worse than duplication.
+- **KISS** -- Prefer flat code over nested code. Prefer explicit over clever. If a function needs a comment to explain *what* it does, simplify the function instead.
+- **Composition over inheritance** -- Build behavior by composing small functions and components, not by extending base classes.
+- **Pure functions first** -- Domain logic and calculations should be pure functions (no side effects, deterministic output). Side effects belong at the edges (API routes, event handlers).
+- **Fail fast** -- Validate inputs at boundaries (API routes, form submission, service entry points). Reject invalid data immediately with clear errors rather than letting it propagate.
+- **Single Responsibility** -- Each function, hook, component, and class should have one reason to change. If a description requires "and," consider splitting.
+
 ## TypeScript
 
 - Strict mode enabled (`"strict": true` in tsconfig)
@@ -22,7 +32,7 @@ alwaysApply: false
 
 ## Error Handling
 
-- API routes: return `{ error: string }` with appropriate HTTP status codes
+- API routes: return `{ data: T }` for success, `{ error: string }` for failure, with appropriate HTTP status codes
 - Never expose internal errors or stack traces to the client
 - No PII (tenant names, emails, phones) in logs or error messages
 
@@ -33,6 +43,32 @@ alwaysApply: false
 - shadcn/ui for all UI primitives (Button, Card, Dialog, Form, Input, etc.)
 - React Hook Form for all forms
 - No inline styles -- use Tailwind utility classes
+- **No business logic in components** -- Components call hooks; hooks call services/API. Components handle rendering and event delegation only.
+- **Component composition** -- Prefer composing small, focused components over large monolithic ones. Extract when a component handles multiple unrelated concerns.
+- **State colocation** -- Keep state as close as possible to where it's used. Local state > context > global store. Do not lift state prematurely.
+- **Server state via TanStack Query** -- All API data fetched and mutated through TanStack Query hooks. Query keys follow the pattern `['entity', ...params]` (e.g., `['tenants', id]`, `['rooms', { status }]`).
+- **Handle all data states** -- Every data-fetching component must render loading, error, and empty states explicitly.
+- **Memoization discipline** -- Do not add `useMemo`/`useCallback` by default. Only use them when there is a measured performance problem or when passing callbacks to memoized children.
+- **No prop drilling** -- If a prop passes through 2+ intermediate components that don't use it, refactor via composition, context, or restructuring.
+
+## Next.js API Routes
+
+- **Flat route handlers** -- Check auth first, validate input second, call service third, return response. Use early returns to keep the handler flat.
+- **No business logic in route handlers** -- Route handlers validate, delegate to a service, and format the response. Nothing else.
+- **Consistent response shape** -- Success: `{ data: T }`. Failure: `{ error: string }`. Always include the appropriate HTTP status code.
+
+## Prisma
+
+- **Select only what you need** -- Use `select` or `include` explicitly. Do not fetch entire records when only a subset of fields is needed.
+- **Prevent N+1 queries** -- Use `include` for related data in a single query. Never loop and query per record.
+- **Transactions for multi-step writes** -- Operations that span multiple tables (e.g., room assignment + status update) must use `prisma.$transaction`.
+- **Repository encapsulation** -- Prisma-generated types do not leak past the repository boundary. Repositories accept and return domain types.
+
+## Tailwind / shadcn
+
+- No `@apply` in CSS files -- keep utility classes in JSX. Extract a React component instead of creating CSS abstractions.
+- Mobile-first class ordering -- base styles for mobile, then `sm:`/`md:` prefixes for larger screens.
+- Extend shadcn/ui via the `className` prop or wrapper components. Do not override internal styles.
 
 ## Naming
 
