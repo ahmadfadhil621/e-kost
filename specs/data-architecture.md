@@ -84,8 +84,8 @@ This document defines the minimal data storage architecture for E-Kost MVP, focu
 ## What We're NOT Building (YAGNI Applied)
 
 ### User Sessions
-**Decision**: Store in browser localStorage/sessionStorage
-**Rationale**: No authentication in MVP, no server-side session requirements, browser handles cleanup automatically
+**Decision**: Store in database via Better Auth's Prisma adapter (server-side sessions)
+**Rationale**: Better Auth manages session records in the same Prisma-managed database as domain data. Database sessions enable server-side revocation and avoid JWT-only limitations. Session table is part of the Prisma schema alongside Tenant, Room, Payment tables.
 
 ### Application Logs  
 **Decision**: Use standard application logging to files or console

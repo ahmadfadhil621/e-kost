@@ -1328,8 +1328,8 @@ function useCreateRoom() {
 - All user inputs validated before database operations
 
 **Authorization**:
-- Supabase Auth enforces authenticated access to all room endpoints
-- Implement row-level security in Supabase to scope data to authenticated user
+- Better Auth enforces authenticated access to all room endpoints
+- Enforce service-layer authorization to scope data to authenticated user
 - Verify user has permission to access/modify rooms
 - Audit log for all CRUD operations
 

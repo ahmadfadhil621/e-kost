@@ -1385,8 +1385,8 @@ CREATE INDEX idx_payments_payment_date ON payments(payment_date DESC);
 - All user inputs validated before database operations
 
 **Authorization**:
-- Supabase Auth enforces authenticated access to all payment endpoints
-- Implement row-level security in Supabase to scope data to authenticated user
+- Better Auth enforces authenticated access to all payment endpoints
+- Enforce service-layer authorization to scope data to authenticated user
 - Verify user has permission to record payments
 - Audit log for all payment operations
 

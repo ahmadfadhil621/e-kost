@@ -14,13 +14,13 @@ E-Kost is a mobile-first web application for small, informal landlords to manage
 - **Backend**: Next.js API Routes (Vercel serverless)
 - **Database**: PostgreSQL via Supabase
 - **ORM**: Prisma
-- **Auth**: Supabase Auth
+- **Auth**: Better Auth (with Prisma adapter)
 - **i18n**: react-i18next with JSON translation files in `locales/`
 - **Hosting**: Vercel + Supabase free tiers ($0/month)
 
 ## MVP Features
 
-1. User Authentication (Supabase Auth)
+1. User Authentication (Better Auth)
 2. Room Inventory Management (CRUD + status tracking)
 3. Tenant & Room Basics (CRUD + room assignments)
 4. Payment Recording (log rent payments)

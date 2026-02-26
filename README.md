@@ -10,7 +10,7 @@ The application solves the problem of scattered information across spreadsheets,
 
 The MVP includes five core features:
 
-- **User Authentication** — Account creation, login, session management, and profile display via Supabase Auth
+- **User Authentication** — Account creation, login, session management, and profile display via Better Auth
 - **Tenant & Room Basics** — Add, view, update, and remove tenants with room assignments
 - **Room Inventory Management** — Create and manage rooms with status tracking (available, occupied, under renovation)
 - **Payment Recording** — Log rent payments with tenant, amount, and date
@@ -25,7 +25,7 @@ The MVP includes five core features:
 | Backend | Next.js API Routes (Vercel serverless) |
 | Database | PostgreSQL via Supabase |
 | ORM | Prisma |
-| Authentication | Supabase Auth |
+| Authentication | Better Auth (Prisma adapter) |
 | i18n | react-i18next |
 | Hosting | Vercel + Supabase free tiers ($0/month) |
 
@@ -70,7 +70,7 @@ Each feature directory contains requirements, design, and task documents. Cross-
 Prerequisites:
 
 - Node.js 18+
-- A Supabase project (free tier) for PostgreSQL
+- A PostgreSQL database (Supabase free tier, or any self-hosted Postgres)
 - Review the specs in `specs/` to understand feature requirements and architecture decisions
 
 Setup steps will be added once implementation begins.

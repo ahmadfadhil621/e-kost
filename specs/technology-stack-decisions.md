@@ -7,7 +7,7 @@ This document captures the comprehensive technology stack evaluation and final d
 **Date**: February 23, 2026  
 **Context**: E-Kost is a mobile-first property management webapp for Indonesian market  
 **Budget Constraint**: $0-10/month  
-**Key Requirements**: Mobile-first (320px-480px), 2-second response time, i18n support, authentication via Supabase Auth
+**Key Requirements**: Mobile-first (320px-480px), 2-second response time, i18n support, self-hostable authentication
 
 ---
 
@@ -21,7 +21,7 @@ This document captures the comprehensive technology stack evaluation and final d
 | Backend Framework | Next.js (serverless) | 5.5/10 | Express, Fastify | $0 free tier vs $6-12/month VPS |
 | Database Type | SQL (PostgreSQL) | 6/10 | MongoDB, Firebase | Financial data requires ACID guarantees |
 | Database Hosting | Supabase | 3/10 | Neon, Railway | Zero DevOps, 3.5 min setup vs 82 min self-hosted |
-| Authentication | Supabase Auth | 2/10 | NextAuth, Clerk | 5 min setup vs 4-8 hours, built-in with Supabase |
+| Authentication | Better Auth (Prisma) | 3/10 | Supabase Auth, NextAuth, Clerk | Self-hostable, email/password first-class, no vendor lock-in, built-in password hashing and database sessions |
 
 **Overall Stack Complexity**: Medium (5-6/10)  
 **Total Monthly Cost**: $0 (Vercel + Supabase free tiers)
@@ -240,7 +240,7 @@ Skeptical consultant approach: "Don't use Supabase unless it clearly wins"
 5. **Generous free tier**: 500 MB sufficient for 1,000 tenants + 10,000 payments
 6. **Prisma integration**: Official Prisma support, connection string works out-of-box
 7. **Real-time capabilities**: Built-in for future features (live balance updates)
-8. **Auth included**: Supabase Auth used for MVP authentication (account creation, login, sessions)
+8. **Auth decoupled**: Authentication handled by Better Auth (not Supabase Auth), keeping database hosting independent from auth provider
 9. **Cost savings**: $0/month vs $10-20/month self-hosted (saves $120-240/year)
 10. **Community support**: 70,000+ GitHub stars, extensive documentation
 
@@ -264,7 +264,7 @@ Skeptical consultant approach: "Don't use Supabase unless it clearly wins"
 | Railway | No free tier | N/A | 4/10 | Standard PostgreSQL, $10/month |
 | PlanetScale | 5 GB, no pause | No | 4/10 | MySQL, serverless-first |
 
-**Why Supabase Wins**: Best "all-in-one" solution (auth, storage, realtime built-in), largest community (70k+ stars), excellent Prisma integration, despite inferior free tier compared to Neon.
+**Why Supabase Wins**: Largest community (70k+ stars), excellent Prisma integration, zero DevOps, and built-in connection pooling for serverless. Auth is handled by Better Auth (not Supabase Auth), so Supabase is used purely as a managed PostgreSQL host.
 
 **Runner-ups**:
 - Neon (3/10 complexity, better free tier: 3 GB + no pausing, but PostgreSQL-only)
@@ -272,44 +272,53 @@ Skeptical consultant approach: "Don't use Supabase unless it clearly wins"
 
 ---
 
-## 7. Authentication: Supabase Auth vs NextAuth
+## 7. Authentication: Better Auth vs Alternatives
 
 ### Context
-E-Kost requires authentication in MVP for account creation, login, session management, and profile display.
+E-Kost requires authentication in MVP for account creation, login, session management, and profile display. A key architectural goal is self-hostability and vendor independence — the system should run without dependency on any external auth service.
 
-### Case AGAINST NextAuth (10 points)
-1. **Overkill for simple needs**: 50-100 lines of configuration for basic email/password auth
-2. **Next.js lock-in**: Tightly coupled to Next.js, doesn't work with other frameworks
-3. **Configuration complexity**: Providers, callbacks, JWT/session strategy require deep understanding
-4. **Database schema pollution**: Adds 4 tables (users, accounts, sessions, verification_tokens)
-5. **No built-in email verification**: Requires custom email service integration
-6. **Session management complexity**: Manual session refresh, token rotation logic
-7. **OAuth setup friction**: Each provider (Google, GitHub) requires separate configuration
-8. **Type safety gaps**: Session types require manual TypeScript definitions
-9. **Testing complexity**: Mocking NextAuth in tests requires extensive setup
-10. **Documentation gaps**: Common patterns (password reset, email verification) not well-documented
+### Candidates Evaluated
+1. **Better Auth** — Open-source auth library with first-class email/password and database sessions
+2. **Supabase Auth** — Managed auth service bundled with Supabase
+3. **Auth.js (NextAuth v5)** — Open-source auth library, primarily designed for OAuth
+4. **Clerk** — Managed auth service with generous free tier
 
-### Case FOR NextAuth (10 points)
-1. **Zero external dependencies**: No third-party auth service, works offline
-2. **Works offline**: Local development doesn't require internet connection
-3. **No vendor lock-in**: Self-hosted, no pricing tiers or usage limits
-4. **Flexible session storage**: Database, JWT, or custom adapter
-5. **Custom auth logic**: Full control over authentication flow and business rules
-6. **OAuth aggregation**: Single interface for Google, GitHub, Facebook, etc.
-7. **TypeScript support**: First-class TypeScript with type inference
-8. **Next.js integration**: Middleware, API routes, server components work seamlessly
-9. **Community adapters**: Prisma, Drizzle, MongoDB adapters available
-10. **Free forever**: No usage limits, no pricing tiers
+### Case FOR Better Auth (selected)
+1. **Email/password is first-class**: Built-in password hashing, not a second-class "Credentials" provider
+2. **Database sessions built-in**: Server-side sessions via Prisma adapter, no JWT-only limitation
+3. **Self-hostable**: No external service dependency — works with any Postgres instance
+4. **No vendor lock-in**: Auth data lives in the same Prisma-managed database as domain data
+5. **Prisma adapter**: Auth tables (User, Session, Account) managed by Prisma alongside Tenant, Room, Payment
+6. **OAuth extensible**: Can add Google, GitHub, etc. later via config — no architectural change
+7. **Simpler API**: Less boilerplate than Auth.js for email/password flows
+8. **Free forever**: No MAU limits, no rate limits, no project pausing
 
-### Final Verdict: Supabase Auth (Not NextAuth)
-**Reason**: 5 minutes setup vs 4-8 hours NextAuth, zero configuration, built-in email verification and OAuth, already using Supabase for database.
+### Case AGAINST Supabase Auth (rejected)
+1. **Vendor lock-in**: Auth tied to Supabase infrastructure, not portable to self-hosted Postgres
+2. **Split data model**: User data in Supabase `auth.users` schema (not Prisma-managed) while domain data in `public` schema
+3. **RLS dependency**: Encourages Row-Level Security patterns that don't port to self-hosted
+4. **Free tier limits**: Project pausing after inactivity, rate limits
+5. **No Prisma control**: Cannot manage auth tables via Prisma migrations
+6. **Cross-schema friction**: Joining auth users to domain entities requires workarounds
 
-**Time Savings**: 10-20 hours = $400-800 at $40/hour  
-**Complexity**: Supabase Auth (2/10) vs NextAuth (6/10)
+### Case AGAINST Auth.js / NextAuth (rejected)
+1. **Credentials provider is second-class**: Intentionally limited — pushed toward JWT-only sessions
+2. **No built-in password hashing**: Must manually configure bcrypt
+3. **Database sessions don't work with Credentials**: OAuth-first design penalizes email/password
+4. **Verbose configuration**: Callbacks, providers, adapters require significant boilerplate
+5. **v5 documentation gaps**: Newer version, some patterns not well-documented
+
+### Final Verdict: Better Auth
+**Reason**: Portable, first-class email/password support, and extensible. Auth data lives in the same Prisma-managed database as domain data, enabling fully self-hosted deployments with no external service dependencies. OAuth providers can be added later via configuration without architectural changes.
+
+**Complexity**: 3/10 (Low)
+**Learning curve**: 2-4 hours
+**Setup time**: ~30 minutes (library install + Prisma schema + config)
 
 **Runner-ups**:
-- Clerk ($25/month, best UX, 10,000 MAU free tier)
-- Custom Auth with Passport.js (20-40 hours implementation, full control)
+- Supabase Auth (2/10 complexity, fastest setup, but vendor lock-in and split data model)
+- Auth.js (6/10 complexity, mature ecosystem, but email/password is second-class)
+- Clerk ($25/month, best UX, but managed service with vendor dependency)
 
 ---
 
@@ -331,7 +340,7 @@ E-Kost requires authentication in MVP for account creation, login, session manag
 - **Validation**: Zod (shared with frontend)
 
 ### Authentication
-- **Provider**: Supabase Auth
+- **Provider**: Better Auth (with Prisma adapter for database sessions)
 
 ### Deployment
 - **Hosting**: Vercel (free tier)
@@ -343,7 +352,7 @@ E-Kost requires authentication in MVP for account creation, login, session manag
 - Tailwind CSS: 4/10 (Low-Medium)
 - Next.js: 5.5/10 (Medium for API routes only)
 - SQL + Prisma: 6/10 (Medium), 5.5/10 for E-Kost (simple schema)
-- Supabase: 3/10 (Low)
+- Better Auth: 3/10 (Low)
 - **Overall**: Medium (5-6/10)
 
 ### Learning Time Estimates
@@ -352,9 +361,9 @@ E-Kost requires authentication in MVP for account creation, login, session manag
 - Tailwind CSS: 2-4 hours
 - Next.js API routes: 20-30 hours
 - SQL + Prisma: 20-30 hours
-- Supabase: 4-6 hours
-- **Total (familiar with React)**: 46-70 hours
-- **Total (new to React)**: 86-130 hours
+- Better Auth: 2-4 hours
+- **Total (familiar with React)**: 44-68 hours
+- **Total (new to React)**: 84-128 hours
 
 ---
 
@@ -385,7 +394,7 @@ E-Kost requires authentication in MVP for account creation, login, session manag
 - PostgreSQL mature tooling for financial reporting
 
 ### 6. Future-Proofing
-- Supabase Auth handles MVP authentication with room to grow
+- Better Auth handles MVP authentication with room to grow (OAuth providers addable via config)
 - PostgreSQL scales to 40,000-60,000 properties
 - Migration path: Free tier → Pro tier or self-hosted at $10k+/month revenue
 
@@ -431,8 +440,8 @@ E-Kost requires authentication in MVP for account creation, login, session manag
 
 ### Risk 4: Vendor Lock-in (Vercel + Supabase)
 - **Impact**: Migration cost if pricing becomes prohibitive
-- **Mitigation**: Use Prisma (database-agnostic), standard Next.js (portable to other hosts)
-- **Likelihood**: Low (migration path exists at $10k+/month revenue)
+- **Mitigation**: Use Prisma (database-agnostic), standard Next.js (portable to other hosts), Better Auth (self-hostable, no Supabase Auth dependency)
+- **Likelihood**: Low (migration path exists at $10k+/month revenue; auth is already vendor-independent)
 
 ---
 

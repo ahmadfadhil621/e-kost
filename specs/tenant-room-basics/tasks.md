@@ -224,7 +224,7 @@
 ## Open Questions / Assumptions
 
 - **Tech Stack**: Specific technologies (framework, database, language) not defined in requirements
-- **Authentication**: Supabase Auth required—all endpoints must verify authenticated session; see user-authentication spec
+- **Authentication**: Better Auth required—all endpoints must verify authenticated session; see user-authentication spec
 - **Room Data**: Assumes room data structure exists (referenced in room-inventory-management spec)
 - **Validation Rules**: Phone number format validation not specified
 - **Concurrent Access**: No requirements for handling concurrent updates to same tenant

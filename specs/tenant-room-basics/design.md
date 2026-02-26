@@ -1296,8 +1296,8 @@ function useCreateTenant() {
 - All user inputs validated before database operations
 
 **Authorization**:
-- Supabase Auth enforces authenticated access to all tenant endpoints
-- Implement row-level security in Supabase to scope data to authenticated user
+- Better Auth enforces authenticated access to all tenant endpoints
+- Enforce service-layer authorization to scope data to authenticated user
 - Verify user has permission to access/modify tenants
 - Audit log for all CRUD operations
 

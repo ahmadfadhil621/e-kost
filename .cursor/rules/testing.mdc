@@ -53,7 +53,7 @@ describe("RoomService.create", () => {
 
 - Arrange-Act-Assert pattern
 - Descriptive test names: `it("returns 400 when tenant name is empty")`
-- Mock external dependencies (Prisma, Supabase Auth, fetch) via MSW and mock modules
+- Mock external dependencies (Prisma, Better Auth, fetch) via MSW and mock modules
 - Never mock internal business logic modules
 - Test accessibility: form labels, ARIA attributes, keyboard navigation
 - Use factory functions from `src/test/fixtures/` for test data, not inline objects

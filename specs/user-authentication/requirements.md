@@ -28,7 +28,7 @@ Property managers need to identify whose account they are using when accessing E
 
 ## Glossary
 
-- **Auth_System**: Supabase Auth service handling authentication operations
+- **Auth_System**: Better Auth library handling authentication operations (with Prisma adapter for database sessions)
 - **User_Account**: A registered user with email, password, and profile information
 - **Session**: An authenticated state that persists across browser sessions
 - **Profile_Icon**: Visual representation of the user (avatar or initials)
@@ -125,7 +125,7 @@ Property managers need to identify whose account they are using when accessing E
 
 ## Constraints
 
-- All authentication operations must use Supabase Auth (see technology-stack-decisions.md)
+- All authentication operations must use Better Auth with Prisma adapter (see technology-stack-decisions.md)
 - The system must support at least 1,000 user accounts without performance degradation
 - User accounts must include a unique identifier that cannot be modified after creation
 - Sessions must persist for 30 days by default

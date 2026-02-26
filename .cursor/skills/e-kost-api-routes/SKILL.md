@@ -137,32 +137,24 @@ Never include tenant names, emails, or phone numbers in error messages or `conso
 
 ## Auth Middleware
 
-Verify Supabase session on all routes. Extract into a reusable helper:
+Verify Better Auth session on all routes. Extract into a reusable helper:
 
 ```typescript
 // src/lib/auth/verify-session.ts
-import { createClient } from '@supabase/supabase-js';
+import { auth } from '@/lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
+import { headers } from 'next/headers';
 
 export async function verifySession(request: NextRequest) {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
     return { user: null, error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
   }
 
-  const token = authHeader.replace('Bearer ', '');
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-
-  if (error || !user) {
-    return { user: null, error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
-  }
-
-  return { user, error: null };
+  return { user: session.user, error: null };
 }
 ```
 

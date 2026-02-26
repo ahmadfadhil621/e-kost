@@ -1,70 +1,75 @@
 # Tasks: User Authentication
 
-## 1. Supabase Auth Setup
+## 1. Better Auth Setup
 
-- [ ] 1.1 Configure Supabase Auth in project
-  - **Description**: Set up Supabase client with Auth configuration and environment variables
+- [ ] 1.1 Configure Better Auth in project
+  - **Description**: Set up Better Auth server instance with Prisma adapter, client instance, and API route handler
   - **Acceptance Criteria**: 
-    - Supabase client initialized with project URL and anon key
-    - Environment variables configured for Supabase credentials
-    - Auth configuration set for 30-day session persistence
+    - Better Auth server instance configured with Prisma adapter (`src/lib/auth.ts`)
+    - Better Auth React client configured (`src/lib/auth-client.ts`)
+    - Catch-all API route handler created (`src/app/api/auth/[...all]/route.ts`)
+    - Environment variables configured (`DATABASE_URL`, `BETTER_AUTH_SECRET`, `NEXT_PUBLIC_APP_URL`)
+    - Auth tables (User, Session, Account, Verification) added to Prisma schema
+    - Session duration set to 30 days
   - **Dependencies**: None
-  - **Effort**: S
-
-- [ ] 1.2 Create auth context provider
-  - **Description**: Build React context to manage authentication state across application
-  - **Acceptance Criteria**:
-    - Auth context provides user state, loading state, and auth methods
-    - Context listens to Supabase auth state changes
-    - Session automatically restored on page load
-    - Context wraps entire application
-  - **Dependencies**: 1.1
   - **Effort**: M
+
+- [ ] 1.2 Create auth hook/context
+  - **Description**: Create `useAuth` hook using Better Auth's React client for session state across application
+  - **Acceptance Criteria**:
+    - Hook provides user state, loading state, and auth methods (signIn, signUp, signOut)
+    - Uses Better Auth's `useSession()` hook internally
+    - Session automatically restored via HTTP-only cookie on page load
+    - Available throughout application
+  - **Dependencies**: 1.1
+  - **Effort**: S
   - **Requirements**: Requirement 3
 
 ## 2. Backend - Authentication Operations
 
-- [ ] 2.1 Implement user registration with Supabase
-  - **Description**: Create registration function using Supabase Auth signUp
+- [ ] 2.1 Implement user registration with Better Auth
+  - **Description**: Wire registration flow using Better Auth's email/password sign-up
   - **Acceptance Criteria**:
-    - Function accepts name, email, and password
-    - Validates email format and password length (≥8 characters)
-    - Calls supabase.auth.signUp() with user metadata (name)
+    - Uses `authClient.signUp.email()` with name, email, and password
+    - Validates email format and password length (≥8 characters) via Zod before calling
+    - Better Auth creates User + Account + Session records via Prisma
     - Returns user object with unique ID and creation timestamp
     - Handles duplicate email errors
-    - Automatically creates session after registration
+    - Automatically creates session (HTTP-only cookie) after registration
   - **Dependencies**: 1.1
   - **Effort**: M
   - **Requirements**: Requirement 1, 7
 
-- [ ] 2.2 Implement user login with Supabase
-  - **Description**: Create login function using Supabase Auth signInWithPassword
+- [ ] 2.2 Implement user login with Better Auth
+  - **Description**: Wire login flow using Better Auth's email/password sign-in
   - **Acceptance Criteria**:
-    - Function accepts email and password
+    - Uses `authClient.signIn.email()` with email and password
     - Validates required fields
-    - Calls supabase.auth.signInWithPassword()
-    - Creates session with 30-day persistence
+    - Better Auth validates credentials and creates database session
+    - Sets HTTP-only session cookie with 30-day expiry
     - Records login timestamp
     - Returns error for invalid credentials
   - **Dependencies**: 1.1
   - **Effort**: M
   - **Requirements**: Requirement 2, 3
 
-- [ ] 2.3 Implement user logout with Supabase
-  - **Description**: Create logout function using Supabase Auth signOut
+- [ ] 2.3 Implement user logout with Better Auth
+  - **Description**: Wire logout flow using Better Auth's sign-out
   - **Acceptance Criteria**:
-    - Function calls supabase.auth.signOut()
-    - Clears session data from browser storage
-    - Updates auth context to null user state
+    - Uses `authClient.signOut()`
+    - Deletes session record from database
+    - Clears session cookie
+    - Updates auth state to null user
     - Returns success confirmation
   - **Dependencies**: 1.1
   - **Effort**: S
   - **Requirements**: Requirement 5
 
 - [ ] 2.4 Implement session persistence check
-  - **Description**: Create function to check and restore existing session on app load
+  - **Description**: Verify session restoration on app load via Better Auth's useSession hook
   - **Acceptance Criteria**:
-    - Function calls supabase.auth.getSession() on app initialization
+    - `authClient.useSession()` checks session cookie on app initialization
+    - Better Auth validates session in database via Prisma
     - Restores user state if valid session exists
     - Handles expired sessions (>30 days)
     - Redirects to login if session invalid or expired
@@ -113,7 +118,7 @@
   - **Requirements**: Requirement 1, 7
 
 - [ ] 3.3 Handle registration submission and errors
-  - **Description**: Connect registration form to Supabase Auth and handle responses
+  - **Description**: Connect registration form to Better Auth and handle responses
   - **Acceptance Criteria**:
     - Calls registration function on form submit
     - Shows loading state during submission (spinner, disabled button)
@@ -165,7 +170,7 @@
   - **Requirements**: Requirement 2
 
 - [ ] 4.3 Handle login submission and errors
-  - **Description**: Connect login form to Supabase Auth and handle responses
+  - **Description**: Connect login form to Better Auth and handle responses
   - **Acceptance Criteria**:
     - Calls login function on form submit
     - Shows loading state during submission (spinner, disabled button)
@@ -216,7 +221,7 @@
   - **Requirements**: Requirement 4, 5
 
 - [ ] 5.3 Implement logout functionality in dropdown
-  - **Description**: Connect logout button to Supabase Auth signOut
+  - **Description**: Connect logout button to Better Auth signOut
   - **Acceptance Criteria**:
     - Calls logout function on button click
     - Shows loading state during logout
@@ -367,7 +372,7 @@
 
 - **Password Reset**: Not included in MVP scope, can be added later
 - **Email Verification**: Not included in MVP scope, can be added later
-- **OAuth/Social Login**: Not included in MVP scope (Google, Facebook, etc.)
+- **OAuth/Social Login**: Not included in MVP scope (Google, Facebook, etc.) — can be added later via Better Auth provider config
 - **Two-Factor Authentication**: Not included in MVP scope
 - **Profile Picture Upload**: Using initials only in MVP, avatar upload can be added later
 - **Account Deletion**: Not included in MVP scope

@@ -48,7 +48,7 @@ This document defines the architectural principles for E-Kost to remain resilien
 ## External Interactions
 
 - **Database storage** – PostgreSQL or managed service
-- **Authentication provider** – Supabase Auth for account creation, login, sessions
+- **Authentication provider** – Better Auth for account creation, login, sessions (with Prisma adapter, self-hostable)
 - **Future: AI services** – for automation, insights, validation (not in MVP)
 - **Future: Analytics/monitoring** – observability (not in MVP)
 - **i18n: Translation files** – JSON files per language (internal, no external dependency)
@@ -125,7 +125,7 @@ This document defines the architectural principles for E-Kost to remain resilien
 - Simple calculator adapter (rent minus payments)
 - Email/SMS adapter for notifications (future)
 - OpenAI/Claude/other adapter for AI (future)
-- Supabase Auth adapter for authentication (current MVP)
+- Better Auth adapter for authentication (current MVP, with Prisma adapter for database sessions)
 - JSON file adapter for i18n (current MVP)
 - Future: Database-backed translation adapter
 
@@ -135,7 +135,7 @@ This document defines the architectural principles for E-Kost to remain resilien
 
 • **AI Integration Scope**: Requirements contain no AI features, but architecture assumes future AI enhancements for automation, insights, or validation assistance.
 
-• **Authentication Strategy**: MVP uses Supabase Auth for account creation, login, and session management. Row-level security and multi-user collaboration are post-MVP considerations.
+• **Authentication Strategy**: MVP uses Better Auth with Prisma adapter for account creation, login, and session management. Auth data lives in the same Prisma-managed database as domain data. Service-layer authorization and multi-user collaboration are post-MVP considerations.
 
 • **Multi-tenancy**: Current specs assume single property management, but architecture should consider future multi-property expansion.
 

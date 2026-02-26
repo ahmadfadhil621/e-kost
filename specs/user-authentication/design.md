@@ -6,31 +6,31 @@ The User Authentication feature enables property managers to create accounts, lo
 
 ### Key Design Decisions
 
-**Authentication Provider**: Supabase Auth is used for all authentication operations, providing email/password authentication with minimal setup (5 minutes vs 4-8 hours for custom implementation). Supabase Auth handles password hashing (bcrypt), session management, and HTTPS transmission automatically.
+**Authentication Provider**: Better Auth is used for all authentication operations, providing email/password authentication as a first-class feature with built-in password hashing and database sessions. Better Auth runs in the application code with a Prisma adapter, storing auth data in the same database as domain data — enabling fully self-hosted deployments with no external service dependency.
 
-**Session Strategy**: Sessions persist for 30 days using Supabase's built-in session management with automatic token refresh. Sessions are stored in browser localStorage and maintained across browser sessions without requiring server-side session storage.
+**Session Strategy**: Sessions persist for 30 days using Better Auth's database session strategy. Sessions are stored server-side in a `session` table managed by Prisma, with a secure HTTP-only cookie on the client. This enables server-side session revocation and avoids JWT-only limitations.
 
 **Mobile-First UI**: All authentication screens use single-column layouts optimized for 320px-480px widths with 44x44px minimum touch targets. Form fields stack vertically with appropriate keyboard types (email keyboard for email fields, secure text entry for passwords).
 
 **Profile Display**: User account information is displayed via a profile icon in the application header, showing initials or avatar with a dropdown containing name, email, and logout functionality. This provides immediate visibility of whose account is active.
 
-**Security**: Passwords are hashed using bcrypt (via Supabase Auth), transmitted over HTTPS only, and never stored in plain text. Minimum password length is 8 characters, enforced at both client and server levels.
+**Security**: Passwords are hashed using bcrypt (built-in to Better Auth), transmitted over HTTPS only, and never stored in plain text. Minimum password length is 8 characters, enforced at both client and server levels.
 
 ## Architecture
 
 ### System Context
 
-The User Authentication feature integrates with Supabase Auth service and establishes the foundation for all protected application features:
+The User Authentication feature uses Better Auth with Prisma adapter and establishes the foundation for all protected application features:
 
 ```mermaid
 graph TB
-    A[Registration Screen] --> B[Supabase Auth]
+    A[Registration Screen] --> B[Better Auth API]
     C[Login Screen] --> B
     D[Profile Display] --> E[Session Manager]
     E --> B
     F[Protected Routes] --> E
-    B --> G[(Supabase Database)]
-    E --> H[Browser localStorage]
+    B --> G[(PostgreSQL via Prisma)]
+    E --> H[HTTP-only Session Cookie]
 ```
 
 ### Authentication Flow
@@ -39,19 +39,16 @@ graph TB
 sequenceDiagram
     participant U as User
     participant UI as Auth UI
-    participant API as Next.js API
-    participant SA as Supabase Auth
-    participant DB as Database
+    participant BA as Better Auth API
+    participant DB as Database (Prisma)
     
     U->>UI: Enter email/password
-    UI->>API: POST /api/auth/register
-    API->>SA: signUp(email, password, metadata)
-    SA->>DB: Create user record
-    SA->>SA: Hash password (bcrypt)
-    DB-->>SA: User created
-    SA-->>API: Session + User data
-    API-->>UI: Success + Session
-    UI->>UI: Store session in localStorage
+    UI->>BA: POST /api/auth/sign-up
+    BA->>BA: Hash password (bcrypt)
+    BA->>DB: Create user record
+    BA->>DB: Create session record
+    DB-->>BA: User + Session created
+    BA-->>UI: Set session cookie + User data
     UI->>U: Redirect to main app
 ```
 
@@ -61,20 +58,19 @@ sequenceDiagram
 sequenceDiagram
     participant B as Browser
     participant UI as App UI
-    participant SM as Session Manager
-    participant SA as Supabase Auth
+    participant BA as Better Auth API
+    participant DB as Database (Prisma)
     
-    B->>UI: Page load
-    UI->>SM: Check session
-    SM->>SM: Read from localStorage
-    SM->>SA: Validate session token
-    alt Valid session
-        SA-->>SM: Session valid
-        SM-->>UI: User authenticated
+    B->>UI: Page load (sends session cookie)
+    UI->>BA: GET /api/auth/get-session
+    BA->>DB: Look up session by token
+    alt Valid session (not expired)
+        DB-->>BA: Session + User data
+        BA-->>UI: User authenticated
         UI->>UI: Render protected content
     else Invalid/expired session
-        SA-->>SM: Session invalid
-        SM-->>UI: User not authenticated
+        DB-->>BA: No valid session
+        BA-->>UI: Not authenticated
         UI->>UI: Redirect to login
     end
 ```
@@ -83,7 +79,7 @@ sequenceDiagram
 
 ### 1. Authentication Service
 
-**Responsibility**: Handle all authentication operations via Supabase Auth client.
+**Responsibility**: Handle all authentication operations via Better Auth client.
 
 **Interface**:
 ```typescript
@@ -117,17 +113,18 @@ interface User {
 }
 
 interface Session {
-  accessToken: string;
-  refreshToken: string;
-  expiresAt: number;
+  id: string;
+  userId: string;
+  expiresAt: Date;
+  token: string;
 }
 ```
 
 **Implementation Notes**:
-- Uses Supabase Auth client library (@supabase/supabase-js)
-- Password hashing handled automatically by Supabase
-- Session tokens stored in localStorage via Supabase client
-- Automatic token refresh before expiration
+- Uses Better Auth client library (better-auth/react)
+- Password hashing handled automatically by Better Auth (bcrypt)
+- Sessions stored server-side in database via Prisma adapter
+- Client receives HTTP-only session cookie (no localStorage for auth tokens)
 
 ### 2. Session Manager
 
@@ -155,9 +152,9 @@ interface SessionManager {
 
 **Implementation Notes**:
 - React Context provider for session state
-- Automatic session refresh 5 minutes before expiration
+- Better Auth handles session expiry server-side
 - Redirects to login on session expiration
-- Clears localStorage on logout
+- Logout invalidates server-side session and clears session cookie
 
 ### 3. API Routes
 
@@ -175,7 +172,8 @@ interface SessionManager {
 
 **POST /api/auth/logout**
 - Terminates current session
-- Clears session from Supabase
+- Deletes session record from database
+- Clears session cookie
 - Response time: <1 second
 
 **GET /api/auth/session**
@@ -255,123 +253,111 @@ interface ErrorResponse {
 
 ### Database Schema
 
-Supabase Auth manages user accounts in its built-in `auth.users` table. We extend this with a custom `profiles` table for additional user metadata:
+Better Auth manages user accounts and sessions via the Prisma adapter. All auth tables live in the same `public` schema as domain tables (Tenant, Room, Payment), managed by a single Prisma schema:
 
-```sql
--- Supabase Auth built-in table (managed by Supabase)
--- auth.users (
---   id UUID PRIMARY KEY,
---   email VARCHAR(255) UNIQUE,
---   encrypted_password VARCHAR(255),
---   email_confirmed_at TIMESTAMP,
---   created_at TIMESTAMP,
---   updated_at TIMESTAMP,
---   last_sign_in_at TIMESTAMP
--- )
+```prisma
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
--- Custom profiles table for additional user data
-CREATE TABLE profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  name VARCHAR(255) NOT NULL,
-  avatar_url VARCHAR(500),
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
+  sessions      Session[]
+  accounts      Account[]
+}
 
--- Enable Row Level Security
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
--- Policy: Users can read their own profile
-CREATE POLICY "Users can read own profile"
-  ON profiles FOR SELECT
-  USING (auth.uid() = id);
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 
--- Policy: Users can update their own profile
-CREATE POLICY "Users can update own profile"
-  ON profiles FOR UPDATE
-  USING (auth.uid() = id);
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  accountId         String
+  providerId        String
+  accessToken       String?
+  refreshToken      String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope             String?
+  password          String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
--- Trigger to create profile on user registration
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO public.profiles (id, name)
-  VALUES (NEW.id, NEW.raw_user_meta_data->>'name');
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
 ```
+
+Authorization is enforced at the service layer (not database-level RLS), keeping the system portable to any PostgreSQL instance.
 
 ### Indexes for Performance
 
-```sql
--- Index on profiles for user lookup
-CREATE INDEX idx_profiles_id ON profiles(id);
-
--- Supabase Auth automatically indexes auth.users(email)
+```prisma
+// Prisma automatically creates indexes for @unique fields (email, session token)
+// Additional indexes defined in schema as needed:
+// @@index([userId]) on Session and Account models
 ```
 
 ### Data Flow
 
 1. **User Registration**: 
-   - UI submits email, password, name → API calls Supabase Auth signUp
-   - Supabase creates auth.users record with hashed password
-   - Trigger creates profiles record with name
-   - Supabase returns session + user data
-   - UI stores session in localStorage
+   - UI submits email, password, name → Better Auth API `/api/auth/sign-up`
+   - Better Auth hashes password (bcrypt) and creates User record via Prisma
+   - Better Auth creates Account record (credential provider) and Session record
+   - Better Auth sets HTTP-only session cookie in response
+   - UI redirects to main app
 
 2. **User Login**:
-   - UI submits email, password → API calls Supabase Auth signInWithPassword
-   - Supabase validates credentials
-   - Supabase returns session + user data
-   - UI stores session in localStorage
+   - UI submits email, password → Better Auth API `/api/auth/sign-in/email`
+   - Better Auth validates credentials against stored hash
+   - Better Auth creates new Session record in database
+   - Better Auth sets HTTP-only session cookie in response
+   - UI redirects to main app
 
 3. **Session Validation**:
-   - App loads → Session Manager reads localStorage
-   - Session Manager calls Supabase Auth getSession
-   - Supabase validates token and returns user data
-   - If valid: render protected content
-   - If invalid: redirect to login
+   - App loads → Browser sends session cookie automatically
+   - Better Auth looks up session in database via Prisma
+   - If valid (not expired): return user data, render protected content
+   - If invalid/expired: return not authenticated, redirect to login
 
 4. **User Logout**:
-   - UI calls logout → API calls Supabase Auth signOut
-   - Supabase invalidates session
-   - UI clears localStorage
+   - UI calls Better Auth API `/api/auth/sign-out`
+   - Better Auth deletes session record from database
+   - Better Auth clears session cookie
    - UI redirects to login
 
 ### Session Storage
 
-Sessions are stored in browser localStorage by Supabase Auth client:
+Sessions are stored server-side in the `session` database table via Prisma. The client receives an HTTP-only cookie containing the session token:
 
-```typescript
-// Stored by Supabase client automatically
-localStorage.setItem('supabase.auth.token', JSON.stringify({
-  access_token: 'jwt-token',
-  refresh_token: 'refresh-token',
-  expires_at: 1234567890,
-  user: { id: 'uuid', email: 'user@example.com' }
-}));
-```
+- **Server-side**: Session record in `session` table with userId, token, expiresAt
+- **Client-side**: HTTP-only, secure cookie (not accessible via JavaScript, preventing XSS)
+- **No localStorage**: Auth tokens are never stored in localStorage (more secure than client-side token storage)
 
 ### User Metadata
 
-User metadata (name) is stored in Supabase Auth's `raw_user_meta_data` field during registration:
-
-```typescript
-const { data, error } = await supabase.auth.signUp({
-  email: 'user@example.com',
-  password: 'password123',
-  options: {
-    data: {
-      name: 'John Doe'
-    }
-  }
-});
-```
+User metadata (name, email) is stored directly in the `user` table managed by Prisma. No separate profiles table or metadata JSON field needed — the User model contains all user fields directly.
 
 
 ## Correctness Properties
@@ -450,13 +436,13 @@ const { data, error } = await supabase.auth.signUp({
 
 **Email Already Registered**:
 - Scenario: User attempts to register with existing email
-- Handling: Supabase Auth returns error, API forwards to client
+- Handling: Better Auth returns error (unique constraint violation), API forwards to client
 - Message: "This email is already registered. Please log in instead."
 - UI: Display error below email field with link to login page
 
 **Invalid Login Credentials**:
 - Scenario: User enters wrong email or password
-- Handling: Supabase Auth returns error, API forwards to client
+- Handling: Better Auth returns error (credential mismatch), API forwards to client
 - Message: "Invalid email or password. Please try again."
 - UI: Display error at top of form (don't specify which field is wrong for security)
 
@@ -482,9 +468,9 @@ const { data, error } = await supabase.auth.signUp({
 
 **Invalid Session Token**:
 - Scenario: Session token is corrupted or invalid
-- Handling: Supabase Auth validation fails
+- Handling: Better Auth database lookup finds no matching session
 - Message: "Your session is invalid. Please log in again."
-- UI: Clear localStorage, redirect to login page
+- UI: Clear session cookie, redirect to login page
 
 **Network Timeout**:
 - Scenario: Authentication request takes longer than 5 seconds
@@ -494,15 +480,15 @@ const { data, error } = await supabase.auth.signUp({
 
 ### Database Errors
 
-**Profile Creation Failure**:
-- Scenario: User account created but profile record fails to insert
-- Handling: Database trigger failure, transaction rollback
+**User Record Creation Failure**:
+- Scenario: User record creation fails during registration
+- Handling: Better Auth transaction rollback (Prisma transaction)
 - Message: "Account creation failed. Please try again."
 - UI: Display error on registration form
 - Logging: Log error details for debugging
 
 **Connection Failure**:
-- Scenario: Cannot connect to Supabase
+- Scenario: Cannot connect to database
 - Handling: API returns 503 Service Unavailable
 - Message: "Service temporarily unavailable. Please try again in a moment."
 - UI: Display error with retry button
@@ -704,7 +690,7 @@ const formInputWithMissingFieldsArbitrary = fc.record({
 - Verify session tokens are not exposed in URLs
 
 **Input Validation**:
-- Test SQL injection attempts (should be prevented by Supabase)
+- Test SQL injection attempts (should be prevented by Prisma parameterized queries)
 - Test XSS attempts in name field
 - Test email format validation
 - Test password length validation
@@ -721,7 +707,7 @@ const formInputWithMissingFieldsArbitrary = fc.record({
 - Test with 100 concurrent registrations
 - Test with 100 concurrent logins
 - Verify no performance degradation
-- Monitor Supabase connection pool
+- Monitor database connection pool
 
 ## Implementation Notes
 
@@ -733,45 +719,64 @@ const formInputWithMissingFieldsArbitrary = fc.record({
 - Zod for schema validation
 - Tailwind CSS for mobile-first styling
 - react-i18next for translation keys
-- Supabase Auth client (@supabase/supabase-js)
+- Better Auth React client (better-auth/react)
 
 **Backend**:
-- Next.js API routes for authentication endpoints
-- Supabase Auth for user management
-- Prisma for profiles table access
+- Next.js API route handler for Better Auth (`/api/auth/[...all]`)
+- Better Auth server instance with Prisma adapter
+- Prisma for all database access (auth + domain tables)
 - Zod for request/response validation
 
 **Database**:
-- Supabase PostgreSQL for profiles table
-- Supabase Auth built-in tables for user accounts
-- Row Level Security (RLS) for data protection
+- PostgreSQL (via Supabase or any self-hosted instance)
+- All auth tables (User, Session, Account, Verification) managed by Prisma
+- Service-layer authorization (not database-level RLS)
 
-### Supabase Auth Configuration
+### Better Auth Configuration
 
-**Client Initialization**:
+**Server Instance** (`src/lib/auth.ts`):
 ```typescript
-import { createClient } from '@supabase/supabase-js';
+import { betterAuth } from 'better-auth';
+import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { PrismaClient } from '@prisma/client';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      storage: window.localStorage,
-      storageKey: 'ekost-auth-token'
-    }
-  }
-);
+const prisma = new PrismaClient();
+
+export const auth = betterAuth({
+  database: prismaAdapter(prisma, { provider: 'postgresql' }),
+  emailAndPassword: { enabled: true },
+  session: {
+    expiresIn: 60 * 60 * 24 * 30, // 30 days
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60, // 5 minutes
+    },
+  },
+});
+```
+
+**Client Instance** (`src/lib/auth-client.ts`):
+```typescript
+import { createAuthClient } from 'better-auth/react';
+
+export const authClient = createAuthClient({
+  baseURL: process.env.NEXT_PUBLIC_APP_URL,
+});
+```
+
+**API Route Handler** (`src/app/api/auth/[...all]/route.ts`):
+```typescript
+import { auth } from '@/lib/auth';
+import { toNextJsHandler } from 'better-auth/next-js';
+
+export const { GET, POST } = toNextJsHandler(auth);
 ```
 
 **Session Configuration**:
 - Session duration: 30 days (2,592,000 seconds)
-- Auto-refresh: Enabled (refreshes 5 minutes before expiration)
-- Storage: localStorage (persists across browser sessions)
-- Storage key: 'ekost-auth-token'
+- Storage: Database (server-side via Prisma adapter)
+- Client: HTTP-only secure cookie
+- Cookie cache: 5 minutes (reduces database lookups)
 
 ### React Hook Form Integration
 
@@ -816,83 +821,67 @@ function RegistrationForm() {
 }
 ```
 
-### Session Management with React Context
+### Session Management with Better Auth React Client
 
-**Auth Context Provider**:
+Better Auth provides a React client with built-in hooks, eliminating the need for a custom Auth Context:
+
 ```typescript
-import { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import { authClient } from '@/lib/auth-client';
+
+// Use in components directly:
+const { data: session, isPending } = authClient.useSession();
+
+// Sign up:
+await authClient.signUp.email({
+  email: 'user@example.com',
+  password: 'password123',
+  name: 'John Doe',
+});
+
+// Sign in:
+await authClient.signIn.email({
+  email: 'user@example.com',
+  password: 'password123',
+});
+
+// Sign out:
+await authClient.signOut();
+```
+
+If a custom context wrapper is needed for additional app-level state:
+
+```typescript
+import { createContext, useContext } from 'react';
+import { authClient } from '@/lib/auth-client';
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
+  user: { id: string; email: string; name: string } | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export function useAuth(): AuthContextType {
+  const { data: session, isPending } = authClient.useSession();
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Check active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const value = {
-    user,
-    session,
-    loading,
+  return {
+    user: session?.user ?? null,
+    loading: isPending,
     signIn: async (email, password) => {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+      const { error } = await authClient.signIn.email({ email, password });
       if (error) throw error;
     },
     signUp: async (email, password, name) => {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { name } }
-      });
+      const { error } = await authClient.signUp.email({ email, password, name });
       if (error) throw error;
     },
     signOut: async () => {
-      const { error } = await supabase.auth.signOut();
+      const { error } = await authClient.signOut();
       if (error) throw error;
-    }
+    },
   };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
 ```
 
 ### Protected Route Component
@@ -940,8 +929,8 @@ function ProfileIcon() {
       .slice(0, 2);
   };
 
-  const initials = user?.user_metadata?.name 
-    ? getInitials(user.user_metadata.name)
+  const initials = user?.name 
+    ? getInitials(user.name)
     : '??';
 
   return (
@@ -956,7 +945,7 @@ function ProfileIcon() {
       
       {showDropdown && (
         <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg p-4">
-          <p className="font-semibold">{user?.user_metadata?.name}</p>
+          <p className="font-semibold">{user?.name}</p>
           <p className="text-sm text-gray-600">{user?.email}</p>
           <button
             onClick={handleLogout}
@@ -1051,24 +1040,24 @@ function RegistrationForm() {
 - Never log passwords
 - Never display passwords in plain text
 - Always use `type="password"` for password inputs
-- Passwords transmitted over HTTPS only (enforced by Supabase)
-- Passwords hashed with bcrypt by Supabase Auth
+- Passwords transmitted over HTTPS only
+- Passwords hashed with bcrypt by Better Auth (built-in)
 
 **Session Security**:
-- Sessions stored in localStorage (not sessionStorage for persistence)
-- Session tokens are JWT with expiration
-- Automatic token refresh before expiration
-- Logout clears all session data
+- Sessions stored server-side in database (not localStorage)
+- Client receives HTTP-only, secure cookie (not accessible via JavaScript)
+- Server-side session revocation on logout
+- Session expiry enforced server-side
 
 **Input Sanitization**:
 - Zod validation prevents malformed data
 - React automatically escapes JSX content (XSS protection)
-- Supabase uses parameterized queries (SQL injection protection)
+- Prisma uses parameterized queries (SQL injection protection)
 
-**Row Level Security**:
-- Profiles table uses RLS policies
-- Users can only read/update their own profile
-- Enforced at database level
+**Authorization**:
+- Service-layer authorization enforces user data scoping
+- Users can only access their own data (enforced in service layer, not database RLS)
+- Portable to any PostgreSQL instance without Supabase-specific RLS
 
 ### Performance Optimization
 
@@ -1091,20 +1080,22 @@ function RegistrationForm() {
 
 **Environment Variables**:
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+DATABASE_URL=postgresql://user:password@host:5432/ekost
+BETTER_AUTH_SECRET=your-random-secret-key
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 **Database Setup**:
-1. Create profiles table with RLS policies
-2. Create trigger for automatic profile creation
-3. Test trigger with sample user registration
+1. Run `prisma migrate dev` to create auth tables (User, Session, Account, Verification)
+2. Auth tables live alongside domain tables in same schema
+3. No separate database or schema configuration needed
 
-**Supabase Configuration**:
-1. Enable email/password authentication
-2. Configure session duration (30 days)
-3. Set up email templates (future: password reset, verification)
-4. Configure CORS for Next.js domain
+**Better Auth Configuration**:
+1. Install `better-auth` package
+2. Configure server instance with Prisma adapter (`src/lib/auth.ts`)
+3. Create client instance (`src/lib/auth-client.ts`)
+4. Add catch-all API route handler (`src/app/api/auth/[...all]/route.ts`)
+5. Generate and set `BETTER_AUTH_SECRET` environment variable
 
 **Monitoring**:
 - Track authentication success/failure rates

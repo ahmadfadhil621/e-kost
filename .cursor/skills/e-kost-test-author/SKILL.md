@@ -227,7 +227,7 @@ it('returns 409 when room number already exists', async () => {
 ## Hard Constraints
 
 - Test files are the **source of truth**. Implementation subagents must NOT modify test files.
-- Never mock internal business logic modules -- only mock external dependencies (Prisma, Supabase Auth, fetch).
+- Never mock internal business logic modules -- only mock external dependencies (Prisma, Better Auth, fetch).
 - Always use factory functions from `src/test/fixtures/` -- never inline test data objects.
 - Every test file must cover all three categories: good, bad, and edge cases.
 - Property-based tests must run minimum 100 iterations.
