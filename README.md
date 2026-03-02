@@ -92,6 +92,14 @@ Known limitations:
 - Basic balance calculation (expected rent minus payments, no late fees or payment plans)
 - Currency: EUR by default, configurable per locale via i18n (no multi-currency within a single property)
 
+## Pre-Deployment Checklist
+
+Before deploying to production, address these items:
+
+- [ ] **Supabase RLS** — Enable Row Level Security on all tables and add a "deny all" policy (since the app uses Prisma, not the Supabase REST API), or disable the PostgREST API entirely in Supabase dashboard (Project Settings → API)
+- [ ] **Environment variables** — Ensure `BETTER_AUTH_SECRET` is a unique, securely generated value (not the development one)
+- [ ] **HTTPS** — Verify all traffic is served over HTTPS (Vercel handles this by default)
+
 ## Contributing
 
 This project follows a spec-driven development approach. All features are documented in `specs/` with formal requirements, design documents, and task breakdowns. Review the relevant spec before implementing or suggesting changes to ensure alignment with MVP goals.
