@@ -2,7 +2,7 @@
 
 ## 1. Domain Layer
 
-- [ ] 1.1 Define auth validation schemas and types
+- [x] 1.1 Define auth validation schemas and types
   - **Description**: Create shared Zod schemas for authentication operations and TypeScript interfaces
   - **Acceptance Criteria**:
     - `registrationSchema` validates name (1-100 chars, required), email (valid format, required), password (min 8 chars, required)
@@ -13,7 +13,7 @@
 
 ## 2. Service Layer
 
-- [ ] 2.1 Configure Better Auth server instance
+- [x] 2.1 Configure Better Auth server instance
   - **Description**: Set up Better Auth server with Prisma adapter, email/password provider, and session config
   - **Acceptance Criteria**:
     - Better Auth server instance configured with Prisma adapter (`src/lib/auth.ts`)
@@ -24,7 +24,7 @@
   - **Dependencies**: None
   - **Effort**: M
 
-- [ ] 2.2 Configure Better Auth React client
+- [x] 2.2 Configure Better Auth React client
   - **Description**: Set up Better Auth client instance for React
   - **Acceptance Criteria**:
     - Client instance configured (`src/lib/auth-client.ts`)
@@ -33,7 +33,7 @@
   - **Dependencies**: 2.1
   - **Effort**: S
 
-- [ ] 2.3 Create useAuth hook
+- [x] 2.3 Create useAuth hook
   - **Description**: Create `useAuth` hook wrapping Better Auth client for app-wide session state
   - **Acceptance Criteria**:
     - Provides user state, loading state, and auth methods (signIn, signUp, signOut)
@@ -45,7 +45,7 @@
 
 ## 3. Data Layer
 
-- [ ] 3.1 Verify Prisma schema for auth tables
+- [x] 3.1 Verify Prisma schema for auth tables
   - **Description**: Ensure Better Auth tables (User, Session, Account, Verification) exist in Prisma schema
   - **Acceptance Criteria**:
     - User model: id, name, email (unique), emailVerified, image, createdAt, updatedAt
@@ -58,7 +58,7 @@
 
 ## 4. API Layer
 
-- [ ] 4.1 Create Better Auth catch-all API route
+- [x] 4.1 Create Better Auth catch-all API route
   - **Description**: Set up Next.js API route handler for all Better Auth endpoints
   - **Acceptance Criteria**:
     - Catch-all route at `src/app/api/auth/[...all]/route.ts`
@@ -67,7 +67,7 @@
   - **Dependencies**: 2.1
   - **Effort**: S
 
-- [ ] 4.2 Create ProtectedRoute component
+- [x] 4.2 Create ProtectedRoute component
   - **Description**: Create component to protect routes requiring authentication
   - **Acceptance Criteria**:
     - Checks for active session via useAuth hook
@@ -79,7 +79,7 @@
 
 ## 5. UI Layer
 
-- [ ] 5.1 Create RegistrationForm component
+- [x] 5.1 Create RegistrationForm component
   - **Description**: Build mobile-responsive registration form
   - **Acceptance Criteria**:
     - Fields: name, email, password
@@ -93,7 +93,7 @@
   - **Dependencies**: 2.2, 4.1
   - **Effort**: M
 
-- [ ] 5.2 Create LoginForm component
+- [x] 5.2 Create LoginForm component
   - **Description**: Build mobile-responsive login form
   - **Acceptance Criteria**:
     - Fields: email, password
@@ -107,7 +107,7 @@
   - **Dependencies**: 2.2, 4.1
   - **Effort**: M
 
-- [ ] 5.3 Create ProfileIcon component
+- [x] 5.3 Create ProfileIcon component
   - **Description**: Build user avatar/initials display for application header
   - **Acceptance Criteria**:
     - Displays user initials in circular avatar (derived from name)
@@ -118,7 +118,7 @@
   - **Dependencies**: 2.3
   - **Effort**: S
 
-- [ ] 5.4 Create ProfileDropdown component
+- [x] 5.4 Create ProfileDropdown component
   - **Description**: Build dropdown showing user info and logout
   - **Acceptance Criteria**:
     - Displays user name and email
@@ -129,7 +129,7 @@
   - **Dependencies**: 5.3, 2.3
   - **Effort**: S
 
-- [ ] 5.5 Integrate ProfileIcon into application header
+- [x] 5.5 Integrate ProfileIcon into application header
   - **Description**: Add profile icon to main authenticated app layout
   - **Acceptance Criteria**:
     - Profile icon visible on all authenticated pages
@@ -141,7 +141,7 @@
 
 ## 6. Internationalization (i18n)
 
-- [ ] 6.1 Set up i18n infrastructure
+- [x] 6.1 Set up i18n infrastructure
   - **Description**: Configure react-i18next and create translation file structure
   - **Acceptance Criteria**:
     - react-i18next installed and configured
@@ -151,7 +151,7 @@
   - **Dependencies**: None
   - **Effort**: M
 
-- [ ] 6.2 Extract and translate authentication strings
+- [x] 6.2 Extract and translate authentication strings
   - **Description**: Add all authentication UI text to translation files
   - **Acceptance Criteria**:
     - All form labels, buttons, messages in en.json and id.json
@@ -164,7 +164,7 @@
 
 ## 7. Testing & Validation
 
-- [ ] 7.1 Test user registration workflow
+- [x] 7.1 Test user registration workflow
   - **Description**: Verify registration meets acceptance criteria
   - **Acceptance Criteria**:
     - Can create account in under 30 seconds
@@ -175,7 +175,7 @@
   - **Dependencies**: 5.1
   - **Effort**: S
 
-- [ ] 7.2 Test user login workflow
+- [x] 7.2 Test user login workflow
   - **Description**: Verify login meets acceptance criteria
   - **Acceptance Criteria**:
     - Can log in with valid credentials in under 10 seconds
@@ -194,7 +194,7 @@
   - **Dependencies**: 4.2
   - **Effort**: S
 
-- [ ] 7.4 Test account display and logout
+- [x] 7.4 Test account display and logout
   - **Description**: Verify profile display and logout functionality
   - **Acceptance Criteria**:
     - Profile icon displays correct initials
@@ -214,7 +214,7 @@
   - **Dependencies**: 5.1, 5.2, 5.3, 5.4
   - **Effort**: M
 
-- [ ] 7.6 Test protected route access control
+- [x] 7.6 Test protected route access control
   - **Description**: Verify protected routes require authentication
   - **Acceptance Criteria**:
     - Unauthenticated users redirected to login

@@ -45,21 +45,40 @@
     "positiveNumber": "Harus angka positif",
     "invalidDate": "Tanggal tidak valid",
     "tooShort": "Terlalu pendek",
-    "tooLong": "Terlalu panjang"
+    "tooLong": "Terlalu panjang",
+    "passwordLength": "Kata sandi minimal 8 karakter"
   },
   "auth": {
-    "login": "Masuk",
-    "register": "Daftar",
+    "register": {
+      "title": "Buat Akun",
+      "submit": "Daftar",
+      "name": "Nama Lengkap",
+      "email": "Alamat Email",
+      "password": "Kata Sandi"
+    },
+    "login": {
+      "title": "Masuk",
+      "submit": "Masuk",
+      "email": "Alamat Email",
+      "password": "Kata Sandi"
+    },
     "logout": "Keluar",
-    "email": "Email",
-    "password": "Kata Sandi",
-    "confirmPassword": "Konfirmasi Kata Sandi",
-    "name": "Nama Lengkap",
-    "forgotPassword": "Lupa Kata Sandi?",
+    "profile": {
+      "title": "Akun",
+      "ariaLabel": "Profil pengguna"
+    },
     "noAccount": "Belum punya akun?",
     "hasAccount": "Sudah punya akun?",
-    "loginSuccess": "Berhasil masuk",
-    "registerSuccess": "Akun berhasil dibuat",
-    "logoutSuccess": "Berhasil keluar"
+    "error": {
+      "emailExists": "Email ini sudah terdaftar. Silakan masuk.",
+      "invalidCredentials": "Email atau kata sandi salah. Silakan coba lagi.",
+      "sessionExpired": "Sesi Anda telah berakhir. Silakan masuk kembali.",
+      "generic": "Terjadi kesalahan. Silakan coba lagi."
+    },
+    "success": {
+      "login": "Berhasil masuk",
+      "register": "Akun berhasil dibuat",
+      "logout": "Berhasil keluar"
+    }
   }
 }

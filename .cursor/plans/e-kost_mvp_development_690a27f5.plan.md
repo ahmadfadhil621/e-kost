@@ -4,10 +4,10 @@ overview: A phased plan to build the E-Kost MVP from zero to a working mobile-fi
 todos:
   - id: phase-0
     content: "Phase 0: Project Foundation -- Initialize Next.js, install deps, Prisma schema, shadcn/ui, design tokens, i18n setup, test config, mobile app shell"
-    status: pending
+    status: completed
   - id: phase-1
     content: "Phase 1: User Authentication (37 tasks) -- Better Auth setup, registration, login, logout, session management, protected routes, profile display, i18n, tests"
-    status: pending
+    status: completed
   - id: spec-multi-property
     content: "Write specs: Multi-Property Management -- requirements.md, design.md, tasks.md"
     status: completed

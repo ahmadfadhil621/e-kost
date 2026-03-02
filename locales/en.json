@@ -41,25 +41,44 @@
   },
   "validation": {
     "required": "This field is required",
-    "email": "Invalid email address",
+    "email": "Please enter a valid email address",
     "positiveNumber": "Must be a positive number",
     "invalidDate": "Invalid date",
     "tooShort": "Too short",
-    "tooLong": "Too long"
+    "tooLong": "Too long",
+    "passwordLength": "Password must be at least 8 characters"
   },
   "auth": {
-    "login": "Log In",
-    "register": "Register",
+    "register": {
+      "title": "Create Account",
+      "submit": "Register",
+      "name": "Full Name",
+      "email": "Email Address",
+      "password": "Password"
+    },
+    "login": {
+      "title": "Log In",
+      "submit": "Log In",
+      "email": "Email Address",
+      "password": "Password"
+    },
     "logout": "Log Out",
-    "email": "Email",
-    "password": "Password",
-    "confirmPassword": "Confirm Password",
-    "name": "Full Name",
-    "forgotPassword": "Forgot Password?",
+    "profile": {
+      "title": "Account",
+      "ariaLabel": "User profile"
+    },
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
-    "loginSuccess": "Logged in successfully",
-    "registerSuccess": "Account created successfully",
-    "logoutSuccess": "Logged out successfully"
+    "error": {
+      "emailExists": "This email is already registered. Please log in instead.",
+      "invalidCredentials": "Invalid email or password. Please try again.",
+      "sessionExpired": "Your session has expired. Please log in again.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "success": {
+      "login": "Logged in successfully",
+      "register": "Account created successfully",
+      "logout": "You have been logged out successfully"
+    }
   }
 }
