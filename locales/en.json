@@ -1,0 +1,65 @@
+{
+  "currency": {
+    "code": "EUR",
+    "locale": "en-IE"
+  },
+  "app": {
+    "name": "E-Kost",
+    "tagline": "Property Management Made Simple"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "rooms": "Rooms",
+    "tenants": "Tenants",
+    "payments": "Payments",
+    "finance": "Finance",
+    "settings": "Settings"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "noResults": "No results found",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "amount": "Amount",
+    "description": "Description",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "required": "Required"
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Invalid email address",
+    "positiveNumber": "Must be a positive number",
+    "invalidDate": "Invalid date",
+    "tooShort": "Too short",
+    "tooLong": "Too long"
+  },
+  "auth": {
+    "login": "Log In",
+    "register": "Register",
+    "logout": "Log Out",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Full Name",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "loginSuccess": "Logged in successfully",
+    "registerSuccess": "Account created successfully",
+    "logoutSuccess": "Logged out successfully"
+  }
+}

@@ -25,9 +25,9 @@ The MVP includes ten features:
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React 18, Vite, Tailwind CSS, shadcn/ui, Lucide React |
+| Frontend | Next.js (App Router), React 18, Tailwind CSS, shadcn/ui, Lucide React |
 | Forms & Validation | React Hook Form, Zod |
-| Backend | Next.js API Routes (Vercel serverless) |
+| Backend | Next.js API Routes (App Router, Vercel serverless) |
 | Database | PostgreSQL via Supabase |
 | ORM | Prisma |
 | Authentication | Better Auth (Prisma adapter) |
@@ -39,41 +39,32 @@ See `specs/technology-stack-decisions.md` for the full evaluation and rationale.
 ## Project Structure
 
 ```
-specs/
-├── tenant-room-basics/
-│   ├── requirements.md
-│   ├── design.md
-│   └── tasks.md
-├── room-inventory-management/
-│   ├── requirements.md
-│   ├── design.md
-│   └── tasks.md
-├── payment-recording/
-│   ├── requirements.md
-│   ├── design.md
-│   └── tasks.md
-├── outstanding-balance/
-│   ├── requirements.md
-│   ├── design.md
-│   └── tasks.md
-├── user-authentication/
-│   ├── requirements.md
-│   ├── design.md
-│   └── tasks.md
-├── multi-property/           (specs pending)
-├── dashboard-overview/       (specs pending)
-├── finance-expense/          (specs pending)
-├── tenant-notes/             (specs pending)
-├── settings-staff/           (specs pending)
-├── architecture-intent.md
-├── cross-cutting-constraints.md
-├── data-architecture.md
-├── technology-decisions.md
-├── technology-stack-decisions.md
-└── scalability-stress-analysis.md
+src/
+├── app/
+│   ├── (auth)/              # Auth pages (login, register) — no header/nav
+│   ├── (app)/               # Authenticated pages — with header/nav
+│   ├── api/                 # API routes
+│   ├── globals.css          # Design tokens (CSS variables)
+│   └── layout.tsx           # Root layout
+├── components/
+│   ├── ui/                  # shadcn/ui components
+│   └── layout/              # App shell, header, nav
+├── domain/
+│   ├── schemas/             # Shared Zod schemas
+│   └── interfaces/          # Repository interfaces
+├── services/                # Business logic services
+├── repositories/            # Prisma implementations
+├── hooks/                   # Custom React hooks
+├── lib/                     # Utilities (prisma, i18n, auth, etc.)
+│   └── utils.ts
+└── test/                    # Test setup and helpers
+locales/
+├── en.json                  # English translations
+└── id.json                  # Indonesian translations
+prisma/
+└── schema.prisma            # Database schema
+specs/                       # Feature specs (requirements, design, tasks)
 ```
-
-Each feature directory contains requirements, design, and task documents. Directories marked "(specs pending)" are new MVP features that need formal specification. Cross-cutting specs cover architecture, data modeling, technology choices, and scalability analysis.
 
 ## Getting Started
 
@@ -83,11 +74,16 @@ Prerequisites:
 - A PostgreSQL database (Supabase free tier, or any self-hosted Postgres)
 - Review the specs in `specs/` to understand feature requirements and architecture decisions
 
-Setup steps will be added once implementation begins.
+Setup:
+
+1. Copy `.env.example` to `.env` and fill in your Supabase `DATABASE_URL` and `BETTER_AUTH_SECRET`
+2. Run `npm install`
+3. Run `npx prisma db push` to sync the schema with your database
+4. Run `npm run dev` to start the development server
 
 ## Development Status
 
-**Current phase:** Specs and architecture complete, implementation pending.
+**Current phase:** Phase 0 (Project Foundation) complete. App shell, design tokens, i18n, Prisma schema, and test config ready.
 
 Known limitations:
 

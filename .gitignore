@@ -1,5 +1,8 @@
 # Dependencies
 node_modules/
+
+# Generated code
+src/generated/
 npm-debug.log
 yarn-error.log
 pnpm-debug.log
@@ -47,3 +50,5 @@ temp/
 
 # OS-specific
 .env.local.php
+
+/src/generated/prisma

@@ -1,0 +1,65 @@
+{
+  "currency": {
+    "code": "IDR",
+    "locale": "id-ID"
+  },
+  "app": {
+    "name": "E-Kost",
+    "tagline": "Manajemen Properti Jadi Mudah"
+  },
+  "nav": {
+    "dashboard": "Dasbor",
+    "rooms": "Kamar",
+    "tenants": "Penyewa",
+    "payments": "Pembayaran",
+    "finance": "Keuangan",
+    "settings": "Pengaturan"
+  },
+  "common": {
+    "loading": "Memuat...",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "delete": "Hapus",
+    "edit": "Ubah",
+    "create": "Buat",
+    "search": "Cari",
+    "filter": "Filter",
+    "noResults": "Tidak ada hasil",
+    "confirm": "Konfirmasi",
+    "back": "Kembali",
+    "next": "Berikutnya",
+    "close": "Tutup",
+    "actions": "Aksi",
+    "status": "Status",
+    "date": "Tanggal",
+    "amount": "Jumlah",
+    "description": "Deskripsi",
+    "name": "Nama",
+    "email": "Email",
+    "phone": "Telepon",
+    "required": "Wajib"
+  },
+  "validation": {
+    "required": "Kolom ini wajib diisi",
+    "email": "Alamat email tidak valid",
+    "positiveNumber": "Harus angka positif",
+    "invalidDate": "Tanggal tidak valid",
+    "tooShort": "Terlalu pendek",
+    "tooLong": "Terlalu panjang"
+  },
+  "auth": {
+    "login": "Masuk",
+    "register": "Daftar",
+    "logout": "Keluar",
+    "email": "Email",
+    "password": "Kata Sandi",
+    "confirmPassword": "Konfirmasi Kata Sandi",
+    "name": "Nama Lengkap",
+    "forgotPassword": "Lupa Kata Sandi?",
+    "noAccount": "Belum punya akun?",
+    "hasAccount": "Sudah punya akun?",
+    "loginSuccess": "Berhasil masuk",
+    "registerSuccess": "Akun berhasil dibuat",
+    "logoutSuccess": "Berhasil keluar"
+  }
+}
