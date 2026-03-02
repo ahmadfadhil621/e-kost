@@ -48,15 +48,16 @@ src/
 │   └── layout.tsx           # Root layout
 ├── components/
 │   ├── ui/                  # shadcn/ui components
+│   ├── auth/                # Auth-related components
 │   └── layout/              # App shell, header, nav
 ├── domain/
 │   ├── schemas/             # Shared Zod schemas
-│   └── interfaces/          # Repository interfaces
-├── services/                # Business logic services
-├── repositories/            # Prisma implementations
+│   └── interfaces/          # Repository interfaces (added in later phases)
+├── services/                # Business logic services (added in later phases)
+├── repositories/            # Prisma implementations (added in later phases)
+├── generated/               # Prisma client output (do not edit)
 ├── hooks/                   # Custom React hooks
 ├── lib/                     # Utilities (prisma, i18n, auth, etc.)
-│   └── utils.ts
 └── test/                    # Test setup and helpers
 locales/
 ├── en.json                  # English translations
@@ -83,7 +84,7 @@ Setup:
 
 ## Development Status
 
-**Current phase:** Phase 0 (Project Foundation) complete. App shell, design tokens, i18n, Prisma schema, and test config ready.
+**Current phase:** Phase 0 (Project Foundation) and Phase 1 (User Authentication) complete. App shell, design tokens, i18n, Prisma schema, test config, and full auth flow (registration, login, logout, protected routes, profile) are in place.
 
 Known limitations:
 

@@ -48,7 +48,7 @@ isProject: false
 
 ## Current State
 
-The project is spec-only: `README.md`, `.gitignore`, and comprehensive specs exist under `specs/`. Zero implementation code. Five features have full specs (109 tasks); five more need specs written first.
+Phase 0 (Project Foundation) and Phase 1 (User Authentication) are complete. Implementation includes Next.js app shell, design tokens, i18n, Prisma schema (with client generated to `src/generated/prisma`), Vitest + Playwright config, and full auth flow (registration, login, logout, protected routes, profile dropdown). All feature specs exist under `specs/`; Multi-Property Management (Phase 2) is next.
 
 ## Tech Stack Resolution
 

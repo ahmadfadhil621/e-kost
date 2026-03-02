@@ -15,7 +15,7 @@ This document captures the comprehensive technology stack evaluation and final d
 
 | Component | Final Decision | Complexity | Runner-ups | Key Reason |
 |-----------|---------------|------------|------------|------------|
-| Frontend Framework | React 18 + Vite | 6/10 | Alpine.js, Lit | Developer familiarity saves 100+ hours |
+| Frontend Framework | React 18 + Next.js (App Router) | 6/10 | Alpine.js, Lit | Developer familiarity; Next.js provides full-stack (pages + API), no separate Vite app |
 | Native vs Web | React Web (PWA) | 6/10 | React Native | No native features needed, 4-6 weeks faster |
 | CSS Framework | Tailwind CSS + shadcn/ui | 4/10 | Vanilla CSS, Bootstrap | Mobile-first by default, rapid prototyping |
 | Backend Framework | Next.js (serverless) | 5.5/10 | Express, Fastify | $0 free tier vs $6-12/month VPS |
@@ -90,8 +90,8 @@ Evaluation of native vs web for mobile-first requirements
 6. **PWA capabilities**: Add to home screen, offline support via service workers
 7. **Lower complexity**: 6/10 vs 8/10 for React Native
 
-### Final Verdict: React Web (Vite + PWA)
-**Reason**: E-Kost doesn't need native features, React Native adds 4-6 weeks to timeline without clear benefit.
+### Final Verdict: React Web (Next.js + PWA)
+**Reason**: E-Kost doesn't need native features, React Native adds 4-6 weeks to timeline without clear benefit. The project uses Next.js App Router for both pages and API (no separate Vite app).
 
 **Complexity**: 6/10 (Medium)  
 **Alternative**: React Native only if camera/GPS/offline-first becomes critical
@@ -325,13 +325,13 @@ E-Kost requires authentication in MVP for account creation, login, session manag
 ## Final Technology Stack
 
 ### Frontend
-- **Framework**: React 18 + Vite
-- **Bundle optimization**: Preact (via alias for 70% smaller bundle)
+- **Framework**: Next.js (App Router) with React 18 — pages and API in one codebase, no separate Vite app
 - **Styling**: Tailwind CSS + shadcn/ui
 - **Forms**: React Hook Form + Zod
 - **i18n**: react-i18next
 - **Date handling**: date-fns
 - **Icons**: Lucide React
+- **Unit testing**: Vitest (uses Vite under the hood for test runs only)
 
 ### Backend
 - **Framework**: Next.js API Routes (Vercel serverless)
@@ -417,7 +417,7 @@ E-Kost requires authentication in MVP for account creation, login, session manag
 ### When to Reconsider React
 - **Performance**: Virtual DOM overhead on low-end devices
 - **Bundle size**: 150KB+ causing slow initial load
-- **Action**: Consider Preact (already planned), Svelte, or Alpine.js
+- **Action**: Consider Preact, Svelte, or Alpine.js
 
 ---
 
