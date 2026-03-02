@@ -15,9 +15,14 @@ Every feature follows this 4-step loop:
 1. **Define unit/integration tests** -- Write Vitest tests for domain services, API routes, and components (good, bad, edge cases)
 2. **Define small E2E tests** -- Write Playwright tests for atomic user actions within the feature (good, bad, edge cases)
 3. **Implement the code** -- Write production code to make all tests pass
-4. **Iterate until all green** -- Fix failures, re-run both test suites, repeat until 0 failures
+4. **Iterate until all green** -- Fix failures, re-run the current feature's tests, repeat until 0 failures
+5. **Full regression check** -- Run the entire Vitest suite (`npx vitest run`) and entire Playwright suite (`npx playwright test`) to catch regressions in previously completed features
 
-Steps 1 and 2 happen before any implementation code is written. Both test suites must pass before a feature is considered complete.
+Steps 1 and 2 happen before any implementation code is written. A feature is not complete until step 5 passes with 0 failures across all tests.
+
+### Regression Failure Rule
+
+If a test from a **previous** feature fails during step 5, the new implementation caused a regression. The fix must be in the **implementation code**, not in the old test. Old tests are the source of truth for previously shipped behavior -- never weaken or modify them to accommodate new code.
 
 ## Libraries
 
