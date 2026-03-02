@@ -160,7 +160,7 @@ This document defines the minimal data storage architecture for E-Kost MVP, focu
 - No additional infrastructure needed
 - Easy to update without deployment
 
-**Sessions**: Browser storage (localStorage for persistence, sessionStorage for temporary)
-- No server-side storage needed
-- Automatic cleanup on browser close
-- No authentication requirements in MVP
+**Sessions**: Database-stored via Better Auth's Prisma adapter
+- Server-side session records in the `session` table alongside domain data
+- HTTP-only cookies for session tokens (secure, not accessible to JavaScript)
+- Enables server-side session revocation and 30-day expiry
