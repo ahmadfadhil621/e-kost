@@ -21,6 +21,12 @@ Property managers need to maintain an accurate record of rent payments to avoid 
 - Integration with banking systems or accounting software
 - Recurring payment automation
 
+## Glossary
+
+- **Payment**: A recorded rent payment from a tenant, containing the amount, payment date, and a system-generated recording timestamp
+- **Payment History**: The chronological list of all payments recorded for a tenant or across the property
+- **Active Tenant**: A tenant with a current room assignment who has not been moved out — only active tenants can have new payments recorded
+
 ## Functional Requirements
 
 ### Requirement 1: Payment Recording

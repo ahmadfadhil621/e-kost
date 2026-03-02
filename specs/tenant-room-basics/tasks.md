@@ -1,258 +1,248 @@
 # Tasks: Tenant & Room Basics (CRUD)
 
-## 1. Project Setup
+## 1. Domain Layer
 
-- [ ] 1.1 Initialize project structure
-  - **Description**: Set up basic project structure with folders for backend, frontend, and database
-  - **Acceptance Criteria**: 
-    - Project structure created with clear separation of concerns
-    - Build system configured
+- [ ] 1.1 Define Tenant entity and validation schemas
+  - **Description**: Create shared Zod schemas for tenant CRUD and TypeScript interfaces for Tenant
+  - **Acceptance Criteria**:
+    - `createTenantSchema` validates name (1-100 chars, required), phone (required), email (valid format, required)
+    - `updateTenantSchema` validates partial updates with at least one field, email format if provided
+    - `assignRoomSchema` validates roomId (required, valid UUID)
+    - TypeScript interfaces for Tenant, CreateTenantInput, UpdateTenantInput
   - **Dependencies**: None
   - **Effort**: S
 
-- [ ] 1.2 Set up database schema for tenants and rooms
-  - **Description**: Create database tables for tenants with fields: id (unique), name, phone, email, created_at, updated_at, moved_out_at
+- [ ] 1.2 Define ITenantRepository interface
+  - **Description**: Create repository interface for tenant data access
   - **Acceptance Criteria**:
-    - Tenant table created with all required fields
-    - Unique identifier auto-generated
-    - Timestamps in UTC timezone
-    - Soft delete support (moved_out_at field)
+    - Methods: create, findById, findByProperty, update, softDelete (move-out)
+    - findByProperty supports filtering active vs moved-out tenants
+    - Room assignment methods: assignRoom, removeRoomAssignment
+    - All methods return typed promises
   - **Dependencies**: 1.1
-  - **Effort**: M
-  - **Requirements**: Requirement 1, 5, Constraints
+  - **Effort**: S
 
-## 2. Backend - Tenant CRUD Operations
+## 2. Service Layer
 
-- [ ] 2.1 Implement tenant creation endpoint
-  - **Description**: Create API endpoint to add new tenant with name, phone, and email
+- [ ] 2.1 Implement TenantService
+  - **Description**: Build service layer with business logic for tenant CRUD and room assignment
   - **Acceptance Criteria**:
-    - POST endpoint accepts tenant data
-    - Validates all required fields (name, phone, email)
-    - Validates email format
-    - Returns unique tenant ID on success
-    - Returns validation errors for missing/invalid fields
-    - Persists to database immediately
+    - `createTenant` validates data and associates tenant with active property
+    - `getTenant` validates property access and returns tenant with room details
+    - `listTenants` returns tenants for property, excludes moved-out by default
+    - `updateTenant` validates property access, preserves room assignment/id/createdAt
+    - `moveOut` soft-deletes tenant (sets movedOutAt), frees room (sets status to available), records move-out date
+    - All operations validate property access via PropertyService
   - **Dependencies**: 1.2
-  - **Effort**: M
-  - **Requirements**: Requirement 1
+  - **Effort**: L
 
-- [ ] 2.2 Implement tenant retrieval endpoints
-  - **Description**: Create API endpoints to list all tenants and get single tenant details
+- [ ] 2.2 Implement room assignment in TenantService
+  - **Description**: Add room assignment and validation business logic
   - **Acceptance Criteria**:
-    - GET endpoint returns list of all tenants with name and room assignment
-    - GET endpoint returns single tenant with all details (name, phone, email, room, assignment date)
-    - Excludes moved-out tenants from active list (or filters appropriately)
-  - **Dependencies**: 1.2
-  - **Effort**: M
-  - **Requirements**: Requirement 3
-
-- [ ] 2.3 Implement tenant update endpoint
-  - **Description**: Create API endpoint to update tenant information
-  - **Acceptance Criteria**:
-    - PUT/PATCH endpoint accepts updated tenant data
-    - Validates email format if provided
-    - Updates only provided fields (name, phone, email)
-    - Preserves room assignment, creation date, and ID
-    - Records modification timestamp in UTC
-    - Returns validation errors for invalid data
-  - **Dependencies**: 1.2
-  - **Effort**: M
-  - **Requirements**: Requirement 4
-
-- [ ] 2.4 Implement tenant move-out endpoint
-  - **Description**: Create API endpoint to mark tenant as moved out
-  - **Acceptance Criteria**:
-    - POST/PUT endpoint marks tenant as moved out
-    - Records move-out date in UTC
-    - Removes tenant-room assignment
-    - Updates associated room status to available
-    - Preserves tenant record (soft delete)
-  - **Dependencies**: 1.2
-  - **Effort**: M
-  - **Requirements**: Requirement 5
-
-## 3. Backend - Room Assignment
-
-- [ ] 3.1 Implement room assignment endpoint
-  - **Description**: Create API endpoint to assign tenant to available room
-  - **Acceptance Criteria**:
-    - POST endpoint accepts tenant ID and room ID
-    - Validates room is available (not occupied)
-    - Creates tenant-room relationship
-    - Updates room status to occupied
+    - `assignRoom` validates room is available (not occupied, not under renovation), links tenant to room, updates room status to occupied
+    - Assignment is transactional (tenant + room update in single transaction)
+    - Prevents assigning tenant who already has a room (must unassign first or move out)
     - Records assignment date in UTC
-    - Returns error if room already occupied
-  - **Dependencies**: 1.2, 2.1
-  - **Effort**: M
-  - **Requirements**: Requirement 2
-
-## 4. Frontend - Tenant Management UI
-
-- [ ] 4.1 Create tenant creation form
-  - **Description**: Build mobile-responsive form for adding new tenants
-  - **Acceptance Criteria**:
-    - Form displays fields for name, phone, and email
-    - Single-column layout on mobile (320px-480px width)
-    - Validates required fields before submission
-    - Displays validation errors clearly
-    - Shows confirmation message on success
-    - Form fields vertically stacked with adequate spacing
+    - Appropriate errors: 404 (room not found), 409 (room occupied)
   - **Dependencies**: 2.1
   - **Effort**: M
-  - **Requirements**: Requirement 1, 6
 
-- [ ] 4.2 Create tenant list view
-  - **Description**: Build mobile-responsive list showing all tenants
+- [ ] 2.3 Write unit tests for TenantService
+  - **Description**: Test all tenant and room assignment business logic
   - **Acceptance Criteria**:
-    - Displays scrollable list of tenants
-    - Shows tenant name and current room assignment
-    - Single-column layout with no horizontal scrolling
-    - Full-width cards with clear visual separation
-    - Adequate padding for mobile readability
-    - Minimum 44x44 pixel touch targets
-  - **Dependencies**: 2.2
+    - Tests for creation (valid data, missing fields, email validation)
+    - Tests for listing (active only, include moved-out, empty)
+    - Tests for update (valid, invalid email, preserve invariants)
+    - Tests for move-out (soft delete, room freed, tenant preserved)
+    - Tests for room assignment (valid, occupied room blocked, under renovation blocked)
+    - Property-based tests for correctness properties
+    - Minimum 20 tests
+  - **Dependencies**: 2.1, 2.2
+  - **Effort**: L
+
+## 3. Data Layer
+
+- [ ] 3.1 Verify Prisma schema for Tenant
+  - **Description**: Ensure Tenant model exists in Prisma schema with correct fields, indexes, and relations
+  - **Acceptance Criteria**:
+    - Tenant model: id, propertyId, name, phone, email, roomId (nullable), assignedAt (nullable), createdAt, updatedAt, movedOutAt (nullable)
+    - Index on propertyId for efficient property-scoped queries
+    - Relation to Property, Room models
+    - movedOutAt field supports soft delete pattern
+  - **Dependencies**: None (Phase 0 creates schema)
+  - **Effort**: S
+
+- [ ] 3.2 Implement PrismaTenantRepository
+  - **Description**: Implement ITenantRepository using Prisma client
+  - **Acceptance Criteria**:
+    - All interface methods implemented
+    - findByProperty filters by propertyId, supports active/moved-out filtering
+    - softDelete sets movedOutAt timestamp (never hard deletes)
+    - assignRoom and removeRoomAssignment handle tenant-room relationship
+    - Includes room data in tenant queries for display
+  - **Dependencies**: 1.2, 3.1
   - **Effort**: M
-  - **Requirements**: Requirement 3, 6
 
-- [ ] 4.3 Create tenant detail view
-  - **Description**: Build mobile-responsive page showing full tenant details
+## 4. API Layer
+
+- [ ] 4.1 Implement tenant CRUD API routes
+  - **Description**: Create REST endpoints for tenant management scoped to a property
   - **Acceptance Criteria**:
-    - Displays name, phone, email, assigned room, and assignment date
-    - Single-column layout fits on mobile screen without scrolling
-    - All interactive elements have 44x44 pixel minimum touch targets
-    - Provides access to edit and move-out actions
-  - **Dependencies**: 2.2
+    - POST /api/properties/[propertyId]/tenants — create tenant (authenticated)
+    - GET /api/properties/[propertyId]/tenants — list tenants (authenticated)
+    - GET /api/properties/[propertyId]/tenants/[tenantId] — get tenant detail (authenticated)
+    - PUT /api/properties/[propertyId]/tenants/[tenantId] — update tenant info (authenticated)
+    - POST /api/properties/[propertyId]/tenants/[tenantId]/move-out — move out tenant (authenticated)
+    - Property access middleware applied to all routes
+    - Input validation with Zod schemas
+    - Consistent JSON error responses
+  - **Dependencies**: 2.1, 3.2
+  - **Effort**: L
+
+- [ ] 4.2 Implement room assignment API route
+  - **Description**: Create REST endpoint for assigning tenant to a room
+  - **Acceptance Criteria**:
+    - POST /api/properties/[propertyId]/tenants/[tenantId]/assign-room — assign room (authenticated)
+    - Input validation: roomId required
+    - Validates room is available
+    - Returns updated tenant with room details
+    - Error codes: 404 (room/tenant not found), 409 (room occupied)
+  - **Dependencies**: 2.2, 3.2
   - **Effort**: M
-  - **Requirements**: Requirement 3, 6
 
-- [ ] 4.4 Create tenant edit form
-  - **Description**: Build mobile-responsive form for updating tenant information
+- [ ] 4.3 Write API route tests
+  - **Description**: Test all tenant API endpoints
   - **Acceptance Criteria**:
-    - Pre-populates form with current tenant data
-    - Allows editing name, phone, and email
+    - Tests for each endpoint: success, validation errors, not found, unauthorized
+    - Tests for room assignment edge cases (occupied, under renovation)
+    - Tests for move-out (soft delete, room freed)
+    - Tests for property access middleware enforcement
+    - Minimum 18 tests
+  - **Dependencies**: 4.1, 4.2
+  - **Effort**: L
+
+## 5. UI Layer
+
+- [ ] 5.1 Create TenantForm component
+  - **Description**: Build mobile-responsive form for creating and editing tenants
+  - **Acceptance Criteria**:
+    - Fields: name (text), phone (tel), email (email)
+    - Supports create and edit modes via props
+    - Client-side validation with React Hook Form + Zod
+    - Mobile-optimized: single column, 44x44px touch targets, appropriate keyboard types
+    - Loading state on submission
+    - Success/error feedback via toast
+    - All text via translation keys
+  - **Dependencies**: 4.1
+  - **Effort**: M
+
+- [ ] 5.2 Create TenantList page
+  - **Description**: Build page showing all tenants for the active property
+  - **Acceptance Criteria**:
+    - Card layout showing tenant name and current room assignment
+    - Single-column layout on mobile, full-width cards
+    - Tap card to view tenant detail
+    - "Add Tenant" button
+    - Loading and empty states
+    - Fetches tenants via TanStack Query
+    - All text via translation keys
+  - **Dependencies**: 4.1
+  - **Effort**: M
+
+- [ ] 5.3 Create TenantDetail page
+  - **Description**: Build tenant detail view with all info and actions
+  - **Acceptance Criteria**:
+    - Displays name, phone, email, assigned room, assignment date
+    - Edit, Assign Room, and Move Out action buttons
     - Single-column layout on mobile
-    - Validates email format
-    - Displays validation errors
-    - Shows confirmation message on success
-    - Preserves room assignment and other data
-  - **Dependencies**: 2.3, 4.3
+    - All interactive elements 44x44px minimum
+    - All text via translation keys
+  - **Dependencies**: 4.1, 5.1
   - **Effort**: M
-  - **Requirements**: Requirement 4, 6
 
-- [ ] 4.5 Create room assignment interface
-  - **Description**: Build mobile-responsive interface for assigning tenant to room
+- [ ] 5.4 Create RoomAssignment component
+  - **Description**: Build room selection interface for tenant assignment
   - **Acceptance Criteria**:
-    - Displays list of available rooms only
-    - Single-column layout on mobile
-    - Minimum 44x44 pixel touch targets
-    - Shows confirmation on successful assignment
-    - Displays error if room already occupied
-  - **Dependencies**: 3.1, 4.3
+    - Displays list of available rooms only (fetched from room API)
+    - Single-column layout with room cards
+    - Shows room number, type, and rent for each option
+    - Confirmation on successful assignment
+    - Error display for occupied rooms
+    - 44x44px touch targets
+    - All text via translation keys
+  - **Dependencies**: 4.2
   - **Effort**: M
-  - **Requirements**: Requirement 2, 6
 
-- [ ] 4.6 Create move-out confirmation dialog
+- [ ] 5.5 Create MoveOutDialog component
   - **Description**: Build confirmation dialog for tenant move-out
   - **Acceptance Criteria**:
-    - Displays confirmation dialog before move-out
-    - Prevents accidental removal
+    - Confirmation dialog with warning text
+    - Confirm and Cancel buttons (44x44px touch targets)
     - Shows success message after move-out
-    - Updates room status to available in UI
-  - **Dependencies**: 2.4, 4.3
-  - **Effort**: S
-  - **Requirements**: Requirement 5, 6
-
-## 5. Testing & Validation
-
-- [ ] 5.1 Test tenant creation workflow
-  - **Description**: Verify tenant creation meets all acceptance criteria
-  - **Acceptance Criteria**:
-    - Can create tenant in under 30 seconds
-    - All required fields validated
-    - Unique ID assigned
-    - Data persisted to database
-    - Confirmation displayed
+    - Room status updates in UI after move-out
+    - All text via translation keys
   - **Dependencies**: 4.1
   - **Effort**: S
-  - **Requirements**: Success Criteria
-
-- [ ] 5.2 Test room assignment workflow
-  - **Description**: Verify room assignment meets all acceptance criteria
-  - **Acceptance Criteria**:
-    - Can assign tenant to room in under 20 seconds
-    - Only available rooms shown
-    - Room status updates to occupied
-    - Assignment date recorded
-    - Error shown for occupied rooms
-  - **Dependencies**: 4.5
-  - **Effort**: S
-  - **Requirements**: Success Criteria
-
-- [ ] 5.3 Test tenant update workflow
-  - **Description**: Verify tenant updates meet all acceptance criteria
-  - **Acceptance Criteria**:
-    - Changes persisted within 2 seconds
-    - Room assignment preserved
-    - Validation errors displayed for invalid data
-    - No data loss during update
-  - **Dependencies**: 4.4
-  - **Effort**: S
-  - **Requirements**: Success Criteria
-
-- [ ] 5.4 Test move-out workflow
-  - **Description**: Verify move-out meets all acceptance criteria
-  - **Acceptance Criteria**:
-    - Room status changes to available within 2 seconds
-    - Tenant record preserved in database
-    - Confirmation dialog prevents accidental removal
-  - **Dependencies**: 4.6
-  - **Effort**: S
-  - **Requirements**: Success Criteria
-
-- [ ] 5.5 Test mobile responsiveness
-  - **Description**: Verify all screens work on mobile devices
-  - **Acceptance Criteria**:
-    - All screens render correctly on 320px-480px width
-    - No horizontal scrolling required
-    - All touch targets minimum 44x44 pixels
-    - No pinch-to-zoom required for readability
-    - Single-column layouts maintained
-  - **Dependencies**: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6
-  - **Effort**: M
-  - **Requirements**: Requirement 6, Success Criteria
-
-## Open Questions / Assumptions
-
-- **Tech Stack**: Specific technologies (framework, database, language) not defined in requirements
-- **Authentication**: Better Auth required—all endpoints must verify authenticated session; see user-authentication spec
-- **Room Data**: Assumes room data structure exists (referenced in room-inventory-management spec)
-- **Validation Rules**: Phone number format validation not specified
-- **Concurrent Access**: No requirements for handling concurrent updates to same tenant
-- **Data Migration**: No requirements for importing existing tenant data
-
 
 ## 6. Internationalization (i18n)
 
-- [ ] 6.1 Set up i18n infrastructure
-  - **Description**: Configure i18n library and translation file structure
+- [ ] 6.1 Extract and translate tenant management strings
+  - **Description**: Add all tenant management UI text to translation files
   - **Acceptance Criteria**:
-    - i18n library installed and configured
-    - Translation files directory created (locales/)
-    - Base language JSON file created with all UI strings
-    - Language switching mechanism implemented
-    - No hardcoded strings in components
-  - **Dependencies**: None
-  - **Effort**: M
-  - **Requirements**: Cross-cutting Constraint 2
-
-- [ ] 6.2 Extract and translate tenant management strings
-  - **Description**: Move all UI text to translation keys for tenant features
-  - **Acceptance Criteria**:
-    - All form labels translated (name, phone, email)
-    - All validation messages translated
-    - All confirmation dialogs translated
-    - All success/error messages translated
-    - Translation keys follow consistent naming convention
-  - **Dependencies**: 6.1
+    - All form labels, buttons, messages in en.json and id.json
+    - Translation keys follow `tenant.*` naming convention
+    - Validation messages translated
+    - Room assignment strings translated
+    - Move-out confirmation dialog translated
+  - **Dependencies**: 5.1, 5.2, 5.3, 5.4, 5.5
   - **Effort**: S
-  - **Requirements**: Cross-cutting Constraint 2
+
+## 7. Testing & Validation
+
+- [ ] 7.1 Test tenant CRUD workflow
+  - **Description**: Verify tenant creation, update, and retrieval
+  - **Acceptance Criteria**:
+    - Can create tenant in under 30 seconds
+    - Tenant appears in list after creation
+    - Tenant update persists within 2 seconds
+    - All fields validated correctly
+  - **Dependencies**: 5.2, 5.3
+  - **Effort**: S
+
+- [ ] 7.2 Test room assignment workflow
+  - **Description**: Verify room assignment meets acceptance criteria
+  - **Acceptance Criteria**:
+    - Can assign tenant to room in under 20 seconds
+    - Only available rooms shown in selection
+    - Room status updates to occupied after assignment
+    - Error displayed for occupied rooms
+  - **Dependencies**: 5.4
+  - **Effort**: S
+
+- [ ] 7.3 Test move-out workflow
+  - **Description**: Verify move-out meets acceptance criteria
+  - **Acceptance Criteria**:
+    - Room status changes to available within 2 seconds
+    - Tenant record preserved in database (soft delete)
+    - Confirmation dialog prevents accidental removal
+  - **Dependencies**: 5.5
+  - **Effort**: S
+
+- [ ] 7.4 Test mobile responsiveness
+  - **Description**: Verify all tenant screens work on mobile
+  - **Acceptance Criteria**:
+    - All screens render at 320px-480px without horizontal scroll
+    - All touch targets minimum 44x44px
+    - Forms and lists display correctly on mobile
+    - Single-column layouts maintained
+  - **Dependencies**: 5.1, 5.2, 5.3, 5.4, 5.5
+  - **Effort**: M
+
+## Open Questions / Assumptions
+
+- **Phone Number Format**: No specific format validation for phone numbers — free-text. Post-MVP enhancement to add country-specific validation.
+- **Room Type Values**: No predefined list of room types — free-text.
+- **Concurrent Access**: Last write wins for MVP. Optimistic locking is post-MVP.
+- **Data Migration**: No requirements for importing existing tenant data.
+- **Property Scoping**: All tenant operations are scoped to the active property via `propertyId` in the URL path and validated by property access middleware.
+- **Moved-Out Tenant Visibility**: Active tenant list excludes moved-out tenants by default. Moved-out tenants can be viewed via a separate filter (post-MVP) or by direct link.

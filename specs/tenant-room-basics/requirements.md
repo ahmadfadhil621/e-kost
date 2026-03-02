@@ -19,6 +19,13 @@ Property managers need a centralized system to track tenant information and room
 - Tenant screening or background checks
 - Integration with external tenant databases
 
+## Glossary
+
+- **Tenant**: A person renting a room, with personal details (name, phone, email) and an optional room assignment
+- **Room Assignment**: The relationship linking a tenant to a specific room, including the assignment date
+- **Move-Out**: The process of soft-deleting a tenant record (setting `movedOutAt`), freeing their room for reassignment while preserving historical data
+- **Active Tenant**: A tenant who has not been moved out (no `movedOutAt` timestamp)
+
 ## Functional Requirements
 
 ### Requirement 1: Tenant Creation

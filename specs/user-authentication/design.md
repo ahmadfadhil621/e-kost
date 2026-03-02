@@ -362,8 +362,6 @@ User metadata (name, email) is stored directly in the `user` table managed by Pr
 
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
-
 ### Property 1: Successful Registration Creates Session
 
 *For any* valid registration data (name, email, password ≥8 characters), submitting the registration form should create a new user account and return a valid session with access token, refresh token, and 30-day expiration.
@@ -1069,39 +1067,12 @@ function RegistrationForm() {
 **Caching**:
 - Cache user profile data in React Context
 - Avoid redundant session validation calls
-- Use SWR or React Query for data fetching
+- Use TanStack Query for data fetching
 
 **Optimistic UI Updates**:
 - Show loading states immediately
 - Update UI before API response
 - Rollback on error
-
-### Deployment Considerations
-
-**Environment Variables**:
-```env
-DATABASE_URL=postgresql://user:password@host:5432/ekost
-BETTER_AUTH_SECRET=your-random-secret-key
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
-
-**Database Setup**:
-1. Run `prisma migrate dev` to create auth tables (User, Session, Account, Verification)
-2. Auth tables live alongside domain tables in same schema
-3. No separate database or schema configuration needed
-
-**Better Auth Configuration**:
-1. Install `better-auth` package
-2. Configure server instance with Prisma adapter (`src/lib/auth.ts`)
-3. Create client instance (`src/lib/auth-client.ts`)
-4. Add catch-all API route handler (`src/app/api/auth/[...all]/route.ts`)
-5. Generate and set `BETTER_AUTH_SECRET` environment variable
-
-**Monitoring**:
-- Track authentication success/failure rates
-- Monitor session creation and expiration
-- Alert on high error rates
-- Track response times for auth operations
 
 ## Future Enhancements
 

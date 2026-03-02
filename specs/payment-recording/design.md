@@ -52,9 +52,8 @@ graph LR
     A2[PaymentList] --> A
     A3[TenantPaymentSection] --> A
     
-    B1[/api/payments] --> B
-    B2[/api/payments/:id] --> B
-    B3[/api/tenants/:id/payments] --> B
+    B1[/api/properties/:pid/payments] --> B
+    B2[/api/properties/:pid/tenants/:id/payments] --> B
     
     C1[PaymentService] --> C
     C2[ValidationService] --> C
@@ -69,13 +68,13 @@ sequenceDiagram
     participant Val as Validation
     participant DB as Database
     
-    UI->>API: GET /api/tenants?hasRoom=true
+    UI->>API: GET /api/properties/:pid/tenants?hasRoom=true
     API->>DB: SELECT tenants WHERE room_id IS NOT NULL AND moved_out_at IS NULL
     DB-->>API: Active tenants list
     API-->>UI: 200 OK {tenants}
     UI->>UI: Display tenant dropdown
     
-    UI->>API: POST /api/payments {tenantId, amount, paymentDate}
+    UI->>API: POST /api/properties/:pid/payments {tenantId, amount, paymentDate}
     API->>Val: Validate required fields and amount > 0
     Val-->>API: Valid
     API->>DB: INSERT payment record with UTC timestamp
@@ -92,7 +91,7 @@ sequenceDiagram
     participant API as API Route
     participant DB as Database
     
-    UI->>API: GET /api/payments
+    UI->>API: GET /api/properties/:pid/payments
     API->>DB: SELECT payments JOIN tenants ORDER BY payment_date DESC
     DB-->>API: Payments with tenant names
     API-->>UI: 200 OK {payments}
@@ -107,21 +106,11 @@ sequenceDiagram
 
 **Interface**:
 ```typescript
-interface PaymentService {
-  // Create a new payment record
-  createPayment(data: CreatePaymentInput): Promise<Payment>;
-  
-  // Retrieve payment by ID
-  getPayment(id: string): Promise<Payment | null>;
-  
-  // Retrieve all payments (global list)
-  listPayments(filters?: PaymentFilters): Promise<Payment[]>;
-  
-  // Retrieve payments for a specific tenant
-  listTenantPayments(tenantId: string): Promise<Payment[]>;
-  
-  // Get active tenants (for dropdown)
-  getActiveTenants(): Promise<Tenant[]>;
+interface IPaymentService {
+  createPayment(propertyId: string, data: CreatePaymentInput): Promise<Payment>;
+  getPayment(propertyId: string, id: string): Promise<Payment | null>;
+  listPayments(propertyId: string): Promise<Payment[]>;
+  listTenantPayments(propertyId: string, tenantId: string): Promise<{ payments: Payment[]; count: number }>;
 }
 
 interface CreatePaymentInput {
@@ -152,38 +141,41 @@ interface Tenant {
 }
 ```
 
-### 2. API Routes
+### 2. Payment Repository
 
-**POST /api/payments**
-- Creates a new payment record
+**Responsibility**: Abstract data access for payment operations behind an interface.
+
+**Interface**:
+```typescript
+interface IPaymentRepository {
+  create(data: { tenantId: string; amount: number; paymentDate: Date }): Promise<Payment>;
+  findById(id: string): Promise<Payment | null>;
+  findByProperty(propertyId: string): Promise<Payment[]>;
+  findByTenant(tenantId: string): Promise<{ payments: Payment[]; count: number }>;
+}
+```
+
+**Implementation**: `PrismaPaymentRepository` implements this interface using Prisma client.
+
+### 3. API Routes
+
+**POST /api/properties/[propertyId]/payments**
+- Creates a new payment record within a property
 - Request body: `{tenantId, amount, paymentDate}`
 - Response: 201 Created with payment object
-- Validation: All fields required, amount must be positive, paymentDate must be valid date
-- Side effect: Triggers balance recalculation for tenant
+- Validation: All fields required, amount must be positive, paymentDate must be valid date, tenant must have active room assignment
+- Access: property owner or staff
 
-**GET /api/payments**
-- Lists all recorded payments
-- Query params: `?tenantId=uuid`, `?startDate=YYYY-MM-DD`, `?endDate=YYYY-MM-DD`
+**GET /api/properties/[propertyId]/payments**
+- Lists all recorded payments for a property
 - Response: 200 OK with array of payments
-- Includes tenant name and room number (joined data)
+- Includes tenant name (joined data)
 - Sorted by payment_date DESC (most recent first)
 
-**GET /api/payments/:id**
-- Retrieves a single payment by ID
-- Response: 200 OK with payment object, or 404 Not Found
-- Includes tenant name and room number
-
-**GET /api/tenants/:id/payments**
+**GET /api/properties/[propertyId]/tenants/[tenantId]/payments**
 - Lists all payments for a specific tenant
-- Response: 200 OK with array of payments
+- Response: 200 OK with array of payments and total count
 - Sorted by payment_date DESC
-- Includes total payment count
-
-**GET /api/tenants?hasRoom=true**
-- Lists active tenants with room assignments
-- Used by payment form to populate tenant dropdown
-- Response: 200 OK with array of tenants
-- Filters: `moved_out_at IS NULL AND room_id IS NOT NULL`
 
 ### 3. UI Components
 
@@ -249,51 +241,21 @@ interface Tenant {
 
 ## Data Models
 
-### Database Schema
-
-```sql
--- Payments table
-CREATE TABLE payments (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE RESTRICT,
-  amount DECIMAL(10,2) NOT NULL CHECK (amount > 0),
-  payment_date DATE NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  
-  CONSTRAINT valid_payment_date CHECK (payment_date <= CURRENT_DATE)
-);
-
--- Indexes for performance
-CREATE INDEX idx_payments_tenant_id ON payments(tenant_id);
-CREATE INDEX idx_payments_payment_date ON payments(payment_date DESC);
-CREATE INDEX idx_payments_created_at ON payments(created_at DESC);
-
--- Composite index for tenant payment queries
-CREATE INDEX idx_payments_tenant_date ON payments(tenant_id, payment_date DESC);
-```
-
-### Prisma Schema
+### Database Schema (Prisma)
 
 ```prisma
 model Payment {
-  id          String   @id @default(uuid())
-  tenantId    String   @map("tenant_id")
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  id          String   @id @default(cuid())
+  tenantId    String
   amount      Decimal  @db.Decimal(10, 2)
-  paymentDate DateTime @map("payment_date") @db.Date
-  createdAt   DateTime @default(now()) @map("created_at")
+  paymentDate DateTime @db.Date
+  createdAt   DateTime @default(now())
+
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   
   @@index([tenantId])
-  @@index([paymentDate(sort: Desc)])
-  @@index([createdAt(sort: Desc)])
   @@index([tenantId, paymentDate(sort: Desc)])
   @@map("payments")
-}
-
-// Extension to existing Tenant model
-model Tenant {
-  // ... existing fields ...
-  payments    Payment[]
 }
 ```
 
@@ -327,62 +289,7 @@ model Tenant {
 - Validate payment date is valid calendar date and not in future
 - Trim whitespace from all string inputs before validation
 
-### Migration Strategy
-
-**Initial Migration**:
-```sql
--- Create payments table (depends on tenants table)
-CREATE TABLE payments (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE RESTRICT,
-  amount DECIMAL(10,2) NOT NULL CHECK (amount > 0),
-  payment_date DATE NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  CONSTRAINT valid_payment_date CHECK (payment_date <= CURRENT_DATE)
-);
-
--- Create indexes
-CREATE INDEX idx_payments_tenant_id ON payments(tenant_id);
-CREATE INDEX idx_payments_payment_date ON payments(payment_date DESC);
-CREATE INDEX idx_payments_created_at ON payments(created_at DESC);
-CREATE INDEX idx_payments_tenant_date ON payments(tenant_id, payment_date DESC);
-```
-
-**Rollback Strategy**:
-```sql
--- Drop payments table
-DROP TABLE IF EXISTS payments CASCADE;
-```
-
 ### Query Patterns
-
-**List All Payments with Tenant Info**:
-```sql
-SELECT 
-  p.id,
-  p.tenant_id,
-  t.name as tenant_name,
-  r.room_number,
-  p.amount,
-  p.payment_date,
-  p.created_at
-FROM payments p
-JOIN tenants t ON p.tenant_id = t.id
-LEFT JOIN rooms r ON t.room_id = r.id
-ORDER BY p.payment_date DESC, p.created_at DESC;
-```
-
-**List Payments for Specific Tenant**:
-```sql
-SELECT 
-  p.id,
-  p.amount,
-  p.payment_date,
-  p.created_at
-FROM payments p
-WHERE p.tenant_id = $1
-ORDER BY p.payment_date DESC, p.created_at DESC;
-```
 
 **Get Active Tenants for Dropdown**:
 ```sql
@@ -398,8 +305,6 @@ ORDER BY t.name ASC;
 
 
 ## Correctness Properties
-
-*A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
 
 ### Property 1: Active Tenant Filtering
 
@@ -1081,7 +986,7 @@ function formatTimestamp(date: Date, locale: string = 'en'): string {
 
 ### API Route Implementation
 
-**POST /api/payments**:
+**POST /api/properties/[propertyId]/payments**:
 ```typescript
 import { NextRequest, NextResponse } from 'next/server';
 import { createPaymentSchema } from '@/lib/validation';
@@ -1166,7 +1071,7 @@ export async function POST(request: NextRequest) {
 ```
 
 
-**GET /api/payments**:
+**GET /api/properties/[propertyId]/payments**:
 ```typescript
 export async function GET(request: NextRequest) {
   try {
@@ -1230,7 +1135,7 @@ export async function GET(request: NextRequest) {
 ```
 
 
-**GET /api/tenants/:id/payments**:
+**GET /api/properties/[propertyId]/tenants/[tenantId]/payments**:
 ```typescript
 export async function GET(
   request: NextRequest,
@@ -1395,43 +1300,6 @@ CREATE INDEX idx_payments_payment_date ON payments(payment_date DESC);
 - Foreign key constraints prevent orphaned payments
 - Check constraints enforce positive amounts
 - Immutable payment records (no updates/deletes in MVP)
-
-
-### Deployment Considerations
-
-**Database Migration**:
-```bash
-# Generate migration
-npx prisma migrate dev --name add_payments_table
-
-# Apply migration to production
-npx prisma migrate deploy
-```
-
-**Environment Variables**:
-```env
-DATABASE_URL="postgresql://user:password@host:5432/database"
-NEXT_PUBLIC_API_URL="https://api.example.com"
-```
-
-**Vercel Deployment**:
-- Automatic deployment on git push
-- Environment variables configured in Vercel dashboard
-- Database connection pooling via Supabase
-- Serverless function timeout: 10 seconds (sufficient for payment operations)
-
-**Monitoring**:
-- Track API response times for payment endpoints
-- Monitor database query performance
-- Alert on error rates exceeding threshold
-- Log all validation errors for analysis
-- Track payment creation success rate
-
-**Data Backup**:
-- Supabase automatic daily backups
-- 7-day backup retention on free tier
-- Point-in-time recovery available
-- Manual backup before major migrations
 
 
 ## Future Enhancements

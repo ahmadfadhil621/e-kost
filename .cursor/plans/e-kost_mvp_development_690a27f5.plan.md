@@ -10,7 +10,7 @@ todos:
     status: pending
   - id: spec-multi-property
     content: "Write specs: Multi-Property Management -- requirements.md, design.md, tasks.md"
-    status: pending
+    status: completed
   - id: phase-2
     content: "Phase 2: Multi-Property Management -- Property CRUD, switcher, staff assignment, propertyId scoping middleware"
     status: pending
@@ -25,7 +25,7 @@ todos:
     status: pending
   - id: spec-remaining
     content: "Write specs: Tenant Notes, Finance/Expense, Dashboard, Settings -- requirements.md, design.md, tasks.md for each"
-    status: pending
+    status: completed
   - id: phase-6a
     content: "Phase 6a: Tenant Notes -- Notes CRUD API, notes section in tenant detail, i18n, tests"
     status: pending

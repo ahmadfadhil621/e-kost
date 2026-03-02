@@ -21,6 +21,13 @@ Property managers need to maintain an accurate inventory of available rooms and 
 - Integration with external property management systems
 - Automated room status transitions
 
+## Glossary
+
+- **Room**: A rentable unit within a property, identified by a room number, with a type, monthly rent amount, and status
+- **Room Status**: One of three values indicating the room's current state: available, occupied, or under renovation
+- **Room Inventory**: The complete collection of rooms managed within a property
+- **Status Indicator**: A visual element combining color, icon, and text label to convey room status accessibly
+
 ## Functional Requirements
 
 ### Requirement 1: Room Creation

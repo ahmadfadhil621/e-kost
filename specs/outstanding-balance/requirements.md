@@ -21,6 +21,12 @@ Property managers need to quickly identify which tenants are behind on rent paym
 - Historical balance tracking or aging reports
 - Integration with accounting systems
 
+## Glossary
+
+- **Outstanding Balance**: The amount a tenant owes, calculated as: room monthly rent minus sum of all recorded payments
+- **Payment Status**: Either "paid" (outstanding balance is zero or negative) or "unpaid" (outstanding balance is greater than zero)
+- **Status Indicator**: A visual element combining color and text/icon to convey payment status accessibly (green/paid or red/unpaid)
+
 ## Functional Requirements
 
 ### Requirement 1: Outstanding Balance Calculation

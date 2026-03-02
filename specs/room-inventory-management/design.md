@@ -50,9 +50,9 @@ graph LR
     A4[RoomDetail] --> A
     A5[StatusFilter] --> A
     
-    B1[/api/rooms] --> B
-    B2[/api/rooms/:id] --> B
-    B3[/api/rooms/:id/status] --> B
+    B1[/api/properties/:pid/rooms] --> B
+    B2[/api/properties/:pid/rooms/:id] --> B
+    B3[/api/properties/:pid/rooms/:id/status] --> B
     
     C1[RoomService] --> C
     C2[ValidationService] --> C
@@ -67,7 +67,7 @@ sequenceDiagram
     participant Val as Validation
     participant DB as Database
     
-    UI->>API: POST /api/rooms {roomNumber, roomType, monthlyRent}
+    UI->>API: POST /api/properties/:pid/rooms {roomNumber, roomType, monthlyRent}
     API->>Val: Validate required fields & uniqueness
     Val-->>API: Valid
     API->>DB: INSERT room record
@@ -84,7 +84,7 @@ sequenceDiagram
     participant API as API Route
     participant DB as Database
     
-    UI->>API: PATCH /api/rooms/:id/status {status}
+    UI->>API: PATCH /api/properties/:pid/rooms/:id/status {status}
     API->>DB: SELECT room WHERE id=:id
     DB-->>API: Room found
     API->>DB: UPDATE rooms SET status=:status, updated_at=NOW()
@@ -101,7 +101,7 @@ sequenceDiagram
     participant API as API Route
     participant DB as Database
     
-    UI->>API: GET /api/rooms?status=available
+    UI->>API: GET /api/properties/:pid/rooms?status=available
     API->>DB: SELECT rooms WHERE status='available'
     DB-->>API: Filtered rooms list
     API-->>UI: 200 OK {rooms, count}
@@ -116,21 +116,12 @@ sequenceDiagram
 
 **Interface**:
 ```typescript
-interface RoomService {
-  // Create a new room
-  createRoom(data: CreateRoomInput): Promise<Room>;
-  
-  // Retrieve room by ID
-  getRoom(id: string): Promise<Room | null>;
-  
-  // Retrieve all rooms with optional filtering
-  listRooms(filters?: RoomFilters): Promise<Room[]>;
-  
-  // Update room information
-  updateRoom(id: string, data: UpdateRoomInput): Promise<Room>;
-  
-  // Update room status
-  updateRoomStatus(id: string, status: RoomStatus): Promise<Room>;
+interface IRoomService {
+  createRoom(propertyId: string, data: CreateRoomInput): Promise<Room>;
+  getRoom(propertyId: string, id: string): Promise<Room | null>;
+  listRooms(propertyId: string, filters?: RoomFilters): Promise<Room[]>;
+  updateRoom(propertyId: string, id: string, data: UpdateRoomInput): Promise<Room>;
+  updateRoomStatus(propertyId: string, id: string, status: RoomStatus): Promise<Room>;
 }
 
 interface CreateRoomInput {
@@ -162,33 +153,51 @@ interface Room {
 }
 ```
 
-### 2. API Routes
+### 2. Room Repository
 
-**POST /api/rooms**
-- Creates a new room record
+**Responsibility**: Abstract data access for room operations behind an interface.
+
+**Interface**:
+```typescript
+interface IRoomRepository {
+  create(data: { propertyId: string; roomNumber: string; roomType: string; monthlyRent: number }): Promise<Room>;
+  findById(id: string): Promise<Room | null>;
+  findByProperty(propertyId: string, filters?: { status?: RoomStatus }): Promise<Room[]>;
+  update(id: string, data: Partial<{ roomNumber: string; roomType: string; monthlyRent: number }>): Promise<Room>;
+  updateStatus(id: string, status: RoomStatus): Promise<Room>;
+}
+```
+
+**Implementation**: `PrismaRoomRepository` implements this interface using Prisma client.
+
+### 3. API Routes
+
+**POST /api/properties/[propertyId]/rooms**
+- Creates a new room record within a property
 - Request body: `{roomNumber, roomType, monthlyRent}`
 - Response: 201 Created with room object
-- Validation: All fields required, roomNumber unique, monthlyRent positive
+- Validation: All fields required, roomNumber unique within property, monthlyRent positive
+- Access: property owner or staff
 
-**GET /api/rooms**
-- Lists all rooms with optional status filtering
+**GET /api/properties/[propertyId]/rooms**
+- Lists all rooms for a property with optional status filtering
 - Query params: `?status=available|occupied|under_renovation`
 - Response: 200 OK with array of rooms and count
 - Default: Returns all rooms if no filter specified
 
-**GET /api/rooms/:id**
+**GET /api/properties/[propertyId]/rooms/[roomId]**
 - Retrieves a single room by ID
 - Response: 200 OK with room object, or 404 Not Found
 - Includes all room attributes
 
-**PUT /api/rooms/:id**
+**PUT /api/properties/[propertyId]/rooms/[roomId]**
 - Updates room information
 - Request body: `{roomNumber?, roomType?, monthlyRent?}`
 - Response: 200 OK with updated room
-- Validation: roomNumber unique if provided, monthlyRent positive if provided
+- Validation: roomNumber unique within property if provided, monthlyRent positive if provided
 - Preserves: id, status, createdAt
 
-**PATCH /api/rooms/:id/status**
+**PATCH /api/properties/[propertyId]/rooms/[roomId]/status**
 - Updates room status only
 - Request body: `{status}`
 - Response: 200 OK with updated room
@@ -260,41 +269,24 @@ interface Room {
 
 ## Data Models
 
-### Database Schema
-
-```sql
--- Rooms table
-CREATE TABLE rooms (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  room_number VARCHAR(50) NOT NULL UNIQUE,
-  room_type VARCHAR(100) NOT NULL,
-  monthly_rent DECIMAL(10,2) NOT NULL CHECK (monthly_rent > 0),
-  status VARCHAR(50) NOT NULL DEFAULT 'available',
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  
-  CONSTRAINT status_values CHECK (status IN ('available', 'occupied', 'under_renovation'))
-);
-
--- Indexes for performance
-CREATE INDEX idx_rooms_status ON rooms(status);
-CREATE UNIQUE INDEX idx_rooms_room_number ON rooms(room_number);
-```
-
-### Prisma Schema
+### Database Schema (Prisma)
 
 ```prisma
 model Room {
-  id          String    @id @default(uuid())
-  roomNumber  String    @unique @map("room_number")
-  roomType    String    @map("room_type")
-  monthlyRent Decimal   @map("monthly_rent") @db.Decimal(10, 2)
+  id          String    @id @default(cuid())
+  propertyId  String
+  roomNumber  String
+  roomType    String
+  monthlyRent Decimal   @db.Decimal(10, 2)
   status      String    @default("available")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  property    Property  @relation(fields: [propertyId], references: [id])
   tenants     Tenant[]
   
-  @@index([status])
+  @@unique([propertyId, roomNumber])
+  @@index([propertyId, status])
   @@map("rooms")
 }
 ```
@@ -343,37 +335,8 @@ model Room {
 - Validate status is one of three allowed values
 - Trim whitespace from string fields before validation
 
-### Migration Strategy
-
-**Initial Migration**:
-```sql
--- Create rooms table
-CREATE TABLE rooms (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  room_number VARCHAR(50) NOT NULL UNIQUE,
-  room_type VARCHAR(100) NOT NULL,
-  monthly_rent DECIMAL(10,2) NOT NULL CHECK (monthly_rent > 0),
-  status VARCHAR(50) NOT NULL DEFAULT 'available',
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  CONSTRAINT status_values CHECK (status IN ('available', 'occupied', 'under_renovation'))
-);
-
--- Create indexes
-CREATE INDEX idx_rooms_status ON rooms(status);
-CREATE UNIQUE INDEX idx_rooms_room_number ON rooms(room_number);
-```
-
-**Rollback Strategy**:
-```sql
--- Drop table
-DROP TABLE IF EXISTS rooms CASCADE;
-```
-
 
 ## Correctness Properties
-
-*A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
 
 ### Property 1: Room Creation Completeness
 
@@ -977,389 +940,68 @@ function RoomForm() {
 ```
 
 
-### Internationalization Implementation
+### Internationalization
 
-**Translation Files Structure**:
-```
-locales/
-├── en.json
-└── id.json
-```
-
-**English Translation File** (`locales/en.json`):
+**Translation Keys** (`locales/en.json`):
 ```json
 {
-  "room": {
-    "create": {
-      "title": "Add Room",
-      "roomNumber": "Room Number",
-      "roomType": "Room Type",
-      "monthlyRent": "Monthly Rent",
-      "submit": "Create Room",
-      "cancel": "Cancel",
-      "success": "Room created successfully"
-    },
-    "edit": {
-      "title": "Edit Room",
-      "submit": "Save Changes",
-      "success": "Room updated successfully"
-    },
-    "list": {
-      "title": "Rooms",
-      "empty": "No rooms found",
-      "filterAll": "All Rooms",
-      "filterAvailable": "Available",
-      "filterOccupied": "Occupied",
-      "filterRenovation": "Under Renovation"
-    },
-    "detail": {
-      "title": "Room Details",
-      "edit": "Edit",
-      "changeStatus": "Change Status"
-    },
-    "status": {
-      "available": "Available",
-      "occupied": "Occupied",
-      "under_renovation": "Under Renovation",
-      "updateSuccess": "Room status updated successfully"
-    },
-    "validation": {
-      "roomNumberRequired": "Room number is required",
-      "roomTypeRequired": "Room type is required",
-      "monthlyRentRequired": "Monthly rent is required",
-      "monthlyRentPositive": "Monthly rent must be positive"
-    },
-    "errors": {
-      "duplicateRoomNumber": "Room number already exists",
-      "notFound": "Room not found",
-      "loadFailed": "Failed to load room data"
-    }
-  }
+  "room.create.title": "Add Room",
+  "room.create.roomNumber": "Room Number",
+  "room.create.roomType": "Room Type",
+  "room.create.monthlyRent": "Monthly Rent",
+  "room.create.submit": "Create Room",
+  "room.create.cancel": "Cancel",
+  "room.create.success": "Room created successfully",
+  "room.edit.title": "Edit Room",
+  "room.edit.submit": "Save Changes",
+  "room.edit.success": "Room updated successfully",
+  "room.list.title": "Rooms",
+  "room.list.empty": "No rooms found",
+  "room.list.filterAll": "All Rooms",
+  "room.list.filterAvailable": "Available",
+  "room.list.filterOccupied": "Occupied",
+  "room.list.filterRenovation": "Under Renovation",
+  "room.detail.title": "Room Details",
+  "room.detail.edit": "Edit",
+  "room.detail.changeStatus": "Change Status",
+  "room.status.available": "Available",
+  "room.status.occupied": "Occupied",
+  "room.status.under_renovation": "Under Renovation",
+  "room.status.updateSuccess": "Room status updated successfully",
+  "room.validation.roomNumberRequired": "Room number is required",
+  "room.validation.roomTypeRequired": "Room type is required",
+  "room.validation.monthlyRentRequired": "Monthly rent is required",
+  "room.validation.monthlyRentPositive": "Monthly rent must be positive",
+  "room.errors.duplicateRoomNumber": "Room number already exists",
+  "room.errors.notFound": "Room not found",
+  "room.errors.loadFailed": "Failed to load room data"
 }
 ```
 
 
-**Indonesian Translation File** (`locales/id.json`):
-```json
-{
-  "room": {
-    "create": {
-      "title": "Tambah Kamar",
-      "roomNumber": "Nomor Kamar",
-      "roomType": "Tipe Kamar",
-      "monthlyRent": "Sewa Bulanan",
-      "submit": "Buat Kamar",
-      "cancel": "Batal",
-      "success": "Kamar berhasil dibuat"
-    },
-    "edit": {
-      "title": "Edit Kamar",
-      "submit": "Simpan Perubahan",
-      "success": "Kamar berhasil diperbarui"
-    },
-    "list": {
-      "title": "Kamar",
-      "empty": "Tidak ada kamar",
-      "filterAll": "Semua Kamar",
-      "filterAvailable": "Tersedia",
-      "filterOccupied": "Terisi",
-      "filterRenovation": "Dalam Renovasi"
-    },
-    "detail": {
-      "title": "Detail Kamar",
-      "edit": "Edit",
-      "changeStatus": "Ubah Status"
-    },
-    "status": {
-      "available": "Tersedia",
-      "occupied": "Terisi",
-      "under_renovation": "Dalam Renovasi",
-      "updateSuccess": "Status kamar berhasil diperbarui"
-    },
-    "validation": {
-      "roomNumberRequired": "Nomor kamar wajib diisi",
-      "roomTypeRequired": "Tipe kamar wajib diisi",
-      "monthlyRentRequired": "Sewa bulanan wajib diisi",
-      "monthlyRentPositive": "Sewa bulanan harus positif"
-    },
-    "errors": {
-      "duplicateRoomNumber": "Nomor kamar sudah ada",
-      "notFound": "Kamar tidak ditemukan",
-      "loadFailed": "Gagal memuat data kamar"
-    }
-  }
-}
-```
+### Data Fetching with TanStack Query
 
-
-**i18next Configuration**:
-```typescript
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import en from './locales/en.json';
-import id from './locales/id.json';
-
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      en: { translation: en },
-      id: { translation: id }
-    },
-    lng: 'en', // default language
-    fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false // React already escapes
-    }
-  });
-
-export default i18n;
-```
-
-**Usage in Components**:
-```typescript
-import { useTranslation } from 'react-i18next';
-
-function RoomList() {
-  const { t } = useTranslation();
-  
-  return (
-    <div>
-      <h2>{t('room.list.title')}</h2>
-      <div className="flex gap-2 mb-4">
-        <button>{t('room.list.filterAll')}</button>
-        <button>{t('room.list.filterAvailable')}</button>
-        <button>{t('room.list.filterOccupied')}</button>
-        <button>{t('room.list.filterRenovation')}</button>
-      </div>
-      {/* Room cards */}
-    </div>
-  );
-}
-```
-
-
-### API Route Implementation
-
-**POST /api/rooms**:
-```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import { createRoomSchema } from '@/lib/validation';
-import { prisma } from '@/lib/prisma';
-import { z } from 'zod';
-
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const data = createRoomSchema.parse(body);
-    
-    const room = await prisma.room.create({
-      data: {
-        roomNumber: data.roomNumber,
-        roomType: data.roomType,
-        monthlyRent: data.monthlyRent,
-        status: 'available'
-      }
-    });
-    
-    return NextResponse.json(room, { status: 201 });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { errors: error.flatten().fieldErrors },
-        { status: 400 }
-      );
-    }
-    if (error.code === 'P2002') { // Prisma unique constraint violation
-      return NextResponse.json(
-        { error: 'Room number already exists' },
-        { status: 409 }
-      );
-    }
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-```
-
-
-**GET /api/rooms**:
-```typescript
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
-    
-    const where = status ? { status } : {};
-    
-    const rooms = await prisma.room.findMany({
-      where,
-      orderBy: { roomNumber: 'asc' }
-    });
-    
-    return NextResponse.json({
-      rooms,
-      count: rooms.length
-    });
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-```
-
-**PATCH /api/rooms/:id/status**:
-```typescript
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const body = await request.json();
-    const { status } = updateRoomStatusSchema.parse(body);
-    
-    const room = await prisma.room.update({
-      where: { id: params.id },
-      data: { status }
-    });
-    
-    return NextResponse.json(room);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { errors: error.flatten().fieldErrors },
-        { status: 400 }
-      );
-    }
-    if (error.code === 'P2025') { // Prisma record not found
-      return NextResponse.json(
-        { error: 'Room not found' },
-        { status: 404 }
-      );
-    }
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-```
-
-
-### Performance Optimization
-
-**Query Optimization**:
-```typescript
-// Use indexes for filtering
-const rooms = await prisma.room.findMany({
-  where: { status: 'available' }, // Uses idx_rooms_status index
-  orderBy: { roomNumber: 'asc' }
-});
-```
-
-**Pagination for Large Lists**:
-```typescript
-const PAGE_SIZE = 50;
-
-async function listRooms(page: number = 1, status?: string) {
-  const where = status ? { status } : {};
-  
-  const [rooms, total] = await Promise.all([
-    prisma.room.findMany({
-      where,
-      skip: (page - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
-      orderBy: { roomNumber: 'asc' }
-    }),
-    prisma.room.count({ where })
-  ]);
-  
-  return {
-    rooms,
-    total,
-    page,
-    pageSize: PAGE_SIZE,
-    totalPages: Math.ceil(total / PAGE_SIZE)
-  };
-}
-```
-
-**Client-Side Caching with React Query**:
 ```typescript
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-function useRooms(status?: string) {
+function useRooms(propertyId: string, status?: string) {
   return useQuery({
-    queryKey: ['rooms', status],
-    queryFn: () => fetchRooms(status),
-    staleTime: 30000 // 30 seconds
+    queryKey: ['rooms', propertyId, status],
+    queryFn: () => fetchRooms(propertyId, status),
+    staleTime: 30000,
   });
 }
 
-function useCreateRoom() {
+function useCreateRoom(propertyId: string) {
   const queryClient = useQueryClient();
-  
   return useMutation({
-    mutationFn: createRoom,
+    mutationFn: (data: CreateRoomInput) => createRoom(propertyId, data),
     onSuccess: () => {
-      // Invalidate and refetch room list
-      queryClient.invalidateQueries({ queryKey: ['rooms'] });
-    }
+      queryClient.invalidateQueries({ queryKey: ['rooms', propertyId] });
+    },
   });
 }
 ```
-
-
-### Security Considerations
-
-**Input Sanitization**:
-- All string inputs are trimmed before validation
-- Room number uniqueness prevents duplicate entries
-- Monthly rent validation prevents negative or zero values
-- Zod schema validation on both client and server
-
-**SQL Injection Prevention**:
-- Prisma uses parameterized queries automatically
-- No raw SQL queries in MVP
-- All user inputs validated before database operations
-
-**Authorization**:
-- Better Auth enforces authenticated access to all room endpoints
-- Enforce service-layer authorization to scope data to authenticated user
-- Verify user has permission to access/modify rooms
-- Audit log for all CRUD operations
-
-### Deployment Considerations
-
-**Database Migration**:
-```bash
-# Generate migration
-npx prisma migrate dev --name add_rooms_table
-
-# Apply migration to production
-npx prisma migrate deploy
-```
-
-**Environment Variables**:
-```env
-DATABASE_URL="postgresql://user:password@host:5432/database"
-NEXT_PUBLIC_API_URL="https://api.example.com"
-```
-
-**Vercel Deployment**:
-- Automatic deployment on git push
-- Environment variables configured in Vercel dashboard
-- Database connection pooling via Prisma Data Proxy or Supabase
-
-**Monitoring**:
-- Track API response times
-- Monitor database query performance
-- Alert on error rates exceeding threshold
-- Log all validation errors for analysis
 
 
 

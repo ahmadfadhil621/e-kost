@@ -1,202 +1,220 @@
 # Tasks: Payment Recording
 
-## 1. Database Setup
+## 1. Domain Layer
 
-- [ ] 1.1 Create payment database schema
-  - **Description**: Create database table for payments with fields: id (unique), tenant_id, payment_amount, payment_date, created_at
+- [ ] 1.1 Define Payment entity and validation schemas
+  - **Description**: Create shared Zod schemas for payment CRUD and TypeScript interfaces for Payment
   - **Acceptance Criteria**:
-    - Payment table created with all required fields
-    - Unique identifier auto-generated
-    - Foreign key relationship to tenant table
-    - Timestamps in UTC timezone
-    - Payment amount stored as positive decimal
+    - `createPaymentSchema` validates tenantId (required, valid UUID), amount (positive number, required), paymentDate (valid date, required)
+    - TypeScript interfaces for Payment, CreatePaymentInput
+    - Amount stored as decimal with 2 decimal places
   - **Dependencies**: None
-  - **Effort**: M
-  - **Requirements**: Requirement 1, 4, Constraints
+  - **Effort**: S
 
-## 2. Backend - Payment Operations
-
-- [ ] 2.1 Implement payment recording endpoint
-  - **Description**: Create API endpoint to record new payment
+- [ ] 1.2 Define IPaymentRepository interface
+  - **Description**: Create repository interface for payment data access
   - **Acceptance Criteria**:
-    - POST endpoint accepts tenant_id, payment_amount, and payment_date
-    - Validates all required fields present
-    - Validates payment amount is positive number
-    - Validates payment date is valid calendar date
-    - Validates tenant has active room assignment
-    - Returns unique payment ID on success
-    - Records creation timestamp in UTC automatically
-    - Returns validation errors for missing/invalid fields
-    - Persists to database immediately
+    - Methods: create, findByProperty, findByTenant, findById
+    - findByProperty returns payments with tenant names, sorted by paymentDate descending
+    - findByTenant returns payments for a single tenant, sorted by paymentDate descending, with count
+    - All methods return typed promises
   - **Dependencies**: 1.1
-  - **Effort**: M
-  - **Requirements**: Requirement 1
+  - **Effort**: S
 
-- [ ] 2.2 Implement payment list retrieval endpoint
-  - **Description**: Create API endpoint to retrieve all payments
+## 2. Service Layer
+
+- [ ] 2.1 Implement PaymentService
+  - **Description**: Build service layer with business logic for payment recording and retrieval
   - **Acceptance Criteria**:
-    - GET endpoint returns all recorded payments
-    - Each payment includes tenant name, amount, payment date, and recording timestamp
-    - Payments sorted by payment date descending (most recent first)
-  - **Dependencies**: 1.1
+    - `createPayment` validates tenant exists, tenant has active room assignment (not moved out), amount is positive, date is valid
+    - `listPayments` returns all payments for property with tenant names, sorted by date descending
+    - `getPaymentsByTenant` returns payments for a specific tenant with count, sorted by date descending
+    - All operations validate property access via PropertyService
+    - Recording timestamp set automatically in UTC
+  - **Dependencies**: 1.2
   - **Effort**: M
-  - **Requirements**: Requirement 2
 
-- [ ] 2.3 Implement per-tenant payment retrieval endpoint
-  - **Description**: Create API endpoint to retrieve payments for specific tenant
+- [ ] 2.2 Write unit tests for PaymentService
+  - **Description**: Test all payment business logic
   - **Acceptance Criteria**:
-    - GET endpoint accepts tenant_id parameter
-    - Returns all payments for specified tenant
-    - Each payment includes amount, payment date, and recording timestamp
-    - Payments sorted by payment date descending (most recent first)
-    - Returns total count of payments for tenant
-  - **Dependencies**: 1.1
-  - **Effort**: M
-  - **Requirements**: Requirement 3
-
-## 3. Frontend - Payment Recording UI
-
-- [ ] 3.1 Create payment recording form
-  - **Description**: Build mobile-responsive form for recording payments
-  - **Acceptance Criteria**:
-    - Form displays exactly three fields: tenant selection, payment amount, payment date
-    - Tenant dropdown shows only tenants with active room assignments
-    - Single-column layout on mobile (320px-480px width)
-    - Form fits in initial viewport without scrolling on mobile
-    - Validates required fields before submission
-    - Validates payment amount is positive number
-    - Displays validation errors clearly
-    - Shows immediate confirmation message on success
-    - Clears form fields after successful submission
-    - Recording timestamp populated automatically (not manual entry)
-    - Form fields vertically stacked with adequate spacing
+    - Tests for creation (valid data, missing fields, negative/zero amount, invalid date, moved-out tenant blocked, no room assignment blocked)
+    - Tests for listing (ordering, empty, with tenant names)
+    - Tests for per-tenant listing (ordering, count, empty)
+    - Property-based tests for correctness properties
+    - Minimum 15 tests
   - **Dependencies**: 2.1
   - **Effort**: M
-  - **Requirements**: Requirement 1, 5, 6
 
-- [ ] 3.2 Create payment list view
-  - **Description**: Build mobile-responsive list showing all payments
+## 3. Data Layer
+
+- [ ] 3.1 Verify Prisma schema for Payment
+  - **Description**: Ensure Payment model exists in Prisma schema with correct fields, indexes, and relations
   - **Acceptance Criteria**:
-    - Displays scrollable list of all payments
-    - Each item shows tenant name, payment amount, payment date, and recording timestamp
-    - Single-column layout with no horizontal scrolling
-    - Full-width cards with adequate padding and clear visual separation
-    - Payments sorted by payment date descending (most recent first)
-    - Minimum 44x44 pixel touch targets
-  - **Dependencies**: 2.2
-  - **Effort**: M
-  - **Requirements**: Requirement 2, 5
+    - Payment model: id, tenantId, amount (Decimal), paymentDate (Date), createdAt
+    - Index on tenantId for efficient per-tenant queries
+    - Index on (propertyId, paymentDate) for sorted listing — or tenantId with property resolved via tenant relation
+    - Relation to Tenant model
+    - Amount stored as Decimal(10,2) for currency precision
+  - **Dependencies**: None (Phase 0 creates schema)
+  - **Effort**: S
 
-- [ ] 3.3 Create per-tenant payment view
-  - **Description**: Build mobile-responsive section showing payments for specific tenant
+- [ ] 3.2 Implement PrismaPaymentRepository
+  - **Description**: Implement IPaymentRepository using Prisma client
   - **Acceptance Criteria**:
-    - Displays in tenant detail page
-    - Shows all payments for that tenant
-    - Each payment shows amount, payment date, and recording timestamp
-    - Single-column layout with no horizontal scrolling
-    - Payments sorted by payment date descending (most recent first)
-    - Displays total count of payments
-    - Fits on single mobile screen without excessive scrolling
-  - **Dependencies**: 2.3
+    - All interface methods implemented
+    - findByProperty includes tenant name via relation join
+    - findByTenant orders by paymentDate descending, returns count
+    - Proper error handling for not-found cases
+  - **Dependencies**: 1.2, 3.1
   - **Effort**: M
-  - **Requirements**: Requirement 3, 5
 
-## 4. Testing & Validation
+## 4. API Layer
 
-- [ ] 4.1 Test payment recording workflow
-  - **Description**: Verify payment recording meets all acceptance criteria
+- [ ] 4.1 Implement payment API routes
+  - **Description**: Create REST endpoints for payment recording and retrieval scoped to a property
+  - **Acceptance Criteria**:
+    - POST /api/properties/[propertyId]/payments — record payment (authenticated)
+    - GET /api/properties/[propertyId]/payments — list all payments for property (authenticated)
+    - GET /api/properties/[propertyId]/tenants/[tenantId]/payments — list payments for tenant (authenticated)
+    - Property access middleware applied to all routes
+    - Input validation with Zod schemas
+    - Consistent JSON error responses (400, 404, 409)
+  - **Dependencies**: 2.1, 3.2
+  - **Effort**: M
+
+- [ ] 4.2 Write API route tests
+  - **Description**: Test all payment API endpoints
+  - **Acceptance Criteria**:
+    - Tests for each endpoint: success, validation errors, not found, unauthorized
+    - Tests for moved-out tenant payment blocked
+    - Tests for tenant without room assignment blocked
+    - Minimum 12 tests
+  - **Dependencies**: 4.1
+  - **Effort**: M
+
+## 5. UI Layer
+
+- [ ] 5.1 Create PaymentForm component
+  - **Description**: Build mobile-responsive form for recording payments
+  - **Acceptance Criteria**:
+    - Fields: tenant selection (dropdown), payment amount (number), payment date (date picker)
+    - Tenant dropdown shows only active tenants with room assignments
+    - Client-side validation with React Hook Form + Zod
+    - Mobile-optimized: single column, fits in initial viewport, 44x44px touch targets
+    - Recording timestamp populated automatically
+    - Form clears after successful submission
+    - Loading state on submission
+    - Success/error feedback via toast
+    - All text via translation keys
+  - **Dependencies**: 4.1
+  - **Effort**: M
+
+- [ ] 5.2 Create PaymentList page
+  - **Description**: Build page showing all payments for the active property
+  - **Acceptance Criteria**:
+    - Card layout showing tenant name, amount, payment date, recording timestamp
+    - Single-column layout on mobile, full-width cards
+    - Payments sorted by date descending (most recent first)
+    - "Record Payment" button
+    - Loading and empty states
+    - Currency formatting via locale
+    - Fetches payments via TanStack Query
+    - All text via translation keys
+  - **Dependencies**: 4.1
+  - **Effort**: M
+
+- [ ] 5.3 Create TenantPaymentSection component
+  - **Description**: Build per-tenant payment section for embedding in tenant detail page
+  - **Acceptance Criteria**:
+    - Displays all payments for a specific tenant
+    - Each payment shows amount, date, recording timestamp
+    - Payments sorted by date descending
+    - Shows total count of payments
+    - Loading and empty states
+    - Currency formatting via locale
+    - Fetches payments via TanStack Query
+    - All text via translation keys
+  - **Dependencies**: 4.1
+  - **Effort**: M
+
+- [ ] 5.4 Integrate PaymentSection into tenant detail page
+  - **Description**: Add payment section to existing tenant detail page
+  - **Acceptance Criteria**:
+    - Payment section appears in tenant detail view
+    - Correctly passes tenantId and propertyId
+    - Mobile-responsive within existing page layout
+  - **Dependencies**: 5.3
+  - **Effort**: S
+
+## 6. Internationalization (i18n)
+
+- [ ] 6.1 Extract and translate payment recording strings
+  - **Description**: Add all payment UI text to translation files
+  - **Acceptance Criteria**:
+    - All form labels, buttons, messages in en.json and id.json
+    - Translation keys follow `payment.*` naming convention
+    - Validation messages translated
+    - Currency formatting respects locale (decimal separators, symbols)
+    - Confirmation messages translated
+  - **Dependencies**: 5.1, 5.2, 5.3
+  - **Effort**: S
+
+## 7. Testing & Validation
+
+- [ ] 7.1 Test payment recording workflow
+  - **Description**: Verify payment recording meets acceptance criteria
   - **Acceptance Criteria**:
     - Can record payment in under 20 seconds
-    - All required fields validated
     - Only active tenants shown in dropdown
     - Positive amount validation works
-    - Unique ID assigned
-    - Data persisted to database
     - Immediate confirmation displayed
     - Form clears after submission
-  - **Dependencies**: 3.1
+  - **Dependencies**: 5.1
   - **Effort**: S
-  - **Requirements**: Success Criteria
 
-- [ ] 4.2 Test payment list view
-  - **Description**: Verify payment list meets all acceptance criteria
+- [ ] 7.2 Test payment list views
+  - **Description**: Verify payment list and per-tenant views
   - **Acceptance Criteria**:
-    - All payments displayed in scrollable list
-    - Most recent payments shown first
+    - All payments displayed, most recent first
+    - Per-tenant view shows correct count
     - All payment details visible on mobile
-    - No horizontal scrolling required
-  - **Dependencies**: 3.2
+    - No horizontal scrolling
+  - **Dependencies**: 5.2, 5.3
   - **Effort**: S
-  - **Requirements**: Success Criteria
 
-- [ ] 4.3 Test per-tenant payment view
-  - **Description**: Verify per-tenant payments meet all acceptance criteria
-  - **Acceptance Criteria**:
-    - All tenant payments displayed
-    - Most recent payments shown first
-    - Total count displayed
-    - Fits on single mobile screen
-  - **Dependencies**: 3.3
-  - **Effort**: S
-  - **Requirements**: Success Criteria
-
-- [ ] 4.4 Test data persistence
+- [ ] 7.3 Test data persistence
   - **Description**: Verify payment data persists correctly
   - **Acceptance Criteria**:
     - Payments visible after closing and reopening application
     - All payment details unchanged after persistence
     - No data loss during recording
-  - **Dependencies**: 3.1, 3.2
+  - **Dependencies**: 5.1, 5.2
   - **Effort**: S
-  - **Requirements**: Requirement 4, Success Criteria
 
-- [ ] 4.5 Test mobile responsiveness
-  - **Description**: Verify all screens work on mobile devices
+- [ ] 7.4 Test mobile responsiveness
+  - **Description**: Verify all payment screens work on mobile
   - **Acceptance Criteria**:
-    - All screens render correctly on 320px-480px width
-    - No horizontal scrolling required
-    - All touch targets minimum 44x44 pixels
-    - No pinch-to-zoom required for readability
-    - Single-column layouts maintained
+    - All screens render at 320px-480px without horizontal scroll
+    - All touch targets minimum 44x44px
     - Payment form fits in initial viewport
-  - **Dependencies**: 3.1, 3.2, 3.3
+    - Single-column layouts maintained
+  - **Dependencies**: 5.1, 5.2, 5.3
   - **Effort**: M
-  - **Requirements**: Requirement 5, Success Criteria
 
-- [ ] 4.6 Test performance with 10,000 payments
+- [ ] 7.5 Test performance with 10,000 payments
   - **Description**: Verify system handles required payment capacity
   - **Acceptance Criteria**:
-    - System supports at least 10,000 payment records
-    - No performance degradation with full capacity
-    - List view remains responsive
+    - List view remains responsive with 10,000 records
     - Payment recording remains fast
-  - **Dependencies**: 3.1, 3.2
+    - No performance degradation
+  - **Dependencies**: 5.2
   - **Effort**: S
-  - **Requirements**: Constraints
 
 ## Open Questions / Assumptions
 
-- **Tech Stack**: Specific technologies (framework, database, language) not defined in requirements
-- **Authentication**: Better Auth required—all endpoints must verify authenticated session; see user-authentication spec
-- **Payment Editing**: No requirements for editing or deleting payments after recording
-- **Payment Method**: No requirement to track payment method (cash, check, transfer)
-- **Currency**: No currency specification or multi-currency support
-- **Partial Payments**: No requirements for handling partial payments or payment plans
-- **Date Input**: No specification for date picker vs manual entry
-- **Tenant Selection**: Assumes tenant data available from tenant-room-basics feature
-
-
-## 5. Internationalization (i18n)
-
-- [ ] 5.1 Extract and translate payment recording strings
-  - **Description**: Move all UI text to translation keys for payment features
-  - **Acceptance Criteria**:
-    - All form labels translated (tenant, amount, date)
-    - All validation messages translated
-    - All confirmation dialogs translated
-    - All success/error messages translated
-    - Currency formatting respects locale
-    - Translation keys follow consistent naming convention
-  - **Dependencies**: Tenant i18n setup (6.1 from tenant-room-basics)
-  - **Effort**: S
-  - **Requirements**: Cross-cutting Constraint 2
+- **Payment Editing**: No requirements for editing or deleting payments after recording. Payments are immutable records.
+- **Payment Method**: No requirement to track payment method (cash, transfer, etc.). Post-MVP enhancement.
+- **Partial Payments**: No payment allocation logic — all payments are generic amounts against a tenant.
+- **Date Input**: Payment date defaults to today, with date picker for past dates.
+- **Property Scoping**: All payment operations are scoped to the active property via `propertyId` in the URL path and validated by property access middleware. Payment's property association is derived from tenant's property.
+- **Currency**: Formatting respects locale via `Intl.NumberFormat`. Currency code from i18n config, not hardcoded.

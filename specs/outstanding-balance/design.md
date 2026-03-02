@@ -44,7 +44,7 @@ sequenceDiagram
     participant API as API Route
     participant DB as Database
     
-    UI->>API: GET /api/tenants/{id}/balance
+    UI->>API: GET /api/properties/:pid/tenants/:id/balance
     API->>DB: SELECT room.monthly_rent FROM tenants JOIN rooms
     DB-->>API: monthly_rent
     API->>DB: SELECT SUM(amount) FROM payments WHERE tenant_id = {id}
@@ -61,12 +61,9 @@ sequenceDiagram
 
 **Interface**:
 ```typescript
-interface BalanceCalculator {
-  // Calculate balance for a single tenant
-  calculateBalance(tenantId: string): Promise<BalanceResult>;
-  
-  // Calculate balances for multiple tenants (optimized batch query)
-  calculateBalances(tenantIds: string[]): Promise<Map<string, BalanceResult>>;
+interface IBalanceCalculator {
+  calculateBalance(propertyId: string, tenantId: string): Promise<BalanceResult>;
+  calculateBalances(propertyId: string): Promise<Map<string, BalanceResult>>;
 }
 
 interface BalanceResult {
@@ -85,15 +82,17 @@ interface BalanceResult {
 
 ### 2. API Routes
 
-**GET /api/tenants/:id/balance**
+**GET /api/properties/[propertyId]/tenants/[tenantId]/balance**
 - Returns balance calculation for a single tenant
 - Response time: <100ms (indexed query)
+- Access: property owner or staff
 - Used by: Tenant detail view
 
-**GET /api/tenants/balances**
-- Returns balance calculations for all tenants
+**GET /api/properties/[propertyId]/balances**
+- Returns balance calculations for all tenants in property
 - Optional query param: `?status=unpaid` to filter
 - Response time: <500ms for 1,000 tenants
+- Access: property owner or staff
 - Used by: Tenant list view
 
 **Response Schema**:
@@ -221,9 +220,6 @@ ORDER BY outstanding_balance DESC;
 3. **Tenant Moved Out**: Tenant marked with `moved_out_at` → Excluded from active balance queries
 
 ## Correctness Properties
-
-*A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
-
 
 ### Property 1: Balance Calculation Formula
 
@@ -539,7 +535,7 @@ const formatCurrency = (amount: number, locale: string, currencyCode: string = '
 **Caching Strategy**:
 - Client-side: Cache balance results for 30 seconds
 - Invalidate cache on payment recording or room assignment change
-- Use React Query or SWR for automatic cache management
+- Use TanStack Query for automatic cache management
 
 **Batch Loading**:
 - Load tenant list with balances in single query
@@ -558,23 +554,6 @@ const formatCurrency = (amount: number, locale: string, currencyCode: string = '
 - Verify user has permission to view tenant balances
 - Enforce service-layer authorization to scope data to authenticated user
 - Audit log for balance queries
-
-### Deployment Considerations
-
-**Database Migration**:
-- No schema changes required (uses existing tables)
-- Add indexes if not already present
-- Test query performance on production data volume
-
-**Feature Flags**:
-- Enable balance display incrementally
-- Test with subset of users before full rollout
-- Monitor performance metrics during rollout
-
-**Monitoring**:
-- Track balance calculation response times
-- Alert on queries exceeding 2-second threshold
-- Monitor error rates for calculation failures
 
 ## Future Enhancements
 

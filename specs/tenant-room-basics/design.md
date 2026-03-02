@@ -50,10 +50,10 @@ graph LR
     A3[TenantDetail] --> A
     A4[RoomAssignment] --> A
     
-    B1[/api/tenants] --> B
-    B2[/api/tenants/:id] --> B
-    B3[/api/tenants/:id/assign-room] --> B
-    B4[/api/tenants/:id/move-out] --> B
+    B1[/api/properties/:pid/tenants] --> B
+    B2[/api/properties/:pid/tenants/:id] --> B
+    B3[/api/properties/:pid/tenants/:id/assign-room] --> B
+    B4[/api/properties/:pid/tenants/:id/move-out] --> B
     
     C1[TenantService] --> C
     C2[RoomService] --> C
@@ -69,7 +69,7 @@ sequenceDiagram
     participant Val as Validation
     participant DB as Database
     
-    UI->>API: POST /api/tenants {name, phone, email}
+    UI->>API: POST /api/properties/:pid/tenants {name, phone, email}
     API->>Val: Validate required fields
     Val-->>API: Valid
     API->>DB: INSERT tenant record
@@ -86,12 +86,12 @@ sequenceDiagram
     participant API as API Route
     participant DB as Database
     
-    UI->>API: GET /api/rooms?status=available
+    UI->>API: GET /api/properties/:pid/rooms?status=available
     API->>DB: SELECT rooms WHERE status='available'
     DB-->>API: Available rooms list
     API-->>UI: 200 OK {rooms}
     UI->>UI: Display room selection
-    UI->>API: POST /api/tenants/:id/assign-room {roomId}
+    UI->>API: POST /api/properties/:pid/tenants/:id/assign-room {roomId}
     API->>DB: BEGIN TRANSACTION
     API->>DB: UPDATE tenants SET room_id=:roomId
     API->>DB: UPDATE rooms SET status='occupied'
@@ -109,24 +109,13 @@ sequenceDiagram
 
 **Interface**:
 ```typescript
-interface TenantService {
-  // Create a new tenant
-  createTenant(data: CreateTenantInput): Promise<Tenant>;
-  
-  // Retrieve tenant by ID
-  getTenant(id: string): Promise<Tenant | null>;
-  
-  // Retrieve all active tenants (not moved out)
-  listTenants(filters?: TenantFilters): Promise<Tenant[]>;
-  
-  // Update tenant information
-  updateTenant(id: string, data: UpdateTenantInput): Promise<Tenant>;
-  
-  // Assign tenant to a room
-  assignRoom(tenantId: string, roomId: string): Promise<Tenant>;
-  
-  // Mark tenant as moved out (soft delete)
-  moveOut(tenantId: string): Promise<Tenant>;
+interface ITenantService {
+  createTenant(propertyId: string, data: CreateTenantInput): Promise<Tenant>;
+  getTenant(propertyId: string, id: string): Promise<Tenant | null>;
+  listTenants(propertyId: string, filters?: TenantFilters): Promise<Tenant[]>;
+  updateTenant(propertyId: string, id: string, data: UpdateTenantInput): Promise<Tenant>;
+  assignRoom(propertyId: string, tenantId: string, roomId: string): Promise<Tenant>;
+  moveOut(propertyId: string, tenantId: string): Promise<Tenant>;
 }
 
 interface CreateTenantInput {
@@ -158,76 +147,62 @@ interface Tenant {
 }
 ```
 
-### 2. Room Service
+### 2. Tenant Repository
 
-**Responsibility**: Business logic for room availability and status management.
+**Responsibility**: Abstract data access for tenant operations behind an interface.
 
 **Interface**:
 ```typescript
-interface RoomService {
-  // Get available rooms (not occupied)
-  getAvailableRooms(): Promise<Room[]>;
-  
-  // Get room by ID
-  getRoom(id: string): Promise<Room | null>;
-  
-  // Update room status
-  updateRoomStatus(id: string, status: RoomStatus): Promise<Room>;
-}
-
-type RoomStatus = 'available' | 'occupied' | 'under_renovation';
-
-interface Room {
-  id: string;
-  roomNumber: string;
-  roomType: string;
-  monthlyRent: number;
-  status: RoomStatus;
-  createdAt: Date;
+interface ITenantRepository {
+  create(data: { propertyId: string; name: string; phone: string; email: string }): Promise<Tenant>;
+  findById(id: string): Promise<Tenant | null>;
+  findByProperty(propertyId: string, filters?: { includeMovedOut?: boolean }): Promise<Tenant[]>;
+  update(id: string, data: Partial<{ name: string; phone: string; email: string }>): Promise<Tenant>;
+  assignRoom(id: string, roomId: string): Promise<Tenant>;
+  removeRoomAssignment(id: string): Promise<Tenant>;
+  softDelete(id: string): Promise<Tenant>;
 }
 ```
 
+**Implementation**: `PrismaTenantRepository` implements this interface using Prisma client.
+
 ### 3. API Routes
 
-**POST /api/tenants**
-- Creates a new tenant record
+**POST /api/properties/[propertyId]/tenants**
+- Creates a new tenant record within a property
 - Request body: `{name, phone, email}`
 - Response: 201 Created with tenant object
 - Validation: All fields required, email format validated
+- Access: property owner or staff
 
-**GET /api/tenants**
-- Lists all active tenants (not moved out)
-- Query params: `?hasRoom=true|false`, `?roomId=uuid`
+**GET /api/properties/[propertyId]/tenants**
+- Lists all active tenants for a property (not moved out by default)
+- Query params: `?hasRoom=true|false`
 - Response: 200 OK with array of tenants
 - Includes room information if assigned
 
-**GET /api/tenants/:id**
+**GET /api/properties/[propertyId]/tenants/[tenantId]**
 - Retrieves a single tenant by ID
 - Response: 200 OK with tenant object, or 404 Not Found
 - Includes room information if assigned
 
-**PUT /api/tenants/:id**
+**PUT /api/properties/[propertyId]/tenants/[tenantId]**
 - Updates tenant information
 - Request body: `{name?, phone?, email?}`
 - Response: 200 OK with updated tenant
 - Validation: Email format if provided
 
-**POST /api/tenants/:id/assign-room**
+**POST /api/properties/[propertyId]/tenants/[tenantId]/assign-room**
 - Assigns tenant to a room
 - Request body: `{roomId}`
 - Response: 200 OK with updated tenant
 - Validation: Room must be available, tenant must not already have a room
 
-**POST /api/tenants/:id/move-out**
+**POST /api/properties/[propertyId]/tenants/[tenantId]/move-out**
 - Marks tenant as moved out
 - Request body: empty or `{moveOutDate?}`
 - Response: 200 OK with updated tenant
 - Side effect: Room status changed to 'available'
-
-**GET /api/rooms**
-- Lists rooms with optional filtering
-- Query params: `?status=available|occupied|under_renovation`
-- Response: 200 OK with array of rooms
 
 ### 4. UI Components
 
@@ -279,74 +254,30 @@ interface Room {
 
 ## Data Models
 
-### Database Schema
-
-```sql
--- Tenants table
-CREATE TABLE tenants (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(255) NOT NULL,
-  phone VARCHAR(50) NOT NULL,
-  email VARCHAR(255) NOT NULL,
-  room_id UUID REFERENCES rooms(id) ON DELETE SET NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  moved_out_at TIMESTAMP NULL,
-  
-  CONSTRAINT email_format CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$')
-);
-
--- Rooms table
-CREATE TABLE rooms (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  room_number VARCHAR(50) NOT NULL UNIQUE,
-  room_type VARCHAR(100) NOT NULL,
-  monthly_rent DECIMAL(10,2) NOT NULL CHECK (monthly_rent > 0),
-  status VARCHAR(50) NOT NULL DEFAULT 'available',
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  
-  CONSTRAINT status_values CHECK (status IN ('available', 'occupied', 'under_renovation'))
-);
-
--- Indexes for performance
-CREATE INDEX idx_tenants_room_id ON tenants(room_id);
-CREATE INDEX idx_tenants_moved_out ON tenants(moved_out_at) WHERE moved_out_at IS NULL;
-CREATE INDEX idx_rooms_status ON rooms(status);
-CREATE INDEX idx_tenants_email ON tenants(email);
-```
-
-### Prisma Schema
+### Database Schema (Prisma)
 
 ```prisma
 model Tenant {
-  id         String    @id @default(uuid())
+  id         String    @id @default(cuid())
+  propertyId String
   name       String
   phone      String
   email      String
-  roomId     String?   @map("room_id")
+  roomId     String?
+  assignedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  movedOutAt DateTime?
+
+  property   Property  @relation(fields: [propertyId], references: [id])
   room       Room?     @relation(fields: [roomId], references: [id])
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @updatedAt @map("updated_at")
-  movedOutAt DateTime? @map("moved_out_at")
   payments   Payment[]
+  notes      TenantNote[]
   
+  @@index([propertyId])
   @@index([roomId])
   @@index([movedOutAt])
-  @@index([email])
   @@map("tenants")
-}
-
-model Room {
-  id          String   @id @default(uuid())
-  roomNumber  String   @unique @map("room_number")
-  roomType    String   @map("room_type")
-  monthlyRent Decimal  @map("monthly_rent") @db.Decimal(10, 2)
-  status      String   @default("available")
-  createdAt   DateTime @default(now()) @map("created_at")
-  tenants     Tenant[]
-  
-  @@index([status])
-  @@map("rooms")
 }
 ```
 
@@ -419,8 +350,6 @@ DROP TABLE IF EXISTS rooms CASCADE;
 
 
 ## Correctness Properties
-
-*A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
 
 ### Property 1: Tenant Creation Completeness
 
@@ -1076,7 +1005,7 @@ function TenantForm() {
 
 ### API Route Implementation
 
-**POST /api/tenants**:
+**POST /api/properties/[propertyId]/tenants**:
 ```typescript
 import { NextRequest, NextResponse } from 'next/server';
 import { createTenantSchema } from '@/lib/validation';
@@ -1111,7 +1040,7 @@ export async function POST(request: NextRequest) {
 }
 ```
 
-**POST /api/tenants/:id/assign-room**:
+**POST /api/properties/[propertyId]/tenants/[tenantId]/assign-room**:
 ```typescript
 export async function POST(
   request: NextRequest,
@@ -1300,34 +1229,6 @@ function useCreateTenant() {
 - Enforce service-layer authorization to scope data to authenticated user
 - Verify user has permission to access/modify tenants
 - Audit log for all CRUD operations
-
-### Deployment Considerations
-
-**Database Migration**:
-```bash
-# Generate migration
-npx prisma migrate dev --name init_tenant_room_tables
-
-# Apply migration to production
-npx prisma migrate deploy
-```
-
-**Environment Variables**:
-```env
-DATABASE_URL="postgresql://user:password@host:5432/database"
-NEXT_PUBLIC_API_URL="https://api.example.com"
-```
-
-**Vercel Deployment**:
-- Automatic deployment on git push
-- Environment variables configured in Vercel dashboard
-- Database connection pooling via Prisma Data Proxy or Supabase
-
-**Monitoring**:
-- Track API response times
-- Monitor database query performance
-- Alert on error rates exceeding threshold
-- Log all validation errors for analysis
 
 ## Future Enhancements
 
