@@ -3,9 +3,9 @@
 // REQ 2.3 -> it('throws on signIn error')
 // REQ 2.5 -> it('returns user data when session exists')
 // REQ 5.2 -> it('calls authClient.signOut on signOut')
-// REQ 5.3 -> it('calls authClient.signOut on signOut')
+// REQ 5.3 -> it('calls authClient.signOut on signOut'), it('throws on signOut error')
 // PROP 5  -> it('throws for any error message returned by auth client on signIn')
-// PROP 8  -> it('calls signOut on auth client for any authenticated user')
+// PROP 8  -> it('calls signOut on auth client for any authenticated user'), it('throws on signOut error')
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
@@ -184,6 +184,26 @@ describe("useAuth", () => {
           );
         })
       ).rejects.toEqual(signUpError);
+    });
+
+    it("throws on signOut error", async () => {
+      const mock = await getMock();
+      const { authClient } = mock;
+      mock.__mockSession.data = {
+        user: { id: "1", name: "John", email: "john@example.com" },
+      };
+      const signOutError = { message: "Session clear failed" };
+      (authClient.signOut as ReturnType<typeof vi.fn>).mockResolvedValue({
+        error: signOutError,
+      });
+
+      const { result } = renderHook(() => useAuth());
+
+      await expect(
+        act(async () => {
+          await result.current.signOut();
+        })
+      ).rejects.toEqual(signOutError);
     });
   });
 
