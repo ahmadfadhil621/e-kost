@@ -3,18 +3,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { RegistrationForm } from "./registration-form";
 
-const mockPush = vi.fn();
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: mockPush,
-    replace: vi.fn(),
-    prefetch: vi.fn(),
-    back: vi.fn(),
-  }),
-  useSearchParams: () => new URLSearchParams(),
-}));
-
 const mockSignUp = vi.fn();
 
 vi.mock("@/hooks/use-auth", () => ({
@@ -28,9 +16,14 @@ vi.mock("@/hooks/use-auth", () => ({
 }));
 
 describe("RegistrationForm", () => {
+  const originalLocation = window.location;
+
   beforeEach(() => {
-    mockPush.mockClear();
     mockSignUp.mockClear();
+    Object.defineProperty(window, "location", {
+      writable: true,
+      value: { ...originalLocation, href: "" },
+    });
   });
 
   describe("good cases", () => {
@@ -83,7 +76,7 @@ describe("RegistrationForm", () => {
       });
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith("/");
+        expect(window.location.href).toBe("/");
       });
     });
 

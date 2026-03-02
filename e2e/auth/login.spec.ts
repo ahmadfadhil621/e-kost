@@ -1,0 +1,98 @@
+import { test, expect } from "@playwright/test";
+
+const TEST_USER_NAME = "Login Test User";
+const TEST_USER_PASSWORD = "LoginPass123!";
+
+let testUserEmail: string;
+
+test.beforeAll(async ({ request }) => {
+  testUserEmail = `login-${Date.now()}@test.com`;
+
+  await request.post("/api/auth/sign-up/email", {
+    data: {
+      name: TEST_USER_NAME,
+      email: testUserEmail,
+      password: TEST_USER_PASSWORD,
+    },
+  });
+});
+
+test.describe("login", () => {
+  test.describe("good cases", () => {
+    test("user logs in with valid credentials and sees dashboard", async ({
+      page,
+    }) => {
+      await page.goto("/login");
+      await page.getByLabel(/email address/i).fill(testUserEmail);
+      await page.getByLabel(/password/i).fill(TEST_USER_PASSWORD);
+      await page.getByRole("button", { name: /log in/i }).click();
+
+      await expect(page).toHaveURL("/", { timeout: 10000 });
+      await expect(page.getByText(/dashboard/i)).toBeVisible();
+    });
+
+    test("login page displays all required fields", async ({ page }) => {
+      await page.goto("/login");
+
+      await expect(page.getByLabel(/email address/i)).toBeVisible();
+      await expect(page.getByLabel(/password/i)).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /log in/i })
+      ).toBeVisible();
+    });
+
+    test("login page has link to register", async ({ page }) => {
+      await page.goto("/login");
+
+      await expect(
+        page.getByRole("link", { name: /create account/i })
+      ).toBeVisible();
+    });
+  });
+
+  test.describe("bad cases", () => {
+    test("user sees validation error for empty email", async ({ page }) => {
+      await page.goto("/login");
+
+      await page.getByLabel(/password/i).fill("SomePassword123");
+      await page.getByRole("button", { name: /log in/i }).click();
+
+      await expect(page.getByText(/email is required/i)).toBeVisible();
+    });
+
+    test("user sees validation error for empty password", async ({ page }) => {
+      await page.goto("/login");
+
+      await page.getByLabel(/email address/i).fill("test@test.com");
+      await page.getByRole("button", { name: /log in/i }).click();
+
+      await expect(page.getByText(/password is required/i)).toBeVisible();
+    });
+
+    test("user sees error for invalid credentials", async ({ page }) => {
+      await page.goto("/login");
+
+      await page.getByLabel(/email address/i).fill("wrong@test.com");
+      await page.getByLabel(/password/i).fill("WrongPassword123");
+      await page.getByRole("button", { name: /log in/i }).click();
+
+      await expect(page.getByRole("alert")).toBeVisible({ timeout: 10000 });
+    });
+  });
+
+  test.describe("edge cases", () => {
+    test("password field masks input", async ({ page }) => {
+      await page.goto("/login");
+
+      const passwordField = page.getByLabel(/password/i);
+      await expect(passwordField).toHaveAttribute("type", "password");
+    });
+
+    test("email field uses email input type", async ({ page }) => {
+      await page.goto("/login");
+
+      const emailField = page.getByLabel(/email address/i);
+      await expect(emailField).toHaveAttribute("type", "email");
+    });
+  });
+});

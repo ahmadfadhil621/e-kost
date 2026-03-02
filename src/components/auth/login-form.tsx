@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
@@ -14,7 +13,6 @@ import { Label } from "@/components/ui/label";
 
 export function LoginForm() {
   const { t } = useTranslation();
-  const router = useRouter();
   const { signIn } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -30,7 +28,7 @@ export function LoginForm() {
     setServerError(null);
     try {
       await signIn(data.email, data.password);
-      router.push("/");
+      window.location.href = "/";
     } catch (error: unknown) {
       const message =
         error && typeof error === "object" && "message" in error
