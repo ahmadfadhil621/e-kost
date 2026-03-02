@@ -19,7 +19,6 @@ Property managers need to maintain an accurate record of rent payments to avoid 
 - Receipt generation or printing
 - Payment reminders or notifications
 - Integration with banking systems or accounting software
-- Multi-currency support
 - Recurring payment automation
 
 ## Functional Requirements

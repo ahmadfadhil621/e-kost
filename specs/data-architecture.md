@@ -10,21 +10,38 @@ This document defines the minimal data storage architecture for E-Kost MVP, focu
 
 | Data Domain | Data Type | Storage Architecture | Reason for Choice |
 |------------|----------|----------------------|------------------|
+| Properties | Transactional | Relational database | Multi-property support, ownership and staff assignment, parent entity for rooms/tenants/expenses |
 | Tenants | Transactional | Relational database | CRUD operations with referential integrity to rooms and payments, structured personal data with consistent schema |
-| Rooms | Transactional | Relational database | Simple inventory management with status updates, foreign key relationships to tenants, structured attributes |
+| Rooms | Transactional | Relational database | Simple inventory management with status updates, foreign key relationships to tenants and properties |
 | Payments | Transactional | Relational database | Financial records requiring ACID compliance, foreign key to tenants, audit trail for monetary transactions |
+| Expenses | Transactional | Relational database | Property-level expense records with category, amount, date; used for finance/income tracking |
+| Tenant Notes | Transactional | Relational database | Per-tenant notes for observations, agreements, reminders; foreign key to tenants |
 | Outstanding Balances | Analytical | Relational database (computed) | Derived calculations from payments and room rent, real-time computation requirements, no separate storage needed |
-| Translation Content | Transactional | JSON files | Key-value pairs for i18n, infrequent updates, simple file-based approach sufficient for MVP |
+| Translation Content | Transactional | JSON files | Key-value pairs for i18n (including currency config), infrequent updates, simple file-based approach sufficient for MVP |
 
 ---
 
 ## MVP Data Domains
 
-### 1. Tenants (Transactional - Relational)
+### 1. Properties (Transactional - Relational)
+
+**Key Attributes**:
+- Unique identifier (immutable)
+- Name, address
+- Owner (foreign key to user)
+- Staff list (many-to-many with users)
+- Creation timestamp (UTC)
+
+**Why Relational**: Parent entity for rooms, tenants, expenses. Ownership and staff relationships require referential integrity. Multi-property queries need JOIN support.
+
+---
+
+### 2. Tenants (Transactional - Relational)
 
 **Key Attributes**:
 - Unique identifier (immutable)
 - Name, phone number, email (PII)
+- Property (foreign key)
 - Room assignment (foreign key)
 - Creation timestamp (UTC)
 - Soft delete flag (move-out tracking)
@@ -33,21 +50,22 @@ This document defines the minimal data storage architecture for E-Kost MVP, focu
 
 ---
 
-### 2. Rooms (Transactional - Relational)
+### 3. Rooms (Transactional - Relational)
 
 **Key Attributes**:
 - Unique identifier (immutable)
+- Property (foreign key)
 - Room number/identifier (unique within property)
 - Room type
 - Monthly rent amount
 - Status (available, occupied, under renovation)
 - Creation timestamp (UTC)
 
-**Why Relational**: Strong consistency required for status updates and tenant assignment validation.
+**Why Relational**: Strong consistency required for status updates and tenant assignment validation. Scoped per property.
 
 ---
 
-### 3. Payments (Transactional - Relational)
+### 4. Payments (Transactional - Relational)
 
 **Key Attributes**:
 - Unique identifier (immutable)
@@ -60,7 +78,35 @@ This document defines the minimal data storage architecture for E-Kost MVP, focu
 
 ---
 
-### 4. Outstanding Balances (Analytical - Computed)
+### 5. Expenses (Transactional - Relational)
+
+**Key Attributes**:
+- Unique identifier (immutable)
+- Property (foreign key)
+- Date
+- Category (Electricity, Water, Internet, Maintenance, Cleaning, Supplies, Tax, Transfer, Other)
+- Description
+- Amount (positive decimal)
+- Recording timestamp (UTC)
+
+**Why Relational**: Financial records requiring ACID compliance. Scoped per property. Supports monthly income/expense reports with category aggregation.
+
+---
+
+### 6. Tenant Notes (Transactional - Relational)
+
+**Key Attributes**:
+- Unique identifier (immutable)
+- Tenant ID (foreign key)
+- Date
+- Text content
+- Recording timestamp (UTC)
+
+**Why Relational**: Foreign key to tenants ensures referential integrity. Simple CRUD with chronological ordering.
+
+---
+
+### 7. Outstanding Balances (Analytical - Computed)
 
 **Calculation**: Expected rent - Total payments
 
@@ -70,7 +116,7 @@ This document defines the minimal data storage architecture for E-Kost MVP, focu
 
 ---
 
-### 5. Translation Content (JSON Files)
+### 8. Translation Content (JSON Files)
 
 **Implementation**: 
 - `locales/en.json`, `locales/id.json`, etc.
@@ -93,7 +139,7 @@ This document defines the minimal data storage architecture for E-Kost MVP, focu
 
 ### Complex Analytics
 **Decision**: Simple SQL queries on existing tables
-**Rationale**: No analytics requirements in MVP, basic reporting can use existing data
+**Rationale**: Dashboard overview and finance tracking use simple aggregation queries, no OLAP or BI tooling needed
 
 ### Caching Layer
 **Decision**: Not needed for MVP scale

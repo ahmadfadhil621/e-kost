@@ -8,13 +8,18 @@ The application solves the problem of scattered information across spreadsheets,
 
 ## MVP Scope
 
-The MVP includes five core features:
+The MVP includes ten features:
 
-- **User Authentication** — Account creation, login, session management, and profile display via Better Auth
+- **User Authentication** — Account creation, login, session management, profile display, owner/staff roles via Better Auth
+- **Multi-Property Management** — Property CRUD, property switcher, staff assignment per property
+- **Room Inventory Management** — Create and manage rooms with status tracking (available, occupied, under renovation), scoped per property
 - **Tenant & Room Basics** — Add, view, update, and remove tenants with room assignments
-- **Room Inventory Management** — Create and manage rooms with status tracking (available, occupied, under renovation)
 - **Payment Recording** — Log rent payments with tenant, amount, and date
 - **Outstanding Balance Tracking** — Calculate and display what each tenant owes based on rent and payments
+- **Dashboard / Overview** — Occupancy statistics, finance summary, outstanding balances list, recent payments
+- **Finance & Expense Tracking** — Monthly income/expense tracker with category breakdown, expense CRUD
+- **Tenant Notes** — Per-tenant notes for recording observations, agreements, or reminders
+- **Settings** — Staff management (owner can add/remove staff), user preferences
 
 ## Tech Stack
 
@@ -55,6 +60,11 @@ specs/
 │   ├── requirements.md
 │   ├── design.md
 │   └── tasks.md
+├── multi-property/           (specs pending)
+├── dashboard-overview/       (specs pending)
+├── finance-expense/          (specs pending)
+├── tenant-notes/             (specs pending)
+├── settings-staff/           (specs pending)
 ├── architecture-intent.md
 ├── cross-cutting-constraints.md
 ├── data-architecture.md
@@ -63,7 +73,7 @@ specs/
 └── scalability-stress-analysis.md
 ```
 
-Each feature directory contains requirements, design, and task documents. Cross-cutting specs cover architecture, data modeling, technology choices, and scalability analysis.
+Each feature directory contains requirements, design, and task documents. Directories marked "(specs pending)" are new MVP features that need formal specification. Cross-cutting specs cover architecture, data modeling, technology choices, and scalability analysis.
 
 ## Getting Started
 
@@ -82,10 +92,9 @@ Setup steps will be added once implementation begins.
 Known limitations:
 
 - Mobile-first design targets smartphone screens (320px–480px width)
-- Single-property system (no multi-property support)
 - Manual payment entry only (no automated processing)
 - Basic balance calculation (expected rent minus payments, no late fees or payment plans)
-- No historical reporting or analytics
+- Currency: EUR by default, configurable per locale via i18n (no multi-currency within a single property)
 
 ## Contributing
 

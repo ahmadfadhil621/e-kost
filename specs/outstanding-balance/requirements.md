@@ -20,7 +20,6 @@ Property managers need to quickly identify which tenants are behind on rent paym
 - Partial payment tracking or payment plans
 - Historical balance tracking or aging reports
 - Integration with accounting systems
-- Multi-currency support
 
 ## Functional Requirements
 

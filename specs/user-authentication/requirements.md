@@ -20,9 +20,6 @@ Property managers need to identify whose account they are using when accessing E
 - Two-factor authentication (2FA)
 - Password reset flow
 - Email verification
-- Role-based access control (RBAC)
-- User management or admin features
-- Multi-property assignment
 - Team invitation or collaboration features (foundation only)
 - Account deletion or deactivation
 

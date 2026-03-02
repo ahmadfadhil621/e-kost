@@ -18,8 +18,6 @@ Property managers need a centralized system to track tenant information and room
 - Automated lease management or contract generation
 - Tenant screening or background checks
 - Integration with external tenant databases
-- Multi-property management in this phase
-- Role-based access control or permission management
 
 ## Functional Requirements
 

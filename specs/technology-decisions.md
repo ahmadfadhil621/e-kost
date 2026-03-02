@@ -16,7 +16,7 @@
 |-----------|----------|---------------|
 | Marketing website / landing page | Orchestrate | Not in MVP scope; if needed, use static site generator or no-code tool—no differentiation value |
 | User authentication | Assemble | MVP feature—use Better Auth (open-source library with Prisma adapter) for account creation, login, session management, and profile display. Self-hostable, no external service dependency. |
-| Core business logic (tenant/room/payment/balance) | Build | Core differentiation—custom CRUD workflows, mobile-first UX, and balance calculation logic are product-specific (all 4 requirements docs) |
+| Core business logic (property/tenant/room/payment/balance/expense/notes) | Build | Core differentiation—custom CRUD workflows, mobile-first UX, multi-property management, and balance/finance calculation logic are product-specific |
 | Mobile-responsive UI | Assemble | Use responsive CSS framework (Tailwind, Bootstrap) for 320px-480px layouts, 44x44px touch targets—standard mobile patterns (Requirement 6 in all specs) |
 | Data storage (tenants, rooms, payments) | Assemble | Use managed database (PostgreSQL on managed service, Supabase, PlanetScale)—standard relational data with UTC timestamps (Constraints in all specs) |
 | Internal admin dashboard | Build | Not in MVP scope; if needed, build minimal view using same mobile-first UI—no separate admin requirements |
@@ -26,7 +26,7 @@
 | Notifications (email, push, etc.) | Orchestrate | Explicitly out of scope—no payment reminders or notifications in Non-Goals (Payment Recording, Outstanding Balance specs) |
 | Form validation | Assemble | Use validation library (Zod, Yup)—standard validation patterns for email, positive numbers, required fields (all specs) |
 | Date handling | Assemble | Use date library (date-fns, Day.js) for UTC timezone handling—standard requirement across all specs (Constraints) |
-| API layer | Build | Custom REST/GraphQL endpoints for tenant, room, payment, balance operations—product-specific business rules (all task files) |
+| API layer | Build | Custom REST endpoints for property, tenant, room, payment, balance, expense, and notes operations—product-specific business rules |
 | Mobile UI components | Assemble | Use component library (Radix UI, shadcn/ui) with mobile-first customization—standard patterns with product-specific layouts |
 
 ---
@@ -37,13 +37,13 @@
 
 **Authentication in MVP**: Authentication is an MVP feature, Assembled via Better Auth (open-source library with Prisma adapter). Not differentiating—standard email/password auth with session management. Chosen over Supabase Auth for self-hosting portability and vendor independence.
 
-**Single Property Assumption**: Non-Goals explicitly exclude "Multi-property management" (Tenant & Room Basics). This simplifies data model—no need for complex multi-tenancy architecture.
+**Multi-Property Support**: MVP includes multi-property management. Each property has its own rooms, tenants, payments, expenses, and staff. Data is scoped via `propertyId` foreign keys. Users can own multiple properties and switch between them via a property switcher UI.
 
 **No Payment Processing**: Non-Goals exclude "Automated payment processing or online payment collection" (Payment Recording). Manual entry only—no Stripe/payment gateway integration needed.
 
 **Mobile-Only Focus**: All specs emphasize 320px-480px mobile screens with 44x44px touch targets. Desktop optimization not required—can Assemble mobile-first framework and skip responsive breakpoints beyond mobile.
 
-**Simple Balance Logic**: Outstanding Balance uses "expected rent minus total payments" with no late fees, payment plans, or pro-rating (Non-Goals). This is Build territory but simple enough to not require external calculation engine.
+**Simple Balance Logic**: Outstanding Balance uses "expected rent minus total payments" with no late fees, payment plans, or pro-rating. This is Build territory but simple enough to not require external calculation engine.
 
 **No Real-Time Collaboration**: No requirements for multiple managers editing simultaneously or conflict resolution. Can use simple optimistic updates—no need for operational transformation or CRDT libraries.
 
@@ -57,7 +57,7 @@
 
 2. **No external integrations**: All specs explicitly exclude banking, accounting, external systems in Non-Goals. This eliminates entire Orchestrate category for business integrations.
 
-3. **Simple data model**: Tenants, rooms, payments, balances with straightforward relationships. No complex domain logic requiring DDD frameworks—Build with standard CRUD + custom business rules.
+3. **Moderate data model**: Properties, tenants, rooms, payments, expenses, notes, balances with clear relationships. Multi-property scoping adds foreign key complexity but no DDD-level patterns needed—Build with standard CRUD + custom business rules.
 
 4. **Performance requirements are modest**: 500 rooms, 1,000 tenants, 10,000 payments (Constraints). Managed database can handle this—no need to Build custom data layer or caching.
 
@@ -69,10 +69,10 @@
 
 ## Build vs Assemble Boundary
 
-**Build**: Tenant CRUD workflows, room assignment logic, payment recording flow, outstanding balance calculation, mobile-optimized card layouts, status indicators (color-coded paid/unpaid), filtering by room status.
+**Build**: Property management and switching, tenant CRUD workflows, room assignment logic, payment recording flow, outstanding balance calculation, expense tracking and category breakdown, tenant notes, dashboard/overview aggregation, staff management, mobile-optimized card layouts, status indicators (color-coded paid/unpaid), filtering by room status.
 
 **Assemble**: Database ORM, form validation, date/time handling, responsive CSS framework, UI component primitives, API routing framework, mobile-first component library.
 
-**Orchestrate**: Analytics (if added), email notifications (if added), payment processing (explicitly excluded).
+**Orchestrate**: Email notifications (if added), payment processing (explicitly excluded).
 
 The line is drawn at: **product-specific business logic and UX = Build**, **well-solved technical problems (including auth) = Assemble**, **commodity services = Orchestrate**.

@@ -4,12 +4,12 @@
 
 | Data Flow | Breaks First | Bottleneck Location | Failure Mode | Immediate Mitigation | Long-Term Fix |
 |----------|--------------|---------------------|-------------|----------------------|--------------|
-| Tenant List → Load All Tenants → DB Query | Database | PostgreSQL connection pool | Connection pool exhaustion, slow full table scan | Add pagination (LIMIT/OFFSET), connection pooling, indexes on created_at | Read replicas, tenant list caching, cursor-based pagination |
+| Tenant List → Load Tenants by Property → DB Query | Database | PostgreSQL connection pool | Connection pool exhaustion, slow full table scan | Add pagination (LIMIT/OFFSET), connection pooling, indexes on property_id + created_at | Read replicas, tenant list caching, cursor-based pagination |
 | Outstanding Balance Calculation → Join Tenants+Rooms+Payments → DB | Database | PostgreSQL query execution | N+1 queries, expensive JOINs across 3 tables | Materialized view for balances, query optimization, indexes | Event-driven balance updates, denormalized balance table |
 | Payment Recording → Insert Payment → Recalculate Balance → DB | Database | PostgreSQL write + calculation | Transaction contention, synchronous balance recalc | Async balance calculation, optimistic locking | Event queue for balance updates, CQRS pattern |
 | Tenant Assignment → Update Room Status → Update Tenant → DB | Database | PostgreSQL transaction locks | Row-level locking on room updates | Shorter transactions, retry logic | Event sourcing for state changes, optimistic concurrency |
 | Payment List View → Load All Payments → DB Query | Database | PostgreSQL full table scan | Memory pressure from large result sets | Pagination, date range filters, indexes | Partitioned payments table by date, read replicas |
-| Room List with Status → Load All Rooms → DB Query | Database | PostgreSQL connection pool | Connection exhaustion on concurrent requests | Connection pooling, room status caching | Redis cache for room status, eventual consistency |
+| Room List with Status → Load Rooms by Property → DB Query | Database | PostgreSQL connection pool | Connection exhaustion on concurrent requests | Connection pooling, room status caching, index on property_id + status | Redis cache for room status, eventual consistency |
 | Mobile UI → Load Tenant Details → Outstanding Balance Calc | API/Service | Application server CPU | Synchronous balance calculation blocking threads | Cache balance results, async calculation | Background job for balance updates, WebSocket for real-time |
 | Tenant Search/Filter → LIKE queries → DB | Database | PostgreSQL sequential scan | Full table scan on text fields | Full-text search indexes (GIN), query limits | Elasticsearch for search, denormalized search table |
 | Payment History per Tenant → JOIN payments+tenants → DB | Database | PostgreSQL query performance | Expensive JOINs on large payment table | Composite indexes, query optimization | Separate payment service, event log for history |
@@ -138,7 +138,7 @@ CREATE UNIQUE INDEX idx_tenant_balances_tenant_id ON tenant_balances(tenant_id);
 **Partitioning Strategy**
 - Partition payments table by month: `payments_2024_01`, `payments_2024_02`
 - Partition audit logs by date range
-- Consider tenant-based partitioning for multi-property future
+- Consider property-based partitioning for multi-property data isolation
 
 ### 5. Observability
 

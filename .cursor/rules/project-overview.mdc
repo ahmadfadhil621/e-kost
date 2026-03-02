@@ -20,16 +20,21 @@ E-Kost is a mobile-first web application for small, informal landlords to manage
 
 ## MVP Features
 
-1. User Authentication (Better Auth)
-2. Room Inventory Management (CRUD + status tracking)
-3. Tenant & Room Basics (CRUD + room assignments)
-4. Payment Recording (log rent payments)
-5. Outstanding Balance Tracking (rent minus payments)
+1. User Authentication (Better Auth, owner/staff roles)
+2. Multi-Property Management (property CRUD, property switcher, staff assignment)
+3. Room Inventory Management (CRUD + status tracking, scoped per property)
+4. Tenant & Room Basics (CRUD + room assignments)
+5. Payment Recording (log rent payments)
+6. Outstanding Balance Tracking (rent minus payments)
+7. Dashboard / Overview (occupancy stats, finance summary, recent payments)
+8. Finance & Expense Tracking (monthly income/expense, category breakdown)
+9. Tenant Notes (per-tenant notes CRUD)
+10. Settings (staff management, user preferences)
 
 ## Key Constraints
 
 - Budget: $0/month (free tiers only)
 - Mobile-first: 320px-480px viewport, 44x44px touch targets
-- Single-property system (no multi-property)
 - Manual payment entry only
+- Currency: EUR by default, configurable per locale via i18n
 - All specs live in `specs/` -- always check specs before implementing a feature

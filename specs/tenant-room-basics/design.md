@@ -1339,8 +1339,6 @@ NEXT_PUBLIC_API_URL="https://api.example.com"
 - Tenant communication/messaging
 - Automated lease renewal reminders
 - Tenant screening and background checks
-- Multi-property management
-- Role-based access control
 - Audit log for all changes
 - Advanced search and filtering
 - Export tenant list to CSV/PDF

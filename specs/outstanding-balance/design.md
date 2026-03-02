@@ -518,10 +518,10 @@ const paymentArbitrary = fc.record({
 
 **Currency Formatting**:
 ```typescript
-const formatCurrency = (amount: number, locale: string) => {
+const formatCurrency = (amount: number, locale: string, currencyCode: string = 'EUR') => {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: 'IDR', // Indonesian Rupiah
+    currency: currencyCode,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(amount);
@@ -584,7 +584,6 @@ const formatCurrency = (amount: number, locale: string) => {
 - Automated payment reminders based on balance
 - Late fee calculation and accrual
 - Payment plan tracking for partial payments
-- Multi-currency support for international properties
 - Export balance reports to CSV/PDF
 - Balance forecasting and projections
 

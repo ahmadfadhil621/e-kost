@@ -16,9 +16,9 @@ These constraints apply to **all MVP features** and must be considered in every 
 
 ---
 
-## 2. Internationalization (i18n) - Language Agnostic
+## 2. Internationalization (i18n) - Language & Currency Agnostic
 
-**Applies to**: All UI text, form labels, validation messages, confirmation dialogs, error messages
+**Applies to**: All UI text, form labels, validation messages, confirmation dialogs, error messages, currency formatting
 
 - All user-facing text must be externalized from code (no hardcoded strings)
 - Language strings must be stored in a single JSON file per language (e.g., `en.json`, `id.json`, `es.json`)
@@ -27,16 +27,21 @@ These constraints apply to **all MVP features** and must be considered in every 
 - All form validation messages, error messages, and confirmation dialogs must be translatable
 - Date and number formatting must respect locale (e.g., date format, decimal separators, currency symbols)
 - All success/confirmation messages must be translatable
+- Currency is a locale-level i18n setting: each locale JSON defines its currency code (e.g., `EUR`, `IDR`)
+- Default currency is EUR; changing locale can change the displayed currency
+- Currency symbols must never be hardcoded in components — always use `Intl.NumberFormat` with the currency code from i18n config
+- All monetary amounts are stored as plain decimals in the database; currency formatting is a display concern only
 
-**Rationale**: E-Kost is inspired by Indonesian property management context but should support any language. A single JSON file per language enables rapid localization without code deployment.
+**Rationale**: E-Kost is inspired by Indonesian property management context but should support any language and currency. A single JSON file per language enables rapid localization without code deployment. Currency as an i18n setting allows the same codebase to serve markets with different currencies.
 
 **Implementation Approach**:
 - Use i18n library (e.g., i18next, react-i18next, Vue I18n) with JSON file-based translations
 - Store translations in `locales/` directory: `locales/en.json`, `locales/id.json`, etc.
 - Each JSON file contains flat or nested key-value pairs for all UI strings
+- Each JSON file includes a `currency` section with `code` (ISO 4217) and `locale` (BCP 47) for formatting
 - Language switching updates the active locale and re-renders UI
-- No hardcoded strings in components—all text references translation keys
-- Locale-aware formatting for dates, numbers, and currency via i18n library
+- No hardcoded strings or currency symbols in components—all text references translation keys
+- Locale-aware formatting for dates, numbers, and currency via `Intl.NumberFormat` and i18n library
 
 **Example Structure**:
 ```
@@ -47,6 +52,10 @@ locales/
 
 en.json:
 {
+  "currency": {
+    "code": "EUR",
+    "locale": "en-IE"
+  },
   "tenant.create.title": "Add Tenant",
   "tenant.create.name": "Full Name",
   "tenant.create.phone": "Phone Number",
@@ -146,4 +155,5 @@ When implementing any feature, verify:
 - [ ] Error messages clear and actionable
 - [ ] No PII in logs or error messages
 - [ ] HTTPS for all data transmission
-- [ ] Date/number formatting respects locale
+- [ ] Date/number/currency formatting respects locale
+- [ ] Currency code sourced from i18n config, not hardcoded

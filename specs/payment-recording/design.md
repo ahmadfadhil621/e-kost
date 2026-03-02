@@ -1039,23 +1039,24 @@ locales/
 ```typescript
 import { useTranslation } from 'react-i18next';
 
-function formatCurrency(amount: number, locale: string = 'en-US'): string {
+function formatCurrency(amount: number, locale: string = 'en-IE', currencyCode: string = 'EUR'): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: 'IDR', // Indonesian Rupiah
+    currency: currencyCode,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(amount);
 }
 
-// Usage in component
+// Usage in component — currency code sourced from i18n config, not hardcoded
 function PaymentCard({ payment }: { payment: Payment }) {
-  const { i18n } = useTranslation();
-  const locale = i18n.language === 'id' ? 'id-ID' : 'en-US';
+  const { t, i18n } = useTranslation();
+  const currencyCode = t('currency.code'); // e.g., 'EUR'
+  const currencyLocale = t('currency.locale'); // e.g., 'en-IE'
   
   return (
     <div>
-      <span>{formatCurrency(payment.amount, locale)}</span>
+      <span>{formatCurrency(payment.amount, currencyLocale, currencyCode)}</span>
     </div>
   );
 }
@@ -1442,7 +1443,6 @@ NEXT_PUBLIC_API_URL="https://api.example.com"
 - Payment reminders or notifications
 - Automated payment processing or online collection
 - Integration with banking systems or accounting software
-- Multi-currency support
 - Recurring payment automation
 - Partial payment tracking
 - Payment notes or memo fields
@@ -1469,6 +1469,5 @@ NEXT_PUBLIC_API_URL="https://api.example.com"
 - Automated rent calculation and payment matching
 - Payment reminders via SMS or WhatsApp
 - Payment confirmation notifications to tenants
-- Multi-property payment tracking
 - Payment reconciliation with bank statements
 

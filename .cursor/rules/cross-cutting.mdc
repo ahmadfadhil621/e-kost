@@ -19,6 +19,8 @@ These apply to every feature. See `specs/cross-cutting-constraints.md` for full 
 - Translation files: `locales/en.json`, `locales/id.json`
 - All validation messages, errors, confirmations, and labels must be translatable
 - Date/number/currency formatting must respect locale
+- Currency: EUR by default, stored as a locale-level i18n setting (not hardcoded in components)
+- Use `Intl.NumberFormat` with currency code from i18n config, never hardcode `€` or currency symbols
 
 ## Data Integrity
 
