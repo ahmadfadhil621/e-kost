@@ -1,5 +1,6 @@
 "use client";
 
+import "@/lib/i18n";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { AppHeader } from "@/components/layout/app-header";
 
