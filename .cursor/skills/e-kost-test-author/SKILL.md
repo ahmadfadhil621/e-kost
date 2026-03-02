@@ -1,20 +1,23 @@
 ---
 name: e-kost-test-author
-description: Write TDD test suites for E-Kost features. Use when writing tests for domain services, API routes, or UI components. Covers unit tests with Good/Bad/Edge structure, property-based tests with fast-check, test fixtures, and MSW handlers.
+description: Write TDD unit and integration test suites for E-Kost features (workflow step 1). Use when writing Vitest tests for domain services, API routes, or UI components. Covers Good/Bad/Edge structure, property-based tests with fast-check, test fixtures, and MSW handlers. For Playwright E2E tests (workflow step 2), use the e-kost-e2e-test-author skill instead.
 ---
 
-# E-Kost Test Author
+# E-Kost Test Author (Unit & Integration -- Workflow Step 1)
+
+This skill covers **step 1** of the feature development workflow: defining unit and integration tests with Vitest. For the full workflow, see `.cursor/rules/testing.mdc`.
 
 ## Workflow
 
 1. Read the feature's spec files:
    - `specs/<feature>/design.md` -- correctness properties, test data generators, interfaces
    - `specs/<feature>/requirements.md` -- acceptance criteria
-   - `.cursor/rules/testing.mdc` -- project testing standards
+   - `.cursor/rules/testing.mdc` -- project testing standards (includes the 4-step workflow)
 2. Create test fixtures in `src/test/fixtures/` if they don't exist yet
 3. Create MSW handlers in `src/test/mocks/` for any API endpoints the feature uses
 4. Write test files co-located with source: `<module>.test.ts` or `<component>.test.tsx`
 5. Run `npx vitest run <path>` to verify tests are syntactically correct (they should fail since implementation doesn't exist yet)
+6. **Hand off to step 2**: E2E tests are written next using the `e-kost-e2e-test-author` skill, before any implementation begins
 
 ## Test File Structure
 
