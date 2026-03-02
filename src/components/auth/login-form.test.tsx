@@ -1,3 +1,12 @@
+// Traceability: user-authentication
+// REQ 2.1 -> it('renders all form fields with labels')
+// REQ 2.2 -> it('submits form with valid data and redirects')
+// REQ 2.3 -> it('shows server error when login fails')
+// REQ 2.4 -> it('shows validation error when email/password is empty')
+// REQ 6.5 -> it('uses email input type for email field'), it('uses password input type')
+// REQ 7.3 -> it('uses password input type for password field')
+// PROP 9  -> it('all interactive elements use semantic roles suitable for touch targets')
+
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -193,6 +202,32 @@ describe("LoginForm", () => {
 
       expect(emailInput.tagName).toBe("INPUT");
       expect(passwordInput.tagName).toBe("INPUT");
+    });
+  });
+
+  describe("property-based tests", () => {
+    // Feature: user-authentication, Property 9: Touch Target Minimum Dimensions
+    // Note: Pixel-level dimension checks require a real browser (E2E layer).
+    // At the component level, we verify all interactive elements are proper
+    // semantic HTML that can receive touch-target CSS sizing.
+    it("all interactive elements use semantic roles suitable for touch targets", () => {
+      render(<LoginForm />);
+
+      const buttons = screen.getAllByRole("button");
+      const links = screen.getAllByRole("link");
+      const inputs = screen.getAllByRole("textbox");
+
+      expect(buttons.length).toBeGreaterThanOrEqual(1);
+      expect(links.length).toBeGreaterThanOrEqual(1);
+      expect(inputs.length).toBeGreaterThanOrEqual(1);
+
+      for (const button of buttons) {
+        expect(button.tagName).toBe("BUTTON");
+      }
+      for (const link of links) {
+        expect(link.tagName).toBe("A");
+        expect(link).toHaveAttribute("href");
+      }
     });
   });
 });

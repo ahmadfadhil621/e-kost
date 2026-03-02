@@ -1,3 +1,8 @@
+// Traceability: user-authentication
+// REQ 5.1 -> test('logout button is accessible inside profile dropdown')
+// REQ 5.2 -> test('user logs out and is redirected to login')
+// REQ 5.4 -> test('after logout, accessing protected page redirects to login')
+
 import { test, expect } from "@playwright/test";
 
 test.use({ storageState: "e2e/.auth/user.json" });

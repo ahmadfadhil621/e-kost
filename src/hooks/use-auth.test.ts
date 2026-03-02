@@ -1,5 +1,15 @@
+// Traceability: user-authentication
+// REQ 2.2 -> it('calls authClient.signIn.email on signIn')
+// REQ 2.3 -> it('throws on signIn error')
+// REQ 2.5 -> it('returns user data when session exists')
+// REQ 5.2 -> it('calls authClient.signOut on signOut')
+// REQ 5.3 -> it('calls authClient.signOut on signOut')
+// PROP 5  -> it('throws for any error message returned by auth client on signIn')
+// PROP 8  -> it('calls signOut on auth client for any authenticated user')
+
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
+import fc from "fast-check";
 import { useAuth } from "./use-auth";
 
 vi.mock("@/lib/auth-client", () => {
@@ -189,6 +199,71 @@ describe("useAuth", () => {
       expect(typeof result.current.signIn).toBe("function");
       expect(typeof result.current.signUp).toBe("function");
       expect(typeof result.current.signOut).toBe("function");
+    });
+  });
+
+  describe("property-based tests", () => {
+    // Feature: user-authentication, Property 5: Invalid Credentials Rejected (hook level)
+    it("throws for any error message returned by auth client on signIn", async () => {
+      await fc.assert(
+        fc.asyncProperty(
+          fc.string({ minLength: 1, maxLength: 200 }),
+          async (errorMessage) => {
+            const mock = await getMock();
+            const { authClient } = mock;
+            const error = { message: errorMessage };
+            (
+              authClient.signIn.email as ReturnType<typeof vi.fn>
+            ).mockResolvedValue({ error });
+
+            const { result } = renderHook(() => useAuth());
+
+            await expect(
+              act(async () => {
+                await result.current.signIn("test@example.com", "password");
+              })
+            ).rejects.toEqual(error);
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    // Feature: user-authentication, Property 8: Logout Clears Session
+    it("calls signOut on auth client for any authenticated user", async () => {
+      await fc.assert(
+        fc.asyncProperty(
+          fc.record({
+            id: fc.uuid(),
+            name: fc
+              .string({ minLength: 1, maxLength: 100 })
+              .filter((s) => s.trim().length > 0),
+            email: fc
+              .tuple(
+                fc.stringMatching(/^[a-z][a-z0-9]{0,14}$/),
+                fc.stringMatching(/^[a-z]{2,8}\.[a-z]{2,4}$/)
+              )
+              .map(([local, domain]) => `${local}@${domain}`),
+          }),
+          async (userData) => {
+            const mock = await getMock();
+            const { authClient } = mock;
+            mock.__mockSession.data = { user: userData };
+            (authClient.signOut as ReturnType<typeof vi.fn>).mockResolvedValue({
+              error: null,
+            });
+
+            const { result } = renderHook(() => useAuth());
+
+            await act(async () => {
+              await result.current.signOut();
+            });
+
+            expect(authClient.signOut).toHaveBeenCalled();
+          }
+        ),
+        { numRuns: 100 }
+      );
     });
   });
 });

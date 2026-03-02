@@ -1,3 +1,11 @@
+// Traceability: user-authentication
+// REQ 2.1 -> test('login page displays all required fields')
+// REQ 2.2 -> test('user logs in with valid credentials and sees dashboard')
+// REQ 2.3 -> test('user sees error for invalid credentials')
+// REQ 2.4 -> test('user sees validation error for empty email'), test('...empty password')
+// REQ 6.5 -> test('email field uses email input type')
+// REQ 7.3 -> test('password field masks input')
+
 import { test, expect } from "@playwright/test";
 
 const TEST_USER_NAME = "Login Test User";

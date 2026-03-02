@@ -117,22 +117,38 @@ function findMatchingBrace(text: string, start: number): number {
     const ch = text[i];
 
     if (ch === "/" && text[i + 1] === "/") {
-      // line comment — skip to end of line
       while (i < text.length && text[i] !== "\n") i++;
       continue;
     }
     if (ch === "/" && text[i + 1] === "*") {
-      // block comment
       i += 2;
       while (i < text.length && !(text[i] === "*" && text[i + 1] === "/")) i++;
       i += 2;
       continue;
     }
+
+    // Regex literal detection: `/` not followed by `/` or `*` after a regex-starting token
+    if (ch === "/" && text[i + 1] !== "/" && text[i + 1] !== "*") {
+      let j = i - 1;
+      while (j >= 0 && /\s/.test(text[j])) j--;
+      const prev = j >= 0 ? text[j] : "\0";
+      if ("(,=:[!&|?;{~^%*/+-<>".includes(prev) || j < start) {
+        i++;
+        while (i < text.length && text[i] !== "/") {
+          if (text[i] === "\\") i++;
+          i++;
+        }
+        i++;
+        while (i < text.length && /[gimsuy]/.test(text[i])) i++;
+        continue;
+      }
+    }
+
     if (ch === "'" || ch === '"' || ch === "`") {
       const quote = ch;
       i++;
       while (i < text.length && text[i] !== quote) {
-        if (text[i] === "\\") i++; // skip escaped char
+        if (text[i] === "\\") i++;
         i++;
       }
       i++;
@@ -168,7 +184,9 @@ function extractDescribes(source: string): DescribeBlock[] {
 
   while ((match = describeRe.exec(source)) !== null) {
     const nameStart = match.index;
-    // Find the opening brace of the describe callback
+
+    if (isInsideLineComment(source, nameStart)) continue;
+
     let braceIdx = source.indexOf("{", nameStart + match[0].length);
     if (braceIdx === -1) continue;
     const endIdx = findMatchingBrace(source, braceIdx);
@@ -192,6 +210,16 @@ function extractDescribes(source: string): DescribeBlock[] {
 }
 
 /**
+ * Check if a position in the source is inside a line comment (// ...).
+ */
+function isInsideLineComment(source: string, index: number): boolean {
+  let lineStart = source.lastIndexOf("\n", index);
+  if (lineStart === -1) lineStart = 0;
+  const linePrefix = source.slice(lineStart, index);
+  return /\/\//.test(linePrefix);
+}
+
+/**
  * Extract individual test blocks (it / test) with their body text.
  * Uses `=>` to locate the arrow-function body, skipping destructured params.
  */
@@ -202,6 +230,9 @@ function extractTestBlocks(source: string): TestBlock[] {
 
   while ((match = testRe.exec(source)) !== null) {
     const startIdx = match.index;
+
+    if (isInsideLineComment(source, startIdx)) continue;
+
     const afterName = source.slice(startIdx + match[0].length);
 
     // Find the arrow `=>` of the callback, then the first `{` after it

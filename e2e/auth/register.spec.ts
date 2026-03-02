@@ -1,3 +1,14 @@
+// Traceability: user-authentication
+// REQ 1.1 -> test('registration page displays all required fields')
+// REQ 1.2 -> test('user registers with valid credentials and lands on app')
+// REQ 1.3 -> test('user sees validation error for empty name'), test('...empty email')
+// REQ 1.4 -> test('user sees error when email is already registered')
+// REQ 1.5 -> test('user sees validation error for short password')
+// REQ 1.7 -> test('user registers with valid credentials and lands on app')
+// REQ 6.5 -> test('email field uses email input type')
+// REQ 7.3 -> test('password field masks input')
+// REQ 7.5 -> test('user can register with exactly 8-character password')
+
 import { test, expect } from "@playwright/test";
 
 test.describe("register", () => {

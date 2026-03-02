@@ -1,3 +1,7 @@
+// Traceability: user-authentication
+// REQ 4.2 -> it('returns initials from two-word name')
+// PROP 7  -> it('always returns 1-2 uppercase characters for non-empty names')
+
 import { describe, it, expect } from "vitest";
 import fc from "fast-check";
 import { getInitials } from "./get-initials";

@@ -1,3 +1,10 @@
+// Traceability: user-authentication
+// REQ 4.1 -> it('renders profile icon with user initials')
+// REQ 4.2 -> it('renders profile icon with user initials')
+// REQ 4.3 -> it('shows dropdown with user name and email on click')
+// REQ 4.4 -> it('shows logout option in dropdown')
+// REQ 5.1 -> it('shows logout option in dropdown')
+
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";

@@ -1,3 +1,8 @@
+// Traceability: user-authentication
+// REQ 3.4 -> test('unauthenticated user visiting / is redirected to login')
+// REQ 3.4 -> test('unauthenticated user cannot see dashboard content')
+// REQ 3.5 -> (covered by E2E login.spec.ts 'user logs in and sees dashboard')
+
 import { test, expect } from "@playwright/test";
 
 test.describe("session redirect", () => {

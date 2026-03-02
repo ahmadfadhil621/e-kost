@@ -1,3 +1,11 @@
+// Traceability: user-authentication
+// REQ 1.1 -> it('renders all form fields with labels')
+// REQ 1.2 -> it('submits form with valid data and redirects')
+// REQ 1.3 -> it('shows validation error when name/email is empty')
+// REQ 1.5 -> it('shows validation error when password is too short')
+// REQ 6.5 -> (covered by E2E register.spec.ts 'email field uses email input type')
+// REQ 7.3 -> (covered by E2E register.spec.ts 'password field masks input')
+
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";

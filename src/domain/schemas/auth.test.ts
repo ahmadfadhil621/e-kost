@@ -1,3 +1,16 @@
+// Traceability: user-authentication
+// REQ 1.2 -> it('accepts valid registration data')
+// REQ 1.3 -> it('rejects when name/email/password is missing/empty')
+// REQ 1.5 -> it('rejects when password is too short')
+// REQ 2.1 -> it('accepts valid login data')
+// REQ 2.4 -> it('rejects when email/password is missing/empty')
+// PROP 1  -> it('registration accepts any valid name/email/password combination')
+// PROP 2  -> it('registration rejects any input with missing required fields')
+// PROP 3  -> it('registration rejects any password shorter than 8 characters')
+// PROP 4  -> it('login schema accepts any valid email and non-empty password')
+// PROP 5  -> it('login schema rejects any input with missing or empty email')
+// PROP 10 -> it('login schema output preserves all fields needed for timestamp recording')
+
 import { describe, it, expect } from "vitest";
 import fc from "fast-check";
 import { registrationSchema, loginSchema } from "./auth";
@@ -308,6 +321,80 @@ describe("property-based tests", () => {
         (input) => {
           const result = registrationSchema.safeParse(input);
           expect(result.success).toBe(true);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  // Feature: user-authentication, Property 4: Successful Login Creates Persistent Session (schema part)
+  it("login schema accepts any valid email and non-empty password", () => {
+    const zodSafeEmail = fc
+      .tuple(
+        fc.stringMatching(/^[a-z][a-z0-9]{0,14}$/),
+        fc.stringMatching(/^[a-z]{2,8}\.[a-z]{2,4}$/)
+      )
+      .map(([local, domain]) => `${local}@${domain}`);
+
+    fc.assert(
+      fc.property(
+        fc.record({
+          email: zodSafeEmail,
+          password: fc.string({ minLength: 1, maxLength: 50 }),
+        }),
+        (input) => {
+          const result = loginSchema.safeParse(input);
+          expect(result.success).toBe(true);
+          if (result.success) {
+            expect(result.data.email).toBe(input.email);
+            expect(result.data.password).toBe(input.password);
+          }
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  // Feature: user-authentication, Property 5: Invalid Credentials Rejected (schema part)
+  it("login schema rejects any input with missing or empty email", () => {
+    fc.assert(
+      fc.property(
+        fc.record({
+          email: fc.constantFrom("", undefined as unknown as string),
+          password: fc.string({ minLength: 1, maxLength: 50 }),
+        }),
+        (input) => {
+          const result = loginSchema.safeParse(input);
+          expect(result.success).toBe(false);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  // Feature: user-authentication, Property 10: Login Timestamp Recording (schema part)
+  it("login schema output preserves all fields needed for timestamp recording", () => {
+    const zodSafeEmail = fc
+      .tuple(
+        fc.stringMatching(/^[a-z][a-z0-9]{0,14}$/),
+        fc.stringMatching(/^[a-z]{2,8}\.[a-z]{2,4}$/)
+      )
+      .map(([local, domain]) => `${local}@${domain}`);
+
+    fc.assert(
+      fc.property(
+        fc.record({
+          email: zodSafeEmail,
+          password: fc.string({ minLength: 1, maxLength: 50 }),
+        }),
+        (input) => {
+          const result = loginSchema.safeParse(input);
+          expect(result.success).toBe(true);
+          if (result.success) {
+            expect(typeof result.data.email).toBe("string");
+            expect(typeof result.data.password).toBe("string");
+            expect(result.data.email).toContain("@");
+          }
         }
       ),
       { numRuns: 100 }

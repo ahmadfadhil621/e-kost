@@ -1,6 +1,12 @@
+// Traceability: user-authentication
+// REQ 3.4 -> it('redirects to login when no user and not loading')
+// REQ 3.5 -> it('renders children when user is authenticated')
+// PROP 6  -> it('redirects to login and hides content for any children when unauthenticated')
+
 import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import fc from "fast-check";
 import { ProtectedRoute } from "./protected-route";
 
 const mockPush = vi.fn();
@@ -114,6 +120,32 @@ describe("ProtectedRoute", () => {
       );
 
       expect(mockPush).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("property-based tests", () => {
+    // Feature: user-authentication, Property 6: Protected Route Access Control
+    it("redirects to login and hides content for any children when unauthenticated", () => {
+      fc.assert(
+        fc.property(
+          fc.string({ minLength: 1, maxLength: 50 }).filter((s) => s.trim().length > 0),
+          (childText) => {
+            mockUser = null;
+            mockLoading = false;
+            mockPush.mockClear();
+
+            render(
+              <ProtectedRoute>
+                <div>{childText}</div>
+              </ProtectedRoute>
+            );
+
+            expect(mockPush).toHaveBeenCalledWith("/login");
+            expect(screen.queryByText(childText)).not.toBeInTheDocument();
+          }
+        ),
+        { numRuns: 100 }
+      );
     });
   });
 });
