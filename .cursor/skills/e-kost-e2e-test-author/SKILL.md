@@ -15,8 +15,9 @@ This skill covers **step 2** of the feature development workflow: defining small
    - `.cursor/rules/testing.mdc` -- project testing standards (includes E2E strategy)
 2. Identify the key user actions for the feature (1 spec file per action)
 3. Write Playwright spec files in `e2e/<feature>/`
-4. Run `npx playwright test e2e/<feature>/ --reporter=list` to verify specs are syntactically correct (they should fail since implementation doesn't exist yet)
-5. **Hand off to step 3**: Implementation begins, targeting both Vitest and Playwright green
+4. Add traceability comments to each spec file mapping acceptance criteria to tests (same format as unit tests -- see `e-kost-test-author` skill)
+5. Run `npx playwright test e2e/<feature>/ --reporter=list` to verify specs are syntactically correct (they should fail since implementation doesn't exist yet)
+6. **Hand off to step 3**: Test quality validation using the `e-kost-test-validator` skill. All three quality gates must pass before implementation begins.
 
 ## What to Test
 
@@ -205,4 +206,5 @@ The `playwright.config.ts` must include:
 Before writing E2E tests for a feature, always read:
 1. `specs/<feature>/design.md` -- Integration Tests section for what flows to cover
 2. `specs/<feature>/requirements.md` -- acceptance criteria that become assertions
-3. `.cursor/rules/testing.mdc` -- project-wide testing conventions and E2E strategy
+3. `.cursor/rules/testing.mdc` -- project-wide testing conventions and E2E strategy (6-step workflow)
+4. `.cursor/rules/test-quality-gates.mdc` -- quality gate checklist (tests will be validated against this)

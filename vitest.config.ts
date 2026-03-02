@@ -18,6 +18,9 @@ export default defineConfig({
         "src/test/**",
         "src/components/ui/**",
       ],
+      thresholds: {
+        branches: 80,
+      },
     },
   },
   resolve: {

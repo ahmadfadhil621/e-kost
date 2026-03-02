@@ -11,6 +11,8 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
+    "test:validate": "tsx scripts/validate-tests.ts",
+    "test:validate:feature": "tsx scripts/validate-tests.ts --feature",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio"
@@ -61,6 +63,7 @@
     "postcss": "^8.5.1",
     "prisma": "^6.4.1",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.21.0",
     "typescript": "^5.7.3",
     "vitest": "^3.0.5"
   }

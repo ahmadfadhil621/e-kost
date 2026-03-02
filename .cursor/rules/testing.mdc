@@ -10,19 +10,27 @@ Tests are written FIRST, before implementation. Tests define the specification. 
 
 ## Feature Development Workflow
 
-Every feature follows this 4-step loop:
+Every feature follows this 6-step loop:
 
-1. **Define unit/integration tests** -- Write Vitest tests for domain services, API routes, and components (good, bad, edge cases)
-2. **Define small E2E tests** -- Write Playwright tests for atomic user actions within the feature (good, bad, edge cases)
-3. **Implement the code** -- Write production code to make all tests pass
-4. **Iterate until all green** -- Fix failures, re-run the current feature's tests, repeat until 0 failures
-5. **Full regression check** -- Run the entire Vitest suite (`npx vitest run`) and entire Playwright suite (`npx playwright test`) to catch regressions in previously completed features
+1. **Define unit/integration tests** -- Write Vitest tests for domain services, API routes, and components (good, bad, edge cases). Use the `e-kost-test-author` skill.
+2. **Define small E2E tests** -- Write Playwright tests for atomic user actions within the feature (good, bad, edge cases). Use the `e-kost-e2e-test-author` skill.
+3. **Validate test quality** -- Run the three quality gates before any implementation begins. Use the `e-kost-test-validator` skill.
+   - **Gate 1:** Run `npx tsx scripts/validate-tests.ts --feature <name>` -- zero errors required
+   - **Gate 2:** Create faulty stubs, run tests against them, verify all faults are killed
+   - **Gate 3:** Walk the review checklist in `.cursor/rules/test-quality-gates.mdc`
+4. **Implement the code** -- Write production code to make all tests pass
+5. **Iterate until all green** -- Fix failures, re-run the current feature's tests, repeat until 0 failures
+6. **Full regression check** -- Run the entire Vitest suite (`npx vitest run`) and entire Playwright suite (`npx playwright test`) to catch regressions in previously completed features
 
-Steps 1 and 2 happen before any implementation code is written. A feature is not complete until step 5 passes with 0 failures across all tests.
+Steps 1-3 happen before any implementation code is written. A feature is not complete until step 6 passes with 0 failures across all tests.
 
 ### Regression Failure Rule
 
-If a test from a **previous** feature fails during step 5, the new implementation caused a regression. The fix must be in the **implementation code**, not in the old test. Old tests are the source of truth for previously shipped behavior -- never weaken or modify them to accommodate new code.
+If a test from a **previous** feature fails during step 6, the new implementation caused a regression. The fix must be in the **implementation code**, not in the old test. Old tests are the source of truth for previously shipped behavior -- never weaken or modify them to accommodate new code.
+
+### Test Quality Gate Failure Rule
+
+If a fault survives Gate 2, the fix must be to ADD or STRENGTHEN test assertions -- never weaken the fault or skip it. If Gate 3 review finds echo-chamber tests or missing boundary coverage, return to step 1 or 2 to fix the tests, then re-run all three gates from Gate 1.
 
 ## Libraries
 

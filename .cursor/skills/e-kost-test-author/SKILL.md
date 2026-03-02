@@ -12,12 +12,13 @@ This skill covers **step 1** of the feature development workflow: defining unit 
 1. Read the feature's spec files:
    - `specs/<feature>/design.md` -- correctness properties, test data generators, interfaces
    - `specs/<feature>/requirements.md` -- acceptance criteria
-   - `.cursor/rules/testing.mdc` -- project testing standards (includes the 4-step workflow)
+   - `.cursor/rules/testing.mdc` -- project testing standards (includes the 6-step workflow)
 2. Create test fixtures in `src/test/fixtures/` if they don't exist yet
 3. Create MSW handlers in `src/test/mocks/` for any API endpoints the feature uses
 4. Write test files co-located with source: `<module>.test.ts` or `<component>.test.tsx`
-5. Run `npx vitest run <path>` to verify tests are syntactically correct (they should fail since implementation doesn't exist yet)
-6. **Hand off to step 2**: E2E tests are written next using the `e-kost-e2e-test-author` skill, before any implementation begins
+5. Add traceability comments to each test file (see Traceability Matrix below)
+6. Run `npx vitest run <path>` to verify tests are syntactically correct (they should fail since implementation doesn't exist yet)
+7. **Hand off to step 2**: E2E tests are written next using the `e-kost-e2e-test-author` skill
 
 ## Test File Structure
 
@@ -227,6 +228,28 @@ it('returns 409 when room number already exists', async () => {
 });
 ```
 
+## Traceability Matrix
+
+Every test file must include traceability comments at the top that map spec items to tests. This enables Gate 1's automated traceability check.
+
+**Format for unit/integration test files:**
+
+```typescript
+// Traceability: <feature-name>
+// REQ 1.2 -> it('creates a room with valid data')
+// REQ 1.3 -> it('rejects when room number is missing')
+// REQ 1.4 -> it('creates a room with valid data') -- checks id, status, timestamp
+// PROP 1  -> it('room creation returns complete object with ID, status, and timestamp')
+// PROP 2  -> it('registration rejects any input with missing required fields')
+```
+
+Rules:
+- One comment line per spec item
+- Use `REQ X.Y` for acceptance criteria (Requirement X, criterion Y)
+- Use `PROP N` for correctness properties from `design.md`
+- If an acceptance criterion is better covered by an E2E test, note it: `// REQ 1.1 -> (covered by E2E create-room.spec.ts)`
+- Property-based tests also reference their property inline: `// Feature: <feature>, Property N: <name>`
+
 ## Hard Constraints
 
 - Test files are the **source of truth**. Implementation subagents must NOT modify test files.
@@ -240,4 +263,5 @@ it('returns 409 when room number already exists', async () => {
 Before writing tests for a feature, always read:
 1. `specs/<feature>/design.md` -- Correctness Properties section for property tests, Test Data Generators section for arbitraries, Components and Interfaces section for what to test
 2. `specs/<feature>/requirements.md` -- acceptance criteria that inform test assertions
-3. `.cursor/rules/testing.mdc` -- project-wide testing conventions
+3. `.cursor/rules/testing.mdc` -- project-wide testing conventions (6-step workflow)
+4. `.cursor/rules/test-quality-gates.mdc` -- quality gate checklist (tests will be validated against this)
