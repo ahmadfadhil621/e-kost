@@ -63,8 +63,16 @@
     },
     "list": {
       "title": "Properti Saya",
+      "viewAll": "Lihat semua properti",
+      "addProperty": "Tambah properti",
       "empty": "Belum ada properti. Buat properti pertama untuk memulai.",
       "active": "Aktif"
+    },
+    "delete": {
+      "title": "Hapus properti",
+      "description": "Semua data terkait (kamar, penyewa, pembayaran, pengeluaran) akan terpengaruh. Tindakan ini tidak dapat dibatalkan.",
+      "confirm": "Hapus",
+      "success": "Properti dihapus"
     },
     "role": {
       "owner": "Pemilik",

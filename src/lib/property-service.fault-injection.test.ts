@@ -9,8 +9,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { PropertyService, ForbiddenError } from "./property-service";
 import type { IPropertyRepository } from "@/domain/interfaces/property-repository";
-import type { IUserByEmailFinder } from "./property-service";
-import { createProperty, createPropertyStaff } from "@/test/fixtures/property";
+import { createProperty } from "@/test/fixtures/property";
 
 function createMockRepo(overrides: Partial<IPropertyRepository> = {}): IPropertyRepository {
   return {
@@ -87,23 +86,6 @@ describe.skip("Gate 2: Fault injection (multi-property-management)", () => {
 
     await expect(service.deleteProperty("staff-id", "prop-id")).rejects.toThrow(
       ForbiddenError
-    );
-  });
-
-  it("fault add-staff-duplicate: allows duplicate staff — KILLED by duplicate check", async () => {
-    const userFinder: IUserByEmailFinder = {
-      findByEmail: vi.fn().mockResolvedValue({ id: "u2", name: "S", email: "s@x.com" }),
-    };
-    const repo = createMockRepo({
-      findUserRole: vi.fn()
-        .mockResolvedValueOnce("owner")
-        .mockResolvedValueOnce(null),
-      addStaff: vi.fn().mockResolvedValue(createPropertyStaff()),
-    });
-    const service = new PropertyService(repo, userFinder);
-
-    await expect(service.addStaff("owner-id", "p1", "s@x.com")).rejects.toThrow(
-      /already staff/i
     );
   });
 

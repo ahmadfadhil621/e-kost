@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { PropertyForm } from "@/components/property/property-form";
+import { usePropertyContext } from "@/contexts/property-context";
 import type { CreatePropertyInput } from "@/domain/schemas/property";
 import { useToast } from "@/hooks/use-toast";
 
@@ -11,6 +12,7 @@ export default function NewPropertyPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { toast } = useToast();
+  const ctx = usePropertyContext();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (data: CreatePropertyInput) => {
@@ -31,6 +33,7 @@ export default function NewPropertyPage() {
         });
         return;
       }
+      await ctx?.refetch();
       toast({
         title: t("property.create.success"),
       });

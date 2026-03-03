@@ -15,7 +15,8 @@
     "test:validate:feature": "tsx scripts/validate-tests.ts --feature",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:cleanse": "tsx scripts/cleanse-database.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

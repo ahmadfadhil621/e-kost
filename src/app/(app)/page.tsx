@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { usePropertyContext } from "@/contexts/property-context";
-import { StaffManagement } from "@/components/property/staff-management";
 import { Button } from "@/components/ui/button";
 
 type PropertyDetail = {
@@ -20,7 +19,6 @@ export default function DashboardPage() {
   const router = useRouter();
   const ctx = usePropertyContext();
   const [property, setProperty] = useState<PropertyDetail | null>(null);
-  const [staff, setStaff] = useState<{ id: string; userId: string; user: { id: string; name: string; email: string } }[]>([]);
 
   const activeId = ctx?.activePropertyId ?? null;
   const properties = ctx?.properties ?? [];
@@ -30,21 +28,17 @@ export default function DashboardPage() {
     if (!activeId) return;
     (async () => {
       try {
-        const [propRes, staffRes] = await Promise.all([
-          fetch(`/api/properties/${activeId}`, { credentials: "include" }),
-          fetch(`/api/properties/${activeId}/staff`, { credentials: "include" }),
-        ]);
+        const propRes = await fetch(`/api/properties/${activeId}`, {
+          credentials: "include",
+        });
         if (propRes.ok) {
           const p = await propRes.json();
           setProperty(p);
-        }
-        if (staffRes.ok) {
-          const s = await staffRes.json();
-          setStaff(Array.isArray(s) ? s : []);
+        } else {
+          setProperty(null);
         }
       } catch {
         setProperty(null);
-        setStaff([]);
       }
     })();
   }, [activeId]);
@@ -92,25 +86,12 @@ export default function DashboardPage() {
     );
   }
 
-  const refetchStaff = () => {
-    fetch(`/api/properties/${activeId}/staff`, { credentials: "include" })
-      .then((r) => r.json())
-      .then((s) => setStaff(Array.isArray(s) ? s : []))
-      .catch(() => setStaff([]));
-  };
-
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold">{property.name}</h2>
         <p className="text-sm text-muted-foreground">{property.address || "—"}</p>
       </div>
-      <StaffManagement
-        propertyId={property.id}
-        ownerId={property.ownerId}
-        staffList={staff}
-        onRefetch={refetchStaff}
-      />
     </div>
   );
 }

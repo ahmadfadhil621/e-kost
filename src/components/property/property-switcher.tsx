@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Plus, List } from "lucide-react";
 import { usePropertyContext } from "@/contexts/property-context";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +31,11 @@ export function PropertySwitcher() {
     router.push("/");
   };
 
+  const closeAndGo = (path: string) => {
+    setOpen(false);
+    router.push(path);
+  };
+
   if (properties.length === 0) {
     return (
       <Button
@@ -41,14 +46,6 @@ export function PropertySwitcher() {
       >
         {t("property.list.title")}
       </Button>
-    );
-  }
-
-  if (properties.length === 1) {
-    return (
-      <span className="truncate text-sm font-medium" title={activeName}>
-        {activeName}
-      </span>
     );
   }
 
@@ -81,6 +78,24 @@ export function PropertySwitcher() {
               </Button>
             </li>
           ))}
+          <li className="mt-2 border-t pt-2">
+            <Button
+              variant="ghost"
+              className="h-12 w-full justify-start gap-2 min-h-[44px] min-w-[44px]"
+              onClick={() => closeAndGo("/properties/new")}
+            >
+              <Plus className="h-4 w-4 shrink-0" aria-hidden />
+              {t("property.list.addProperty")}
+            </Button>
+            <Button
+              variant="ghost"
+              className="h-12 w-full justify-start gap-2 min-h-[44px] min-w-[44px]"
+              onClick={() => closeAndGo("/properties")}
+            >
+              <List className="h-4 w-4 shrink-0" aria-hidden />
+              {t("property.list.viewAll")}
+            </Button>
+          </li>
         </ul>
       </SheetContent>
     </Sheet>

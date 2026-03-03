@@ -63,8 +63,16 @@
     },
     "list": {
       "title": "My Properties",
+      "viewAll": "View all properties",
+      "addProperty": "Add property",
       "empty": "No properties yet. Create your first property to get started.",
       "active": "Active"
+    },
+    "delete": {
+      "title": "Delete property",
+      "description": "All associated data (rooms, tenants, payments, expenses) will be affected. This cannot be undone.",
+      "confirm": "Delete",
+      "success": "Property deleted"
     },
     "role": {
       "owner": "Owner",

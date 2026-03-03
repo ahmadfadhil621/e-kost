@@ -7,25 +7,19 @@
 // REQ 3.5 -> it('rejects update when user is staff not owner')
 // REQ 4.3 -> it('excludes soft-deleted properties from list')
 // REQ 4.6 -> it('rejects delete when user is staff not owner')
-// REQ 6.3 -> it('rejects adding same user as staff twice')
-// REQ 6.4 -> it('rejects staff invitation for unregistered email')
-// REQ 6.6 -> (covered by API / E2E)
 // REQ 7.5 -> it('rejects getProperty when user has no access')
 // PROP 1 -> it('property creation sets owner and id and timestamps (PROP 1)')
 // PROP 2 -> it('list returns exactly owned and staff properties excluding deleted')
 // PROP 3 -> it('rejects update when user is staff not owner'), it('rejects delete when user is staff not owner')
-// PROP 4 -> it('rejects adding same user as staff twice')
 // PROP 5 -> (data isolation covered in API/integration)
 // PROP 6 -> it('validateAccess returns 403 for unauthorized user')
 // PROP 7 -> it('excludes soft-deleted properties from list')
-// PROP 8 -> (covered by API/E2E staff removal)
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import fc from "fast-check";
 import { PropertyService, ForbiddenError } from "./property-service";
 import type { IPropertyRepository } from "@/domain/interfaces/property-repository";
-import type { IUserByEmailFinder } from "./property-service";
-import { createProperty, createPropertyStaff } from "@/test/fixtures/property";
+import { createProperty } from "@/test/fixtures/property";
 
 function createMockRepo(overrides: Partial<IPropertyRepository> = {}): IPropertyRepository {
   return {
@@ -329,129 +323,6 @@ describe("PropertyService", () => {
         await expect(service.deleteProperty("user-id", "other-property")).rejects.toThrow(
           ForbiddenError
         );
-      });
-    });
-  });
-
-  describe("addStaff", () => {
-    describe("good cases", () => {
-      it("adds staff when user exists and is not already staff", async () => {
-        const staffRecord = createPropertyStaff({
-          propertyId: "p1",
-          userId: "u2",
-          user: { id: "u2", name: "Staff", email: "staff@example.com" },
-        });
-        const userFinder: IUserByEmailFinder = {
-          findByEmail: vi.fn().mockResolvedValue({ id: "u2", name: "Staff", email: "staff@example.com" }),
-        };
-        const findUserRole = vi.fn()
-          .mockResolvedValueOnce("owner")
-          .mockResolvedValueOnce(null);
-        const repo = createMockRepo({
-          findUserRole,
-          addStaff: vi.fn().mockResolvedValue(staffRecord),
-        });
-        const service = new PropertyService(repo, userFinder);
-
-        const result = await service.addStaff("owner-id", "p1", "staff@example.com");
-
-        expect(result.userId).toBe("u2");
-        expect(result.user.email).toBe("staff@example.com");
-        expect(repo.addStaff).toHaveBeenCalledWith("p1", "u2");
-      });
-    });
-
-    describe("bad cases", () => {
-      it("rejects staff invitation for unregistered email (REQ 6.4)", async () => {
-        const userFinder: IUserByEmailFinder = {
-          findByEmail: vi.fn().mockResolvedValue(null),
-        };
-        const repo = createMockRepo({
-          findUserRole: vi.fn().mockResolvedValue("owner"),
-        });
-        const service = new PropertyService(repo, userFinder);
-
-        await expect(
-          service.addStaff("owner-id", "p1", "nobody@example.com")
-        ).rejects.toThrow(/registered account|not found/i);
-      });
-
-      it("rejects adding same user as staff twice (PROP 4)", async () => {
-        const userFinder: IUserByEmailFinder = {
-          findByEmail: vi.fn().mockResolvedValue({ id: "u2", name: "S", email: "s@x.com" }),
-        };
-        const repo = createMockRepo({
-          findUserRole: vi.fn()
-            .mockResolvedValueOnce("owner")
-            .mockResolvedValueOnce("staff"),
-        });
-        const service = new PropertyService(repo, userFinder);
-
-        await expect(
-          service.addStaff("owner-id", "p1", "s@x.com")
-        ).rejects.toThrow(/already staff/i);
-      });
-
-      it("rejects addStaff when user is not owner", async () => {
-        const repo = createMockRepo({ findUserRole: vi.fn().mockResolvedValue("staff") });
-        const service = new PropertyService(repo, {
-          findByEmail: vi.fn().mockResolvedValue({ id: "u2", name: "S", email: "s@x.com" }),
-        });
-
-        await expect(
-          service.addStaff("staff-id", "p1", "s@x.com")
-        ).rejects.toThrow(ForbiddenError);
-      });
-    });
-    describe("edge cases", () => {
-      it("rejects invalid email format", async () => {
-        const repo = createMockRepo({ findUserRole: vi.fn().mockResolvedValue("owner") });
-        const service = new PropertyService(repo, {
-          findByEmail: vi.fn().mockResolvedValue(null),
-        });
-        await expect(
-          service.addStaff("owner-id", "p1", "not-an-email")
-        ).rejects.toThrow();
-      });
-    });
-  });
-
-  describe("removeStaff", () => {
-    describe("bad cases", () => {
-      it("rejects removing property owner as staff", async () => {
-        const repo = createMockRepo({
-          findUserRole: vi.fn().mockResolvedValue("owner"),
-          findById: vi.fn().mockResolvedValue(createProperty({ ownerId: "owner-1" })),
-        });
-        const service = new PropertyService(repo);
-
-        await expect(
-          service.removeStaff("owner-1", "p1", "owner-1")
-        ).rejects.toThrow(/cannot remove.*owner/i);
-      });
-    });
-
-    describe("good cases", () => {
-      it("removes staff when caller is owner", async () => {
-        const repo = createMockRepo({
-          findUserRole: vi.fn().mockResolvedValue("owner"),
-          findById: vi.fn().mockResolvedValue(createProperty({ ownerId: "owner-1" })),
-          removeStaff: vi.fn().mockResolvedValue(undefined),
-        });
-        const service = new PropertyService(repo);
-
-        await service.removeStaff("owner-1", "p1", "staff-1");
-
-        expect(repo.removeStaff).toHaveBeenCalledWith("p1", "staff-1");
-      });
-    });
-    describe("edge cases", () => {
-      it("rejects when caller is staff not owner", async () => {
-        const repo = createMockRepo({ findUserRole: vi.fn().mockResolvedValue("staff") });
-        const service = new PropertyService(repo);
-        await expect(
-          service.removeStaff("staff-id", "p1", "other-staff")
-        ).rejects.toThrow(ForbiddenError);
       });
     });
   });
