@@ -48,6 +48,32 @@
     "tooLong": "Too long",
     "passwordLength": "Password must be at least 8 characters"
   },
+  "property": {
+    "create": {
+      "title": "Add Property",
+      "name": "Property Name",
+      "address": "Address",
+      "submit": "Create Property",
+      "success": "Property created successfully"
+    },
+    "edit": {
+      "title": "Edit Property",
+      "submit": "Save Changes",
+      "success": "Property updated successfully"
+    },
+    "list": {
+      "title": "My Properties",
+      "empty": "No properties yet. Create your first property to get started."
+    },
+    "role": {
+      "owner": "Owner",
+      "staff": "Staff"
+    },
+    "validation": {
+      "nameRequired": "Property name is required",
+      "addressRequired": "Address is required"
+    }
+  },
   "auth": {
     "register": {
       "title": "Create Account",
