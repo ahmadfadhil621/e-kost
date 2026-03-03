@@ -48,6 +48,40 @@
     "tooLong": "Terlalu panjang",
     "passwordLength": "Kata sandi minimal 8 karakter"
   },
+  "property": {
+    "create": {
+      "title": "Tambah Properti",
+      "name": "Nama Properti",
+      "address": "Alamat",
+      "submit": "Buat Properti",
+      "success": "Properti berhasil dibuat"
+    },
+    "edit": {
+      "title": "Ubah Properti",
+      "submit": "Simpan Perubahan",
+      "success": "Properti berhasil diperbarui"
+    },
+    "list": {
+      "title": "Properti Saya",
+      "empty": "Belum ada properti. Buat properti pertama untuk memulai.",
+      "active": "Aktif"
+    },
+    "role": {
+      "owner": "Pemilik",
+      "staff": "Staf"
+    },
+    "validation": {
+      "nameRequired": "Nama properti wajib diisi",
+      "addressRequired": "Alamat wajib diisi"
+    },
+    "staff": {
+      "title": "Staf",
+      "addByEmail": "Tambah berdasarkan email",
+      "invite": "Undang",
+      "invited": "Staf berhasil diundang",
+      "notFound": "Tidak ada akun terdaftar untuk email ini"
+    }
+  },
   "auth": {
     "register": {
       "title": "Buat Akun",

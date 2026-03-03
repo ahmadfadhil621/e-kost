@@ -63,7 +63,8 @@
     },
     "list": {
       "title": "My Properties",
-      "empty": "No properties yet. Create your first property to get started."
+      "empty": "No properties yet. Create your first property to get started.",
+      "active": "Active"
     },
     "role": {
       "owner": "Owner",
@@ -72,6 +73,13 @@
     "validation": {
       "nameRequired": "Property name is required",
       "addressRequired": "Address is required"
+    },
+    "staff": {
+      "title": "Staff",
+      "addByEmail": "Add by email",
+      "invite": "Invite",
+      "invited": "Staff invited successfully",
+      "notFound": "No registered account found for this email"
     }
   },
   "auth": {

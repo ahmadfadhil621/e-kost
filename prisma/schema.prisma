@@ -80,12 +80,13 @@ model Verification {
 // ──────────────────────────────────────────────
 
 model Property {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
   address   String?
   ownerId   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   owner    User            @relation("PropertyOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   staff    PropertyStaff[]

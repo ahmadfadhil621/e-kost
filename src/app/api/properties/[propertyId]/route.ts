@@ -1,31 +1,101 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
+import { updatePropertySchema } from "@/domain/schemas/property";
+import { withPropertyAccess } from "@/lib/property-access";
+import { propertyService } from "@/lib/property-service-instance";
 
 export async function GET(
-  _request: Request,
-  _context: { params: Promise<{ propertyId: string }> }
+  request: Request,
+  context: { params: Promise<{ propertyId: string }> }
 ) {
-  return NextResponse.json(
-    { error: "Not implemented" },
-    { status: 501 }
-  );
+  const { propertyId } = await context.params;
+  const access = await withPropertyAccess(propertyId, { request });
+  if (access.errorResponse) return access.errorResponse;
+
+  try {
+    const property = await propertyService.getProperty(access.userId!, propertyId);
+    return NextResponse.json({
+      id: property.id,
+      name: property.name,
+      address: property.address,
+      ownerId: property.ownerId,
+      createdAt: property.createdAt,
+      updatedAt: property.updatedAt,
+    });
+  } catch (e) {
+    if (e instanceof Error && e.message === "Property not found") {
+      return NextResponse.json({ error: "Property not found" }, { status: 404 });
+    }
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function PUT(
-  _request: Request,
-  _context: { params: Promise<{ propertyId: string }> }
+  request: Request,
+  context: { params: Promise<{ propertyId: string }> }
 ) {
-  return NextResponse.json(
-    { error: "Not implemented" },
-    { status: 501 }
-  );
+  const { propertyId } = await context.params;
+  const access = await withPropertyAccess(propertyId, {
+    requireOwner: true,
+    request,
+  });
+  if (access.errorResponse) return access.errorResponse;
+
+  try {
+    const body = await request.json();
+    const data = updatePropertySchema.parse(body);
+    const property = await propertyService.updateProperty(
+      access.userId!,
+      propertyId,
+      data
+    );
+    return NextResponse.json({
+      id: property.id,
+      name: property.name,
+      address: property.address,
+      ownerId: property.ownerId,
+      createdAt: property.createdAt,
+      updatedAt: property.updatedAt,
+    });
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      const msg = err.errors[0]?.message ?? "Validation failed";
+      return NextResponse.json({ error: msg }, { status: 400 });
+    }
+    if (err instanceof Error && err.name === "ForbiddenError") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function DELETE(
-  _request: Request,
-  _context: { params: Promise<{ propertyId: string }> }
+  request: Request,
+  context: { params: Promise<{ propertyId: string }> }
 ) {
-  return NextResponse.json(
-    { error: "Not implemented" },
-    { status: 501 }
-  );
+  const { propertyId } = await context.params;
+  const access = await withPropertyAccess(propertyId, {
+    requireOwner: true,
+    request,
+  });
+  if (access.errorResponse) return access.errorResponse;
+
+  try {
+    await propertyService.deleteProperty(access.userId!, propertyId);
+    return new NextResponse(null, { status: 204 });
+  } catch (e) {
+    if (e instanceof Error && e.name === "ForbiddenError") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

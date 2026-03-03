@@ -5,8 +5,40 @@
 // REQ 4.1 -> (covered by E2E)
 // REQ 7.4 -> (covered by service tests)
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { NextResponse } from "next/server";
 import { POST, GET } from "./route";
+
+const mockSession = {
+  user: { id: "test-user-id", name: "Test User", email: "test@example.com" },
+};
+
+vi.mock("@/lib/auth-api", () => ({
+  getSession: vi.fn(),
+}));
+
+vi.mock("@/lib/property-service-instance", () => ({
+  propertyService: {
+    createProperty: vi.fn().mockResolvedValue({
+      id: "prop-1",
+      name: "My Property",
+      address: "123 Main St",
+      ownerId: "test-user-id",
+      createdAt: new Date("2025-01-01"),
+      updatedAt: new Date("2025-01-01"),
+      deletedAt: null,
+    }),
+    listProperties: vi.fn().mockResolvedValue([]),
+  },
+}));
+
+const { getSession } = await import("@/lib/auth-api");
+
+beforeEach(() => {
+  vi.mocked(getSession).mockResolvedValue({
+    session: mockSession,
+  });
+});
 
 describe("POST /api/properties", () => {
   describe("good cases", () => {
@@ -59,6 +91,10 @@ describe("POST /api/properties", () => {
     });
 
     it("POST returns 401 when not authenticated", async () => {
+      vi.mocked(getSession).mockResolvedValueOnce({
+        session: null,
+        errorResponse: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+      });
       const request = new Request("http://localhost:3000/api/properties", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -104,6 +140,10 @@ describe("GET /api/properties", () => {
 
   describe("bad cases", () => {
     it("GET returns 401 when not authenticated", async () => {
+      vi.mocked(getSession).mockResolvedValueOnce({
+        session: null,
+        errorResponse: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+      });
       const request = new Request("http://localhost:3000/api/properties");
 
       const response = await GET(request);
