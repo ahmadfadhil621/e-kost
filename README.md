@@ -82,6 +82,8 @@ Setup:
 3. Run `npx prisma db push` to sync the schema with your database
 4. Run `npm run dev` to start the development server
 
+**E2E tests and Playwright MCP (Cursor):** Install browser binaries once with `npx playwright install chromium`. Required for `npm run test:e2e` and for the Playwright MCP server (browser automation in Cursor).
+
 ## Development Status
 
 **Current phase:** Phase 0 (Project Foundation) and Phase 1 (User Authentication) complete. App shell, design tokens, i18n, Prisma schema, test config, and full auth flow (registration, login, logout, protected routes, profile) are in place.
