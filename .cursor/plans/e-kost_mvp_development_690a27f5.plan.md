@@ -50,6 +50,23 @@ isProject: false
 
 Phase 0 (Project Foundation) and Phase 1 (User Authentication) are complete. Implementation includes Next.js app shell, design tokens, i18n, Prisma schema (with client generated to `src/generated/prisma`), Vitest + Playwright config, and full auth flow (registration, login, logout, protected routes, profile dropdown). All feature specs exist under `specs/`; Multi-Property Management (Phase 2) is next.
 
+## Feature Development Workflow (TDD)
+
+**Every feature phase (2–8) follows the same 6-step loop.** See [testing.mdc](.cursor/rules/testing.mdc).
+
+
+| Step  | What                                                                                                                                          | When                       |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| **1** | Define unit/integration tests (Vitest) — Good/Bad/Edge, co-located or in `src/test/`. Use **e-kost-test-author** skill.                       | Before any implementation  |
+| **2** | Define E2E tests (Playwright) — atomic user actions in `e2e/<feature>/`. Use **e-kost-e2e-test-author** skill.                                | Before any implementation  |
+| **3** | Validate test quality — Gate 1 (validate-tests.ts), Gate 2 (fault injection), Gate 3 (review checklist). Use **e-kost-test-validator** skill. | Before any implementation  |
+| **4** | Implement the code — domain → service → API → UI → i18n, layer by layer.                                                                      | After all three gates pass |
+| **5** | Iterate until all green — fix failures, re-run feature tests until 0 failures.                                                                | After step 4               |
+| **6** | Full regression — run full Vitest + Playwright suites. No regressions in previous features.                                                   | Before phase is complete   |
+
+
+**Rules:** Implementation subagents must not modify test files. If a regression appears in step 6, fix implementation only. If a fault survives Gate 2, strengthen tests, never weaken them.
+
 ## Tech Stack Resolution
 
 Use **Next.js App Router** as the full-stack framework. Drop the Vite reference from the README. This gives us:
@@ -141,26 +158,16 @@ graph TD
 
 ---
 
-## Phase 2: Multi-Property Management (specs needed first)
+## Phase 2: Multi-Property Management
 
-**Spec status**: Pending -- needs requirements.md, design.md, tasks.md written
+**Spec**: [specs/multi-property-management/requirements.md](specs/multi-property-management/requirements.md), [design.md](specs/multi-property-management/design.md), [tasks.md](specs/multi-property-management/tasks.md)
 
-**Scope** (inferred from README + architecture-intent):
+**Scope**: Property CRUD (name, address); property switcher; staff assignment (owner invites by email); all subsequent features scoped by `propertyId`.
 
-- Property CRUD: create/read/update/delete properties (name, address)
-- Property switcher: dropdown or sheet to switch active property context
-- Staff assignment: owner invites staff by email, staff gets access to specific properties
-- All subsequent features (rooms, tenants, payments, expenses) are scoped by `propertyId`
+**Workflow (TDD)**:
 
-**Estimated tasks** (~20):
-
-- Domain: Property entity, validation schemas
-- API: CRUD endpoints at `src/app/api/properties/`
-- Service: PropertyService with ownership/staff checks
-- UI: Property list, create/edit form, property switcher in header, staff invite form
-- Middleware: extract `propertyId` from context for all scoped queries
-- i18n: property management strings
-- Tests
+- **Steps 1–3 (tests first):** Write Vitest tests for PropertyService, property API routes, and property UI components (Good/Bad/Edge). Write Playwright E2E tests in `e2e/multi-property-management/` for create property, switch property, staff invite. Run `npx tsx scripts/validate-tests.ts --feature multi-property-management`, then Gate 2 (fault injection) and Gate 3 (review checklist). No implementation until all three gates pass.
+- **Steps 4–6 (implementation):** Follow [tasks.md](specs/multi-property-management/tasks.md): domain (Property entity, Zod, IPropertyRepository) → PropertyService + staff logic → Prisma repository → API at `src/app/api/properties/` → UI (list, form, switcher, staff invite) → middleware for `propertyId` context → i18n. Iterate until feature tests pass, then full Vitest + Playwright regression.
 
 **Why Phase 2**: Every data entity (Room, Tenant, Payment, Expense) has a `propertyId` foreign key. Building property management early prevents retrofitting scoping into every feature later.
 
@@ -172,20 +179,12 @@ graph TD
 
 **Spec**: [specs/room-inventory-management/tasks.md](specs/room-inventory-management/tasks.md)
 
-**Layer-by-layer**:
+**Workflow (TDD)**:
 
-1. **Schema**: Room model already in Prisma from Phase 0, just verify indexes (status, room_number unique per property)
-2. **Service**: RoomService with create, list, get, update, updateStatus. Repository interface `IRoomRepository`.
-3. **API** (tasks 2.1-2.4): CRUD + status endpoints at `src/app/api/properties/[propertyId]/rooms/`
-4. **UI** (tasks 3.1-3.6):
-  - Room list with card layout at `src/app/(app)/rooms/page.tsx`
-  - Status filter tabs (all/available/occupied/renovation) with count badges
-  - Room detail page at `src/app/(app)/rooms/[roomId]/page.tsx`
-  - Create/edit forms using React Hook Form + Zod
-  - Status change dropdown/sheet
-  - Color-coded status indicators using `--status-`* CSS variables + text labels + icons
-5. **i18n** (task 5.1): Room management strings under `rooms.`* keys
-6. **Tests** (tasks 4.1-4.6): CRUD workflows, filtering, mobile responsiveness, 500-room performance
+- **Steps 1–3 (tests first):** Write Vitest tests for RoomService, room API routes, and room UI (Good/Bad/Edge). Write Playwright E2E tests in `e2e/room-inventory-management/` for create room, edit room, filter by status, change status. Run `npx tsx scripts/validate-tests.ts --feature room-inventory-management`, then Gate 2 and Gate 3. No implementation until all three gates pass.
+- **Steps 4–6 (implementation):** Schema verification → RoomService + `IRoomRepository` → API at `src/app/api/properties/[propertyId]/rooms/` → UI (list, detail, forms, status filter, status change, indicators) → i18n (`rooms.`*). Iterate until green, then full regression.
+
+**Implementation scope** (layer-by-layer): Room model indexes; RoomService create/list/get/update/updateStatus; CRUD + status API; room list with card layout and filter tabs; room detail; create/edit forms; status change; color-coded indicators (`--status-`* + text + icons); 500-room performance.
 
 **Estimated effort**: 2-3 days
 
@@ -195,19 +194,10 @@ graph TD
 
 **Spec**: [specs/tenant-room-basics/tasks.md](specs/tenant-room-basics/tasks.md)
 
-**Layer-by-layer**:
+**Workflow (TDD)**:
 
-1. **Schema**: Tenant model already in Prisma, verify soft-delete (`movedOutAt`) and room FK
-2. **Service**: TenantService with CRUD, assignment, move-out logic. Repository interface `ITenantRepository`.
-3. **API** (tasks 2.1-2.4, 3.1): CRUD + move-out + room assignment at `src/app/api/properties/[propertyId]/tenants/`
-4. **UI** (tasks 4.1-4.6):
-  - Tenant list with name + room at `src/app/(app)/tenants/page.tsx`
-  - Tenant detail page at `src/app/(app)/tenants/[tenantId]/page.tsx`
-  - Create/edit forms
-  - Room assignment interface (shows only available rooms)
-  - Move-out confirmation dialog (soft delete + room release)
-5. **i18n** (tasks 6.1-6.2): Tenant strings under `tenants.`* keys
-6. **Tests** (tasks 5.1-5.5): CRUD, assignment, move-out, mobile
+- **Steps 1–3 (tests first):** Write Vitest tests for TenantService, tenant API routes, and tenant UI (Good/Bad/Edge). Write Playwright E2E tests in `e2e/tenant-room-basics/` for create tenant, assign room, move-out. Run `npx tsx scripts/validate-tests.ts --feature tenant-room-basics`, then Gate 2 and Gate 3. No implementation until all three gates pass.
+- **Steps 4–6 (implementation):** Schema verification (soft-delete, room FK) → TenantService + `ITenantRepository` → API (CRUD + move-out + assignment) → UI (list, detail, forms, room assignment, move-out dialog) → i18n (`tenants.`*). Iterate until green, then full regression.
 
 **Key behavior**: Move-out sets `movedOutAt`, frees room status to `available`, preserves tenant record for history.
 
@@ -219,40 +209,25 @@ graph TD
 
 **Spec**: [specs/payment-recording/tasks.md](specs/payment-recording/tasks.md)
 
-**Layer-by-layer**:
+**Workflow (TDD)**:
 
-1. **Schema**: Payment model already in Prisma, verify indexes (tenant_id, payment_date)
-2. **Service**: PaymentService with record, list, listByTenant. Repository interface `IPaymentRepository`.
-3. **API** (tasks 2.1-2.3): Record + list + per-tenant list at `src/app/api/properties/[propertyId]/payments/`
-4. **UI** (tasks 3.1-3.3):
-  - Payment form at `src/app/(app)/payments/new/page.tsx` (3 fields: tenant dropdown, amount, date)
-  - Payment list view at `src/app/(app)/payments/page.tsx`
-  - Per-tenant payments section in tenant detail page
-  - Currency formatting via `Intl.NumberFormat` with locale from i18n config
-5. **i18n** (task 5.1): Payment strings under `payments.`* keys
-6. **Tests** (tasks 4.1-4.6): Recording, list, per-tenant, persistence, mobile, 10K performance
+- **Steps 1–3 (tests first):** Write Vitest tests for PaymentService, payment API routes, and payment UI (Good/Bad/Edge). Write Playwright E2E tests in `e2e/payment-recording/` for record payment, view list, per-tenant view. Run `npx tsx scripts/validate-tests.ts --feature payment-recording`, then Gate 2 and Gate 3. No implementation until all three gates pass.
+- **Steps 4–6 (implementation):** Schema verification → PaymentService + `IPaymentRepository` → API (record, list, per-tenant) → UI (payment form, list, tenant detail section, currency via i18n) → i18n (`payments.`*). Iterate until green, then full regression. Ensure 10K-performance tests pass.
 
 **Estimated effort**: 2 days
 
 ---
 
-## Phase 6a: Tenant Notes (specs needed first)
+## Phase 6a: Tenant Notes
 
-**Spec status**: Pending
+**Spec**: [specs/tenant-notes/requirements.md](specs/tenant-notes/requirements.md), [design.md](specs/tenant-notes/design.md), [tasks.md](specs/tenant-notes/tasks.md)
 
-**Scope** (inferred):
+**Scope**: Per-tenant notes CRUD (TenantNote: content, date); notes section in tenant detail; sorted by date descending.
 
-- Per-tenant notes CRUD (create, read, update, delete)
-- Each note: id, tenantId, content, date, createdAt
-- Displayed as a section in tenant detail page
-- Sorted by date descending
+**Workflow (TDD)**:
 
-**Estimated tasks** (~12):
-
-- Service: NoteService, `INoteRepository`
-- API: CRUD at `src/app/api/properties/[propertyId]/tenants/[tenantId]/notes/`
-- UI: Notes section in tenant detail, add/edit/delete note forms
-- i18n, tests
+- **Steps 1–3 (tests first):** Write Vitest tests for NoteService, notes API routes, and notes UI (Good/Bad/Edge). Write Playwright E2E tests in `e2e/tenant-notes/` for add note, edit note, delete note. Run `npx tsx scripts/validate-tests.ts --feature tenant-notes`, then Gate 2 and Gate 3. No implementation until gates pass.
+- **Steps 4–6 (implementation):** Follow [tasks.md](specs/tenant-notes/tasks.md): domain (TenantNote, Zod, INoteRepository) → NoteService → Prisma repository → API at `src/app/api/properties/[propertyId]/tenants/[tenantId]/notes/` → UI (notes section in tenant detail, add/edit/delete) → i18n. Iterate until green, then full regression.
 
 **Estimated effort**: 1-2 days
 
@@ -262,83 +237,55 @@ graph TD
 
 **Spec**: [specs/outstanding-balance/tasks.md](specs/outstanding-balance/tasks.md)
 
-**Layer-by-layer**:
+**Workflow (TDD)**:
 
-1. **Service** (tasks 1.1, 1.3): BalanceService implementing `IBalanceCalculator`. Formula: `monthlyRent - SUM(payments)`. Computed on-demand, no stored balance. Recalculates on payment or room change.
-2. **API** (task 1.2): Balance endpoint at `src/app/api/properties/[propertyId]/tenants/[tenantId]/balance`
-3. **UI** (tasks 2.1-2.4):
-  - Balance section in tenant detail (balance, rent, total payments)
-  - Color-coded status indicators (`--balance-paid` green, `--balance-outstanding` red) with text + icon
-  - Balance + status indicator added to tenant list cards
-  - Optional sort-by-outstanding in tenant list
-4. **i18n** (task 4.1): Balance strings under `balance.`* keys
-5. **Tests** (tasks 3.1-3.8): Calculation accuracy, update triggers, display, indicators, mobile, 1K performance
+- **Steps 1–3 (tests first):** Write Vitest tests for BalanceService (`IBalanceCalculator`), balance API, and balance UI (Good/Bad/Edge). Write Playwright E2E tests in `e2e/outstanding-balance/` for balance display in tenant detail and list. Run `npx tsx scripts/validate-tests.ts --feature outstanding-balance`, then Gate 2 and Gate 3. No implementation until gates pass.
+- **Steps 4–6 (implementation):** BalanceService (formula: monthlyRent - SUM(payments), on-demand) → balance API → UI (tenant detail section, list indicators, sort-by-outstanding) → i18n (`balance.`*). Iterate until green, then full regression. Ensure 1K-performance tests pass.
 
 **Estimated effort**: 2 days
 
 ---
 
-## Phase 6c: Finance & Expense Tracking (specs needed first)
+## Phase 6c: Finance & Expense Tracking
 
-**Spec status**: Pending
+**Spec**: [specs/finance-expense-tracking/requirements.md](specs/finance-expense-tracking/requirements.md), [design.md](specs/finance-expense-tracking/design.md), [tasks.md](specs/finance-expense-tracking/tasks.md)
 
-**Scope** (inferred):
+**Scope**: Expense CRUD (category, amount, date, description); ExpenseService + FinanceSummaryService; monthly income/expense and category breakdown; net income.
 
-- Expense CRUD: category, amount, date, description, scoped per property
-- Monthly income view: sum of payments received in a month
-- Monthly expense view: sum of expenses in a month
-- Category breakdown (pie chart or list)
-- Net income: income minus expenses
+**Workflow (TDD)**:
 
-**Estimated tasks** (~18):
-
-- Domain: Expense entity, categories enum, validation schemas
-- Service: ExpenseService, `IExpenseRepository`
-- API: CRUD at `src/app/api/properties/[propertyId]/expenses/`
-- UI: Expense list, create/edit form, monthly summary page with income/expense/net breakdown
-- i18n, tests
+- **Steps 1–3 (tests first):** Write Vitest tests for ExpenseService, FinanceSummaryService, expense API, and finance UI (Good/Bad/Edge). Write Playwright E2E tests in `e2e/finance-expense-tracking/` for add expense, view monthly summary. Run `npx tsx scripts/validate-tests.ts --feature finance-expense-tracking`, then Gate 2 and Gate 3. No implementation until gates pass.
+- **Steps 4–6 (implementation):** Follow [tasks.md](specs/finance-expense-tracking/tasks.md): domain (Expense entity, categories enum, Zod, IExpenseRepository) → ExpenseService + FinanceSummaryService → Prisma repository → API at `src/app/api/properties/[propertyId]/expenses/` → UI (expense list/form, monthly summary, breakdown) → i18n. Iterate until green, then full regression.
 
 **Estimated effort**: 2-3 days
 
 ---
 
-## Phase 7: Dashboard / Overview (specs needed first)
+## Phase 7: Dashboard / Overview
 
-**Spec status**: Pending
+**Spec**: [specs/dashboard-overview/requirements.md](specs/dashboard-overview/requirements.md), [design.md](specs/dashboard-overview/design.md), [tasks.md](specs/dashboard-overview/tasks.md)
 
-**Scope** (inferred):
+**Scope**: Landing at `(app)/page.tsx`; DashboardService aggregating RoomService, PaymentService, ExpenseService, BalanceService; occupancy stats; finance summary; outstanding balances list; recent payments.
 
-- Landing page after login at `src/app/(app)/page.tsx`
-- Occupancy stats: total rooms, occupied count, available count, occupancy rate
-- Finance summary: monthly income, monthly expenses, net
-- Outstanding balances list: tenants with unpaid balances
-- Recent payments: last 5-10 payments
+**Workflow (TDD)**:
 
-**Estimated tasks** (~12):
-
-- API: Dashboard aggregate endpoint(s)
-- UI: Dashboard page with stat cards, recent activity lists
-- i18n, tests
+- **Steps 1–3 (tests first):** Write Vitest tests for DashboardService, dashboard API, and dashboard UI (Good/Bad/Edge). Write Playwright E2E tests in `e2e/dashboard-overview/` for dashboard load and displayed stats. Run `npx tsx scripts/validate-tests.ts --feature dashboard-overview`, then Gate 2 and Gate 3. No implementation until gates pass.
+- **Steps 4–6 (implementation):** Follow [tasks.md](specs/dashboard-overview/tasks.md): DashboardService + additions to RoomService, BalanceService, PaymentService → dashboard API → UI (stat cards, recent activity, balances list) → i18n. Iterate until green, then full regression.
 
 **Estimated effort**: 2 days
 
 ---
 
-## Phase 8: Settings & Staff Management (specs needed first)
+## Phase 8: Settings & Staff Management
 
-**Spec status**: Pending
+**Spec**: [specs/settings-staff-management/requirements.md](specs/settings-staff-management/requirements.md), [design.md](specs/settings-staff-management/design.md), [tasks.md](specs/settings-staff-management/tasks.md)
 
-**Scope** (inferred):
+**Scope**: Settings page (Language, Account, Staff sections); LanguageSelector; AccountSection (name edit); StaffSection (invite/remove, owner-only); staff API from Phase 2.
 
-- Staff management: owner invites/removes staff per property (ties into Phase 2 multi-property)
-- User preferences: language selector, potentially currency preference
-- Account settings: update name, email
+**Workflow (TDD)**:
 
-**Estimated tasks** (~15):
-
-- API: Staff invite/remove endpoints, user preference endpoints
-- UI: Settings page with sections for staff, language, account
-- i18n, tests
+- **Steps 1–3 (tests first):** Write Vitest tests for settings API (where applicable) and settings UI (Good/Bad/Edge). Write Playwright E2E tests in `e2e/settings-staff-management/` for change language, update account, invite/remove staff. Run `npx tsx scripts/validate-tests.ts --feature settings-staff-management`, then Gate 2 and Gate 3. No implementation until gates pass.
+- **Steps 4–6 (implementation):** Follow [tasks.md](specs/settings-staff-management/tasks.md): Settings page layout → LanguageSelector, AccountSection, StaffSection → staff/preference API as needed → i18n. Iterate until green, then full regression.
 
 **Estimated effort**: 2 days
 
@@ -352,7 +299,7 @@ These are not separate phases but requirements applied at every step:
 - **Mobile-first**: All layouts 320px-480px, 44x44px touch targets, single-column, no horizontal scroll.
 - **Accessibility**: Color + text/icon for all indicators, form labels, keyboard nav, WCAG AA contrast.
 - **Validation**: Shared Zod schemas between frontend and API routes.
-- **Testing**: Unit tests for services, API route tests with MSW, component tests with Testing Library.
+- **Testing**: TDD workflow — tests first (Vitest + Playwright Tier 1), quality gates, then implementation. Unit/API/component tests with Good/Bad/Edge; E2E in `e2e/<feature>/`. Tier 2 journey tests (`e2e/journeys/`) are written after Phase 8.
 - **Currency**: Always use `Intl.NumberFormat` with currency code from i18n config, never hardcode symbols.
 
 ---
@@ -426,31 +373,30 @@ prisma/
 ## Estimated Timeline Summary
 
 
-| Phase     | Feature              | Effort          | Status                     |
-| --------- | -------------------- | --------------- | -------------------------- |
-| 0         | Project Foundation   | 1-2 days        | Ready to start             |
-| 1         | User Authentication  | 3-4 days        | Fully specified (37 tasks) |
-| 2         | Multi-Property       | 2-3 days        | Needs specs first          |
-| 3         | Room Inventory       | 2-3 days        | Fully specified (20 tasks) |
-| 4         | Tenant & Room Basics | 2-3 days        | Fully specified (21 tasks) |
-| 5         | Payment Recording    | 2 days          | Fully specified (17 tasks) |
-| 6a        | Tenant Notes         | 1-2 days        | Needs specs first          |
-| 6b        | Outstanding Balance  | 2 days          | Fully specified (14 tasks) |
-| 6c        | Finance & Expense    | 2-3 days        | Needs specs first          |
-| 7         | Dashboard            | 2 days          | Needs specs first          |
-| 8         | Settings & Staff     | 2 days          | Needs specs first          |
-| **Total** |                      | **~21-29 days** |                            |
+| Phase     | Feature              | Effort          | Specs                                       |
+| --------- | -------------------- | --------------- | ------------------------------------------- |
+| 0         | Project Foundation   | 1-2 days        | —                                           |
+| 1         | User Authentication  | 3-4 days        | specs/user-authentication/                  |
+| 2         | Multi-Property       | 2-3 days        | specs/multi-property-management/            |
+| 3         | Room Inventory       | 2-3 days        | specs/room-inventory-management/            |
+| 4         | Tenant & Room Basics | 2-3 days        | specs/tenant-room-basics/                   |
+| 5         | Payment Recording    | 2 days          | specs/payment-recording/                    |
+| 6a        | Tenant Notes         | 1-2 days        | specs/tenant-notes/                         |
+| 6b        | Outstanding Balance  | 2 days          | specs/outstanding-balance/                  |
+| 6c        | Finance & Expense    | 2-3 days        | specs/finance-expense-tracking/             |
+| 7         | Dashboard            | 2 days          | specs/dashboard-overview/                   |
+| 8         | Settings & Staff     | 2 days          | specs/settings-staff-management/            |
+| **Total** |                      | **~21-29 days** | All phases have requirements, design, tasks |
 
 
 ---
 
 ## Pre-Implementation Actions Required
 
-Before starting Phase 0:
+Before starting Phase 0 (if starting from scratch):
 
 1. **Update README**: Change "React 18, Vite" to "Next.js (App Router)" in the tech stack table
-2. **Write missing specs**: Multi-Property, Dashboard, Finance/Expense, Tenant Notes, Settings each need requirements.md, design.md, and tasks.md
-3. **Set up Supabase project**: Create free-tier Supabase project, get `DATABASE_URL` and connection string
-4. **Generate `BETTER_AUTH_SECRET`**: Random secret for auth token signing
+2. **Set up Supabase project**: Create free-tier Supabase project, get `DATABASE_URL` and connection string
+3. **Generate `BETTER_AUTH_SECRET`**: Random secret for auth token signing
 
-The missing specs (Phases 2, 6a, 6c, 7, 8) can be written incrementally -- each spec only needs to be done before its phase starts. Phases 0-1 and 3-5 can begin immediately with existing specs.
+**Specs**: All feature specs exist under `specs/<feature>/` with requirements.md, design.md, and tasks.md (user-authentication, multi-property-management, room-inventory-management, tenant-room-basics, payment-recording, tenant-notes, outstanding-balance, finance-expense-tracking, dashboard-overview, settings-staff-management). For every phase, **tests (steps 1–3) are written and validated before any implementation (steps 4–6)**. E2E test folders must match spec names (`e2e/<feature>/`) for `validate-tests.ts --feature <feature>`. After Phase 8, add Tier 2 journey tests in `e2e/journeys/`.
