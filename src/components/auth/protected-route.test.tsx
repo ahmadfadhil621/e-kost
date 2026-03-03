@@ -95,7 +95,7 @@ describe("ProtectedRoute", () => {
   });
 
   describe("edge cases", () => {
-    it("shows loading state while session is being checked", () => {
+    it("shows app shell (children) while session is being checked", () => {
       mockLoading = true;
       mockUser = null;
 
@@ -105,7 +105,8 @@ describe("ProtectedRoute", () => {
         </ProtectedRoute>
       );
 
-      expect(screen.queryByText("Protected Content")).not.toBeInTheDocument();
+      // Render children while loading so header/app shell is visible (avoids blank page and E2E timeouts)
+      expect(screen.getByText("Protected Content")).toBeInTheDocument();
       expect(mockPush).not.toHaveBeenCalled();
     });
 

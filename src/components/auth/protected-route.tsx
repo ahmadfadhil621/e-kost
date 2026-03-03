@@ -14,11 +14,9 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     }
   }, [user, loading, router]);
 
-  if (loading) {
-    return null;
-  }
-
-  if (!user) {
+  // Render children while loading so the app shell (e.g. header) is visible;
+  // avoids blank page and E2E timeouts when session check is slow
+  if (!loading && !user) {
     return null;
   }
 

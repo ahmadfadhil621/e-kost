@@ -52,14 +52,8 @@ export default function DashboardPage() {
     }
   }, [isLoading, properties.length, activeId, router]);
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-[200px] items-center justify-center">
-        <p className="text-muted-foreground">{t("common.loading")}</p>
-      </div>
-    );
-  }
-
+  // Show empty state as soon as we have no properties (including while loading)
+  // so the create prompt is visible quickly and E2E/parallel load don't time out
   if (properties.length === 0) {
     return (
       <div className="space-y-4">
@@ -67,9 +61,20 @@ export default function DashboardPage() {
         <p className="text-muted-foreground">
           {t("property.list.empty")}
         </p>
+        {isLoading && (
+          <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
+        )}
         <Button asChild className="min-h-[44px] min-w-[44px]">
           <Link href="/properties/new">{t("property.create.submit")}</Link>
         </Button>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[200px] items-center justify-center">
+        <p className="text-muted-foreground">{t("common.loading")}</p>
       </div>
     );
   }

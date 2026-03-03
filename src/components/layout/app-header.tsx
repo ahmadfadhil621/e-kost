@@ -8,7 +8,7 @@ export function AppHeader() {
   const { t } = useTranslation();
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background">
+    <header role="banner" className="sticky top-0 z-50 border-b bg-background">
       <div className="flex h-14 items-center justify-between gap-2 px-4">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <PropertySwitcher />
