@@ -1,7 +1,7 @@
 ---
 description: TDD testing conventions and expectations for E-Kost
 globs: "**/*.test.{ts,tsx},**/e2e/**/*.spec.ts"
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Testing Standards (TDD)
