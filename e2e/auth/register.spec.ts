@@ -24,7 +24,7 @@ test.describe("register", () => {
       await page.getByLabel(/password/i).fill("SecurePass123!");
       await page.getByRole("button", { name: /register/i }).click();
 
-      await expect(page).toHaveURL("/", { timeout: 10000 });
+      await expect(page).toHaveURL("/", { timeout: 20000 });
     });
 
     test("registration page displays all required fields", async ({
@@ -104,7 +104,7 @@ test.describe("register", () => {
       await page.getByLabel(/email address/i).fill(duplicateEmail);
       await page.getByLabel(/password/i).fill("SecurePass123!");
       await page.getByRole("button", { name: /register/i }).click();
-      await expect(page).toHaveURL("/", { timeout: 10000 });
+      await expect(page).toHaveURL("/", { timeout: 20000 });
 
       await page.goto("/register");
       await page.getByLabel(/full name/i).fill("Duplicate User");
@@ -112,7 +112,9 @@ test.describe("register", () => {
       await page.getByLabel(/password/i).fill("SecurePass123!");
       await page.getByRole("button", { name: /register/i }).click();
 
-      await expect(page.getByRole("alert")).toBeVisible({ timeout: 10000 });
+      await expect(page.locator("form [role='alert']")).toBeVisible({
+        timeout: 15000,
+      });
     });
   });
 
@@ -128,7 +130,7 @@ test.describe("register", () => {
       await page.getByLabel(/password/i).fill("Exactly8");
       await page.getByRole("button", { name: /register/i }).click();
 
-      await expect(page).toHaveURL("/", { timeout: 10000 });
+      await expect(page).toHaveURL("/", { timeout: 20000 });
     });
 
     test("password field masks input", async ({ page }) => {

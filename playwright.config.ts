@@ -18,12 +18,22 @@ export default defineConfig({
   projects: [
     { name: "setup", testMatch: /.*\.setup\.ts/ },
     {
-      name: "chromium",
+      name: "chromium-no-props",
+      testMatch: /switch-property\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 375, height: 667 },
       },
       dependencies: ["setup"],
+    },
+    {
+      name: "chromium",
+      testMatch: /^(?!.*switch-property\.spec\.ts).*\.spec\.ts$/,
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 375, height: 667 },
+      },
+      dependencies: ["chromium-no-props"],
     },
   ],
   webServer: {

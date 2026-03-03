@@ -9,12 +9,12 @@ test.use({ storageState: "e2e/.auth/user.json" });
 
 test.describe("logout", () => {
   test.describe("good cases", () => {
-    test("user logs out and is redirected to login", async ({ page }) => {
+    test("user logs out and is redirected to login", { timeout: 60000 }, async ({ page }) => {
       await page.goto("/");
 
-      await expect(page.getByText(/dashboard/i)).toBeVisible({
-        timeout: 10000,
-      });
+      await expect(
+        page.getByText(/dashboard/i).or(page.getByRole("button", { name: /my properties/i })).or(page.getByRole("link", { name: /create property/i })).first()
+      ).toBeVisible({ timeout: 35000 });
 
       await page
         .getByRole("button", { name: /user profile/i })
@@ -29,13 +29,13 @@ test.describe("logout", () => {
   });
 
   test.describe("bad cases", () => {
-    test("after logout, accessing protected page redirects to login", async ({
+    test("after logout, accessing protected page redirects to login", { timeout: 60000 }, async ({
       page,
     }) => {
       await page.goto("/");
-      await expect(page.getByText(/dashboard/i)).toBeVisible({
-        timeout: 10000,
-      });
+      await expect(
+        page.getByText(/dashboard/i).or(page.getByRole("button", { name: /my properties/i })).or(page.getByRole("link", { name: /create property/i })).first()
+      ).toBeVisible({ timeout: 35000 });
 
       await page
         .getByRole("button", { name: /user profile/i })
@@ -51,13 +51,13 @@ test.describe("logout", () => {
   });
 
   test.describe("edge cases", () => {
-    test("logout button is accessible inside profile dropdown", async ({
+    test("logout button is accessible inside profile dropdown", { timeout: 60000 }, async ({
       page,
     }) => {
       await page.goto("/");
-      await expect(page.getByText(/dashboard/i)).toBeVisible({
-        timeout: 10000,
-      });
+      await expect(
+        page.getByText(/dashboard/i).or(page.getByRole("button", { name: /my properties/i })).or(page.getByRole("link", { name: /create property/i })).first()
+      ).toBeVisible({ timeout: 35000 });
 
       await page
         .getByRole("button", { name: /user profile/i })

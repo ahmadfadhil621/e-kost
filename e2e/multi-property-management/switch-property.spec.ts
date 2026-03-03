@@ -40,7 +40,7 @@ test.describe("switch property", () => {
       page,
     }) => {
       await page.goto("/");
-      const emptyOrCreate = page.getByText(/no properties|create your first|add property/i);
+      const emptyOrCreate = page.getByText(/no properties yet|create your first property|get started/i).first();
       await expect(emptyOrCreate).toBeVisible({ timeout: 10000 });
     });
   });

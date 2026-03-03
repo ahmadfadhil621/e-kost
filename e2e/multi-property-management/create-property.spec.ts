@@ -33,7 +33,7 @@ test.describe("create property", () => {
       await page.getByRole("button", { name: /create property/i }).click();
 
       await expect(
-        page.getByText(/created successfully|my properties|property/i)
+        page.getByText(/created successfully|my properties|property/i).first()
       ).toBeVisible({ timeout: 10000 });
     });
   });
@@ -46,8 +46,8 @@ test.describe("create property", () => {
 
       await page.getByRole("button", { name: /create property/i }).click();
 
-      await expect(page.getByText(/property name is required|required/i)).toBeVisible();
-      await expect(page.getByText(/address is required|required/i)).toBeVisible();
+      await expect(page.getByText(/property name is required|required/i).first()).toBeVisible();
+      await expect(page.getByText(/address is required|required/i).first()).toBeVisible();
     });
   });
 

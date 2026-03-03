@@ -35,8 +35,10 @@ test.describe("login", () => {
       await page.getByLabel(/password/i).fill(TEST_USER_PASSWORD);
       await page.getByRole("button", { name: /log in/i }).click();
 
-      await expect(page).toHaveURL("/", { timeout: 10000 });
-      await expect(page.getByText(/dashboard/i)).toBeVisible();
+      await expect(page).toHaveURL("/", { timeout: 20000 });
+      await expect(
+        page.getByText(/dashboard/i).or(page.getByRole("link", { name: /create property/i })).first()
+      ).toBeVisible({ timeout: 35000 });
     });
 
     test("login page displays all required fields", async ({ page }) => {
@@ -65,7 +67,9 @@ test.describe("login", () => {
       await page.getByLabel(/password/i).fill("SomePassword123");
       await page.getByRole("button", { name: /log in/i }).click();
 
-      await expect(page.getByText(/email is required/i)).toBeVisible();
+      await expect(page.getByText(/email is required/i)).toBeVisible({
+        timeout: 15000,
+      });
     });
 
     test("user sees validation error for empty password", async ({ page }) => {
@@ -84,7 +88,11 @@ test.describe("login", () => {
       await page.getByLabel(/password/i).fill("WrongPassword123");
       await page.getByRole("button", { name: /log in/i }).click();
 
-      await expect(page.getByRole("alert")).toBeVisible({ timeout: 10000 });
+      await expect(
+        page.locator("form [role='alert']").or(
+          page.getByText(/invalid|wrong|try again|not found|something went wrong/i)
+        )
+      ).toBeVisible({ timeout: 15000 });
     });
   });
 

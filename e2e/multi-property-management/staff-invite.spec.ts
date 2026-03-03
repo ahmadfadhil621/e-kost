@@ -14,11 +14,16 @@ test.describe("staff invite", () => {
     test("owner sees staff management section on property", async ({
       page,
     }) => {
+      // Ensure E2E user has a property so dashboard shows staff section
+      await page.goto("/properties/new");
+      await page.getByLabel(/property name|name/i).fill("E2E Staff Test Property");
+      await page.getByLabel(/address/i).fill("123 E2E Street");
+      await page.getByRole("button", { name: /create property/i }).click();
+      await expect(page).toHaveURL(/\/properties/, { timeout: 15000 });
       await page.goto("/");
-
       await expect(
         page.getByText(/staff|members|manage/i).first()
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible({ timeout: 15000 });
     });
 
     test("owner can open add staff form", async ({ page }) => {
