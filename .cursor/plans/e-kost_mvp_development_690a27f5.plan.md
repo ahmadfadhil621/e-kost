@@ -48,7 +48,7 @@ isProject: false
 
 ## Current State
 
-Phase 0 (Project Foundation), Phase 1 (User Authentication), and Phase 2 (Multi-Property Management) are complete. Implementation includes Next.js app shell, design tokens, i18n, Prisma schema, Vitest + Playwright config, full auth flow, and multi-property (Property CRUD, switcher, staff assignment, propertyId scoping, PropertyProvider/context). All regression checks: Vitest 125 passed; Playwright 34 passed (one auth E2E test “user sees error when email is already registered” may be flaky). Phase 3 (Room Inventory) is next.
+Phase 0 (Project Foundation), Phase 1 (User Authentication), and Phase 2 (Multi-Property Management) are complete. Implementation includes Next.js app shell, design tokens, i18n, Prisma schema, Vitest + Playwright config, full auth flow, and multi-property (Property CRUD, switcher, staff assignment, propertyId scoping, PropertyProvider/context). All regression checks: Vitest 125 passed; Playwright 34 passed (one auth E2E test “user sees error when email is already registered” may be flaky). Phase 3 (Room Inventory) is in progress: domain, RoomService, room API routes, RoomForm/StatusIndicator, tests, E2E specs, and quality gates (1–3) are done; PrismaRoomRepository, RoomList/Card/Detail/StatusFilter, pages, and id.json remain.
 
 ## Feature Development Workflow (TDD)
 

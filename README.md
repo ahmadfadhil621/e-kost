@@ -43,22 +43,23 @@ src/
 ├── app/
 │   ├── (auth)/              # Auth pages (login, register) — no header/nav
 │   ├── (app)/               # Authenticated pages — with header/nav
-│   ├── api/                 # API routes
+│   ├── api/                 # API routes (auth, properties, properties/[id]/rooms, …)
 │   ├── globals.css          # Design tokens (CSS variables)
 │   └── layout.tsx           # Root layout
 ├── components/
 │   ├── ui/                  # shadcn/ui components
 │   ├── auth/                # Auth-related components
+│   ├── property/            # Property CRUD, switcher
+│   ├── room/                # Room form, status indicator
 │   └── layout/              # App shell, header, nav
 ├── domain/
-│   ├── schemas/             # Shared Zod schemas
-│   └── interfaces/          # Repository interfaces (added in later phases)
-├── services/                # Business logic services (added in later phases)
-├── repositories/            # Prisma implementations (added in later phases)
+│   ├── schemas/             # Shared Zod schemas (property, room, auth)
+│   └── interfaces/          # Repository interfaces (property, room)
+├── lib/                     # Services (property-service, room-service), auth, prisma, i18n
 ├── generated/               # Prisma client output (do not edit)
 ├── hooks/                   # Custom React hooks
-├── lib/                     # Utilities (prisma, i18n, auth, etc.)
-└── test/                    # Test setup and helpers
+└── test/                    # Test setup, fixtures, mocks, fault reports
+e2e/                         # Playwright E2E specs (auth, properties, room-inventory)
 locales/
 ├── en.json                  # English translations
 └── id.json                  # Indonesian translations
@@ -86,7 +87,7 @@ Setup:
 
 ## Development Status
 
-**Current phase:** Phase 0 (Project Foundation) and Phase 1 (User Authentication) complete. App shell, design tokens, i18n, Prisma schema, test config, and full auth flow (registration, login, logout, protected routes, profile) are in place.
+**Completed:** Phase 0 (Foundation), Phase 1 (User Authentication), Phase 2 (Multi-Property Management). **In progress:** Phase 3 (Room Inventory) — domain schemas, RoomService, room CRUD API routes, RoomForm and StatusIndicator components, unit/API/component tests, E2E specs (create-room, update-status, filter-rooms), and test quality gates (Gate 1–3) are done; PrismaRoomRepository, RoomList/RoomCard/RoomDetail/StatusFilter UI, and full i18n (id.json) remain.
 
 Known limitations:
 

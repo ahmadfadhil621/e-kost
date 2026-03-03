@@ -2,7 +2,7 @@
 
 ## 1. Domain Layer
 
-- [ ] 1.1 Define Room entity and validation schemas
+- [x] 1.1 Define Room entity and validation schemas
   - **Description**: Create shared Zod schemas for room CRUD and TypeScript interfaces for Room and RoomStatus
   - **Acceptance Criteria**:
     - `createRoomSchema` validates roomNumber (1-50 chars, required, trimmed), roomType (1-100 chars, required, trimmed), monthlyRent (positive number, required)
@@ -12,7 +12,7 @@
   - **Dependencies**: None
   - **Effort**: S
 
-- [ ] 1.2 Define IRoomRepository interface
+- [x] 1.2 Define IRoomRepository interface
   - **Description**: Create repository interface for room data access
   - **Acceptance Criteria**:
     - Methods: create, findById, findByProperty, update, updateStatus
@@ -24,7 +24,7 @@
 
 ## 2. Service Layer
 
-- [ ] 2.1 Implement RoomService
+- [x] 2.1 Implement RoomService
   - **Description**: Build service layer with business logic for room CRUD and status management
   - **Acceptance Criteria**:
     - `createRoom` validates data, enforces room number uniqueness within property, sets initial status to available
@@ -36,7 +36,7 @@
   - **Dependencies**: 1.2
   - **Effort**: L
 
-- [ ] 2.2 Write unit tests for RoomService
+- [x] 2.2 Write unit tests for RoomService
   - **Description**: Test all room business logic
   - **Acceptance Criteria**:
     - Tests for creation (valid data, missing fields, duplicate room number, negative rent, initial status)
@@ -50,7 +50,7 @@
 
 ## 3. Data Layer
 
-- [ ] 3.1 Verify Prisma schema for Room
+- [x] 3.1 Verify Prisma schema for Room
   - **Description**: Ensure Room model exists in Prisma schema with correct fields, indexes, and relations
   - **Acceptance Criteria**:
     - Room model: id, propertyId, roomNumber, roomType, monthlyRent, status, createdAt, updatedAt
@@ -74,7 +74,7 @@
 
 ## 4. API Layer
 
-- [ ] 4.1 Implement room CRUD API routes
+- [x] 4.1 Implement room CRUD API routes
   - **Description**: Create REST endpoints for room management scoped to a property
   - **Acceptance Criteria**:
     - POST /api/properties/[propertyId]/rooms — create room (authenticated, property access validated)
@@ -88,7 +88,7 @@
   - **Dependencies**: 2.1, 3.2
   - **Effort**: L
 
-- [ ] 4.2 Write API route tests
+- [x] 4.2 Write API route tests
   - **Description**: Test all room API endpoints
   - **Acceptance Criteria**:
     - Tests for each endpoint: success cases, validation errors, not found, unauthorized
@@ -100,7 +100,7 @@
 
 ## 5. UI Layer
 
-- [ ] 5.1 Create RoomForm component
+- [x] 5.1 Create RoomForm component
   - **Description**: Build mobile-responsive form for creating and editing rooms
   - **Acceptance Criteria**:
     - Fields: room number (text), room type (text), monthly rent (number)
@@ -149,7 +149,7 @@
   - **Dependencies**: 4.1, 5.1
   - **Effort**: M
 
-- [ ] 5.5 Create StatusIndicator component
+- [x] 5.5 Create StatusIndicator component
   - **Description**: Build reusable status indicator for room status
   - **Acceptance Criteria**:
     - Color + icon + text label for each status (available, occupied, under renovation)
@@ -226,6 +226,10 @@
     - No performance degradation
   - **Dependencies**: 5.2
   - **Effort**: S
+
+## Progress Note
+
+TDD steps 1–3 complete: unit/API/component tests and E2E specs written; Gate 1 (structural), Gate 2 (fault injection), and Gate 3 (review checklist) passed. Domain (1.1, 1.2), service (2.1, 2.2), API (4.1, 4.2), RoomForm (5.1), StatusIndicator (5.5), and en.json room keys are implemented. Remaining: 3.2 PrismaRoomRepository, 5.2–5.4 and 5.6 UI, 6.1 id.json, 7.x validation.
 
 ## Open Questions / Assumptions
 

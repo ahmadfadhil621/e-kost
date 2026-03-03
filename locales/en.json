@@ -122,5 +122,51 @@
       "register": "Account created successfully",
       "logout": "You have been logged out successfully"
     }
+  },
+  "room": {
+    "create": {
+      "title": "Add Room",
+      "roomNumber": "Room Number",
+      "roomType": "Room Type",
+      "monthlyRent": "Monthly Rent",
+      "submit": "Create Room",
+      "cancel": "Cancel",
+      "success": "Room created successfully"
+    },
+    "edit": {
+      "title": "Edit Room",
+      "submit": "Save Changes",
+      "success": "Room updated successfully"
+    },
+    "list": {
+      "title": "Rooms",
+      "empty": "No rooms found",
+      "filterAll": "All Rooms",
+      "filterAvailable": "Available",
+      "filterOccupied": "Occupied",
+      "filterRenovation": "Under Renovation"
+    },
+    "detail": {
+      "title": "Room Details",
+      "edit": "Edit",
+      "changeStatus": "Change Status"
+    },
+    "status": {
+      "available": "Available",
+      "occupied": "Occupied",
+      "under_renovation": "Under Renovation",
+      "updateSuccess": "Room status updated successfully"
+    },
+    "validation": {
+      "roomNumberRequired": "Room number is required",
+      "roomTypeRequired": "Room type is required",
+      "monthlyRentRequired": "Monthly rent is required",
+      "monthlyRentPositive": "Monthly rent must be a positive number"
+    },
+    "errors": {
+      "duplicateRoomNumber": "Room number already exists",
+      "notFound": "Room not found",
+      "loadFailed": "Failed to load room data"
+    }
   }
 }
