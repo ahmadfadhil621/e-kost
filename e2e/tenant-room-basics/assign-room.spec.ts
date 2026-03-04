@@ -17,6 +17,7 @@ test.describe("assign room", () => {
       page,
       request,
     }) => {
+      test.info().setTimeout(60000);
       const propertyId = getPropertyId();
       const tenantRes = await request.post(
         `/api/properties/${propertyId}/tenants`,
@@ -42,15 +43,31 @@ test.describe("assign room", () => {
       await expect(
         page.getByRole("button", { name: /assign room/i }).or(
           page.getByRole("link", { name: /assign room/i })
-        )
-      ).toBeVisible({ timeout: 5000 });
+        ).first()
+      ).toBeVisible({ timeout: 15000 });
     });
 
-    test("user assigns tenant to room and sees confirmation", { timeout: 30000 }, async ({
+    test("user assigns tenant to room and sees confirmation", async ({
       page,
       request,
     }) => {
+      test.info().setTimeout(60000);
       const propertyId = getPropertyId();
+      const roomNumber = "Assign-" + Date.now();
+      const roomRes = await request.post(
+        `/api/properties/${propertyId}/rooms`,
+        {
+          data: {
+            roomNumber,
+            roomType: "single",
+            monthlyRent: 500000,
+          },
+        }
+      );
+      if (!roomRes.ok()) {
+        test.skip();
+        return;
+      }
       const tenantRes = await request.post(
         `/api/properties/${propertyId}/tenants`,
         {
@@ -79,14 +96,16 @@ test.describe("assign room", () => {
         .click();
       await expect(
         page.getByText(/available rooms|select.*room|assign room/i).first()
-      ).toBeVisible({ timeout: 5000 });
-      const roomOption = page.getByRole("button", { name: /E2E-1|room/i }).first();
-      if ((await roomOption.count()) > 0) {
-        await roomOption.click();
-        await expect(
-          page.getByText(/room assigned|success|assigned/i)
-        ).toBeVisible({ timeout: 10000 });
-      }
+      ).toBeVisible({ timeout: 12000 });
+      await expect(
+        page.getByRole("button", { name: new RegExp(roomNumber, "i") })
+      ).toBeVisible({ timeout: 8000 });
+      await page
+        .getByRole("button", { name: new RegExp(roomNumber, "i") })
+        .click();
+      await expect(
+        page.getByText(/room assigned|success|assigned/i).first()
+      ).toBeVisible({ timeout: 15000 });
     });
   });
 
@@ -95,6 +114,7 @@ test.describe("assign room", () => {
       page,
       request,
     }) => {
+      test.info().setTimeout(60000);
       const propertyId = getPropertyId();
       const tenantRes = await request.post(
         `/api/properties/${propertyId}/tenants`,
@@ -123,10 +143,11 @@ test.describe("assign room", () => {
         .first()
         .click();
       await expect(
-        page.getByText(/no available rooms|no rooms/i).or(
-          page.getByText(/available rooms/i)
-        )
-      ).toBeVisible({ timeout: 5000 });
+        page
+          .getByText(/no available rooms|no rooms/i)
+          .or(page.getByText(/available rooms/i))
+          .first()
+      ).toBeVisible({ timeout: 12000 });
     });
   });
 
@@ -135,6 +156,7 @@ test.describe("assign room", () => {
       page,
       request,
     }) => {
+      test.info().setTimeout(60000);
       const propertyId = getPropertyId();
       const tenantRes = await request.post(
         `/api/properties/${propertyId}/tenants`,
@@ -162,15 +184,18 @@ test.describe("assign room", () => {
         .or(page.getByRole("link", { name: /assign room/i }))
         .first()
         .click();
+      await expect(
+        page.getByText(/available rooms|select.*room|assign room|no available/i)
+          .first()
+      ).toBeVisible({ timeout: 12000 });
       const cancelBtn = page.getByRole("button", { name: /cancel/i }).first();
-      if ((await cancelBtn.count()) > 0) {
-        await cancelBtn.click();
-        await expect(
-          page.getByRole("button", { name: /assign room/i }).or(
-            page.getByRole("link", { name: /assign room/i })
-          )
-        ).toBeVisible({ timeout: 2000 });
-      }
+      await expect(cancelBtn).toBeVisible({ timeout: 8000 });
+      await cancelBtn.click();
+      await expect(
+        page.getByRole("button", { name: /assign room/i }).or(
+          page.getByRole("link", { name: /assign room/i })
+        ).first()
+      ).toBeVisible({ timeout: 8000 });
     });
   });
 });

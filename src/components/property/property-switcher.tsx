@@ -36,19 +36,6 @@ export function PropertySwitcher() {
     router.push(path);
   };
 
-  if (properties.length === 0) {
-    return (
-      <Button
-        variant="ghost"
-        size="sm"
-        className="min-h-[44px] min-w-[44px]"
-        onClick={() => router.push("/properties")}
-      >
-        {t("property.list.title")}
-      </Button>
-    );
-  }
-
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -66,21 +53,13 @@ export function PropertySwitcher() {
         <SheetHeader>
           <SheetTitle>{t("property.list.title")}</SheetTitle>
         </SheetHeader>
-        <ul className="mt-4 flex flex-col gap-1">
-          {properties.map((p) => (
-            <li key={p.id}>
-              <Button
-                variant={p.id === activeId ? "secondary" : "ghost"}
-                className="h-12 w-full justify-start min-h-[44px] min-w-[44px]"
-                onClick={() => handleSelect(p.id)}
-              >
-                {p.name}
-              </Button>
-            </li>
-          ))}
-          <li className="mt-2 border-t pt-2">
+        {properties.length === 0 ? (
+          <div className="mt-4 space-y-2">
+            <p className="text-sm text-muted-foreground">
+              {t("property.list.empty")}
+            </p>
             <Button
-              variant="ghost"
+              variant="default"
               className="h-12 w-full justify-start gap-2 min-h-[44px] min-w-[44px]"
               onClick={() => closeAndGo("/properties/new")}
             >
@@ -88,15 +67,47 @@ export function PropertySwitcher() {
               {t("property.list.addProperty")}
             </Button>
             <Button
-              variant="ghost"
+              variant="outline"
               className="h-12 w-full justify-start gap-2 min-h-[44px] min-w-[44px]"
               onClick={() => closeAndGo("/properties")}
             >
               <List className="h-4 w-4 shrink-0" aria-hidden />
               {t("property.list.viewAll")}
             </Button>
-          </li>
-        </ul>
+          </div>
+        ) : (
+          <ul className="mt-4 flex flex-col gap-1">
+            {properties.map((p) => (
+              <li key={p.id}>
+                <Button
+                  variant={p.id === activeId ? "secondary" : "ghost"}
+                  className="h-12 w-full justify-start min-h-[44px] min-w-[44px]"
+                  onClick={() => handleSelect(p.id)}
+                >
+                  {p.name}
+                </Button>
+              </li>
+            ))}
+            <li className="mt-2 border-t pt-2">
+              <Button
+                variant="ghost"
+                className="h-12 w-full justify-start gap-2 min-h-[44px] min-w-[44px]"
+                onClick={() => closeAndGo("/properties/new")}
+              >
+                <Plus className="h-4 w-4 shrink-0" aria-hidden />
+                {t("property.list.addProperty")}
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-12 w-full justify-start gap-2 min-h-[44px] min-w-[44px]"
+                onClick={() => closeAndGo("/properties")}
+              >
+                <List className="h-4 w-4 shrink-0" aria-hidden />
+                {t("property.list.viewAll")}
+              </Button>
+            </li>
+          </ul>
+        )}
       </SheetContent>
     </Sheet>
   );

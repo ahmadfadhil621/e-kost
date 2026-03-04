@@ -31,9 +31,10 @@ test.describe("create room", () => {
       ).toBeVisible({ timeout: 2000 });
     });
 
-    test("user creates room with valid data and sees success", { timeout: 45000 }, async ({
+    test("user creates room with valid data and sees success", async ({
       page,
     }) => {
+      test.info().setTimeout(45000);
       await goToNewRoomPage(page);
       const roomNumber = "E2E-" + Date.now();
       await page.getByLabel(/room number/i).fill(roomNumber);

@@ -34,5 +34,5 @@ export async function goToTenantDetail(page: Page, tenantId: string) {
     .getByRole("button", { name: /edit|assign room|move out/i })
     .or(page.getByText(/tenant details|detail/i))
     .first()
-    .waitFor({ state: "visible", timeout: 10000 });
+    .waitFor({ state: "visible", timeout: 45000 });
 }

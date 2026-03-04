@@ -9,7 +9,8 @@ test.use({ storageState: "e2e/.auth/user.json" });
 
 test.describe("logout", () => {
   test.describe("good cases", () => {
-    test("user logs out and is redirected to login", { timeout: 60000 }, async ({ page }) => {
+    test("user logs out and is redirected to login", async ({ page }) => {
+      test.info().setTimeout(60000);
       await page.goto("/");
 
       await expect(
@@ -24,17 +25,19 @@ test.describe("logout", () => {
         .getByRole("menuitem", { name: /log out/i })
         .click();
 
+      await page.waitForURL(/\/login/, { timeout: 20000 });
       await expect(page.getByLabel(/email address/i)).toBeVisible({
-        timeout: 15000,
+        timeout: 10000,
       });
       await expect(page).toHaveURL(/\/login/);
     });
   });
 
   test.describe("bad cases", () => {
-    test("after logout, accessing protected page redirects to login", { timeout: 90000 }, async ({
+    test("after logout, accessing protected page redirects to login", async ({
       page,
     }) => {
+      test.info().setTimeout(90000);
       await page.goto("/");
       await expect(
         page.getByText(/dashboard/i).or(page.getByRole("button", { name: /my properties/i })).or(page.getByRole("link", { name: /create property/i })).first()
@@ -46,8 +49,9 @@ test.describe("logout", () => {
       await page
         .getByRole("menuitem", { name: /log out/i })
         .click();
+      await page.waitForURL(/\/login/, { timeout: 20000 });
       await expect(page.getByLabel(/email address/i)).toBeVisible({
-        timeout: 15000,
+        timeout: 10000,
       });
       await expect(page).toHaveURL(/\/login/);
 
@@ -60,9 +64,10 @@ test.describe("logout", () => {
   });
 
   test.describe("edge cases", () => {
-    test("logout button is accessible inside profile dropdown", { timeout: 60000 }, async ({
+    test("logout button is accessible inside profile dropdown", async ({
       page,
     }) => {
+      test.info().setTimeout(60000);
       await page.goto("/");
       await expect(
         page.getByText(/dashboard/i).or(page.getByRole("button", { name: /my properties/i })).or(page.getByRole("link", { name: /create property/i })).first()

@@ -97,10 +97,15 @@ export default function DashboardPage() {
         <h2 className="text-lg font-semibold">{property.name}</h2>
         <p className="text-sm text-muted-foreground">{property.address || "—"}</p>
       </div>
-      <div>
+      <div className="flex flex-col gap-2">
         <Button asChild className="min-h-[44px] min-w-[44px]">
           <Link href={`/properties/${activeId}/rooms`}>
             {t("nav.rooms")}
+          </Link>
+        </Button>
+        <Button asChild className="min-h-[44px] min-w-[44px]">
+          <Link href={`/properties/${activeId}/tenants`}>
+            {t("nav.tenants")}
           </Link>
         </Button>
       </div>

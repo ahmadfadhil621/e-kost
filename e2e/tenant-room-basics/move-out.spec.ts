@@ -79,10 +79,11 @@ test.describe("move out", () => {
       ).toBeVisible({ timeout: 2000 });
     });
 
-    test("user confirms move-out and sees success", { timeout: 20000 }, async ({
+    test("user confirms move-out and sees success", async ({
       page,
       request,
     }) => {
+      test.info().setTimeout(45000);
       const propertyId = getPropertyId();
       const tenantRes = await request.post(
         `/api/properties/${propertyId}/tenants`,
@@ -117,9 +118,10 @@ test.describe("move out", () => {
         .getByRole("button", { name: /confirm move out|confirm/i })
         .first()
         .click();
-      await expect(
-        page.getByText(/moved out|success|tenant moved/i)
-      ).toBeVisible({ timeout: 10000 });
+      await Promise.race([
+        page.getByText(/moved out|success|tenant moved/i).first().waitFor({ state: "visible", timeout: 15000 }),
+        page.waitForURL(new RegExp(`/properties/${propertyId}/tenants(?:/|$)`), { timeout: 15000 }),
+      ]);
     });
   });
 

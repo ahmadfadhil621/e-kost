@@ -168,5 +168,52 @@
       "notFound": "Kamar tidak ditemukan",
       "loadFailed": "Gagal memuat data kamar"
     }
+  },
+  "tenant": {
+    "list": {
+      "title": "Penyewa",
+      "empty": "Belum ada penyewa",
+      "addTenant": "Tambah penyewa"
+    },
+    "create": {
+      "title": "Tambah Penyewa",
+      "name": "Nama Lengkap",
+      "phone": "Telepon",
+      "email": "Email",
+      "submit": "Buat Penyewa",
+      "success": "Penyewa berhasil ditambahkan"
+    },
+    "edit": {
+      "title": "Ubah Penyewa",
+      "submit": "Simpan Perubahan",
+      "success": "Penyewa berhasil diperbarui"
+    },
+    "detail": {
+      "title": "Detail Penyewa",
+      "assignRoom": "Assign Kamar",
+      "moveOut": "Pindah Keluar",
+      "edit": "Ubah",
+      "room": "Kamar",
+      "noRoom": "Belum ada kamar"
+    },
+    "assignRoom": {
+      "title": "Assign Kamar",
+      "availableRooms": "Kamar tersedia",
+      "noAvailableRooms": "Tidak ada kamar tersedia",
+      "selectRoom": "Pilih kamar",
+      "success": "Kamar berhasil diassign"
+    },
+    "moveOut": {
+      "title": "Pindah Keluar",
+      "confirmMessage": "Yakin ingin memindahkan penyewa ini? Kamar akan menjadi tersedia.",
+      "confirm": "Konfirmasi Pindah Keluar",
+      "success": "Penyewa berhasil pindah keluar"
+    },
+    "validation": {
+      "nameRequired": "Nama wajib diisi",
+      "phoneRequired": "Telepon wajib diisi",
+      "emailRequired": "Email wajib diisi",
+      "invalidEmail": "Masukkan alamat email yang valid"
+    }
   }
 }

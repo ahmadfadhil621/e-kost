@@ -8,12 +8,12 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
 
 /** Room data for card display; accepts API shape (date strings) or domain shape (Date). */
-type RoomForCard = Pick<Room, "id" | "propertyId" | "roomNumber" | "roomType" | "monthlyRent" | "status"> & {
+export type RoomForCard = Pick<Room, "id" | "propertyId" | "roomNumber" | "roomType" | "monthlyRent" | "status"> & {
   createdAt?: Date | string;
   updatedAt?: Date | string;
 };
 
-interface RoomCardProps {
+export interface RoomCardProps {
   room: RoomForCard;
   href: string;
 }

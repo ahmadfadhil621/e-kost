@@ -168,5 +168,52 @@
       "notFound": "Room not found",
       "loadFailed": "Failed to load room data"
     }
+  },
+  "tenant": {
+    "list": {
+      "title": "Tenants",
+      "empty": "No tenants found",
+      "addTenant": "Add tenant"
+    },
+    "create": {
+      "title": "Add Tenant",
+      "name": "Full Name",
+      "phone": "Phone",
+      "email": "Email",
+      "submit": "Create Tenant",
+      "success": "Tenant created successfully"
+    },
+    "edit": {
+      "title": "Edit Tenant",
+      "submit": "Save Changes",
+      "success": "Tenant updated successfully"
+    },
+    "detail": {
+      "title": "Tenant Details",
+      "assignRoom": "Assign Room",
+      "moveOut": "Move Out",
+      "edit": "Edit",
+      "room": "Room",
+      "noRoom": "No room assigned"
+    },
+    "assignRoom": {
+      "title": "Assign Room",
+      "availableRooms": "Available rooms",
+      "noAvailableRooms": "No available rooms",
+      "selectRoom": "Select a room",
+      "success": "Room assigned successfully"
+    },
+    "moveOut": {
+      "title": "Move Out",
+      "confirmMessage": "Are you sure you want to move this tenant out? The room will become available.",
+      "confirm": "Confirm Move Out",
+      "success": "Tenant moved out successfully"
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "phoneRequired": "Phone is required",
+      "emailRequired": "Email is required",
+      "invalidEmail": "Please enter a valid email address"
+    }
   }
 }

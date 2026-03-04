@@ -2,6 +2,7 @@
 // REQ 5.3, 5.4, 5.5 -> it('POST returns 200 and tenant with movedOutAt when move-out succeeds')
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { NextResponse } from "next/server";
 import { POST } from "./route";
 import { createTenant } from "@/test/fixtures/tenant";
 
@@ -86,9 +87,7 @@ describe("POST /api/properties/[propertyId]/tenants/[tenantId]/move-out", () => 
       vi.mocked(withPropertyAccess).mockResolvedValueOnce({
         userId: null,
         role: null,
-        errorResponse: new Response(JSON.stringify({ error: "Unauthorized" }), {
-          status: 401,
-        }),
+        errorResponse: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
       });
 
       const request = new Request(

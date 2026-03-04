@@ -29,9 +29,10 @@ test.describe("create tenant", () => {
       ).toBeVisible({ timeout: 2000 });
     });
 
-    test("user creates tenant with valid data and sees success", { timeout: 45000 }, async ({
+    test("user creates tenant with valid data and sees success", async ({
       page,
     }) => {
+      test.info().setTimeout(45000);
       await goToNewTenantPage(page);
       const unique = "E2E-" + Date.now();
       await page.getByLabel(/name|full name/i).first().fill("Tenant " + unique);

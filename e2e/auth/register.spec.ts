@@ -94,9 +94,10 @@ test.describe("register", () => {
       ).toBeVisible();
     });
 
-    test("user sees error when email is already registered", { timeout: 60000 }, async ({
+    test("user sees error when email is already registered", async ({
       page,
     }) => {
+      test.info().setTimeout(60000);
       const duplicateEmail = `dup-${Date.now()}@test.com`;
 
       await page.goto("/register");

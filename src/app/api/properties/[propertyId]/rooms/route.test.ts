@@ -14,6 +14,7 @@ import { createRoom } from "@/test/fixtures/room";
 
 const mockSession = {
   user: { id: "test-user-id", name: "Test User", email: "test@example.com" },
+  session: {} as unknown,
 };
 
 const propertyId = "prop-123";

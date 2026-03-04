@@ -6,25 +6,14 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { RoomCard } from "@/components/room/room-card";
+import { RoomCard, type RoomForCard } from "@/components/room/room-card";
 import { StatusFilter, type StatusFilterValue } from "@/components/room/status-filter";
 import type { RoomStatus } from "@/domain/schemas/room";
-
-type RoomSummary = {
-  id: string;
-  propertyId: string;
-  roomNumber: string;
-  roomType: string;
-  monthlyRent: number;
-  status: RoomStatus;
-  createdAt: string;
-  updatedAt: string;
-};
 
 async function fetchRooms(
   propertyId: string,
   status?: RoomStatus
-): Promise<{ rooms: RoomSummary[]; count: number }> {
+): Promise<{ rooms: RoomForCard[]; count: number }> {
   const url = status
     ? `/api/properties/${propertyId}/rooms?status=${status}`
     : `/api/properties/${propertyId}/rooms`;

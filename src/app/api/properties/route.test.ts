@@ -11,6 +11,7 @@ import { POST, GET } from "./route";
 
 const mockSession = {
   user: { id: "test-user-id", name: "Test User", email: "test@example.com" },
+  session: {} as unknown,
 };
 
 vi.mock("@/lib/auth-api", () => ({

@@ -7,11 +7,13 @@
 // PROP 12 -> it('GET returns count equal to tenants array length')
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { NextResponse } from "next/server";
 import { POST, GET } from "./route";
 import { createTenant } from "@/test/fixtures/tenant";
 
 const mockSession = {
   user: { id: "test-user-id", name: "Test User", email: "test@example.com" },
+  session: {} as unknown,
 };
 
 const propertyId = "prop-123";
@@ -129,9 +131,7 @@ describe("POST /api/properties/[propertyId]/tenants", () => {
       vi.mocked(withPropertyAccess).mockResolvedValueOnce({
         userId: null,
         role: null,
-        errorResponse: new Response(JSON.stringify({ error: "Unauthorized" }), {
-          status: 401,
-        }),
+        errorResponse: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
       });
 
       const request = new Request(
@@ -230,9 +230,7 @@ describe("GET /api/properties/[propertyId]/tenants", () => {
       vi.mocked(withPropertyAccess).mockResolvedValueOnce({
         userId: null,
         role: null,
-        errorResponse: new Response(JSON.stringify({ error: "Unauthorized" }), {
-          status: 401,
-        }),
+        errorResponse: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
       });
 
       const request = new Request(
