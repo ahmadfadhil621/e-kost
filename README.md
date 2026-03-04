@@ -59,7 +59,7 @@ src/
 ├── generated/               # Prisma client output (do not edit)
 ├── hooks/                   # Custom React hooks
 └── test/                    # Test setup, fixtures, mocks, fault reports
-e2e/                         # Playwright E2E specs (auth, properties, room-inventory)
+e2e/                         # Playwright E2E specs (auth, multi-property-management, room-inventory-management)
 locales/
 ├── en.json                  # English translations
 └── id.json                  # Indonesian translations
@@ -98,7 +98,7 @@ CI uses a PostgreSQL 16 service container and sets `DATABASE_URL`, `BETTER_AUTH_
 
 ## Development Status
 
-**Completed:** Phase 0 (Foundation), Phase 1 (User Authentication), Phase 2 (Multi-Property Management), Phase 3 (Room Inventory). Room inventory includes PrismaRoomRepository, room CRUD API routes, RoomList/RoomCard/RoomDetail/StatusFilter/RoomForm/StatusIndicator, and i18n (en + id). Remaining: 7.x manual validation (workflow, filtering, mobile, performance).
+**Completed:** Phase 0 (Foundation), Phase 1 (User Authentication), Phase 2 (Multi-Property Management), Phase 3 (Room Inventory). Room inventory includes PrismaRoomRepository, room CRUD API routes, RoomList/RoomCard/RoomDetail/StatusFilter/RoomForm/StatusIndicator, and i18n (en + id). Full Vitest and Playwright suites pass in CI. Optional manual checks (workflow, filtering, mobile, performance) are listed in `specs/room-inventory-management/tasks.md` (section 7).
 
 Known limitations:
 

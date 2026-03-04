@@ -16,7 +16,7 @@ todos:
     status: completed
   - id: phase-3
     content: "Phase 3: Room Inventory (20 tasks) -- Room CRUD + status API, list/detail/form UI, status indicators, filters, i18n, tests"
-    status: pending
+    status: completed
   - id: phase-4
     content: "Phase 4: Tenant & Room Basics (21 tasks) -- Tenant CRUD + assignment + move-out API, list/detail/form UI, move-out dialog, i18n, tests"
     status: pending
@@ -48,7 +48,7 @@ isProject: false
 
 ## Current State
 
-Phase 0 (Project Foundation), Phase 1 (User Authentication), and Phase 2 (Multi-Property Management) are complete. Implementation includes Next.js app shell, design tokens, i18n, Prisma schema, Vitest + Playwright config, full auth flow, and multi-property (Property CRUD, switcher, staff assignment, propertyId scoping, PropertyProvider/context). All regression checks: Vitest 125 passed; Playwright 34 passed (one auth E2E test “user sees error when email is already registered” may be flaky). Phase 3 (Room Inventory) is in progress: domain, RoomService, room API routes, RoomForm/StatusIndicator, tests, E2E specs, and quality gates (1–3) are done; PrismaRoomRepository, RoomList/Card/Detail/StatusFilter, pages, and id.json remain.
+Phase 0 (Project Foundation), Phase 1 (User Authentication), Phase 2 (Multi-Property Management), and Phase 3 (Room Inventory) are complete. Implementation includes the full stack for each: auth flow, multi-property (Property CRUD, switcher, staff assignment, propertyId scoping), and room inventory (domain, RoomService, PrismaRoomRepository, room CRUD + status API, RoomList/RoomCard/RoomDetail/RoomForm/StatusFilter/StatusIndicator, pages, i18n). Full regression (Vitest + Playwright) passes in CI. Next: Phase 4 (Tenant & Room Basics).
 
 ## Feature Development Workflow (TDD)
 
