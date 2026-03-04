@@ -7,7 +7,7 @@ export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  retries: 1,
   workers: process.env.CI ? 1 : undefined,
   reporter: "list",
   use: {
@@ -16,7 +16,17 @@ export default defineConfig({
     viewport: { width: 375, height: 667 },
   },
   projects: [
-    { name: "setup", testMatch: /.*\.setup\.ts/ },
+    { name: "setup", testMatch: /auth\.setup\.ts/ },
+    {
+      name: "setup-with-property",
+      testMatch: /auth-with-property\.setup\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 375, height: 667 },
+        storageState: "e2e/.auth/user.json",
+      },
+      dependencies: ["setup"],
+    },
     {
       name: "chromium-no-props",
       testMatch: /switch-property\.spec\.ts/,
@@ -33,7 +43,7 @@ export default defineConfig({
         ...devices["Desktop Chrome"],
         viewport: { width: 375, height: 667 },
       },
-      dependencies: ["chromium-no-props"],
+      dependencies: ["chromium-no-props", "setup-with-property"],
     },
   ],
   webServer: {

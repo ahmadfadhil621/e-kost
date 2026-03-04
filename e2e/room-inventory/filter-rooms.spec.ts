@@ -4,17 +4,14 @@
 // REQ 5.5 -> test('filter updates list and count')
 
 import { test, expect } from "@playwright/test";
+import { goToRoomsList } from "../helpers/room-inventory";
 
-test.use({ storageState: "e2e/.auth/user.json" });
+test.use({ storageState: "e2e/.auth/user-with-property.json" });
 
 test.describe("filter rooms", () => {
   test.describe("good cases", () => {
     test("room list shows all rooms by default", async ({ page }) => {
-      await page.goto("/");
-
-      const roomsLink = page.getByRole("link", { name: /rooms/i }).first();
-      await expect(roomsLink).toBeVisible({ timeout: 10000 });
-      await roomsLink.click();
+      await goToRoomsList(page);
 
       await expect(
         page.getByText(/rooms|all rooms|no rooms found/i).first()
@@ -24,11 +21,7 @@ test.describe("filter rooms", () => {
     test("filtering by available shows only available rooms", async ({
       page,
     }) => {
-      await page.goto("/");
-
-      const roomsLink = page.getByRole("link", { name: /rooms/i }).first();
-      await expect(roomsLink).toBeVisible({ timeout: 10000 });
-      await roomsLink.click();
+      await goToRoomsList(page);
 
       const availableFilter = page
         .getByRole("button", { name: /available/i })
@@ -42,11 +35,7 @@ test.describe("filter rooms", () => {
     });
 
     test("filter updates list and count", async ({ page }) => {
-      await page.goto("/");
-
-      const roomsLink = page.getByRole("link", { name: /rooms/i }).first();
-      await expect(roomsLink).toBeVisible({ timeout: 10000 });
-      await roomsLink.click();
+      await goToRoomsList(page);
 
       const allFilter = page.getByRole("button", { name: /all rooms|all/i }).first();
       const occupiedFilter = page
@@ -61,13 +50,22 @@ test.describe("filter rooms", () => {
     });
   });
 
+  test.describe("bad cases", () => {
+    test("rooms list shows list or empty state, not generic error page", async ({
+      page,
+    }) => {
+      await goToRoomsList(page);
+      await expect(
+        page.getByText(/rooms|all rooms|no rooms found/i).first()
+      ).toBeVisible({ timeout: 5000 });
+      const genericError = page.getByText(/something went wrong|internal server error|error loading/i);
+      await expect(genericError).not.toBeVisible();
+    });
+  });
+
   test.describe("edge cases", () => {
     test("empty filter result shows no rooms message", async ({ page }) => {
-      await page.goto("/");
-
-      const roomsLink = page.getByRole("link", { name: /rooms/i }).first();
-      await expect(roomsLink).toBeVisible({ timeout: 10000 });
-      await roomsLink.click();
+      await goToRoomsList(page);
 
       const renovationFilter = page
         .getByRole("button", { name: /under renovation|renovation/i })

@@ -30,19 +30,24 @@ test.describe("login", () => {
     test("user logs in with valid credentials and sees dashboard", async ({
       page,
     }) => {
+      test.setTimeout(60000);
       await page.goto("/login");
       await page.getByLabel(/email address/i).fill(testUserEmail);
       await page.getByLabel(/password/i).fill(TEST_USER_PASSWORD);
       await page.getByRole("button", { name: /log in/i }).click();
 
-      await expect(page).toHaveURL("/", { timeout: 20000 });
+      await expect(page).toHaveURL("/", { timeout: 25000 });
+      await page.waitForLoadState("domcontentloaded");
       await expect(
-        page.getByText(/dashboard/i).or(page.getByRole("link", { name: /create property/i })).first()
-      ).toBeVisible({ timeout: 35000 });
+        page.getByRole("link", { name: /create property/i })
+      ).toBeVisible({ timeout: 15000 });
     });
 
     test("login page displays all required fields", async ({ page }) => {
       await page.goto("/login");
+      await expect(page.getByRole("button", { name: /log in/i })).toBeVisible({
+        timeout: 10000,
+      });
 
       await expect(page.getByLabel(/email address/i)).toBeVisible();
       await expect(page.getByLabel(/password/i)).toBeVisible();

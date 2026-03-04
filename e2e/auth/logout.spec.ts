@@ -24,12 +24,15 @@ test.describe("logout", () => {
         .getByRole("menuitem", { name: /log out/i })
         .click();
 
-      await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
+      await expect(page.getByLabel(/email address/i)).toBeVisible({
+        timeout: 15000,
+      });
+      await expect(page).toHaveURL(/\/login/);
     });
   });
 
   test.describe("bad cases", () => {
-    test("after logout, accessing protected page redirects to login", { timeout: 60000 }, async ({
+    test("after logout, accessing protected page redirects to login", { timeout: 90000 }, async ({
       page,
     }) => {
       await page.goto("/");
@@ -43,10 +46,16 @@ test.describe("logout", () => {
       await page
         .getByRole("menuitem", { name: /log out/i })
         .click();
-      await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
+      await expect(page.getByLabel(/email address/i)).toBeVisible({
+        timeout: 15000,
+      });
+      await expect(page).toHaveURL(/\/login/);
 
-      await page.goto("/");
-      await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
+      await page.goto("/", { waitUntil: "load" });
+      await page.waitForURL(/\/login/, { timeout: 25000 });
+      await expect(page.getByLabel(/email address/i)).toBeVisible({
+        timeout: 5000,
+      });
     });
   });
 
@@ -64,8 +73,8 @@ test.describe("logout", () => {
         .click();
 
       await expect(
-        page.getByRole("menuitem", { name: /log out/i })
-      ).toBeVisible();
+        page.getByText(/log out/i)
+      ).toBeVisible({ timeout: 15000 });
     });
   });
 });

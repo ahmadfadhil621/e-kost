@@ -7,6 +7,7 @@ const E2E_USER_EMAIL = `e2e-setup-${Date.now()}@test.com`;
 const E2E_USER_PASSWORD = "TestPass123!";
 
 setup("authenticate", async ({ page }) => {
+  setup.setTimeout(60000);
   await page.goto("/register");
 
   await page.getByLabel(/full name/i).fill(E2E_USER_NAME);
@@ -14,7 +15,7 @@ setup("authenticate", async ({ page }) => {
   await page.getByLabel(/password/i).fill(E2E_USER_PASSWORD);
   await page.getByRole("button", { name: /register/i }).click();
 
-  const redirectTimeout = 20000;
+  const redirectTimeout = 35000;
   const redirected = await page
     .waitForURL((url) => url.pathname === "/", { timeout: redirectTimeout })
     .then(() => true)

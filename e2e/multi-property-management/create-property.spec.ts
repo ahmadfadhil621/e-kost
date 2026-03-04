@@ -7,7 +7,7 @@
 
 import { test, expect } from "@playwright/test";
 
-test.use({ storageState: "e2e/.auth/user.json" });
+test.use({ storageState: "e2e/.auth/user-with-property.json" });
 
 test.describe("create property", () => {
   test.describe("good cases", () => {

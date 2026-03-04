@@ -22,6 +22,9 @@ test.describe("session redirect", () => {
     }) => {
       await page.goto("/");
       await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
+      await expect(
+        page.getByLabel(/email address/i)
+      ).toBeVisible({ timeout: 5000 });
 
       await expect(page.getByText(/dashboard/i)).not.toBeVisible();
     });
@@ -32,9 +35,10 @@ test.describe("session redirect", () => {
       page,
     }) => {
       await page.goto("/login");
-
       await expect(page).toHaveURL(/\/login/);
-      await expect(page.getByLabel(/email address/i)).toBeVisible();
+      await expect(page.getByLabel(/email address/i)).toBeVisible({
+        timeout: 5000,
+      });
     });
 
     test("register page is accessible without authentication", async ({
