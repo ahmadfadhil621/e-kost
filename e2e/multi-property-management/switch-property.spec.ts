@@ -56,7 +56,7 @@ test.describe("switch property", () => {
       if ((await clickable.count()) > 0) {
         await clickable.click();
         await expect(
-          page.getByRole("dialog").or(page.getByRole("listbox")).or(page.getByText(/switch property|my properties/i))
+          page.getByRole("dialog").or(page.getByRole("listbox"))
         ).toBeVisible({ timeout: 3000 });
       }
     });
