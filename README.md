@@ -85,6 +85,17 @@ Setup:
 
 **E2E tests and Playwright MCP (Cursor):** Install browser binaries once with `npx playwright install chromium`. Required for `npm run test:e2e` and for the Playwright MCP server (browser automation in Cursor).
 
+## CI (GitHub Actions)
+
+On every push and pull request to `main`, the **CI** workflow (`.github/workflows/ci.yml`) runs:
+
+1. **Lint** — `npm run lint`
+2. **Build** — `npm run build` (with Prisma client generated and schema synced via `prisma db push`)
+3. **Unit and integration tests** — `npm run test:run` (Vitest)
+4. **E2E tests** — `npm run test:e2e` (Playwright; Chromium only)
+
+CI uses a PostgreSQL 16 service container and sets `DATABASE_URL`, `BETTER_AUTH_SECRET`, and `BETTER_AUTH_URL` in the workflow. No GitHub secrets are required for this default setup. To use your own Supabase database in CI instead, add `DATABASE_URL` (and optionally `BETTER_AUTH_SECRET`) as repository secrets and reference them in the workflow.
+
 ## Development Status
 
 **Completed:** Phase 0 (Foundation), Phase 1 (User Authentication), Phase 2 (Multi-Property Management), Phase 3 (Room Inventory). Room inventory includes PrismaRoomRepository, room CRUD API routes, RoomList/RoomCard/RoomDetail/StatusFilter/RoomForm/StatusIndicator, and i18n (en + id). Remaining: 7.x manual validation (workflow, filtering, mobile, performance).
