@@ -29,7 +29,9 @@ const PropertyContext = createContext<PropertyContextValue | null>(null);
 
 export function PropertyProvider({ children }: { children: React.ReactNode }) {
   const [properties, setProperties] = useState<PropertySummary[]>([]);
-  const [activePropertyId, setActiveState] = useState<string | null>(null);
+  const [activePropertyId, setActiveState] = useState<string | null>(() =>
+    typeof window !== "undefined" ? localStorage.getItem(ACTIVE_PROPERTY_KEY) : null
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   const refetch = useCallback(async () => {
@@ -48,11 +50,6 @@ export function PropertyProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     refetch();
   }, [refetch]);
-
-  useEffect(() => {
-    const stored = typeof window !== "undefined" ? localStorage.getItem(ACTIVE_PROPERTY_KEY) : null;
-    if (stored) setActiveState(stored);
-  }, []);
 
   const setActivePropertyId = useCallback((id: string | null) => {
     setActiveState(id);

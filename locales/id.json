@@ -122,5 +122,51 @@
       "register": "Akun berhasil dibuat",
       "logout": "Berhasil keluar"
     }
+  },
+  "room": {
+    "create": {
+      "title": "Tambah Kamar",
+      "roomNumber": "Nomor Kamar",
+      "roomType": "Tipe Kamar",
+      "monthlyRent": "Sewa Bulanan",
+      "submit": "Buat Kamar",
+      "cancel": "Batal",
+      "success": "Kamar berhasil dibuat"
+    },
+    "edit": {
+      "title": "Ubah Kamar",
+      "submit": "Simpan Perubahan",
+      "success": "Kamar berhasil diperbarui"
+    },
+    "list": {
+      "title": "Kamar",
+      "empty": "Belum ada kamar",
+      "filterAll": "Semua Kamar",
+      "filterAvailable": "Tersedia",
+      "filterOccupied": "Terisi",
+      "filterRenovation": "Dalam Renovasi"
+    },
+    "detail": {
+      "title": "Detail Kamar",
+      "edit": "Ubah",
+      "changeStatus": "Ubah Status"
+    },
+    "status": {
+      "available": "Tersedia",
+      "occupied": "Terisi",
+      "under_renovation": "Dalam Renovasi",
+      "updateSuccess": "Status kamar berhasil diperbarui"
+    },
+    "validation": {
+      "roomNumberRequired": "Nomor kamar wajib diisi",
+      "roomTypeRequired": "Tipe kamar wajib diisi",
+      "monthlyRentRequired": "Sewa bulanan wajib diisi",
+      "monthlyRentPositive": "Sewa bulanan harus angka positif"
+    },
+    "errors": {
+      "duplicateRoomNumber": "Nomor kamar sudah ada",
+      "notFound": "Kamar tidak ditemukan",
+      "loadFailed": "Gagal memuat data kamar"
+    }
   }
 }

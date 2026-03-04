@@ -87,7 +87,7 @@ Setup:
 
 ## Development Status
 
-**Completed:** Phase 0 (Foundation), Phase 1 (User Authentication), Phase 2 (Multi-Property Management). **In progress:** Phase 3 (Room Inventory) — domain schemas, RoomService, room CRUD API routes, RoomForm and StatusIndicator components, unit/API/component tests, E2E specs (create-room, update-status, filter-rooms), and test quality gates (Gate 1–3) are done; PrismaRoomRepository, RoomList/RoomCard/RoomDetail/StatusFilter UI, and full i18n (id.json) remain.
+**Completed:** Phase 0 (Foundation), Phase 1 (User Authentication), Phase 2 (Multi-Property Management), Phase 3 (Room Inventory). Room inventory includes PrismaRoomRepository, room CRUD API routes, RoomList/RoomCard/RoomDetail/StatusFilter/RoomForm/StatusIndicator, and i18n (en + id). Remaining: 7.x manual validation (workflow, filtering, mobile, performance).
 
 Known limitations:
 

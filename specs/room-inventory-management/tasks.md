@@ -61,7 +61,7 @@
   - **Dependencies**: None (Phase 0 creates schema)
   - **Effort**: S
 
-- [ ] 3.2 Implement PrismaRoomRepository
+- [x] 3.2 Implement PrismaRoomRepository
   - **Description**: Implement IRoomRepository using Prisma client
   - **Acceptance Criteria**:
     - All interface methods implemented
@@ -113,7 +113,7 @@
   - **Dependencies**: 4.1
   - **Effort**: M
 
-- [ ] 5.2 Create RoomList page
+- [x] 5.2 Create RoomList page
   - **Description**: Build page showing all rooms for the active property in a card layout
   - **Acceptance Criteria**:
     - Card layout showing room number, type, monthly rent, status indicator
@@ -126,7 +126,7 @@
   - **Dependencies**: 4.1, 5.3, 5.5
   - **Effort**: M
 
-- [ ] 5.3 Create RoomCard component
+- [x] 5.3 Create RoomCard component
   - **Description**: Build individual room display card for list view
   - **Acceptance Criteria**:
     - Full-width card with room number, type, rent, status indicator
@@ -137,7 +137,7 @@
   - **Dependencies**: 5.5
   - **Effort**: S
 
-- [ ] 5.4 Create RoomDetail page
+- [x] 5.4 Create RoomDetail page
   - **Description**: Build room detail view with edit and status change actions
   - **Acceptance Criteria**:
     - Displays room number, type, monthly rent, current status, creation date
@@ -161,7 +161,7 @@
   - **Dependencies**: None
   - **Effort**: S
 
-- [ ] 5.6 Create StatusFilter component
+- [x] 5.6 Create StatusFilter component
   - **Description**: Build status filter controls for room list
   - **Acceptance Criteria**:
     - Four buttons: All, Available, Occupied, Under Renovation
@@ -174,7 +174,7 @@
 
 ## 6. Internationalization (i18n)
 
-- [ ] 6.1 Extract and translate room management strings
+- [x] 6.1 Extract and translate room management strings
   - **Description**: Add all room management UI text to translation files
   - **Acceptance Criteria**:
     - All form labels, buttons, messages in en.json and id.json
@@ -229,7 +229,7 @@
 
 ## Progress Note
 
-TDD steps 1–3 complete: unit/API/component tests and E2E specs written; Gate 1 (structural), Gate 2 (fault injection), and Gate 3 (review checklist) passed. Domain (1.1, 1.2), service (2.1, 2.2), API (4.1, 4.2), RoomForm (5.1), StatusIndicator (5.5), and en.json room keys are implemented. Remaining: 3.2 PrismaRoomRepository, 5.2–5.4 and 5.6 UI, 6.1 id.json, 7.x validation.
+TDD steps 1–3 complete. Domain, service, PrismaRoomRepository, API, RoomForm, RoomList, RoomCard, RoomDetail, StatusFilter, StatusIndicator, and i18n (en.json, id.json) are implemented. Remaining: 7.x manual validation (CRUD workflow, filtering, mobile, performance).
 
 ## Open Questions / Assumptions
 
