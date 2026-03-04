@@ -38,7 +38,7 @@ setup("create user with one property", async ({ page, baseURL }) => {
   await page.context().storageState({ path: authWithPropertyFile });
 
   const authDir = path.dirname(authWithPropertyFile);
-  if (!fs.existsSync(authDir)) fs.mkdirSync(authDir, { recursive: true });
+  if (!fs.existsSync(authDir)) {fs.mkdirSync(authDir, { recursive: true });}
   fs.writeFileSync(
     propertyIdFile,
     JSON.stringify({ propertyId }),

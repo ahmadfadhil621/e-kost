@@ -10,7 +10,7 @@ export async function GET(
 ) {
   const { propertyId } = await context.params;
   const access = await withPropertyAccess(propertyId, { request });
-  if (access.errorResponse) return access.errorResponse;
+  if (access.errorResponse) {return access.errorResponse;}
 
   try {
     const property = await propertyService.getProperty(access.userId!, propertyId);
@@ -42,7 +42,7 @@ export async function PUT(
     requireOwner: true,
     request,
   });
-  if (access.errorResponse) return access.errorResponse;
+  if (access.errorResponse) {return access.errorResponse;}
 
   try {
     const body = await request.json();
@@ -84,7 +84,7 @@ export async function DELETE(
     requireOwner: true,
     request,
   });
-  if (access.errorResponse) return access.errorResponse;
+  if (access.errorResponse) {return access.errorResponse;}
 
   try {
     await propertyService.deleteProperty(access.userId!, propertyId);

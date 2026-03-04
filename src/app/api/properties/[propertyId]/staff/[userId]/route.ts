@@ -11,7 +11,7 @@ export async function DELETE(
     requireOwner: true,
     request,
   });
-  if (access.errorResponse) return access.errorResponse;
+  if (access.errorResponse) {return access.errorResponse;}
 
   try {
     await propertyService.removeStaff(access.userId!, propertyId, staffUserId);

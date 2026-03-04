@@ -15,7 +15,7 @@
 // PROP 6 -> it('validateAccess returns 403 for unauthorized user')
 // PROP 7 -> it('excludes soft-deleted properties from list')
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import fc from "fast-check";
 import { PropertyService, ForbiddenError } from "./property-service";
 import type { IPropertyRepository } from "@/domain/interfaces/property-repository";

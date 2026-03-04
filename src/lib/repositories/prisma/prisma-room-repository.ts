@@ -16,13 +16,13 @@ const PRISMA_TO_DOMAIN: Record<string, RoomStatus> = {
 
 function toDomainStatus(s: string): RoomStatus {
   const status = PRISMA_TO_DOMAIN[s];
-  if (!status) throw new Error(`Unknown room status: ${s}`);
+  if (!status) {throw new Error(`Unknown room status: ${s}`);}
   return status;
 }
 
 function toNumber(value: unknown): number {
-  if (value == null) return 0;
-  if (typeof value === "number" && !Number.isNaN(value)) return value;
+  if (value === null || value === undefined) {return 0;}
+  if (typeof value === "number" && !Number.isNaN(value)) {return value;}
   if (typeof value === "object" && "toNumber" in value && typeof (value as { toNumber: () => number }).toNumber === "function") {
     return (value as { toNumber: () => number }).toNumber();
   }

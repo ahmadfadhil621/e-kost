@@ -12,7 +12,7 @@ export async function withPropertyAccess(
   | { userId: null; role: null; errorResponse: NextResponse }
 > {
   const { session, errorResponse } = await getSession(options.request);
-  if (errorResponse) return { userId: null, role: null, errorResponse };
+  if (errorResponse) {return { userId: null, role: null, errorResponse };}
 
   try {
     const role = await propertyService.validateAccess(session!.user.id, propertyId);

@@ -13,7 +13,7 @@ interface RoomCardProps {
 }
 
 export function RoomCard({ room, href }: RoomCardProps) {
-  const { t } = useTranslation();
+  useTranslation();
   const formatCurrency = useFormatCurrency();
 
   return (

@@ -6,7 +6,7 @@ import { propertyService } from "@/lib/property-service-instance";
 
 export async function POST(request: Request) {
   const { session, errorResponse } = await getSession(request);
-  if (errorResponse) return errorResponse;
+  if (errorResponse) {return errorResponse;}
 
   try {
     const body = await request.json();
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   const { session, errorResponse } = await getSession(request);
-  if (errorResponse) return errorResponse;
+  if (errorResponse) {return errorResponse;}
 
   try {
     const properties = await propertyService.listProperties(session!.user.id);

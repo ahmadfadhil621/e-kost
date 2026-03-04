@@ -37,7 +37,7 @@ export function PropertyProvider({ children }: { children: React.ReactNode }) {
   const refetch = useCallback(async () => {
     try {
       const res = await fetch("/api/properties", { credentials: "include" });
-      if (!res.ok) return;
+      if (!res.ok) {return;}
       const data = await res.json();
       setProperties(Array.isArray(data) ? data : []);
     } catch {
@@ -54,8 +54,8 @@ export function PropertyProvider({ children }: { children: React.ReactNode }) {
   const setActivePropertyId = useCallback((id: string | null) => {
     setActiveState(id);
     if (typeof window !== "undefined") {
-      if (id) localStorage.setItem(ACTIVE_PROPERTY_KEY, id);
-      else localStorage.removeItem(ACTIVE_PROPERTY_KEY);
+      if (id) {localStorage.setItem(ACTIVE_PROPERTY_KEY, id);}
+      else {localStorage.removeItem(ACTIVE_PROPERTY_KEY);}
     }
   }, []);
 

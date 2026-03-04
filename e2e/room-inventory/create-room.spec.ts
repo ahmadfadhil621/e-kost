@@ -7,7 +7,7 @@
 // REQ 6 (mobile) -> (viewport 375x667 in config)
 
 import { test, expect } from "@playwright/test";
-import { goToNewRoomPage, goToRoomsList } from "../helpers/room-inventory";
+import { goToNewRoomPage } from "../helpers/room-inventory";
 
 test.use({ storageState: "e2e/.auth/user-with-property.json" });
 

@@ -23,8 +23,8 @@ async function fetchRoom(
     `/api/properties/${propertyId}/rooms/${roomId}`,
     { credentials: "include" }
   );
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error("Failed to fetch room");
+  if (res.status === 404) {return null;}
+  if (!res.ok) {throw new Error("Failed to fetch room");}
   return res.json();
 }
 

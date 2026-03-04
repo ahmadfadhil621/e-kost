@@ -29,7 +29,7 @@ async function fetchRooms(
     ? `/api/properties/${propertyId}/rooms?status=${status}`
     : `/api/properties/${propertyId}/rooms`;
   const res = await fetch(url, { credentials: "include" });
-  if (!res.ok) throw new Error("Failed to fetch rooms");
+  if (!res.ok) {throw new Error("Failed to fetch rooms");}
   return res.json();
 }
 
@@ -46,8 +46,8 @@ export default function RoomListPage() {
   });
 
   const filteredRooms = useMemo(() => {
-    if (!allRoomsData?.rooms) return [];
-    if (filter === "all") return allRoomsData.rooms;
+    if (!allRoomsData?.rooms) {return [];}
+    if (filter === "all") {return allRoomsData.rooms;}
     return allRoomsData.rooms.filter((r) => r.status === filter);
   }, [allRoomsData?.rooms, filter]);
 

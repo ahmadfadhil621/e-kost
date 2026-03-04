@@ -49,7 +49,7 @@ test.describe("update room status", () => {
     }) => {
       await goToRoomsList(page);
       const firstRoomCard = page.locator("[data-testid=room-card]").first();
-      if ((await firstRoomCard.count()) === 0) return;
+      if ((await firstRoomCard.count()) === 0) {return;}
       await firstRoomCard.click();
       await expect(
         page.getByText(/available|occupied|under renovation|change status|no rooms/i).first()

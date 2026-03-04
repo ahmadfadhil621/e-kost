@@ -57,7 +57,7 @@ export default function PropertiesListPage() {
   };
 
   const handleConfirmDelete = async () => {
-    if (!propertyToDelete) return;
+    if (!propertyToDelete) {return;}
     setIsDeleting(true);
     try {
       const res = await fetch(`/api/properties/${propertyToDelete.id}`, {

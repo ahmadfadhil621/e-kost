@@ -48,7 +48,7 @@ export class RoomService {
   async getRoom(userId: string, propertyId: string, id: string): Promise<Room | null> {
     await this.propertyAccess.validateAccess(userId, propertyId);
     const room = await this.repo.findById(id);
-    if (!room || room.propertyId !== propertyId) return null;
+    if (!room || room.propertyId !== propertyId) {return null;}
     return room;
   }
 
@@ -80,7 +80,7 @@ export class RoomService {
           r.id !== id &&
           r.roomNumber.toLowerCase() === parsed.roomNumber!.trim().toLowerCase()
       );
-      if (duplicate) throw new Error("Room number already exists");
+      if (duplicate) {throw new Error("Room number already exists");}
     }
     return this.repo.update(id, {
       roomNumber: parsed.roomNumber?.trim(),

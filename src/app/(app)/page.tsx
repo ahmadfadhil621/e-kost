@@ -25,7 +25,7 @@ export default function DashboardPage() {
   const isLoading = ctx?.isLoading ?? true;
 
   useEffect(() => {
-    if (!activeId) return;
+    if (!activeId) {return;}
     (async () => {
       try {
         const propRes = await fetch(`/api/properties/${activeId}`, {
@@ -44,8 +44,8 @@ export default function DashboardPage() {
   }, [activeId]);
 
   useEffect(() => {
-    if (isLoading) return;
-    if (properties.length === 0) return;
+    if (isLoading) {return;}
+    if (properties.length === 0) {return;}
     if (!activeId && properties.length > 0) {
       router.replace("/properties");
       return;

@@ -22,7 +22,7 @@
 // PROP 13 -> it('create then getRoom returns same data (PROP 13)')
 // PROP 14 -> it('rejects create when room number already exists'), it('rejects update with duplicate room number')
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import fc from "fast-check";
 import { RoomService } from "./room-service";
 import type { IRoomRepository } from "@/domain/interfaces/room-repository";

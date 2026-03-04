@@ -127,8 +127,8 @@ export class PrismaPropertyRepository implements IPropertyRepository {
       where: { id: propertyId },
       select: { ownerId: true, deletedAt: true },
     });
-    if (!property || property.deletedAt) return null;
-    if (property.ownerId === userId) return "owner";
+    if (!property || property.deletedAt) {return null;}
+    if (property.ownerId === userId) {return "owner";}
     const staff = await prisma.propertyStaff.findUnique({
       where: { propertyId_userId: { propertyId, userId } },
     });

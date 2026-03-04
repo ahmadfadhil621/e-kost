@@ -41,7 +41,7 @@ export class PropertyService {
   async getProperty(userId: string, propertyId: string): Promise<Property> {
     await this.validateAccess(userId, propertyId);
     const property = await this.repo.findById(propertyId);
-    if (!property) throw new Error("Property not found");
+    if (!property) {throw new Error("Property not found");}
     return property;
   }
 
@@ -55,14 +55,14 @@ export class PropertyService {
     data: UpdatePropertyInput
   ): Promise<Property> {
     const role = await this.validateAccess(userId, propertyId);
-    if (role !== "owner") throw new ForbiddenError("Owner access required");
+    if (role !== "owner") {throw new ForbiddenError("Owner access required");}
     const parsed = updatePropertySchema.parse(data);
     return this.repo.update(propertyId, parsed);
   }
 
   async deleteProperty(userId: string, propertyId: string): Promise<void> {
     const role = await this.validateAccess(userId, propertyId);
-    if (role !== "owner") throw new ForbiddenError("Owner access required");
+    if (role !== "owner") {throw new ForbiddenError("Owner access required");}
     return this.repo.softDelete(propertyId);
   }
 
@@ -72,14 +72,14 @@ export class PropertyService {
     staffEmail: string
   ): Promise<PropertyStaff> {
     const role = await this.validateAccess(ownerId, propertyId);
-    if (role !== "owner") throw new ForbiddenError("Owner access required");
+    if (role !== "owner") {throw new ForbiddenError("Owner access required");}
     addStaffSchema.parse({ email: staffEmail });
-    if (!this.userByEmail) throw new Error("User lookup not configured");
+    if (!this.userByEmail) {throw new Error("User lookup not configured");}
     const user = await this.userByEmail.findByEmail(staffEmail);
-    if (!user) throw new Error("No registered account found for this email");
+    if (!user) {throw new Error("No registered account found for this email");}
     const existingRole = await this.repo.findUserRole(propertyId, user.id);
-    if (existingRole === "staff") throw new Error("This user is already staff on this property");
-    if (existingRole === "owner") throw new Error("Cannot add property owner as staff");
+    if (existingRole === "staff") {throw new Error("This user is already staff on this property");}
+    if (existingRole === "owner") {throw new Error("Cannot add property owner as staff");}
     return this.repo.addStaff(propertyId, user.id);
   }
 
@@ -89,7 +89,7 @@ export class PropertyService {
     staffUserId: string
   ): Promise<void> {
     const role = await this.validateAccess(ownerId, propertyId);
-    if (role !== "owner") throw new ForbiddenError("Owner access required");
+    if (role !== "owner") {throw new ForbiddenError("Owner access required");}
     if (staffUserId === (await this.repo.findById(propertyId))?.ownerId) {
       throw new Error("Cannot remove the property owner");
     }
@@ -103,7 +103,7 @@ export class PropertyService {
 
   async validateAccess(userId: string, propertyId: string): Promise<PropertyRole> {
     const role = await this.repo.findUserRole(propertyId, userId);
-    if (!role) throw new ForbiddenError("No access to this property");
+    if (!role) {throw new ForbiddenError("No access to this property");}
     return role;
   }
 }

@@ -10,7 +10,7 @@ export async function PATCH(
 ) {
   const { propertyId, roomId } = await context.params;
   const access = await withPropertyAccess(propertyId, { request });
-  if (access.errorResponse) return access.errorResponse;
+  if (access.errorResponse) {return access.errorResponse;}
 
   try {
     const body = await request.json();

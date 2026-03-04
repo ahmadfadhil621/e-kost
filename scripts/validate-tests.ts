@@ -74,7 +74,7 @@ interface ValidationReport {
 // ---------------------------------------------------------------------------
 
 function globSync(dir: string, pattern: RegExp, results: string[] = []): string[] {
-  if (!fs.existsSync(dir)) return results;
+  if (!fs.existsSync(dir)) {return results;}
 
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
@@ -117,12 +117,12 @@ function findMatchingBrace(text: string, start: number): number {
     const ch = text[i];
 
     if (ch === "/" && text[i + 1] === "/") {
-      while (i < text.length && text[i] !== "\n") i++;
+      while (i < text.length && text[i] !== "\n") {i++;}
       continue;
     }
     if (ch === "/" && text[i + 1] === "*") {
       i += 2;
-      while (i < text.length && !(text[i] === "*" && text[i + 1] === "/")) i++;
+      while (i < text.length && !(text[i] === "*" && text[i + 1] === "/")) {i++;}
       i += 2;
       continue;
     }
@@ -130,16 +130,16 @@ function findMatchingBrace(text: string, start: number): number {
     // Regex literal detection: `/` not followed by `/` or `*` after a regex-starting token
     if (ch === "/" && text[i + 1] !== "/" && text[i + 1] !== "*") {
       let j = i - 1;
-      while (j >= 0 && /\s/.test(text[j])) j--;
+      while (j >= 0 && /\s/.test(text[j])) {j--;}
       const prev = j >= 0 ? text[j] : "\0";
       if ("(,=:[!&|?;{~^%*/+-<>".includes(prev) || j < start) {
         i++;
         while (i < text.length && text[i] !== "/") {
-          if (text[i] === "\\") i++;
+          if (text[i] === "\\") {i++;}
           i++;
         }
         i++;
-        while (i < text.length && /[gimsuy]/.test(text[i])) i++;
+        while (i < text.length && /[gimsuy]/.test(text[i])) {i++;}
         continue;
       }
     }
@@ -148,17 +148,17 @@ function findMatchingBrace(text: string, start: number): number {
       const quote = ch;
       i++;
       while (i < text.length && text[i] !== quote) {
-        if (text[i] === "\\") i++;
+        if (text[i] === "\\") {i++;}
         i++;
       }
       i++;
       continue;
     }
 
-    if (ch === "{") depth++;
+    if (ch === "{") {depth++;}
     if (ch === "}") {
       depth--;
-      if (depth === 0) return i;
+      if (depth === 0) {return i;}
     }
     i++;
   }
@@ -168,7 +168,7 @@ function findMatchingBrace(text: string, start: number): number {
 function lineNumberAt(text: string, index: number): number {
   let line = 1;
   for (let i = 0; i < index && i < text.length; i++) {
-    if (text[i] === "\n") line++;
+    if (text[i] === "\n") {line++;}
   }
   return line;
 }
@@ -185,12 +185,12 @@ function extractDescribes(source: string): DescribeBlock[] {
   while ((match = describeRe.exec(source)) !== null) {
     const nameStart = match.index;
 
-    if (isInsideLineComment(source, nameStart)) continue;
+    if (isInsideLineComment(source, nameStart)) {continue;}
 
-    let braceIdx = source.indexOf("{", nameStart + match[0].length);
-    if (braceIdx === -1) continue;
+    const braceIdx = source.indexOf("{", nameStart + match[0].length);
+    if (braceIdx === -1) {continue;}
     const endIdx = findMatchingBrace(source, braceIdx);
-    if (endIdx === -1) continue;
+    if (endIdx === -1) {continue;}
 
     const body = source.slice(braceIdx, endIdx + 1);
     const childNames: string[] = [];
@@ -214,7 +214,7 @@ function extractDescribes(source: string): DescribeBlock[] {
  */
 function isInsideLineComment(source: string, index: number): boolean {
   let lineStart = source.lastIndexOf("\n", index);
-  if (lineStart === -1) lineStart = 0;
+  if (lineStart === -1) {lineStart = 0;}
   const linePrefix = source.slice(lineStart, index);
   return /\/\//.test(linePrefix);
 }
@@ -231,19 +231,19 @@ function extractTestBlocks(source: string): TestBlock[] {
   while ((match = testRe.exec(source)) !== null) {
     const startIdx = match.index;
 
-    if (isInsideLineComment(source, startIdx)) continue;
+    if (isInsideLineComment(source, startIdx)) {continue;}
 
     const afterName = source.slice(startIdx + match[0].length);
 
     // Find the arrow `=>` of the callback, then the first `{` after it
     const arrowIdx = afterName.indexOf("=>");
-    if (arrowIdx === -1) continue;
+    if (arrowIdx === -1) {continue;}
     const braceRelIdx = afterName.indexOf("{", arrowIdx + 2);
-    if (braceRelIdx === -1) continue;
+    if (braceRelIdx === -1) {continue;}
     const braceIdx = startIdx + match[0].length + braceRelIdx;
 
     const endIdx = findMatchingBrace(source, braceIdx);
-    if (endIdx === -1) continue;
+    if (endIdx === -1) {continue;}
 
     const body = source.slice(braceIdx, endIdx + 1);
     const startLine = lineNumberAt(source, startIdx);
@@ -259,7 +259,7 @@ function extractTestBlocks(source: string): TestBlock[] {
         const dist = startIdx - dMatch.index;
         // Only count if this describe's brace scope includes our test
         const dBrace = source.indexOf("{", dMatch.index + dMatch[0].length);
-        if (dBrace === -1) continue;
+        if (dBrace === -1) {continue;}
         const dEnd = findMatchingBrace(source, dBrace);
         if (dEnd >= endIdx && dist < closestDistance) {
           closestDistance = dist;
@@ -281,7 +281,7 @@ function checkGoodBadEdge(source: string, filePath: string): Issue[] {
   const issues: Issue[] = [];
   const describes = extractDescribes(source);
 
-  if (describes.length === 0) return issues;
+  if (describes.length === 0) {return issues;}
 
   // We check the top-level describes that have children (nested describes).
   // A top-level describe should have good/bad/edge children.
@@ -309,9 +309,9 @@ function checkGoodBadEdge(source: string, filePath: string): Issue[] {
     const hasEdge = d.children.some((c) => c.includes("edge"));
 
     const missing: string[] = [];
-    if (!hasGood) missing.push("good cases");
-    if (!hasBad) missing.push("bad cases");
-    if (!hasEdge) missing.push("edge cases");
+    if (!hasGood) {missing.push("good cases");}
+    if (!hasBad) {missing.push("bad cases");}
+    if (!hasEdge) {missing.push("edge cases");}
 
     if (missing.length > 0) {
       issues.push({
@@ -368,7 +368,7 @@ function checkWeakAssertions(source: string, filePath: string): Issue[] {
 
   for (const block of blocks) {
     const expectMatches = block.body.match(/\bexpect\s*\([^)]*\)\s*\.\s*(\w+)\s*\(/g);
-    if (!expectMatches) continue;
+    if (!expectMatches) {continue;}
 
     // Extract assertion method names from this block
     const methods: string[] = [];
@@ -409,7 +409,7 @@ function checkPropertyTestConfig(source: string, filePath: string): Issue[] {
 
     // Find the matching `)` of fc.assert( to capture the full call including config
     const parenStart = source.indexOf("(", startIdx + "fc.assert".length);
-    if (parenStart === -1) continue;
+    if (parenStart === -1) {continue;}
 
     // Use brace-matching logic adapted for parentheses
     let depth = 0;
@@ -420,14 +420,14 @@ function checkPropertyTestConfig(source: string, filePath: string): Issue[] {
         const q = ch;
         i++;
         while (i < source.length && source[i] !== q) {
-          if (source[i] === "\\") i++;
+          if (source[i] === "\\") {i++;}
           i++;
         }
       } else if (ch === "(") {
         depth++;
       } else if (ch === ")") {
         depth--;
-        if (depth === 0) break;
+        if (depth === 0) {break;}
       }
       i++;
     }
@@ -510,7 +510,7 @@ interface SpecItem {
 }
 
 function parseRequirements(filePath: string): SpecItem[] {
-  if (!fs.existsSync(filePath)) return [];
+  if (!fs.existsSync(filePath)) {return [];}
   const content = fs.readFileSync(filePath, "utf-8");
   const items: SpecItem[] = [];
 
@@ -524,16 +524,15 @@ function parseRequirements(filePath: string): SpecItem[] {
   }
 
   // Match numbered acceptance criteria
-  const criteriaRe = /^(\d+)\.\s+WHEN\b/gm;
   let currentReq = "";
   const lines = content.split("\n");
-  let reqIdx = 0;
+  let _reqIdx = 0;
 
   for (let i = 0; i < lines.length; i++) {
     const headingMatch = lines[i].match(/^### Requirement (\d+):/);
     if (headingMatch) {
       currentReq = headingMatch[1];
-      reqIdx++;
+      _reqIdx++;
     }
     const critMatch = lines[i].match(/^(\d+)\.\s+WHEN\b/);
     if (critMatch && currentReq) {
@@ -547,7 +546,7 @@ function parseRequirements(filePath: string): SpecItem[] {
 }
 
 function parseCorrectnessProperties(filePath: string): SpecItem[] {
-  if (!fs.existsSync(filePath)) return [];
+  if (!fs.existsSync(filePath)) {return [];}
   const content = fs.readFileSync(filePath, "utf-8");
   const items: SpecItem[] = [];
 
@@ -614,7 +613,6 @@ function checkSpecTraceability(
 
   // Check requirements coverage (lighter check — look for REQ references or keyword overlap)
   for (const req of requirements) {
-    const reqId = req.id.replace(" ", " ");
     const idPattern = req.id.toLowerCase().replace(" ", "\\s*");
     const idRe = new RegExp(idPattern);
     const found = idRe.test(contentLower) || contentLower.includes(req.id.toLowerCase());

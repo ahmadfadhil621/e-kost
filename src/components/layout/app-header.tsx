@@ -5,7 +5,7 @@ import { ProfileDropdown } from "@/components/auth/profile-dropdown";
 import { PropertySwitcher } from "@/components/property/property-switcher";
 
 export function AppHeader() {
-  const { t } = useTranslation();
+  useTranslation();
 
   return (
     <header role="banner" className="sticky top-0 z-50 border-b bg-background">
