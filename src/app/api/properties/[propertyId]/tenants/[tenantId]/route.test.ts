@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GET, PUT } from "./route";
 import { createTenant } from "@/test/fixtures/tenant";
 
-const mockSession = {
+const _mockSession = {
   user: { id: "test-user-id", name: "Test User", email: "test@example.com" },
 };
 

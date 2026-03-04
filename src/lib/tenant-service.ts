@@ -46,7 +46,7 @@ export class TenantService {
   ): Promise<Tenant | null> {
     await this.propertyAccess.validateAccess(userId, propertyId);
     const tenant = await this.tenantRepo.findById(id);
-    if (!tenant || tenant.propertyId !== propertyId) return null;
+    if (!tenant || tenant.propertyId !== propertyId) {return null;}
     return tenant;
   }
 
@@ -76,9 +76,9 @@ export class TenantService {
     }
     const parsed = updateTenantSchema.parse(data);
     const updates: Partial<{ name: string; phone: string; email: string }> = {};
-    if (parsed.name !== undefined) updates.name = parsed.name.trim();
-    if (parsed.phone !== undefined) updates.phone = parsed.phone.trim();
-    if (parsed.email !== undefined) updates.email = parsed.email.trim();
+    if (parsed.name !== undefined) {updates.name = parsed.name.trim();}
+    if (parsed.phone !== undefined) {updates.phone = parsed.phone.trim();}
+    if (parsed.email !== undefined) {updates.email = parsed.email.trim();}
     return this.tenantRepo.update(id, updates);
   }
 

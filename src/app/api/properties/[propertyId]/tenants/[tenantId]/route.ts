@@ -10,7 +10,7 @@ export async function GET(
 ) {
   const { propertyId, tenantId } = await context.params;
   const access = await withPropertyAccess(propertyId, { request });
-  if (access.errorResponse) return access.errorResponse;
+  if (access.errorResponse) {return access.errorResponse;}
 
   try {
     const tenant = await tenantService.getTenant(
@@ -50,7 +50,7 @@ export async function PUT(
 ) {
   const { propertyId, tenantId } = await context.params;
   const access = await withPropertyAccess(propertyId, { request });
-  if (access.errorResponse) return access.errorResponse;
+  if (access.errorResponse) {return access.errorResponse;}
 
   try {
     const body = await request.json();

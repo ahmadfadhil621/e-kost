@@ -10,7 +10,7 @@ export async function POST(
 ) {
   const { propertyId } = await context.params;
   const access = await withPropertyAccess(propertyId, { request });
-  if (access.errorResponse) return access.errorResponse;
+  if (access.errorResponse) {return access.errorResponse;}
 
   try {
     const body = await request.json();
@@ -56,7 +56,7 @@ export async function GET(
 ) {
   const { propertyId } = await context.params;
   const access = await withPropertyAccess(propertyId, { request });
-  if (access.errorResponse) return access.errorResponse;
+  if (access.errorResponse) {return access.errorResponse;}
 
   try {
     const tenants = await tenantService.listTenants(
