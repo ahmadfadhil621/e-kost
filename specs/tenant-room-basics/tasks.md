@@ -2,7 +2,7 @@
 
 ## 1. Domain Layer
 
-- [ ] 1.1 Define Tenant entity and validation schemas
+- [x] 1.1 Define Tenant entity and validation schemas
   - **Description**: Create shared Zod schemas for tenant CRUD and TypeScript interfaces for Tenant
   - **Acceptance Criteria**:
     - `createTenantSchema` validates name (1-100 chars, required), phone (required), email (valid format, required)
@@ -12,7 +12,7 @@
   - **Dependencies**: None
   - **Effort**: S
 
-- [ ] 1.2 Define ITenantRepository interface
+- [x] 1.2 Define ITenantRepository interface
   - **Description**: Create repository interface for tenant data access
   - **Acceptance Criteria**:
     - Methods: create, findById, findByProperty, update, softDelete (move-out)
@@ -24,7 +24,7 @@
 
 ## 2. Service Layer
 
-- [ ] 2.1 Implement TenantService
+- [x] 2.1 Implement TenantService
   - **Description**: Build service layer with business logic for tenant CRUD and room assignment
   - **Acceptance Criteria**:
     - `createTenant` validates data and associates tenant with active property
@@ -36,7 +36,7 @@
   - **Dependencies**: 1.2
   - **Effort**: L
 
-- [ ] 2.2 Implement room assignment in TenantService
+- [x] 2.2 Implement room assignment in TenantService
   - **Description**: Add room assignment and validation business logic
   - **Acceptance Criteria**:
     - `assignRoom` validates room is available (not occupied, not under renovation), links tenant to room, updates room status to occupied
@@ -47,7 +47,7 @@
   - **Dependencies**: 2.1
   - **Effort**: M
 
-- [ ] 2.3 Write unit tests for TenantService
+- [x] 2.3 Write unit tests for TenantService
   - **Description**: Test all tenant and room assignment business logic
   - **Acceptance Criteria**:
     - Tests for creation (valid data, missing fields, email validation)
@@ -62,7 +62,7 @@
 
 ## 3. Data Layer
 
-- [ ] 3.1 Verify Prisma schema for Tenant
+- [x] 3.1 Verify Prisma schema for Tenant
   - **Description**: Ensure Tenant model exists in Prisma schema with correct fields, indexes, and relations
   - **Acceptance Criteria**:
     - Tenant model: id, propertyId, name, phone, email, roomId (nullable), assignedAt (nullable), createdAt, updatedAt, movedOutAt (nullable)
@@ -72,7 +72,7 @@
   - **Dependencies**: None (Phase 0 creates schema)
   - **Effort**: S
 
-- [ ] 3.2 Implement PrismaTenantRepository
+- [x] 3.2 Implement PrismaTenantRepository
   - **Description**: Implement ITenantRepository using Prisma client
   - **Acceptance Criteria**:
     - All interface methods implemented
@@ -85,7 +85,7 @@
 
 ## 4. API Layer
 
-- [ ] 4.1 Implement tenant CRUD API routes
+- [x] 4.1 Implement tenant CRUD API routes
   - **Description**: Create REST endpoints for tenant management scoped to a property
   - **Acceptance Criteria**:
     - POST /api/properties/[propertyId]/tenants — create tenant (authenticated)
@@ -99,7 +99,7 @@
   - **Dependencies**: 2.1, 3.2
   - **Effort**: L
 
-- [ ] 4.2 Implement room assignment API route
+- [x] 4.2 Implement room assignment API route
   - **Description**: Create REST endpoint for assigning tenant to a room
   - **Acceptance Criteria**:
     - POST /api/properties/[propertyId]/tenants/[tenantId]/assign-room — assign room (authenticated)
@@ -110,7 +110,7 @@
   - **Dependencies**: 2.2, 3.2
   - **Effort**: M
 
-- [ ] 4.3 Write API route tests
+- [x] 4.3 Write API route tests
   - **Description**: Test all tenant API endpoints
   - **Acceptance Criteria**:
     - Tests for each endpoint: success, validation errors, not found, unauthorized
@@ -123,7 +123,7 @@
 
 ## 5. UI Layer
 
-- [ ] 5.1 Create TenantForm component
+- [x] 5.1 Create TenantForm component
   - **Description**: Build mobile-responsive form for creating and editing tenants
   - **Acceptance Criteria**:
     - Fields: name (text), phone (tel), email (email)
@@ -136,7 +136,7 @@
   - **Dependencies**: 4.1
   - **Effort**: M
 
-- [ ] 5.2 Create TenantList page
+- [x] 5.2 Create TenantList page
   - **Description**: Build page showing all tenants for the active property
   - **Acceptance Criteria**:
     - Card layout showing tenant name and current room assignment
@@ -149,7 +149,7 @@
   - **Dependencies**: 4.1
   - **Effort**: M
 
-- [ ] 5.3 Create TenantDetail page
+- [x] 5.3 Create TenantDetail page
   - **Description**: Build tenant detail view with all info and actions
   - **Acceptance Criteria**:
     - Displays name, phone, email, assigned room, assignment date
@@ -160,7 +160,7 @@
   - **Dependencies**: 4.1, 5.1
   - **Effort**: M
 
-- [ ] 5.4 Create RoomAssignment component
+- [x] 5.4 Create RoomAssignment component
   - **Description**: Build room selection interface for tenant assignment
   - **Acceptance Criteria**:
     - Displays list of available rooms only (fetched from room API)
@@ -173,7 +173,7 @@
   - **Dependencies**: 4.2
   - **Effort**: M
 
-- [ ] 5.5 Create MoveOutDialog component
+- [x] 5.5 Create MoveOutDialog component
   - **Description**: Build confirmation dialog for tenant move-out
   - **Acceptance Criteria**:
     - Confirmation dialog with warning text
@@ -186,7 +186,7 @@
 
 ## 6. Internationalization (i18n)
 
-- [ ] 6.1 Extract and translate tenant management strings
+- [x] 6.1 Extract and translate tenant management strings
   - **Description**: Add all tenant management UI text to translation files
   - **Acceptance Criteria**:
     - All form labels, buttons, messages in en.json and id.json

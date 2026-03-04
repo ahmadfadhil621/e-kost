@@ -90,6 +90,7 @@
   - **Acceptance Criteria**:
     - Route: / (app root within authenticated layout)
     - Vertical stack: OccupancyCard, FinanceSummaryCard, OutstandingBalancesList, RecentPaymentsList
+    - Quick links to Rooms and Tenants for the active property
     - Pull-to-refresh or refresh button
     - Skeleton loading per section
     - Error state with retry for full load failure

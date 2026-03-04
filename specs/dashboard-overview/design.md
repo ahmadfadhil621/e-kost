@@ -172,6 +172,7 @@ interface DashboardResponse {
 **DashboardPage**
 - Route: `/` (app root, within authenticated layout)
 - Vertical stack of dashboard sections
+- Quick links to **Rooms** and **Tenants** for the active property (navigation to `/properties/:id/rooms` and `/properties/:id/tenants`)
 - Pull-to-refresh functionality
 - Skeleton loaders per section during loading
 - Property name in header (via property switcher)

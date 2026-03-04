@@ -43,7 +43,7 @@ src/
 ├── app/
 │   ├── (auth)/              # Auth pages (login, register) — no header/nav
 │   ├── (app)/               # Authenticated pages — with header/nav
-│   ├── api/                 # API routes (auth, properties, properties/[id]/rooms, …)
+│   ├── api/                 # API routes (auth, properties, properties/[id]/rooms, tenants, …)
 │   ├── globals.css          # Design tokens (CSS variables)
 │   └── layout.tsx           # Root layout
 ├── components/
@@ -51,15 +51,16 @@ src/
 │   ├── auth/                # Auth-related components
 │   ├── property/            # Property CRUD, switcher
 │   ├── room/                # Room form, status indicator
+│   ├── tenant/              # Tenant form, assign room, move-out
 │   └── layout/              # App shell, header, nav
 ├── domain/
-│   ├── schemas/             # Shared Zod schemas (property, room, auth)
-│   └── interfaces/          # Repository interfaces (property, room)
-├── lib/                     # Services (property-service, room-service), auth, prisma, i18n
+│   ├── schemas/             # Shared Zod schemas (property, room, tenant, auth)
+│   └── interfaces/          # Repository interfaces (property, room, tenant)
+├── lib/                     # Services (property-service, room-service, tenant-service), auth, prisma, i18n
 ├── generated/               # Prisma client output (do not edit)
 ├── hooks/                   # Custom React hooks
 └── test/                    # Test setup, fixtures, mocks, fault reports
-e2e/                         # Playwright E2E specs (auth, multi-property-management, room-inventory-management)
+e2e/                         # Playwright E2E specs (auth, multi-property-management, room-inventory-management, tenant-room-basics)
 locales/
 ├── en.json                  # English translations
 └── id.json                  # Indonesian translations
@@ -98,7 +99,7 @@ CI uses a PostgreSQL 16 service container and sets `DATABASE_URL`, `BETTER_AUTH_
 
 ## Development Status
 
-**Completed:** Phase 0 (Foundation), Phase 1 (User Authentication), Phase 2 (Multi-Property Management), Phase 3 (Room Inventory). Room inventory includes PrismaRoomRepository, room CRUD API routes, RoomList/RoomCard/RoomDetail/StatusFilter/RoomForm/StatusIndicator, and i18n (en + id). Full Vitest and Playwright suites pass in CI. Optional manual checks (workflow, filtering, mobile, performance) are listed in `specs/room-inventory-management/tasks.md` (section 7).
+**Completed:** Phase 0 (Foundation), Phase 1 (User Authentication), Phase 2 (Multi-Property Management), Phase 3 (Room Inventory), Phase 4 (Tenant & Room Basics). Room inventory includes PrismaRoomRepository, room CRUD API routes, RoomList/RoomCard/RoomDetail/StatusFilter/RoomForm/StatusIndicator, and i18n (en + id). Tenant & Room Basics includes TenantService, PrismaTenantRepository, tenant CRUD and assign-room/move-out API routes, TenantForm/TenantList/TenantDetail, assign-room and move-out flows, tenant i18n (en + id), and E2E specs (create-tenant, assign-room, move-out). Dashboard includes quick links to Rooms and Tenants. Full Vitest and Playwright suites pass in CI. Optional manual checks (workflow, filtering, mobile, performance) are listed in `specs/room-inventory-management/tasks.md` (section 7).
 
 Known limitations:
 
