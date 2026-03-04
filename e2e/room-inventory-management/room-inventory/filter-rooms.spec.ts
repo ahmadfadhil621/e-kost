@@ -4,7 +4,7 @@
 // REQ 5.5 -> test('filter updates list and count')
 
 import { test, expect } from "@playwright/test";
-import { goToRoomsList } from "../helpers/room-inventory";
+import { goToRoomsList } from "../../helpers/room-inventory";
 
 test.use({ storageState: "e2e/.auth/user-with-property.json" });
 

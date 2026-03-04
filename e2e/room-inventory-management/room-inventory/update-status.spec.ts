@@ -4,7 +4,7 @@
 // REQ 2.6 -> test('user sees confirmation after status update')
 
 import { test, expect } from "@playwright/test";
-import { goToRoomsList } from "../helpers/room-inventory";
+import { goToRoomsList } from "../../helpers/room-inventory";
 
 test.use({ storageState: "e2e/.auth/user-with-property.json" });
 
