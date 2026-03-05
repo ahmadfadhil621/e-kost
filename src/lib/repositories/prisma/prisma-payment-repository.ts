@@ -3,8 +3,12 @@ import type { IPaymentRepository } from "@/domain/interfaces/payment-repository"
 import { prisma } from "@/lib/prisma";
 
 function toNumber(value: unknown): number {
-  if (value === null || value === undefined) return 0;
-  if (typeof value === "number" && !Number.isNaN(value)) return value;
+  if (value === null || value === undefined) {
+    return 0;
+  }
+  if (typeof value === "number" && !Number.isNaN(value)) {
+    return value;
+  }
   if (
     typeof value === "object" &&
     "toNumber" in value &&
