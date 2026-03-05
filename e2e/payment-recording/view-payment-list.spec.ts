@@ -23,7 +23,6 @@ test.describe("view payment list", () => {
 
     test("payment list shows tenant name, amount, date, timestamp when payments exist", async ({
       page,
-      request,
     }) => {
       test.info().setTimeout(45000);
       await goToPaymentsList(page);

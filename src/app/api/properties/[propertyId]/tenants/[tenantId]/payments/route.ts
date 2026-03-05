@@ -26,7 +26,9 @@ export async function GET(
 ) {
   const { propertyId, tenantId } = await context.params;
   const access = await withPropertyAccess(propertyId, { request });
-  if (access.errorResponse) return access.errorResponse;
+  if (access.errorResponse) {
+    return access.errorResponse;
+  }
 
   try {
     const result = await paymentService.listTenantPayments(

@@ -30,6 +30,34 @@ setup("create user with one property", async ({ page, baseURL }) => {
   expect(roomRes.ok(), `Create room failed: ${await roomRes.text()}`).toBe(
     true
   );
+  const roomBody = await roomRes.json();
+  const roomId = roomBody?.id;
+  expect(roomId, "Room response must include id").toBeTruthy();
+
+  const tenantRes = await page.request.post(
+    `${baseURL}/api/properties/${propertyId}/tenants`,
+    {
+      data: {
+        name: "E2E Payment Tenant",
+        phone: "081234567890",
+        email: "e2e-payment-tenant@test.com",
+      },
+    }
+  );
+  expect(tenantRes.ok(), `Create tenant failed: ${await tenantRes.text()}`).toBe(
+    true
+  );
+  const tenantBody = await tenantRes.json();
+  const tenantId = tenantBody?.id;
+  expect(tenantId, "Tenant response must include id").toBeTruthy();
+
+  const assignRes = await page.request.post(
+    `${baseURL}/api/properties/${propertyId}/tenants/${tenantId}/assign-room`,
+    { data: { roomId } }
+  );
+  expect(assignRes.ok(), `Assign room failed: ${await assignRes.text()}`).toBe(
+    true
+  );
 
   await page.evaluate(
     ({ key, id }) => localStorage.setItem(key, id),

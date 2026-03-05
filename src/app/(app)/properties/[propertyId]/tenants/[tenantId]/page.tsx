@@ -14,6 +14,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { TenantPaymentSection } from "@/components/payment/tenant-payment-section";
+import type { Payment } from "@/domain/schemas/payment";
 
 type TenantDetail = {
   id: string;
@@ -64,6 +66,28 @@ async function fetchAvailableRooms(
   return res.json();
 }
 
+async function fetchTenantPayments(
+  propertyId: string,
+  tenantId: string
+): Promise<{ payments: Payment[]; count: number }> {
+  const res = await fetch(
+    `/api/properties/${propertyId}/tenants/${tenantId}/payments`,
+    { credentials: "include" }
+  );
+  if (!res.ok) {
+    throw new Error("Failed to fetch payments");
+  }
+  const data = await res.json();
+  const payments = (data.payments ?? []).map(
+    (p: { paymentDate: string; createdAt: string }) => ({
+      ...p,
+      paymentDate: p.paymentDate ? new Date(p.paymentDate) : new Date(),
+      createdAt: p.createdAt ? new Date(p.createdAt) : new Date(),
+    })
+  );
+  return { payments, count: data.count ?? payments.length };
+}
+
 export default function TenantDetailPage() {
   const { t } = useTranslation();
   const params = useParams();
@@ -86,6 +110,12 @@ export default function TenantDetailPage() {
     queryKey: ["rooms", propertyId, "available"],
     queryFn: () => fetchAvailableRooms(propertyId),
     enabled: !!propertyId && assignOpen,
+  });
+
+  const { data: paymentsData, isLoading: paymentsLoading } = useQuery({
+    queryKey: ["payments", "tenant", propertyId, tenantId],
+    queryFn: () => fetchTenantPayments(propertyId, tenantId),
+    enabled: !!propertyId && !!tenantId,
   });
 
   const assignMutation = useMutation({
@@ -146,7 +176,9 @@ export default function TenantDetailPage() {
     return (
       <div className="flex min-h-[200px] items-center justify-center">
         <p className="text-muted-foreground">
-          {isLoading ? t("common.loading") : t("tenant.detail.title")}
+          {isLoading
+            ? t("common.loading")
+            : t("tenant.detail.notFound", "Tenant not found")}
         </p>
       </div>
     );
@@ -230,6 +262,13 @@ export default function TenantDetailPage() {
           </Link>
         </Button>
       </div>
+
+      <TenantPaymentSection
+        tenantId={tenantId}
+        payments={paymentsData?.payments ?? []}
+        count={paymentsData?.count ?? 0}
+        isLoading={paymentsLoading}
+      />
 
       <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
         <DialogContent className="max-w-md">

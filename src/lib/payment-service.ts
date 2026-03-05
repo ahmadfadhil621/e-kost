@@ -51,9 +51,13 @@ export class PaymentService {
   ): Promise<Payment | null> {
     await this.propertyAccess.validateAccess(userId, propertyId);
     const payment = await this.paymentRepo.findById(id);
-    if (!payment) return null;
+    if (!payment) {
+      return null;
+    }
     const tenant = await this.tenantRepo.findById(payment.tenantId);
-    if (!tenant || tenant.propertyId !== propertyId) return null;
+    if (!tenant || tenant.propertyId !== propertyId) {
+      return null;
+    }
     return payment;
   }
 

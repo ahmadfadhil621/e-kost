@@ -100,6 +100,7 @@
     },
     "login": {
       "title": "Log In",
+      "pageTitle": "Welcome back",
       "submit": "Log In",
       "email": "Email Address",
       "password": "Password"
@@ -115,7 +116,7 @@
       "emailExists": "This email is already registered. Please log in instead.",
       "invalidCredentials": "Invalid email or password. Please try again.",
       "sessionExpired": "Your session has expired. Please log in again.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "An error occurred. Please try again."
     },
     "success": {
       "login": "Logged in successfully",
@@ -190,6 +191,7 @@
     },
     "detail": {
       "title": "Tenant Details",
+      "notFound": "Tenant not found",
       "assignRoom": "Assign Room",
       "moveOut": "Move Out",
       "edit": "Edit",

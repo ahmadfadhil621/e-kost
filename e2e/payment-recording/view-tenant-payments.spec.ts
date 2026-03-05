@@ -31,9 +31,9 @@ test.describe("view tenant payments", () => {
       }
       await goToTenantDetail(page, tenantId);
       await expect(
-        page
-          .getByRole("heading", { name: /payment history|riwayat pembayaran/i })
-          .or(page.getByText(/payment|pembayaran/i).first())
+        page.getByRole("heading", {
+          name: /payment history|riwayat pembayaran/i,
+        })
       ).toBeVisible({ timeout: 15000 });
     });
 
@@ -69,12 +69,16 @@ test.describe("view tenant payments", () => {
     test("tenant payments section not visible for non-existent tenant", async ({
       page,
     }) => {
-      await page.goto("/properties/any-id/tenants/non-existent-id");
+      const propertyId = getPropertyId();
+      await page.goto(`/properties/${propertyId}/tenants/non-existent-tenant-id`);
+      // Match EN: "Tenant not found", "An error occurred"; ID: "Penyewa tidak ditemukan", "Terjadi kesalahan"; or tenant/penyewa heading
       await expect(
-        page.getByText(/not found|tenant not found|error/i).or(
-          page.getByRole("heading", { name: /tenant|penyewa/i })
-        )
-      ).toBeVisible({ timeout: 10000 });
+        page
+          .getByText(
+            /not found|tenant not found|error|tidak ditemukan|kesalahan|penyewa tidak/i
+          )
+          .or(page.getByRole("heading", { name: /tenant|penyewa/i }))
+      ).toBeVisible({ timeout: 15000 });
     });
   });
 

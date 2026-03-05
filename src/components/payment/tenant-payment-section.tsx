@@ -2,7 +2,7 @@
 
 import { useTranslation } from "react-i18next";
 import type { Payment } from "@/domain/schemas/payment";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
 
 interface TenantPaymentSectionProps {
@@ -27,7 +27,7 @@ export function TenantPaymentSection({
   count,
   isLoading = false,
 }: TenantPaymentSectionProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const currencyCode = t("currency.code");
   const currencyLocale = t("currency.locale");
 

@@ -22,7 +22,7 @@ todos:
     status: completed
   - id: phase-5
     content: "Phase 5: Payment Recording (17 tasks) -- Payment record/list API, payment form + list UI, per-tenant view, currency formatting, i18n, tests"
-    status: pending
+    status: completed
   - id: spec-remaining
     content: "Write specs: Tenant Notes, Finance/Expense, Dashboard, Settings -- requirements.md, design.md, tasks.md for each"
     status: completed

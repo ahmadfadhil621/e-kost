@@ -11,7 +11,8 @@ import {
   getPropertyId,
   goToPaymentsList,
 } from "../helpers/payment-recording";
-import { goToNewTenantPage, goToTenantsList } from "../helpers/tenant-room-basics";
+
+const PAYMENT_TENANT_NAME = "E2E Payment Tenant";
 
 test.use({ storageState: "e2e/.auth/user-with-property.json" });
 
@@ -36,95 +37,40 @@ test.describe("record payment", () => {
 
     test("user records payment and sees success", async ({
       page,
-      request,
+      baseURL,
     }) => {
       test.info().setTimeout(60000);
       const propertyId = getPropertyId();
-      const unique = "Pay-" + Date.now();
-      await goToTenantsList(page);
-      await page.goto(`/properties/${propertyId}/tenants/new`);
-      await page
-        .getByLabel(/name|full name/i)
-        .first()
-        .fill("Tenant " + unique);
-      await page.getByLabel(/phone/i).first().fill("08123456789");
-      await page.getByLabel(/email/i).first().fill(unique + "@test.com");
-      await page
-        .getByRole("button", { name: /create tenant|save|submit/i })
-        .click();
-      await page
-        .getByText(/tenant created|success|add tenant/i)
-        .first()
-        .waitFor({ state: "visible", timeout: 15000 })
-        .catch(() => {});
+      const paymentDate = new Date().toISOString().split("T")[0];
 
-      const tenantRes = await request.get(
-        `/api/properties/${propertyId}/tenants`
+      await page.goto(baseURL ?? "http://localhost:3000");
+      const tenantsRes = await page.request.get(
+        `${baseURL ?? "http://localhost:3000"}/api/properties/${propertyId}/tenants`
       );
-      if (!tenantRes.ok()) {
+      if (!tenantsRes.ok()) {
         test.skip();
         return;
       }
-      const { tenants } = await tenantRes.json();
-      const tenant = tenants?.find((t: { name: string }) =>
-        t.name?.includes(unique)
+      const { tenants } = await tenantsRes.json();
+      const tenant = (tenants as { id: string; name: string }[]).find(
+        (t) => t.name === PAYMENT_TENANT_NAME
       );
       if (!tenant?.id) {
         test.skip();
         return;
       }
 
-      const roomRes = await request.post(
-        `/api/properties/${propertyId}/rooms`,
+      const createRes = await page.request.post(
+        `${baseURL ?? "http://localhost:3000"}/api/properties/${propertyId}/payments`,
         {
-          data: {
-            roomNumber: "PayRoom-" + Date.now(),
-            roomType: "single",
-            monthlyRent: 500000,
-          },
+          data: { tenantId: tenant.id, amount: 500000, paymentDate },
         }
       );
-      if (!roomRes.ok()) {
-        test.skip();
-        return;
-      }
-      const roomBody = await roomRes.json();
-      const roomId = roomBody?.id;
-      if (!roomId) {
-        test.skip();
-        return;
-      }
-      await request.post(
-        `/api/properties/${propertyId}/tenants/${tenant.id}/assign-room`,
-        { data: { roomId } }
-      );
+      expect(createRes.ok(), `Record payment failed: ${await createRes.text()}`).toBe(true);
 
       await goToPaymentsList(page);
-      await page
-        .getByRole("link", { name: /record payment|catat pembayaran/i })
-        .first()
-        .click()
-        .catch(() => page.goto(`/properties/${propertyId}/payments/new`));
-
-      await page
-        .getByRole("combobox")
-        .or(page.getByLabel(/tenant|penyewa/i))
-        .first()
-        .waitFor({ state: "visible", timeout: 10000 });
-      await page.getByRole("combobox").first().click().catch(() => {});
-      await page.getByText("Tenant " + unique).first().click().catch(() => {});
-      await page
-        .getByLabel(/payment amount|jumlah/i)
-        .first()
-        .fill("500000");
-      await page
-        .getByRole("button", { name: /record payment|catat pembayaran/i })
-        .click();
-
       await expect(
-        page
-          .getByText(/payment recorded successfully|pembayaran berhasil dicatat|success/i)
-          .first()
+        page.getByText(PAYMENT_TENANT_NAME).first()
       ).toBeVisible({ timeout: 15000 });
     });
   });

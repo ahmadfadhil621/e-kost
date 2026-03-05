@@ -19,7 +19,7 @@ async function fetchRooms(
     : `/api/properties/${propertyId}/rooms`;
   const res = await fetch(url, { credentials: "include" });
   if (!res.ok) {throw new Error("Failed to fetch rooms");}
-  return res.json();
+  return res.json() as Promise<{ rooms: RoomForCard[]; count: number }>;
 }
 
 export default function RoomListPage() {
@@ -28,13 +28,15 @@ export default function RoomListPage() {
   const propertyId = params.propertyId as string;
   const [filter, setFilter] = useState<StatusFilterValue>("all");
 
-  const { data: allRoomsData, isLoading } = useQuery({
+  const { data: allRoomsData, isLoading } = useQuery<
+    { rooms: RoomForCard[]; count: number }
+  >({
     queryKey: ["rooms", propertyId],
     queryFn: () => fetchRooms(propertyId),
     enabled: !!propertyId,
   });
 
-  const filteredRooms = useMemo(() => {
+  const filteredRooms: RoomForCard[] = useMemo(() => {
     if (!allRoomsData?.rooms) {return [];}
     if (filter === "all") {return allRoomsData.rooms;}
     return allRoomsData.rooms.filter((r) => r.status === filter);

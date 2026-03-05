@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const createPaymentSchema = z
   .object({
-    tenantId: z.string().uuid("Invalid tenant ID"),
+    tenantId: z.string().min(1, "Tenant is required"),
     amount: z
       .number()
       .positive("Amount must be positive")
