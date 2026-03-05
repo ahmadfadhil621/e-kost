@@ -19,7 +19,7 @@ todos:
     status: completed
   - id: phase-4
     content: "Phase 4: Tenant & Room Basics (21 tasks) -- Tenant CRUD + assignment + move-out API, list/detail/form UI, move-out dialog, i18n, tests"
-    status: pending
+    status: completed
   - id: phase-5
     content: "Phase 5: Payment Recording (17 tasks) -- Payment record/list API, payment form + list UI, per-tenant view, currency formatting, i18n, tests"
     status: pending
@@ -48,7 +48,7 @@ isProject: false
 
 ## Current State
 
-Phase 0 (Project Foundation), Phase 1 (User Authentication), Phase 2 (Multi-Property Management), and Phase 3 (Room Inventory) are complete. Implementation includes the full stack for each: auth flow, multi-property (Property CRUD, switcher, staff assignment, propertyId scoping), and room inventory (domain, RoomService, PrismaRoomRepository, room CRUD + status API, RoomList/RoomCard/RoomDetail/RoomForm/StatusFilter/StatusIndicator, pages, i18n). Full regression (Vitest + Playwright) passes in CI. Next: Phase 4 (Tenant & Room Basics).
+Phase 0 (Project Foundation), Phase 1 (User Authentication), Phase 2 (Multi-Property Management), Phase 3 (Room Inventory), and Phase 4 (Tenant & Room Basics) are complete. Implementation includes the full stack for each: auth flow; multi-property (Property CRUD, switcher, staff assignment, propertyId scoping); room inventory (domain, RoomService, PrismaRoomRepository, room CRUD + status API, list/detail/forms, status filter/indicators, pages, i18n); tenant & room basics (TenantService, PrismaTenantRepository, tenant CRUD + assign-room + move-out API, list/detail/forms, move-out dialog, pages, i18n, E2E in `e2e/tenant-room-basics/`). Next: Phase 5 (Payment Recording).
 
 ## Feature Development Workflow (TDD)
 

@@ -215,5 +215,43 @@
       "emailRequired": "Email is required",
       "invalidEmail": "Please enter a valid email address"
     }
+  },
+  "payment": {
+    "create": {
+      "title": "Record Payment",
+      "tenant": "Tenant",
+      "selectTenant": "Select a tenant",
+      "amount": "Payment Amount",
+      "date": "Payment Date",
+      "submit": "Record Payment",
+      "success": "Payment recorded successfully"
+    },
+    "list": {
+      "title": "Payment History",
+      "empty": "No payments recorded",
+      "tenant": "Tenant",
+      "amount": "Amount",
+      "date": "Payment Date",
+      "recorded": "Recorded",
+      "recordPayment": "Record Payment"
+    },
+    "tenantSection": {
+      "title": "Payment History",
+      "count": "{{count}} payment(s) recorded",
+      "empty": "No payments recorded for this tenant"
+    },
+    "validation": {
+      "tenantRequired": "Tenant is required",
+      "amountRequired": "Amount is required",
+      "amountPositive": "Amount must be positive",
+      "dateRequired": "Payment date is required",
+      "dateFuture": "Payment date cannot be in the future"
+    },
+    "errors": {
+      "noRoom": "Cannot record payment: tenant has no room assignment",
+      "movedOut": "Cannot record payment: tenant has moved out",
+      "notFound": "Payment not found",
+      "loadFailed": "Failed to load payment data"
+    }
   }
 }

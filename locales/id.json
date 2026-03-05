@@ -215,5 +215,43 @@
       "emailRequired": "Email wajib diisi",
       "invalidEmail": "Masukkan alamat email yang valid"
     }
+  },
+  "payment": {
+    "create": {
+      "title": "Catat Pembayaran",
+      "tenant": "Penyewa",
+      "selectTenant": "Pilih penyewa",
+      "amount": "Jumlah Pembayaran",
+      "date": "Tanggal Pembayaran",
+      "submit": "Catat Pembayaran",
+      "success": "Pembayaran berhasil dicatat"
+    },
+    "list": {
+      "title": "Riwayat Pembayaran",
+      "empty": "Belum ada pembayaran tercatat",
+      "tenant": "Penyewa",
+      "amount": "Jumlah",
+      "date": "Tanggal Pembayaran",
+      "recorded": "Dicatat",
+      "recordPayment": "Catat Pembayaran"
+    },
+    "tenantSection": {
+      "title": "Riwayat Pembayaran",
+      "count": "{{count}} pembayaran tercatat",
+      "empty": "Belum ada pembayaran untuk penyewa ini"
+    },
+    "validation": {
+      "tenantRequired": "Penyewa wajib dipilih",
+      "amountRequired": "Jumlah wajib diisi",
+      "amountPositive": "Jumlah harus positif",
+      "dateRequired": "Tanggal pembayaran wajib diisi",
+      "dateFuture": "Tanggal pembayaran tidak boleh di masa depan"
+    },
+    "errors": {
+      "noRoom": "Tidak dapat mencatat pembayaran: penyewa tidak memiliki kamar",
+      "movedOut": "Tidak dapat mencatat pembayaran: penyewa sudah pindah",
+      "notFound": "Pembayaran tidak ditemukan",
+      "loadFailed": "Gagal memuat data pembayaran"
+    }
   }
 }
