@@ -8,13 +8,16 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 1,
-  workers: process.env.CI ? 1 : undefined,
+  // Use 1 worker so local runs match CI and avoid overloading the dev server (timeouts, ECONNRESET).
+  workers: 1,
   reporter: "list",
   use: {
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",
     viewport: { width: 375, height: 667 },
+    navigationTimeout: 45000,
   },
+  timeout: 60000,
   projects: [
     { name: "setup", testMatch: /auth\.setup\.ts/ },
     {

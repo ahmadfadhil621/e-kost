@@ -8,14 +8,17 @@ function getPropertyId(): string {
   return data.propertyId;
 }
 
+/** Wait for rooms list to be ready (list or empty state). Resilient to slow API locally. */
 export async function goToRoomsList(page: Page) {
   const propertyId = getPropertyId();
   await page.goto(`/properties/${propertyId}/rooms`);
+  // Wait for loading to finish (optional short wait), then for final content.
+  await page.getByText(/loading/i).first().waitFor({ state: "hidden", timeout: 5000 }).catch(() => {});
   await page
     .getByRole("link", { name: /add room/i })
     .or(page.getByText(/rooms|no rooms found/i))
     .first()
-    .waitFor({ state: "visible", timeout: 15000 });
+    .waitFor({ state: "visible", timeout: 25000 });
 }
 
 export async function goToNewRoomPage(page: Page) {
