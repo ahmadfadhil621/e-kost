@@ -30,9 +30,12 @@ export async function goToNewTenantPage(page: Page) {
 export async function goToTenantDetail(page: Page, tenantId: string) {
   const propertyId = getPropertyId();
   await page.goto(`/properties/${propertyId}/tenants/${tenantId}`);
+  // Active tenant: Edit / Assign room / Move out buttons or "Tenant details" heading.
+  // Moved-out tenant: only Back link and notes; no action buttons — match Back or heading.
   await page
     .getByRole("button", { name: /edit|assign room|move out/i })
-    .or(page.getByText(/tenant details|detail/i))
+    .or(page.getByText(/tenant details|detail penyewa|detail/i))
+    .or(page.getByRole("link", { name: /^back$|kembali/i }))
     .first()
     .waitFor({ state: "visible", timeout: 45000 });
 }
