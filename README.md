@@ -53,16 +53,18 @@ src/
 │   ├── room/                # Room form, status indicator
 │   ├── tenant/              # Tenant form, assign room, move-out
 │   ├── payment/             # Payment form, list, per-tenant section
+│   ├── balance/             # Balance section, status indicator (tenant detail & list)
 │   ├── notes/               # Note form, note card, notes section (tenant detail)
 │   └── layout/              # App shell, header, nav
+├── contexts/                # React context (e.g. property-context for active property)
 ├── domain/
 │   ├── schemas/             # Shared Zod schemas (property, room, tenant, payment, auth)
 │   └── interfaces/          # Repository interfaces (property, room, tenant, payment, note)
-├── lib/                     # Services (property, room, tenant, payment), auth, prisma, i18n
+├── lib/                     # Services (property, room, tenant, payment, balance, note), auth, prisma, i18n
 ├── generated/               # Prisma client output (do not edit)
 ├── hooks/                   # Custom React hooks
 └── test/                    # Test setup, fixtures, mocks, fault reports
-e2e/                         # Playwright E2E specs (auth, multi-property-management, room-inventory-management, tenant-room-basics, payment-recording, tenant-notes)
+e2e/                         # Playwright E2E specs (auth, multi-property-management, room-inventory-management, tenant-room-basics, payment-recording, outstanding-balance, tenant-notes)
 locales/
 ├── en.json                  # English translations
 └── id.json                  # Indonesian translations
@@ -101,7 +103,7 @@ CI uses a PostgreSQL 16 service container and sets `DATABASE_URL`, `BETTER_AUTH_
 
 ## Development Status
 
-**Completed:** Phase 0 (Foundation), Phase 1 (User Authentication), Phase 2 (Multi-Property Management), Phase 3 (Room Inventory), Phase 4 (Tenant & Room Basics), Phase 5 (Payment Recording), Phase 6a (Tenant Notes). Room inventory includes PrismaRoomRepository, room CRUD API routes, RoomList/RoomCard/RoomDetail/StatusFilter/RoomForm/StatusIndicator, and i18n (en + id). Tenant & Room Basics includes TenantService, PrismaTenantRepository, tenant CRUD and assign-room/move-out API routes, TenantForm/TenantList/TenantDetail, assign-room and move-out flows, tenant i18n (en + id), and E2E specs (create-tenant, assign-room, move-out). Payment Recording includes PaymentService, PrismaPaymentRepository, payment CRUD API routes, PaymentForm/PaymentList/TenantPaymentSection, payment i18n (en + id), and E2E specs in `e2e/payment-recording/` (record-payment, view-payment-list, view-tenant-payments). Tenant Notes includes NoteService, PrismaNoteRepository, note CRUD API routes, NotesSection/NoteCard/NoteForm in tenant detail (and moved-out read-only), notes i18n (en + id), and E2E specs in `e2e/tenant-notes/` (create-note, view-notes, edit-note, delete-note, moved-out-tenant-notes). Dashboard (app root) includes quick links to Rooms and Tenants. Full Vitest and Playwright suites pass in CI. Optional manual checks (workflow, filtering, mobile, performance) are listed in `specs/room-inventory-management/tasks.md` (section 7).
+**Completed:** Phase 0 (Foundation), Phase 1 (User Authentication), Phase 2 (Multi-Property Management), Phase 3 (Room Inventory), Phase 4 (Tenant & Room Basics), Phase 5 (Payment Recording), Phase 6 (Outstanding Balance), Phase 6a (Tenant Notes). Outstanding Balance includes BalanceService, balance API routes (single tenant and batch), BalanceSection/BalanceStatusIndicator, balance on tenant list and detail, balance i18n (en + id), and E2E specs in `e2e/outstanding-balance/` (view-tenant-balance, view-tenant-list-balances). Room inventory includes PrismaRoomRepository, room CRUD API routes, RoomList/RoomCard/RoomDetail/StatusFilter/RoomForm/StatusIndicator, and i18n (en + id). Tenant & Room Basics includes TenantService, PrismaTenantRepository, tenant CRUD and assign-room/move-out API routes, TenantForm/TenantList/TenantDetail, assign-room and move-out flows, tenant i18n (en + id), and E2E specs (create-tenant, assign-room, move-out). Payment Recording includes PaymentService, PrismaPaymentRepository, payment CRUD API routes, PaymentForm/PaymentList/TenantPaymentSection, payment i18n (en + id), and E2E specs in `e2e/payment-recording/` (record-payment, view-payment-list, view-tenant-payments). Tenant Notes includes NoteService, PrismaNoteRepository, note CRUD API routes, NotesSection/NoteCard/NoteForm in tenant detail (and moved-out read-only), notes i18n (en + id), and E2E specs in `e2e/tenant-notes/` (create-note, view-notes, edit-note, delete-note, moved-out-tenant-notes). Dashboard (app root) includes quick links to Rooms and Tenants. Full Vitest and Playwright suites pass in CI. Optional manual checks (workflow, filtering, mobile, performance) are listed in `specs/room-inventory-management/tasks.md` (section 7).
 
 Known limitations:
 

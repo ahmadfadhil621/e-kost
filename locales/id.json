@@ -256,6 +256,18 @@
       "loadFailed": "Gagal memuat data pembayaran"
     }
   },
+  "balance": {
+    "sectionTitle": "Saldo Tertunggak",
+    "monthlyRent": "Sewa bulanan",
+    "totalPayments": "Total pembayaran",
+    "outstanding": "Saldo tertunggak",
+    "status": {
+      "paid": "Terbayar",
+      "unpaid": "Belum bayar"
+    },
+    "noRoom": "Belum ada kamar — saldo tidak tersedia",
+    "loadFailed": "Gagal memuat saldo"
+  },
   "notes": {
     "title": "Catatan",
     "add": "Tambah Catatan",

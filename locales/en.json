@@ -256,6 +256,18 @@
       "loadFailed": "Failed to load payment data"
     }
   },
+  "balance": {
+    "sectionTitle": "Outstanding Balance",
+    "monthlyRent": "Monthly rent",
+    "totalPayments": "Total payments",
+    "outstanding": "Outstanding balance",
+    "status": {
+      "paid": "Paid",
+      "unpaid": "Unpaid"
+    },
+    "noRoom": "No room assigned — balance not available",
+    "loadFailed": "Failed to load balance"
+  },
   "notes": {
     "title": "Notes",
     "add": "Add Note",

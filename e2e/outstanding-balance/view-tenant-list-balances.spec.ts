@@ -36,7 +36,7 @@ test.describe("view tenant list balances", () => {
       await expect(
         page.getByRole("link", { name: /add tenant|tambah penyewa/i }).or(
           page.getByText(/tenants|no tenants|penyewa|tidak ada penyewa/i)
-        )
+        ).first()
       ).toBeVisible({ timeout: 15000 });
       const body = page.locator("body");
       const box = await body.boundingBox();

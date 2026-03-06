@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { TenantPaymentSection } from "@/components/payment/tenant-payment-section";
+import { BalanceSection } from "@/components/balance/balance-section";
 import { NotesSection } from "@/components/notes/notes-section";
 import type { Payment } from "@/domain/schemas/payment";
 
@@ -271,6 +272,8 @@ export default function TenantDetailPage() {
           </Link>
         </Button>
       </div>
+
+      <BalanceSection propertyId={propertyId} tenantId={tenantId} />
 
       <TenantPaymentSection
         tenantId={tenantId}
