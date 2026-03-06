@@ -1,12 +1,14 @@
 // Traceability: tenant-notes
 // REQ 5.1, 5.2 -> test('moved-out tenant detail still shows notes section and existing notes')
 // REQ 5.3 -> test('add note is disabled or hidden for moved-out tenant')
+// Run with project chromium-moved-out-notes (uses auth-with-moved-out-tenant setup).
 
 import { test, expect } from "@playwright/test";
 import { goToTenantDetail } from "../helpers/tenant-room-basics";
-import { getPropertyId } from "../helpers/tenant-notes";
-
-test.use({ storageState: "e2e/.auth/user-with-property.json" });
+import {
+  getPropertyId,
+  getMovedOutTenantSetup,
+} from "../helpers/tenant-notes";
 
 test.describe("moved-out tenant notes", () => {
   test.describe("good cases", () => {
@@ -16,24 +18,33 @@ test.describe("moved-out tenant notes", () => {
       baseURL,
     }) => {
       test.info().setTimeout(60000);
-      const propertyId = getPropertyId();
-      const tenantsRes = await request.get(
-        `/api/properties/${propertyId}/tenants?includeMovedOut=true`
-      );
-      if (!tenantsRes.ok()) {
-        test.skip();
-        return;
-      }
-      const { tenants } = await tenantsRes.json();
-      const movedOut = (tenants as { id: string; movedOutAt: string | null }[]).find(
-        (t) => t.movedOutAt !== null
-      );
-      if (!movedOut?.id) {
-        test.skip();
-        return;
+      const setupIds = getMovedOutTenantSetup();
+      let propertyId: string;
+      let movedOutTenantId: string;
+      if (setupIds) {
+        propertyId = setupIds.propertyId;
+        movedOutTenantId = setupIds.movedOutTenantId;
+      } else {
+        propertyId = getPropertyId();
+        const tenantsRes = await request.get(
+          `/api/properties/${propertyId}/tenants?includeMovedOut=true`
+        );
+        if (!tenantsRes.ok()) {
+          test.skip();
+          return;
+        }
+        const { tenants } = await tenantsRes.json();
+        const movedOut = (
+          tenants as { id: string; movedOutAt: string | null }[]
+        ).find((t) => t.movedOutAt !== null);
+        if (!movedOut?.id) {
+          test.skip();
+          return;
+        }
+        movedOutTenantId = movedOut.id;
       }
       const notesRes = await request.get(
-        `${baseURL ?? "http://localhost:3000"}/api/properties/${propertyId}/tenants/${movedOut.id}/notes`
+        `${baseURL ?? "http://localhost:3000"}/api/properties/${propertyId}/tenants/${movedOutTenantId}/notes`
       );
       if (!notesRes.ok()) {
         test.skip();
@@ -44,11 +55,9 @@ test.describe("moved-out tenant notes", () => {
         test.skip();
         return;
       }
-      await goToTenantDetail(page, movedOut.id);
+      await goToTenantDetail(page, movedOutTenantId);
       await expect(
-        page
-          .getByText(/notes|catatan/i)
-          .first()
+        page.getByText(/notes|catatan/i).first()
       ).toBeVisible({ timeout: 15000 }).catch(() => {});
     });
   });
@@ -59,16 +68,25 @@ test.describe("moved-out tenant notes", () => {
       request,
     }) => {
       test.info().setTimeout(60000);
-      const propertyId = getPropertyId();
-      const tenantsRes = await request.get(
-        `/api/properties/${propertyId}/tenants`
-      );
-      if (!tenantsRes.ok()) {
-        test.skip();
-        return;
+      const setupIds = getMovedOutTenantSetup();
+      let tenantId: string | undefined;
+      if (setupIds) {
+        tenantId = setupIds.movedOutTenantId;
+      } else {
+        const propertyId = getPropertyId();
+        const tenantsRes = await request.get(
+          `/api/properties/${propertyId}/tenants?includeMovedOut=true`
+        );
+        if (!tenantsRes.ok()) {
+          test.skip();
+          return;
+        }
+        const { tenants } = await tenantsRes.json();
+        const movedOut = (
+          tenants as { id: string; movedOutAt: string | null }[]
+        ).find((t) => t.movedOutAt !== null);
+        tenantId = movedOut?.id;
       }
-      const { tenants } = await tenantsRes.json();
-      const tenantId = tenants?.[0]?.id;
       if (!tenantId) {
         test.skip();
         return;
@@ -86,27 +104,38 @@ test.describe("moved-out tenant notes", () => {
       request,
     }) => {
       test.info().setTimeout(60000);
-      const propertyId = getPropertyId();
-      const tenantsRes = await request.get(
-        `/api/properties/${propertyId}/tenants?includeMovedOut=true`
-      );
-      if (!tenantsRes.ok()) {
-        test.skip();
-        return;
+      const setupIds = getMovedOutTenantSetup();
+      let propertyId: string;
+      let movedOutTenantId: string;
+      if (setupIds) {
+        propertyId = setupIds.propertyId;
+        movedOutTenantId = setupIds.movedOutTenantId;
+      } else {
+        propertyId = getPropertyId();
+        const tenantsRes = await request.get(
+          `/api/properties/${propertyId}/tenants?includeMovedOut=true`
+        );
+        if (!tenantsRes.ok()) {
+          test.skip();
+          return;
+        }
+        const { tenants } = await tenantsRes.json();
+        const movedOut = (
+          tenants as { id: string; movedOutAt: string | null }[]
+        ).find((t) => t.movedOutAt !== null);
+        if (!movedOut?.id) {
+          test.skip();
+          return;
+        }
+        movedOutTenantId = movedOut.id;
       }
-      const { tenants } = await tenantsRes.json();
-      const movedOut = (tenants as { id: string; movedOutAt: string | null }[]).find(
-        (t) => t.movedOutAt !== null
-      );
-      if (!movedOut?.id) {
-        test.skip();
-        return;
-      }
-      await goToTenantDetail(page, movedOut.id);
+      await goToTenantDetail(page, movedOutTenantId);
       await expect(
         page
           .getByText(/moved out|read-only|hanya baca|tidak dapat menambah/i)
-          .or(page.getByRole("button", { name: /add note|tambah catatan/i }).first())
+          .or(
+            page.getByRole("button", { name: /add note|tambah catatan/i }).first()
+          )
           .or(page.getByText(/notes|catatan/i).first())
       ).toBeVisible({ timeout: 15000 }).catch(() => {});
     });

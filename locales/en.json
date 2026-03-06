@@ -255,5 +255,34 @@
       "notFound": "Payment not found",
       "loadFailed": "Failed to load payment data"
     }
+  },
+  "notes": {
+    "title": "Notes",
+    "add": "Add Note",
+    "empty": "No notes yet. Add a note to record observations or agreements.",
+    "form": {
+      "content": "Note",
+      "contentPlaceholder": "Write a note about this tenant...",
+      "date": "Date",
+      "submit": "Save Note",
+      "cancel": "Cancel"
+    },
+    "edit": {
+      "title": "Edit Note",
+      "success": "Note updated"
+    },
+    "create": {
+      "success": "Note added"
+    },
+    "delete": {
+      "confirm": "Delete this note?",
+      "success": "Note deleted"
+    },
+    "validation": {
+      "contentRequired": "Note content is required",
+      "contentTooLong": "Note must be 2000 characters or fewer",
+      "invalidDate": "Please enter a valid date"
+    },
+    "movedOut": "This tenant has moved out. Notes are read-only."
   }
 }

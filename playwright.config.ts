@@ -31,6 +31,16 @@ export default defineConfig({
       dependencies: ["setup"],
     },
     {
+      name: "setup-with-moved-out-tenant",
+      testMatch: /auth-with-moved-out-tenant\.setup\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 375, height: 667 },
+        storageState: "e2e/.auth/user.json",
+      },
+      dependencies: ["setup"],
+    },
+    {
       name: "chromium-no-props",
       testMatch: /switch-property\.spec\.ts/,
       use: {
@@ -41,12 +51,22 @@ export default defineConfig({
     },
     {
       name: "chromium",
-      testMatch: /^(?!.*switch-property\.spec\.ts).*\.spec\.ts$/,
+      testMatch: /^(?!.*(switch-property|moved-out-tenant-notes)\.spec\.ts).*\.spec\.ts$/,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 375, height: 667 },
       },
       dependencies: ["chromium-no-props", "setup-with-property"],
+    },
+    {
+      name: "chromium-moved-out-notes",
+      testMatch: /moved-out-tenant-notes\.spec\.ts$/,
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 375, height: 667 },
+        storageState: "e2e/.auth/user-with-moved-out-tenant.json",
+      },
+      dependencies: ["setup-with-moved-out-tenant"],
     },
   ],
   webServer: {

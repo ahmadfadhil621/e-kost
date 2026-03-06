@@ -2,7 +2,7 @@
 
 ## 1. Domain Layer
 
-- [ ] 1.1 Define TenantNote entity and validation schemas
+- [x] 1.1 Define TenantNote entity and validation schemas
   - **Description**: Create shared Zod schemas for note CRUD and TypeScript interfaces
   - **Acceptance Criteria**:
     - `createNoteSchema` validates content (1-2000 chars, required) and date (valid date, required)
@@ -11,7 +11,7 @@
   - **Dependencies**: None
   - **Effort**: S
 
-- [ ] 1.2 Define INoteRepository interface
+- [x] 1.2 Define INoteRepository interface
   - **Description**: Create repository interface for tenant note data access
   - **Acceptance Criteria**:
     - Methods: create, findByTenant, findById, update, delete
@@ -22,7 +22,7 @@
 
 ## 2. Service Layer
 
-- [ ] 2.1 Implement NoteService
+- [x] 2.1 Implement NoteService
   - **Description**: Build service layer with business logic for note CRUD
   - **Acceptance Criteria**:
     - `createNote` validates content non-empty, date valid, tenant exists and is not moved out
@@ -33,7 +33,7 @@
   - **Dependencies**: 1.2
   - **Effort**: M
 
-- [ ] 2.2 Write unit tests for NoteService
+- [x] 2.2 Write unit tests for NoteService
   - **Description**: Test all note business logic
   - **Acceptance Criteria**:
     - Tests for creation (valid, empty content, long content, moved-out tenant blocked)
@@ -47,7 +47,7 @@
 
 ## 3. Data Layer
 
-- [ ] 3.1 Verify Prisma schema for TenantNote
+- [x] 3.1 Verify Prisma schema for TenantNote
   - **Description**: Ensure TenantNote model exists with correct fields and relations
   - **Acceptance Criteria**:
     - TenantNote model: id, tenantId, content (Text), date (Date), createdAt, updatedAt
@@ -56,7 +56,7 @@
   - **Dependencies**: None (Phase 0 creates schema)
   - **Effort**: S
 
-- [ ] 3.2 Implement PrismaNoteRepository
+- [x] 3.2 Implement PrismaNoteRepository
   - **Description**: Implement INoteRepository using Prisma client
   - **Acceptance Criteria**:
     - All interface methods implemented
@@ -68,7 +68,7 @@
 
 ## 4. API Layer
 
-- [ ] 4.1 Implement note CRUD API routes
+- [x] 4.1 Implement note CRUD API routes
   - **Description**: Create REST endpoints for tenant note management
   - **Acceptance Criteria**:
     - POST /api/properties/[propertyId]/tenants/[tenantId]/notes — create note
@@ -81,7 +81,7 @@
   - **Dependencies**: 2.1, 3.2
   - **Effort**: M
 
-- [ ] 4.2 Write API route tests
+- [x] 4.2 Write API route tests
   - **Description**: Test all note API endpoints
   - **Acceptance Criteria**:
     - Tests for each endpoint: success, validation errors, not found, unauthorized
@@ -92,7 +92,7 @@
 
 ## 5. UI Layer
 
-- [ ] 5.1 Create NotesSection component
+- [x] 5.1 Create NotesSection component
   - **Description**: Build notes section for embedding in tenant detail page
   - **Acceptance Criteria**:
     - Displays note list and "Add Note" button
@@ -103,7 +103,7 @@
   - **Dependencies**: 4.1
   - **Effort**: M
 
-- [ ] 5.2 Create NoteCard component
+- [x] 5.2 Create NoteCard component
   - **Description**: Build individual note display card
   - **Acceptance Criteria**:
     - Shows note content, formatted date, creation timestamp
@@ -113,7 +113,7 @@
   - **Dependencies**: 5.1
   - **Effort**: S
 
-- [ ] 5.3 Create NoteForm component
+- [x] 5.3 Create NoteForm component
   - **Description**: Build form for creating and editing notes
   - **Acceptance Criteria**:
     - Textarea for content (auto-expanding, character counter)
@@ -125,7 +125,7 @@
   - **Dependencies**: 5.1
   - **Effort**: M
 
-- [ ] 5.4 Integrate NotesSection into tenant detail page
+- [x] 5.4 Integrate NotesSection into tenant detail page
   - **Description**: Add notes section to existing tenant detail page
   - **Acceptance Criteria**:
     - Notes section appears below tenant info and payment sections
@@ -137,7 +137,7 @@
 
 ## 6. Internationalization (i18n)
 
-- [ ] 6.1 Extract and translate tenant notes strings
+- [x] 6.1 Extract and translate tenant notes strings
   - **Description**: Add all notes UI text to translation files
   - **Acceptance Criteria**:
     - All form labels, buttons, messages in en.json and id.json
@@ -148,7 +148,7 @@
 
 ## 7. Testing & Validation
 
-- [ ] 7.1 Test note CRUD workflow
+- [x] 7.1 Test note CRUD workflow
   - **Description**: Verify note creation, editing, and deletion
   - **Acceptance Criteria**:
     - Can add note in under 15 seconds
@@ -159,7 +159,7 @@
   - **Dependencies**: 5.4
   - **Effort**: S
 
-- [ ] 7.2 Test notes for moved-out tenants
+- [x] 7.2 Test notes for moved-out tenants
   - **Description**: Verify notes behavior for moved-out tenants
   - **Acceptance Criteria**:
     - Existing notes visible for moved-out tenants
@@ -168,7 +168,7 @@
   - **Dependencies**: 5.4
   - **Effort**: S
 
-- [ ] 7.3 Test mobile responsiveness
+- [x] 7.3 Test mobile responsiveness
   - **Description**: Verify notes section works on mobile
   - **Acceptance Criteria**:
     - Notes section renders at 320px-480px without horizontal scroll

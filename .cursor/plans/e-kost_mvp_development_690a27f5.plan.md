@@ -28,7 +28,7 @@ todos:
     status: completed
   - id: phase-6a
     content: "Phase 6a: Tenant Notes -- Notes CRUD API, notes section in tenant detail, i18n, tests"
-    status: pending
+    status: completed
   - id: phase-6b
     content: "Phase 6b: Outstanding Balance (14 tasks) -- BalanceService, balance API, balance in tenant detail + list, status indicators, sorting, i18n, tests"
     status: pending
@@ -48,7 +48,7 @@ isProject: false
 
 ## Current State
 
-Phase 0 (Project Foundation), Phase 1 (User Authentication), Phase 2 (Multi-Property Management), Phase 3 (Room Inventory), Phase 4 (Tenant & Room Basics), and Phase 5 (Payment Recording) are complete. Implementation includes the full stack for each: auth flow; multi-property (Property CRUD, switcher, staff assignment, propertyId scoping); room inventory (domain, RoomService, PrismaRoomRepository, room CRUD + status API, list/detail/forms, status filter/indicators, pages, i18n); tenant & room basics (TenantService, PrismaTenantRepository, tenant CRUD + assign-room + move-out API, list/detail/forms, move-out dialog, pages, i18n, E2E in `e2e/tenant-room-basics/`); payment recording (PaymentService, PrismaPaymentRepository, payment CRUD API, PaymentForm/PaymentList/TenantPaymentSection, payment i18n, E2E in `e2e/payment-recording/`). Next: Phase 6a (Tenant Notes), Phase 6b (Outstanding Balance), Phase 6c (Finance & Expense Tracking).
+Phase 0 (Project Foundation), Phase 1 (User Authentication), Phase 2 (Multi-Property Management), Phase 3 (Room Inventory), Phase 4 (Tenant & Room Basics), Phase 5 (Payment Recording), and Phase 6a (Tenant Notes) are complete. Implementation includes the full stack for each: auth flow; multi-property (Property CRUD, switcher, staff assignment, propertyId scoping); room inventory (domain, RoomService, PrismaRoomRepository, room CRUD + status API, list/detail/forms, status filter/indicators, pages, i18n); tenant & room basics (TenantService, PrismaTenantRepository, tenant CRUD + assign-room + move-out API, list/detail/forms, move-out dialog, pages, i18n, E2E in `e2e/tenant-room-basics/`); payment recording (PaymentService, PrismaPaymentRepository, payment CRUD API, PaymentForm/PaymentList/TenantPaymentSection, payment i18n, E2E in `e2e/payment-recording/`); tenant notes (NoteService, PrismaNoteRepository, note CRUD API, NotesSection/NoteCard/NoteForm in tenant detail, notes i18n, E2E in `e2e/tenant-notes/`). Next: Phase 6b (Outstanding Balance), Phase 6c (Finance & Expense Tracking).
 
 ## Feature Development Workflow (TDD)
 

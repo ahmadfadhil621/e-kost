@@ -255,5 +255,34 @@
       "notFound": "Pembayaran tidak ditemukan",
       "loadFailed": "Gagal memuat data pembayaran"
     }
+  },
+  "notes": {
+    "title": "Catatan",
+    "add": "Tambah Catatan",
+    "empty": "Belum ada catatan. Tambah catatan untuk mencatat pengamatan atau kesepakatan.",
+    "form": {
+      "content": "Catatan",
+      "contentPlaceholder": "Tulis catatan tentang penyewa ini...",
+      "date": "Tanggal",
+      "submit": "Simpan Catatan",
+      "cancel": "Batal"
+    },
+    "edit": {
+      "title": "Ubah Catatan",
+      "success": "Catatan diperbarui"
+    },
+    "create": {
+      "success": "Catatan ditambah"
+    },
+    "delete": {
+      "confirm": "Hapus catatan ini?",
+      "success": "Catatan dihapus"
+    },
+    "validation": {
+      "contentRequired": "Isi catatan wajib diisi",
+      "contentTooLong": "Catatan maksimal 2000 karakter",
+      "invalidDate": "Masukkan tanggal yang valid"
+    },
+    "movedOut": "Penyewa ini sudah pindah. Catatan hanya dapat dibaca."
   }
 }

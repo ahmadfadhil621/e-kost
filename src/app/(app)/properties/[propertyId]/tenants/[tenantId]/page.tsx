@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { TenantPaymentSection } from "@/components/payment/tenant-payment-section";
+import { NotesSection } from "@/components/notes/notes-section";
 import type { Payment } from "@/domain/schemas/payment";
 
 type TenantDetail = {
@@ -201,16 +202,24 @@ export default function TenantDetailPage() {
 
   if (tenant.movedOutAt) {
     return (
-      <div className="space-y-4">
-        <p className="text-muted-foreground">{t("tenant.detail.title")}</p>
-        <p className="text-sm text-muted-foreground">
-          {tenant.name} — {t("tenant.moveOut.success")}
-        </p>
-        <Button asChild className="min-h-[44px] min-w-[44px]">
+      <div className="space-y-6">
+        <h2 className="text-lg font-semibold">{t("tenant.detail.title")}</h2>
+        <div className="space-y-2">
+          <p className="font-medium">{tenant.name}</p>
+          <p className="text-sm text-muted-foreground">
+            {t("tenant.moveOut.success")}
+          </p>
+        </div>
+        <Button asChild variant="ghost" className="min-h-[44px] min-w-[44px]">
           <Link href={`/properties/${propertyId}/tenants`}>
             {t("common.back")}
           </Link>
         </Button>
+        <NotesSection
+          propertyId={propertyId}
+          tenantId={tenantId}
+          readOnly
+        />
       </div>
     );
   }
@@ -269,6 +278,8 @@ export default function TenantDetailPage() {
         count={paymentsData?.count ?? 0}
         isLoading={paymentsLoading}
       />
+
+      <NotesSection propertyId={propertyId} tenantId={tenantId} />
 
       <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
         <DialogContent className="max-w-md">
