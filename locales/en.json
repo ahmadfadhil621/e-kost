@@ -296,5 +296,57 @@
       "invalidDate": "Please enter a valid date"
     },
     "movedOut": "This tenant has moved out. Notes are read-only."
+  },
+  "finance": {
+    "title": "Finance",
+    "income": "Income",
+    "expenses": "Expenses",
+    "netIncome": "Net Income",
+    "noData": "No financial data for this month",
+    "positive": "Profit",
+    "negative": "Loss",
+    "categoryBreakdown": "Expense Breakdown"
+  },
+  "expense": {
+    "create": {
+      "title": "Add Expense",
+      "success": "Expense recorded"
+    },
+    "edit": {
+      "title": "Edit Expense",
+      "success": "Expense updated"
+    },
+    "form": {
+      "category": "Category",
+      "amount": "Amount",
+      "date": "Date",
+      "description": "Description (optional)",
+      "submit": "Save Expense",
+      "cancel": "Cancel"
+    },
+    "list": {
+      "title": "Expenses",
+      "empty": "No expenses recorded for this period"
+    },
+    "delete": {
+      "confirm": "Delete this expense?",
+      "success": "Expense deleted"
+    },
+    "category": {
+      "electricity": "Electricity",
+      "water": "Water",
+      "internet": "Internet",
+      "maintenance": "Maintenance",
+      "cleaning": "Cleaning",
+      "supplies": "Supplies",
+      "tax": "Tax",
+      "transfer": "Transfer",
+      "other": "Other"
+    },
+    "validation": {
+      "categoryRequired": "Please select a category",
+      "amountPositive": "Amount must be a positive number",
+      "dateRequired": "Date is required"
+    }
   }
 }

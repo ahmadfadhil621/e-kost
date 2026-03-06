@@ -296,5 +296,57 @@
       "invalidDate": "Masukkan tanggal yang valid"
     },
     "movedOut": "Penyewa ini sudah pindah. Catatan hanya dapat dibaca."
+  },
+  "finance": {
+    "title": "Keuangan",
+    "income": "Pemasukan",
+    "expenses": "Pengeluaran",
+    "netIncome": "Laba Bersih",
+    "noData": "Tidak ada data keuangan untuk bulan ini",
+    "positive": "Laba",
+    "negative": "Rugi",
+    "categoryBreakdown": "Rincian Pengeluaran"
+  },
+  "expense": {
+    "create": {
+      "title": "Tambah Pengeluaran",
+      "success": "Pengeluaran dicatat"
+    },
+    "edit": {
+      "title": "Ubah Pengeluaran",
+      "success": "Pengeluaran diperbarui"
+    },
+    "form": {
+      "category": "Kategori",
+      "amount": "Jumlah",
+      "date": "Tanggal",
+      "description": "Deskripsi (opsional)",
+      "submit": "Simpan Pengeluaran",
+      "cancel": "Batal"
+    },
+    "list": {
+      "title": "Pengeluaran",
+      "empty": "Tidak ada pengeluaran untuk periode ini"
+    },
+    "delete": {
+      "confirm": "Hapus pengeluaran ini?",
+      "success": "Pengeluaran dihapus"
+    },
+    "category": {
+      "electricity": "Listrik",
+      "water": "Air",
+      "internet": "Internet",
+      "maintenance": "Pemeliharaan",
+      "cleaning": "Kebersihan",
+      "supplies": "Perlengkapan",
+      "tax": "Pajak",
+      "transfer": "Transfer",
+      "other": "Lainnya"
+    },
+    "validation": {
+      "categoryRequired": "Pilih kategori",
+      "amountPositive": "Jumlah harus positif",
+      "dateRequired": "Tanggal wajib diisi"
+    }
   }
 }
