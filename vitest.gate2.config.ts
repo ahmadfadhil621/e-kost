@@ -8,7 +8,10 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
-    include: ["src/lib/payment-service.fault-injection.test.ts"],
+    include: [
+      "src/lib/payment-service.fault-injection.test.ts",
+      "src/lib/note-service.fault-injection.test.ts",
+    ],
     exclude: [],
   },
   resolve: {
