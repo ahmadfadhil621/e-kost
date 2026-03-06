@@ -55,7 +55,7 @@ test.describe("moved-out tenant notes", () => {
         test.skip();
         return;
       }
-      await goToTenantDetail(page, movedOutTenantId);
+      await goToTenantDetail(page, movedOutTenantId, propertyId);
       await expect(
         page.getByText(/notes|catatan/i).first()
       ).toBeVisible({ timeout: 15000 }).catch(() => {});
@@ -91,7 +91,8 @@ test.describe("moved-out tenant notes", () => {
         test.skip();
         return;
       }
-      await goToTenantDetail(page, tenantId);
+      const propertyIdForNav = setupIds?.propertyId ?? getPropertyId();
+      await goToTenantDetail(page, tenantId, propertyIdForNav);
       await expect(
         page.getByText(/notes|catatan|tenant|penyewa/i).first()
       ).toBeVisible({ timeout: 15000 }).catch(() => {});
@@ -129,7 +130,8 @@ test.describe("moved-out tenant notes", () => {
         }
         movedOutTenantId = movedOut.id;
       }
-      await goToTenantDetail(page, movedOutTenantId);
+      const propertyIdForNav = setupIds?.propertyId ?? getPropertyId();
+      await goToTenantDetail(page, movedOutTenantId, propertyIdForNav);
       await expect(
         page
           .getByText(/moved out|read-only|hanya baca|tidak dapat menambah/i)

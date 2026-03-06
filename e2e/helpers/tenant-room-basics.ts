@@ -27,9 +27,13 @@ export async function goToNewTenantPage(page: Page) {
     .waitFor({ state: "visible", timeout: 20000 });
 }
 
-export async function goToTenantDetail(page: Page, tenantId: string) {
-  const propertyId = getPropertyId();
-  await page.goto(`/properties/${propertyId}/tenants/${tenantId}`);
+export async function goToTenantDetail(
+  page: Page,
+  tenantId: string,
+  propertyId?: string
+) {
+  const pid = propertyId ?? getPropertyId();
+  await page.goto(`/properties/${pid}/tenants/${tenantId}`);
   // Active tenant: Edit / Assign room / Move out buttons or "Tenant details" heading.
   // Moved-out tenant: only Back link and notes; no action buttons — match Back or heading.
   await page
