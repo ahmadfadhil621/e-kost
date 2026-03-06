@@ -1,11 +1,14 @@
-import { BalanceService } from "@/lib/balance-service";
+import {
+  BalanceService,
+  type IBalanceRepository,
+} from "@/lib/balance-service";
 import { propertyService } from "@/lib/property-service-instance";
 
 /**
  * Stub repository until Prisma balance queries are implemented.
  * All methods throw; replace with PrismaBalanceRepository when data layer is ready.
  */
-const stubBalanceRepo = {
+const stubBalanceRepo: IBalanceRepository = {
   async getBalanceRow() {
     throw new Error("Balance repository not implemented");
   },
@@ -15,6 +18,6 @@ const stubBalanceRepo = {
 };
 
 export const balanceService = new BalanceService(
-  stubBalanceRepo as Parameters<typeof BalanceService>[0],
+  stubBalanceRepo,
   propertyService
 );

@@ -66,7 +66,7 @@ export function BalanceSection({ propertyId, tenantId }: BalanceSectionProps) {
     );
   }
 
-  if (error || data === null) {
+  if (error || data === null || data === undefined) {
     return (
       <section aria-labelledby="balance-heading">
         <h2 id="balance-heading" className="text-lg font-semibold mb-2">
