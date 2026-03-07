@@ -69,6 +69,7 @@ describe("FinanceSummaryService", () => {
         expect(result.expenses).toBe(0);
         expect(result.netIncome).toBe(1000000);
         expect(incomeSource.getMonthlyIncome).toHaveBeenCalledWith(
+          userId,
           propertyId,
           2026,
           3
@@ -260,6 +261,7 @@ describe("FinanceSummaryService", () => {
         await service.getMonthlySummary(userId, propertyId, 2025, 12);
 
         expect(incomeSource.getMonthlyIncome).toHaveBeenCalledWith(
+          userId,
           propertyId,
           2025,
           12

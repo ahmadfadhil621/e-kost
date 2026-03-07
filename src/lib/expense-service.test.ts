@@ -903,7 +903,7 @@ describe("ExpenseService", () => {
                 date: "2026-03-01",
               })
             ).rejects.toThrow();
-            expect(repo.create).not.toHaveBeenCalled();
+            await expect(repo.create).not.toHaveBeenCalled();
           }
         ),
         { numRuns: 100 }

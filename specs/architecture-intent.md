@@ -88,7 +88,7 @@ This document defines the architectural principles for E-Kost to remain resilien
 - No framework dependencies, no database specifics
 
 ### Service Layer (Stable Interface, Flexible Implementation)
-- PropertyService, TenantService, RoomService, PaymentService, BalanceService, ExpenseService, NoteService
+- PropertyService, TenantService, RoomService, PaymentService, BalanceService, ExpenseService, FinanceSummaryService, NoteService
 - Repository interfaces for data access
 - Pluggable implementations for future AI/automation
 

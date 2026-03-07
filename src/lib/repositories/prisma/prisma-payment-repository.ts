@@ -83,4 +83,21 @@ export class PrismaPaymentRepository implements IPaymentRepository {
       count: list.length,
     };
   }
+
+  async sumByPropertyAndMonth(
+    propertyId: string,
+    year: number,
+    month: number
+  ): Promise<number> {
+    const start = new Date(Date.UTC(year, month - 1, 1));
+    const end = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
+    const result = await prisma.payment.aggregate({
+      where: {
+        tenant: { propertyId },
+        paymentDate: { gte: start, lte: end },
+      },
+      _sum: { amount: true },
+    });
+    return toNumber(result._sum?.amount);
+  }
 }

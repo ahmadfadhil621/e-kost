@@ -1,8 +1,8 @@
 import { ExpenseService } from "@/lib/expense-service";
 import { propertyService } from "@/lib/property-service-instance";
-import { StubExpenseRepository } from "@/lib/repositories/stub-expense-repository";
+import { PrismaExpenseRepository } from "@/lib/repositories/prisma/prisma-expense-repository";
 
-const expenseRepo = new StubExpenseRepository();
+const expenseRepo = new PrismaExpenseRepository();
 
 export const expenseService = new ExpenseService(
   expenseRepo,

@@ -113,6 +113,11 @@ export default function DashboardPage() {
             {t("nav.payments")}
           </Link>
         </Button>
+        <Button asChild className="min-h-[44px] min-w-[44px]">
+          <Link href={`/properties/${activeId}/finance`}>
+            {t("nav.finance")}
+          </Link>
+        </Button>
       </div>
     </div>
   );

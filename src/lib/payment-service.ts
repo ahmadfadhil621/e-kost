@@ -78,4 +78,14 @@ export class PaymentService {
     }
     return this.paymentRepo.findByTenant(tenantId);
   }
+
+  async getMonthlyIncome(
+    userId: string,
+    propertyId: string,
+    year: number,
+    month: number
+  ): Promise<number> {
+    await this.propertyAccess.validateAccess(userId, propertyId);
+    return this.paymentRepo.sumByPropertyAndMonth(propertyId, year, month);
+  }
 }

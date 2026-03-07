@@ -3,6 +3,7 @@ import type { FinanceSummary } from "@/domain/schemas/expense";
 
 export interface IMonthlyIncomeSource {
   getMonthlyIncome(
+    userId: string,
     propertyId: string,
     year: number,
     month: number
@@ -22,7 +23,7 @@ export class FinanceSummaryService {
     month: number
   ): Promise<FinanceSummary> {
     const [income, expenseSummary] = await Promise.all([
-      this.incomeSource.getMonthlyIncome(propertyId, year, month),
+      this.incomeSource.getMonthlyIncome(userId, propertyId, year, month),
       this.expenseService.getMonthlyExpenseSummary(
         userId,
         propertyId,

@@ -10,7 +10,7 @@ E-Kost follows a layered architecture with clear boundaries. See `specs/architec
 ## Layers
 
 1. **Domain Layer** -- Entities (Property, Tenant, Room, Payment, Expense, TenantNote), business rules, validation. No framework dependencies.
-2. **Service Layer** -- PropertyService, TenantService, RoomService, PaymentService, BalanceService, ExpenseService, NoteService. Depend on repository interfaces, not implementations.
+2. **Service Layer** -- PropertyService, TenantService, RoomService, PaymentService, BalanceService, ExpenseService, FinanceSummaryService, NoteService. Depend on repository interfaces, not implementations.
 3. **API Layer** -- Next.js API routes under `app/api/`. Stable REST contracts. Input validation with Zod.
 4. **Data Layer** -- Prisma repository implementations behind interfaces.
 5. **UI Layer** -- React components consuming API. No business logic in components.

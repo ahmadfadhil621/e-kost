@@ -17,4 +17,8 @@ export class StubPaymentRepository implements IPaymentRepository {
   async findByTenant(): Promise<PaymentWithCount> {
     throw new Error("Not implemented");
   }
+
+  async sumByPropertyAndMonth(): Promise<number> {
+    throw new Error("Not implemented");
+  }
 }

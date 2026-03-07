@@ -25,7 +25,7 @@ export function CategoryBreakdownList({
   }
 
   return (
-    <ul className="space-y-2" aria-label="Expense breakdown by category">
+    <ul className="space-y-2" aria-label={t("finance.categoryBreakdown")}>
       {categories.map((item) => {
         const percentage =
           totalExpenses > 0

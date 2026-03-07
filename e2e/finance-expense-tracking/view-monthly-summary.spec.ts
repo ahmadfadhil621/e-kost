@@ -81,8 +81,7 @@ test.describe("view monthly summary", () => {
       await expect(
         page.getByText(/income|pemasukan|finance|keuangan/i).first()
       ).toBeVisible({ timeout: 10000 });
-      const main = page.getByRole("main").or(page.locator("body"));
-      await expect(main).toBeVisible();
+      await expect(page.getByRole("main")).toBeVisible();
     });
   });
 

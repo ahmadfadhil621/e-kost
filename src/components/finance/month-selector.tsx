@@ -17,7 +17,7 @@ export function MonthSelector({
   onPrevious,
   onNext,
 }: MonthSelectorProps) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const date = new Date(year, month - 1, 1);
   const monthYearLabel = new Intl.DateTimeFormat(i18n.language, {
     month: "long",
@@ -31,7 +31,7 @@ export function MonthSelector({
         variant="outline"
         size="icon"
         onClick={onPrevious}
-        aria-label="Previous month"
+        aria-label={t("finance.previousMonth")}
         className="min-h-[44px] min-w-[44px]"
       >
         <ChevronLeft className="h-5 w-5" />
@@ -44,7 +44,7 @@ export function MonthSelector({
         variant="outline"
         size="icon"
         onClick={onNext}
-        aria-label="Next month"
+        aria-label={t("finance.nextMonth")}
         className="min-h-[44px] min-w-[44px]"
       >
         <ChevronRight className="h-5 w-5" />

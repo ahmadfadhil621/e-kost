@@ -9,4 +9,9 @@ export interface IPaymentRepository {
   findById(id: string): Promise<Payment | null>;
   findByProperty(propertyId: string): Promise<Payment[]>;
   findByTenant(tenantId: string): Promise<PaymentWithCount>;
+  sumByPropertyAndMonth(
+    propertyId: string,
+    year: number,
+    month: number
+  ): Promise<number>;
 }

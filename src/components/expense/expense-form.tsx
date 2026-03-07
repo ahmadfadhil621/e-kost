@@ -26,6 +26,13 @@ interface ExpenseFormProps {
   onCancel?: () => void;
   isLoading?: boolean;
   defaultDate?: string;
+  /** Pre-fill for edit mode */
+  initialData?: {
+    category: CreateExpenseInput["category"];
+    amount: number;
+    date: string;
+    description?: string;
+  };
 }
 
 const defaultExpenseDate = () => new Date().toISOString().split("T")[0];
@@ -35,6 +42,7 @@ export function ExpenseForm({
   onCancel,
   isLoading = false,
   defaultDate = defaultExpenseDate(),
+  initialData,
 }: ExpenseFormProps) {
   const { t } = useTranslation();
   const {
@@ -45,12 +53,19 @@ export function ExpenseForm({
     formState: { errors },
   } = useForm<CreateExpenseInput>({
     resolver: zodResolver(createExpenseSchema),
-    defaultValues: {
-      category: undefined as unknown as CreateExpenseInput["category"],
-      amount: undefined as unknown as number,
-      date: defaultDate,
-      description: "",
-    },
+    defaultValues: initialData
+      ? {
+          category: initialData.category,
+          amount: initialData.amount,
+          date: initialData.date,
+          description: initialData.description ?? "",
+        }
+      : {
+          category: undefined as unknown as CreateExpenseInput["category"],
+          amount: undefined as unknown as number,
+          date: defaultDate,
+          description: "",
+        },
   });
 
   const category = watch("category");
