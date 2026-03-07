@@ -16,6 +16,9 @@ env:
 jobs:
   lint-and-unit:
     runs-on: ubuntu-latest
+    env:
+      # Required by prisma.config.ts when loading config (e.g. prisma generate); not used for connections.
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
