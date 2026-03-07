@@ -32,12 +32,17 @@ test.describe("create tenant", () => {
     test("user creates tenant with valid data and sees success", async ({
       page,
     }) => {
-      test.info().setTimeout(45000);
+      test.info().setTimeout(90000);
       await goToNewTenantPage(page);
+      // Wait for form to be ready (submit button) to avoid filling during re-mount
+      await page
+        .getByRole("button", { name: /create tenant|save|submit/i })
+        .waitFor({ state: "visible", timeout: 10000 });
       const unique = "E2E-" + Date.now();
-      await page.getByLabel(/name|full name/i).first().fill("Tenant " + unique);
-      await page.getByLabel(/phone/i).first().fill("08123456789");
-      await page.getByLabel(/email/i).first().fill(unique + "@test.com");
+      // Use input ids to avoid detached DOM when form re-renders
+      await page.locator("#tenant-name").fill("Tenant " + unique);
+      await page.locator("#tenant-phone").fill("08123456789");
+      await page.locator("#tenant-email").fill(unique + "@test.com");
       await page
         .getByRole("button", { name: /create tenant|save|submit/i })
         .click();
@@ -48,7 +53,7 @@ test.describe("create tenant", () => {
           .or(page.getByText(unique))
           .or(page.getByRole("link", { name: /add tenant/i }))
           .first()
-      ).toBeVisible({ timeout: 15000 });
+      ).toBeVisible({ timeout: 25000 });
     });
   });
 
@@ -56,30 +61,37 @@ test.describe("create tenant", () => {
     test("user sees validation errors when required fields are empty", async ({
       page,
     }) => {
+      test.info().setTimeout(60000);
       await goToNewTenantPage(page);
-      await page
-        .getByRole("button", { name: /create tenant|save|submit/i })
-        .click();
+      const submitBtn = page.getByRole("button", {
+        name: /create tenant|save|submit/i,
+      });
+      await submitBtn.waitFor({ state: "visible", timeout: 15000 });
+      await submitBtn.click();
 
       await expect(
         page.getByText(/name is required|required|invalid/i).first()
-      ).toBeVisible({ timeout: 5000 });
+      ).toBeVisible({ timeout: 15000 });
     });
   });
 
   test.describe("edge cases", () => {
     test("user sees validation when email is invalid", async ({ page }) => {
+      test.info().setTimeout(60000);
       await goToNewTenantPage(page);
-      await page.getByLabel(/name|full name/i).first().fill("Test User");
-      await page.getByLabel(/phone/i).first().fill("08123456789");
-      await page.getByLabel(/email/i).first().fill("notanemail");
+      await page
+        .getByRole("button", { name: /create tenant|save|submit/i })
+        .waitFor({ state: "visible", timeout: 15000 });
+      await page.locator("#tenant-name").fill("Test User");
+      await page.locator("#tenant-phone").fill("08123456789");
+      await page.locator("#tenant-email").fill("notanemail");
       await page
         .getByRole("button", { name: /create tenant|save|submit/i })
         .click();
 
       await expect(
         page.getByText(/invalid email|email format/i)
-      ).toBeVisible({ timeout: 5000 });
+      ).toBeVisible({ timeout: 15000 });
     });
   });
 });

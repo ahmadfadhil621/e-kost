@@ -139,6 +139,7 @@ test.describe("moved-out tenant notes", () => {
             page.getByRole("button", { name: /add note|tambah catatan/i }).first()
           )
           .or(page.getByText(/notes|catatan/i).first())
+          .first()
       ).toBeVisible({ timeout: 15000 });
     });
   });

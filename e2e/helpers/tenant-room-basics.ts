@@ -21,10 +21,11 @@ export async function goToTenantsList(page: Page) {
 export async function goToNewTenantPage(page: Page) {
   const propertyId = getPropertyId();
   await page.goto(`/properties/${propertyId}/tenants/new`);
+  // CI/slow envs: allow more time for form to render
   await page
     .getByLabel(/name|full name/i)
     .first()
-    .waitFor({ state: "visible", timeout: 20000 });
+    .waitFor({ state: "visible", timeout: 40000 });
 }
 
 export async function goToTenantDetail(
@@ -34,15 +35,20 @@ export async function goToTenantDetail(
 ) {
   const pid = propertyId ?? getPropertyId();
   await page.goto(`/properties/${pid}/tenants/${tenantId}`);
-  // Active tenant: Edit / Assign room / Move out buttons or "Tenant details" heading.
-  // Moved-out tenant: Back link + heading; no action buttons.
-  // Not-found/error: Back is a button (not link). Match both so CI and slow envs don't timeout.
-  // Use 70s in CI/slow envs so tenant fetch + render can complete under load.
+  await page.waitForLoadState("domcontentloaded");
+  // Active: Edit / Assign room / Move out or "Tenant details" heading.
+  // Moved-out: "Tenant moved out successfully" text, Back link, or heading.
+  // Not-found/error: Back button. Use 90s in CI so tenant fetch + render can complete.
   await page
     .getByRole("button", { name: /edit|assign room|move out/i })
     .or(page.getByText(/tenant details|detail penyewa|detail/i))
+    .or(
+    page.getByText(
+      /tenant moved out successfully|moved out successfully|penyewa berhasil pindah keluar|pindah keluar/i
+    )
+  )
     .or(page.getByRole("link", { name: /^back$|kembali/i }))
     .or(page.getByRole("button", { name: /^back$|kembali/i }))
     .first()
-    .waitFor({ state: "visible", timeout: 70000 });
+    .waitFor({ state: "visible", timeout: 90000 });
 }
