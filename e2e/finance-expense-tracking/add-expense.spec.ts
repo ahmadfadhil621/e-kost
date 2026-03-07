@@ -12,6 +12,7 @@ import {
   goToExpenseList,
   getPropertyId,
 } from "../helpers/finance-expense-tracking";
+import { stableFill } from "../helpers/forms";
 
 test.use({ storageState: "e2e/.auth/user-with-property.json" });
 
@@ -115,7 +116,7 @@ test.describe("add expense", () => {
         .first()
         .click({ timeout: 15000 })
         .catch(() => {});
-      await page.getByLabel(/amount|jumlah/i).first().fill("0").catch(() => {});
+      await stableFill(page, () => page.getByLabel(/amount|jumlah/i), "0").catch(() => {});
       await page
         .getByRole("button", { name: /save expense|simpan pengeluaran/i })
         .first()

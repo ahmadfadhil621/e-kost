@@ -7,6 +7,7 @@
 import { test, expect } from "@playwright/test";
 import { goToTenantDetail } from "../helpers/tenant-room-basics";
 import { getPropertyId } from "../helpers/tenant-notes";
+import { stableFill } from "../helpers/forms";
 
 test.use({ storageState: "e2e/.auth/user-with-property.json" });
 
@@ -104,7 +105,7 @@ test.describe("create note", () => {
       }
       const contentField = page.getByLabel(/note|content|catatan/i).first();
       if (await contentField.isVisible({ timeout: 5000 }).catch(() => false)) {
-        await contentField.fill("");
+        await stableFill(page, () => page.getByLabel(/note|content|catatan/i), "");
         const submit = page.getByRole("button", { name: /save|simpan|submit/i }).first();
         if (await submit.isVisible({ timeout: 3000 }).catch(() => false)) {
           await submit.click();

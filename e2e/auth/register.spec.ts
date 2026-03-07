@@ -10,6 +10,7 @@
 // REQ 7.5 -> test('user can register with exactly 8-character password')
 
 import { test, expect } from "@playwright/test";
+import { stableFill } from "../helpers/forms";
 
 test.describe("register", () => {
   test.describe("good cases", () => {
@@ -19,9 +20,9 @@ test.describe("register", () => {
       const uniqueEmail = `reg-good-${Date.now()}@test.com`;
 
       await page.goto("/register");
-      await page.getByLabel(/full name/i).fill("New User");
-      await page.getByLabel(/email address/i).fill(uniqueEmail);
-      await page.getByLabel(/password/i).fill("SecurePass123!");
+      await stableFill(page, () => page.getByLabel(/full name/i), "New User");
+      await stableFill(page, () => page.getByLabel(/email address/i), uniqueEmail);
+      await stableFill(page, () => page.getByLabel(/password/i), "SecurePass123!");
       await page.getByRole("button", { name: /register/i }).click();
 
       await expect(page).toHaveURL("/", { timeout: 30000 });
@@ -51,8 +52,8 @@ test.describe("register", () => {
     test("user sees validation error for empty name", async ({ page }) => {
       await page.goto("/register");
 
-      await page.getByLabel(/email address/i).fill("valid@test.com");
-      await page.getByLabel(/password/i).fill("ValidPass123!");
+      await stableFill(page, () => page.getByLabel(/email address/i), "valid@test.com");
+      await stableFill(page, () => page.getByLabel(/password/i), "ValidPass123!");
       await page.getByRole("button", { name: /register/i }).click();
 
       await expect(page.getByText(/name is required/i)).toBeVisible();
@@ -61,8 +62,8 @@ test.describe("register", () => {
     test("user sees validation error for empty email", async ({ page }) => {
       await page.goto("/register");
 
-      await page.getByLabel(/full name/i).fill("Test User");
-      await page.getByLabel(/password/i).fill("ValidPass123!");
+      await stableFill(page, () => page.getByLabel(/full name/i), "Test User");
+      await stableFill(page, () => page.getByLabel(/password/i), "ValidPass123!");
       await page.getByRole("button", { name: /register/i }).click();
 
       await expect(page.getByText(/email is required/i)).toBeVisible();
@@ -73,9 +74,9 @@ test.describe("register", () => {
     }) => {
       await page.goto("/register");
 
-      await page.getByLabel(/full name/i).fill("Test User");
-      await page.getByLabel(/email address/i).fill("not-an-email");
-      await page.getByLabel(/password/i).fill("ValidPass123!");
+      await stableFill(page, () => page.getByLabel(/full name/i), "Test User");
+      await stableFill(page, () => page.getByLabel(/email address/i), "not-an-email");
+      await stableFill(page, () => page.getByLabel(/password/i), "ValidPass123!");
       await page.getByRole("button", { name: /register/i }).click();
 
       await expect(page.getByText(/invalid email/i)).toBeVisible();
@@ -84,9 +85,9 @@ test.describe("register", () => {
     test("user sees validation error for short password", async ({ page }) => {
       await page.goto("/register");
 
-      await page.getByLabel(/full name/i).fill("Test User");
-      await page.getByLabel(/email address/i).fill("short-pw@test.com");
-      await page.getByLabel(/password/i).fill("short");
+      await stableFill(page, () => page.getByLabel(/full name/i), "Test User");
+      await stableFill(page, () => page.getByLabel(/email address/i), "short-pw@test.com");
+      await stableFill(page, () => page.getByLabel(/password/i), "short");
       await page.getByRole("button", { name: /register/i }).click();
 
       await expect(
@@ -101,16 +102,16 @@ test.describe("register", () => {
       const duplicateEmail = `dup-${Date.now()}@test.com`;
 
       await page.goto("/register");
-      await page.getByLabel(/full name/i).fill("First User");
-      await page.getByLabel(/email address/i).fill(duplicateEmail);
-      await page.getByLabel(/password/i).fill("SecurePass123!");
+      await stableFill(page, () => page.getByLabel(/full name/i), "First User");
+      await stableFill(page, () => page.getByLabel(/email address/i), duplicateEmail);
+      await stableFill(page, () => page.getByLabel(/password/i), "SecurePass123!");
       await page.getByRole("button", { name: /register/i }).click();
       await expect(page).toHaveURL("/", { timeout: 30000 });
 
       await page.goto("/register");
-      await page.getByLabel(/full name/i).fill("Duplicate User");
-      await page.getByLabel(/email address/i).fill(duplicateEmail);
-      await page.getByLabel(/password/i).fill("SecurePass123!");
+      await stableFill(page, () => page.getByLabel(/full name/i), "Duplicate User");
+      await stableFill(page, () => page.getByLabel(/email address/i), duplicateEmail);
+      await stableFill(page, () => page.getByLabel(/password/i), "SecurePass123!");
       await page.getByRole("button", { name: /register/i }).click();
 
       await expect(
@@ -128,9 +129,9 @@ test.describe("register", () => {
       const uniqueEmail = `edge-pw-${Date.now()}@test.com`;
 
       await page.goto("/register");
-      await page.getByLabel(/full name/i).fill("Edge User");
-      await page.getByLabel(/email address/i).fill(uniqueEmail);
-      await page.getByLabel(/password/i).fill("Exactly8");
+      await stableFill(page, () => page.getByLabel(/full name/i), "Edge User");
+      await stableFill(page, () => page.getByLabel(/email address/i), uniqueEmail);
+      await stableFill(page, () => page.getByLabel(/password/i), "Exactly8");
       await page.getByRole("button", { name: /register/i }).click();
 
       await expect(page).toHaveURL("/", { timeout: 30000 });

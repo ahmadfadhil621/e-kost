@@ -7,6 +7,7 @@
 // REQ 7.3 -> test('password field masks input')
 
 import { test, expect } from "@playwright/test";
+import { stableFill } from "../helpers/forms";
 
 const TEST_USER_NAME = "Login Test User";
 const TEST_USER_PASSWORD = "LoginPass123!";
@@ -32,8 +33,8 @@ test.describe("login", () => {
     }) => {
       test.setTimeout(60000);
       await page.goto("/login");
-      await page.getByLabel(/email address/i).fill(testUserEmail);
-      await page.getByLabel(/password/i).fill(TEST_USER_PASSWORD);
+      await stableFill(page, () => page.getByLabel(/email address/i), testUserEmail);
+      await stableFill(page, () => page.getByLabel(/password/i), TEST_USER_PASSWORD);
       await page.getByRole("button", { name: /log in/i }).click();
 
       await expect(page).toHaveURL("/", { timeout: 25000 });
@@ -69,7 +70,7 @@ test.describe("login", () => {
     test("user sees validation error for empty email", async ({ page }) => {
       await page.goto("/login");
 
-      await page.getByLabel(/password/i).fill("SomePassword123");
+      await stableFill(page, () => page.getByLabel(/password/i), "SomePassword123");
       await page.getByRole("button", { name: /log in/i }).click();
 
       await expect(page.getByText(/email is required/i)).toBeVisible({
@@ -80,7 +81,7 @@ test.describe("login", () => {
     test("user sees validation error for empty password", async ({ page }) => {
       await page.goto("/login");
 
-      await page.getByLabel(/email address/i).fill("test@test.com");
+      await stableFill(page, () => page.getByLabel(/email address/i), "test@test.com");
       await page.getByRole("button", { name: /log in/i }).click();
 
       await expect(page.getByText(/password is required/i)).toBeVisible();
@@ -89,8 +90,8 @@ test.describe("login", () => {
     test("user sees error for invalid credentials", async ({ page }) => {
       await page.goto("/login");
 
-      await page.getByLabel(/email address/i).fill("wrong@test.com");
-      await page.getByLabel(/password/i).fill("WrongPassword123");
+      await stableFill(page, () => page.getByLabel(/email address/i), "wrong@test.com");
+      await stableFill(page, () => page.getByLabel(/password/i), "WrongPassword123");
       await page.getByRole("button", { name: /log in/i }).click();
 
       await expect(

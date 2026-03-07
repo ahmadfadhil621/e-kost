@@ -8,6 +8,7 @@
 
 import { test, expect } from "@playwright/test";
 import { goToNewRoomPage } from "../../helpers/room-inventory";
+import { stableFill } from "../../helpers/forms";
 
 test.use({ storageState: "e2e/.auth/user-with-property.json" });
 
@@ -37,9 +38,9 @@ test.describe("create room", () => {
       test.info().setTimeout(45000);
       await goToNewRoomPage(page);
       const roomNumber = "E2E-" + Date.now();
-      await page.getByLabel(/room number/i).fill(roomNumber);
-      await page.getByLabel(/room type/i).fill("single");
-      await page.getByLabel(/monthly rent/i).fill("1500000");
+      await stableFill(page, () => page.getByLabel(/room number/i), roomNumber);
+      await stableFill(page, () => page.getByLabel(/room type/i), "single");
+      await stableFill(page, () => page.getByLabel(/monthly rent/i), "1500000");
       await page.getByRole("button", { name: /create room|save/i }).click();
 
       await expect(
@@ -70,9 +71,9 @@ test.describe("create room", () => {
       page,
     }) => {
       await goToNewRoomPage(page);
-      await page.getByLabel(/room number/i).fill("A99");
-      await page.getByLabel(/room type/i).fill("single");
-      await page.getByLabel(/monthly rent/i).fill("-100");
+      await stableFill(page, () => page.getByLabel(/room number/i), "A99");
+      await stableFill(page, () => page.getByLabel(/room type/i), "single");
+      await stableFill(page, () => page.getByLabel(/monthly rent/i), "-100");
       await page.getByRole("button", { name: /create room|save/i }).click();
 
       await expect(

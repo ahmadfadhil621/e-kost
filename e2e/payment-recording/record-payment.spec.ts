@@ -11,6 +11,7 @@ import {
   getPropertyId,
   goToPaymentsList,
 } from "../helpers/payment-recording";
+import { stableFill } from "../helpers/forms";
 
 const PAYMENT_TENANT_NAME = "E2E Payment Tenant";
 
@@ -105,7 +106,7 @@ test.describe("record payment", () => {
         .first()
         .click()
         .catch(() => {});
-      await page.getByLabel(/payment amount|jumlah/i).first().fill("0");
+      await stableFill(page, () => page.getByLabel(/payment amount|jumlah/i), "0");
       await page
         .getByRole("button", { name: /record payment|catat pembayaran/i })
         .first()

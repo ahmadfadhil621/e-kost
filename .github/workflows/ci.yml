@@ -14,8 +14,33 @@ env:
   NODE_VERSION: "20"
 
 jobs:
-  ci:
+  lint-and-unit:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit and integration tests
+        run: npm run test:run
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: lint-and-unit
 
     services:
       postgres:
@@ -56,20 +81,38 @@ jobs:
       - name: Sync database schema
         run: npx prisma db push
 
-      - name: Lint
-        run: npm run lint
-
       - name: Build
         run: npm run build
         env:
-          # Next.js build may reference these at build time
           BETTER_AUTH_URL: "http://localhost:3000"
-
-      - name: Unit and integration tests
-        run: npm run test:run
 
       - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
 
+      - name: Add swap space
+        run: |
+          sudo swapoff -a || true
+          sudo fallocate -l 2G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+
       - name: E2E tests
         run: npm run test:e2e
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload test results and traces
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-test-results
+          path: test-results/
+          retention-days: 7

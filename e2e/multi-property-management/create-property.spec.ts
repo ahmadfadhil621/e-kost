@@ -6,6 +6,7 @@
 // REQ 1.6 -> test('user creates property with valid data and sees success')
 
 import { test, expect } from "@playwright/test";
+import { stableFill } from "../helpers/forms";
 
 test.use({ storageState: "e2e/.auth/user-with-property.json" });
 
@@ -28,8 +29,8 @@ test.describe("create property", () => {
     }) => {
       await page.goto("/properties/new");
 
-      await page.getByLabel(/property name|name/i).fill("E2E Test Property");
-      await page.getByLabel(/address/i).fill("123 E2E Street");
+      await stableFill(page, () => page.getByLabel(/property name|name/i), "E2E Test Property");
+      await stableFill(page, () => page.getByLabel(/address/i), "123 E2E Street");
       await page.getByRole("button", { name: /create property/i }).click();
 
       await expect(
@@ -55,8 +56,8 @@ test.describe("create property", () => {
     test("user sees validation when name is too long", async ({ page }) => {
       await page.goto("/properties/new");
 
-      await page.getByLabel(/property name|name/i).fill("a".repeat(201));
-      await page.getByLabel(/address/i).fill("Valid Address");
+      await stableFill(page, () => page.getByLabel(/property name|name/i), "a".repeat(201));
+      await stableFill(page, () => page.getByLabel(/address/i), "Valid Address");
       await page.getByRole("button", { name: /create property/i }).click();
 
       await expect(page.getByText(/200|too long|characters/i)).toBeVisible({

@@ -1,4 +1,5 @@
 import { test as setup } from "@playwright/test";
+import { stableFill } from "../helpers/forms";
 
 const authFile = "e2e/.auth/user.json";
 
@@ -10,9 +11,9 @@ setup("authenticate", async ({ page }) => {
   setup.setTimeout(60000);
   await page.goto("/register");
 
-  await page.getByLabel(/full name/i).fill(E2E_USER_NAME);
-  await page.getByLabel(/email address/i).fill(E2E_USER_EMAIL);
-  await page.getByLabel(/password/i).fill(E2E_USER_PASSWORD);
+  await stableFill(page, () => page.getByLabel(/full name/i), E2E_USER_NAME);
+  await stableFill(page, () => page.getByLabel(/email address/i), E2E_USER_EMAIL);
+  await stableFill(page, () => page.getByLabel(/password/i), E2E_USER_PASSWORD);
   await page.getByRole("button", { name: /register/i }).click();
 
   const redirectTimeout = 35000;

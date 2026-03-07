@@ -6,6 +6,7 @@
 
 import { test, expect } from "@playwright/test";
 import { goToNewTenantPage } from "../helpers/tenant-room-basics";
+import { stableFill } from "../helpers/forms";
 
 test.use({ storageState: "e2e/.auth/user-with-property.json" });
 
@@ -39,10 +40,9 @@ test.describe("create tenant", () => {
         .getByRole("button", { name: /create tenant|save|submit/i })
         .waitFor({ state: "visible", timeout: 10000 });
       const unique = "E2E-" + Date.now();
-      // Use input ids to avoid detached DOM when form re-renders
-      await page.locator("#tenant-name").fill("Tenant " + unique);
-      await page.locator("#tenant-phone").fill("08123456789");
-      await page.locator("#tenant-email").fill(unique + "@test.com");
+      await stableFill(page, () => page.locator("#tenant-name"), "Tenant " + unique);
+      await stableFill(page, () => page.locator("#tenant-phone"), "08123456789");
+      await stableFill(page, () => page.locator("#tenant-email"), unique + "@test.com");
       await page
         .getByRole("button", { name: /create tenant|save|submit/i })
         .click();
@@ -82,9 +82,9 @@ test.describe("create tenant", () => {
       await page
         .getByRole("button", { name: /create tenant|save|submit/i })
         .waitFor({ state: "visible", timeout: 15000 });
-      await page.locator("#tenant-name").fill("Test User");
-      await page.locator("#tenant-phone").fill("08123456789");
-      await page.locator("#tenant-email").fill("notanemail");
+      await stableFill(page, () => page.locator("#tenant-name"), "Test User");
+      await stableFill(page, () => page.locator("#tenant-phone"), "08123456789");
+      await stableFill(page, () => page.locator("#tenant-email"), "notanemail");
       await page
         .getByRole("button", { name: /create tenant|save|submit/i })
         .click();

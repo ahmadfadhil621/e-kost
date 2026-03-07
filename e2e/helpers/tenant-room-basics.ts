@@ -36,6 +36,7 @@ export async function goToTenantDetail(
   const pid = propertyId ?? getPropertyId();
   await page.goto(`/properties/${pid}/tenants/${tenantId}`);
   await page.waitForLoadState("domcontentloaded");
+  await page.waitForLoadState("networkidle");
   // Active: Edit / Assign room / Move out or "Tenant details" heading.
   // Moved-out: "Tenant moved out successfully" text, Back link, or heading.
   // Not-found/error: Back button. Use 90s in CI so tenant fetch + render can complete.

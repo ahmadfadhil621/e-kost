@@ -8,14 +8,16 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 1,
-  // Use 1 worker so local runs match CI and avoid overloading the dev server (timeouts, ECONNRESET).
+  // Use 1 worker in CI and locally to avoid flakiness (form detachment, dev server overload).
   workers: 1,
-  reporter: "list",
+  reporter: process.env.CI ? [["list"], ["html", { outputFolder: "playwright-report" }]] : "list",
   use: {
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",
     viewport: { width: 375, height: 667 },
     navigationTimeout: 60000,
+    // CI: avoid /dev/shm size issues in containers
+    launchOptions: process.env.CI ? { args: ["--disable-dev-shm-usage"] } : undefined,
   },
   timeout: 90000,
   projects: [
@@ -46,6 +48,7 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 375, height: 667 },
+        storageState: "e2e/.auth/user.json"
       },
       dependencies: ["setup"],
     },
@@ -55,6 +58,7 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 375, height: 667 },
+        storageState: "e2e/.auth/user-with-property.json"
       },
       dependencies: ["chromium-no-props", "setup-with-property"],
     },
@@ -69,10 +73,18 @@ export default defineConfig({
       dependencies: ["setup-with-moved-out-tenant"],
     },
   ],
-  webServer: {
-    command: "npm run dev",
-    url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  // CI: use production server (build already ran in workflow). Local: dev server.
+  webServer: process.env.CI
+    ? {
+        command: "npx next start",
+        url: "http://localhost:3000",
+        reuseExistingServer: false,
+        timeout: 120_000,
+      }
+    : {
+        command: "npm run dev",
+        url: "http://localhost:3000",
+        reuseExistingServer: true,
+        timeout: 120_000,
+      },
 });
