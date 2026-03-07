@@ -3,7 +3,6 @@ import * as path from "path";
 import { test as setup, expect } from "@playwright/test";
 
 const authWithMovedOutFile = "e2e/.auth/user-with-moved-out-tenant.json";
-const propertyIdFile = "e2e/.auth/property-id.json";
 const movedOutTenantFile = "e2e/.auth/moved-out-tenant.json";
 const ACTIVE_PROPERTY_KEY = "e-kost-active-property-id";
 
@@ -99,11 +98,9 @@ setup("create user with property and moved-out tenant with note", async ({
   if (!fs.existsSync(authDir)) {
     fs.mkdirSync(authDir, { recursive: true });
   }
-  fs.writeFileSync(
-    propertyIdFile,
-    JSON.stringify({ propertyId }),
-    "utf-8"
-  );
+  // Do not write property-id.json here; it is shared with setup-with-property.
+  // chromium tests must use the main property from setup-with-property.
+  // moved-out-notes tests use getMovedOutTenantSetup() which reads this file.
   fs.writeFileSync(
     movedOutTenantFile,
     JSON.stringify({ propertyId, movedOutTenantId: tenantId }),

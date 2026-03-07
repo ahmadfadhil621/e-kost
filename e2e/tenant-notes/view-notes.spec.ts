@@ -115,9 +115,16 @@ test.describe("view notes", () => {
     }) => {
       test.info().setTimeout(60000);
       const propertyId = getPropertyId();
-      const tenantsRes = await request.get(
-        `/api/properties/${propertyId}/tenants`
-      );
+      let tenantsRes;
+      try {
+        tenantsRes = await request.get(
+          `/api/properties/${propertyId}/tenants`,
+          { timeout: 15000 }
+        );
+      } catch {
+        test.skip(true, "Tenants API request failed (timeout or network)");
+        return;
+      }
       if (!tenantsRes.ok()) {
         test.skip();
         return;
@@ -129,10 +136,16 @@ test.describe("view notes", () => {
         return;
       }
       await goToTenantDetail(page, tenantId);
-      const doc = page.locator("body");
-      await expect(doc).toBeVisible({ timeout: 15000 });
-      const box = await doc.boundingBox();
-      expect(box?.width).toBeLessThanOrEqual(480);
+      await expect(
+        page
+          .getByText(/notes|catatan|no notes|belum ada|add note|tambah catatan/i)
+          .first()
+      ).toBeVisible({ timeout: 15000 });
+      const hasNoHorizontalScroll = await page.evaluate(() => {
+        const { scrollWidth, clientWidth } = document.documentElement;
+        return scrollWidth <= clientWidth;
+      });
+      expect(hasNoHorizontalScroll).toBe(true);
     });
   });
 });

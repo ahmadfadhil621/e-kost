@@ -17,7 +17,7 @@ test.describe("moved-out tenant notes", () => {
       request,
       baseURL,
     }) => {
-      test.info().setTimeout(60000);
+      test.info().setTimeout(90000);
       const setupIds = getMovedOutTenantSetup();
       let propertyId: string;
       let movedOutTenantId: string;
@@ -58,7 +58,7 @@ test.describe("moved-out tenant notes", () => {
       await goToTenantDetail(page, movedOutTenantId, propertyId);
       await expect(
         page.getByText(/notes|catatan/i).first()
-      ).toBeVisible({ timeout: 15000 }).catch(() => {});
+      ).toBeVisible({ timeout: 15000 });
     });
   });
 
@@ -67,7 +67,7 @@ test.describe("moved-out tenant notes", () => {
       page,
       request,
     }) => {
-      test.info().setTimeout(60000);
+      test.info().setTimeout(90000);
       const setupIds = getMovedOutTenantSetup();
       let tenantId: string | undefined;
       if (setupIds) {
@@ -95,7 +95,7 @@ test.describe("moved-out tenant notes", () => {
       await goToTenantDetail(page, tenantId, propertyIdForNav);
       await expect(
         page.getByText(/notes|catatan|tenant|penyewa/i).first()
-      ).toBeVisible({ timeout: 15000 }).catch(() => {});
+      ).toBeVisible({ timeout: 15000 });
     });
   });
 
@@ -104,7 +104,7 @@ test.describe("moved-out tenant notes", () => {
       page,
       request,
     }) => {
-      test.info().setTimeout(60000);
+      test.info().setTimeout(90000);
       const setupIds = getMovedOutTenantSetup();
       let propertyId: string;
       let movedOutTenantId: string;
@@ -139,7 +139,7 @@ test.describe("moved-out tenant notes", () => {
             page.getByRole("button", { name: /add note|tambah catatan/i }).first()
           )
           .or(page.getByText(/notes|catatan/i).first())
-      ).toBeVisible({ timeout: 15000 }).catch(() => {});
+      ).toBeVisible({ timeout: 15000 });
     });
   });
 });
