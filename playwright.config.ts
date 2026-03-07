@@ -52,9 +52,19 @@ export default defineConfig({
       },
       dependencies: ["setup"],
     },
+    // Auth specs that require unauthenticated browser (no storage state).
+    {
+      name: "chromium-auth",
+      testMatch: /(register|login|session-redirect)\.spec\.ts$/,
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 375, height: 667 },
+      },
+      dependencies: ["setup"],
+    },
     {
       name: "chromium",
-      testMatch: /^(?!.*(switch-property|moved-out-tenant-notes)\.spec\.ts).*\.spec\.ts$/,
+      testMatch: /^(?!.*(switch-property|moved-out-tenant-notes|register|login|session-redirect)\.spec\.ts).*\.spec\.ts$/,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 375, height: 667 },
