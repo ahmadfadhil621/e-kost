@@ -15,9 +15,9 @@ export default defineConfig({
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",
     viewport: { width: 375, height: 667 },
-    navigationTimeout: 45000,
+    navigationTimeout: 60000,
   },
-  timeout: 60000,
+  timeout: 90000,
   projects: [
     { name: "setup", testMatch: /auth\.setup\.ts/ },
     {

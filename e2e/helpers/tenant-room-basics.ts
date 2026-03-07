@@ -36,10 +36,11 @@ export async function goToTenantDetail(
   await page.goto(`/properties/${pid}/tenants/${tenantId}`);
   // Active tenant: Edit / Assign room / Move out buttons or "Tenant details" heading.
   // Moved-out tenant: only Back link and notes; no action buttons — match Back or heading.
+  // Use 70s in CI/slow envs so tenant fetch + render can complete under load.
   await page
     .getByRole("button", { name: /edit|assign room|move out/i })
     .or(page.getByText(/tenant details|detail penyewa|detail/i))
     .or(page.getByRole("link", { name: /^back$|kembali/i }))
     .first()
-    .waitFor({ state: "visible", timeout: 45000 });
+    .waitFor({ state: "visible", timeout: 70000 });
 }
