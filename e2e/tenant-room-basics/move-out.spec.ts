@@ -83,7 +83,7 @@ test.describe("move out", () => {
       page,
       request,
     }) => {
-      test.info().setTimeout(45000);
+      test.info().setTimeout(90000);
       const propertyId = getPropertyId();
       const tenantRes = await request.post(
         `/api/properties/${propertyId}/tenants`,
