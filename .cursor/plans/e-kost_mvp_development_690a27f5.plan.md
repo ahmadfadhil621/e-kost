@@ -40,7 +40,7 @@ todos:
     status: completed
   - id: phase-8
     content: "Phase 8: Settings & Staff -- Language switcher (options from locales/*.json), staff invite/remove, account settings, i18n, tests"
-    status: pending
+    status: completed
 isProject: false
 ---
 
@@ -48,7 +48,7 @@ isProject: false
 
 ## Current State
 
-Phase 0 (Project Foundation) through Phase 7 (Dashboard) are complete. Implementation includes the full stack for each: auth flow; multi-property (Property CRUD, switcher, staff assignment, propertyId scoping); room inventory (domain, RoomService, PrismaRoomRepository, room CRUD + status API, list/detail/forms, status filter/indicators, pages, i18n); tenant & room basics (TenantService, PrismaTenantRepository, tenant CRUD + assign-room + move-out API, list/detail/forms, move-out dialog, pages, i18n, E2E in `e2e/tenant-room-basics/`); payment recording (PaymentService, PrismaPaymentRepository, payment CRUD API, PaymentForm/PaymentList/TenantPaymentSection, payment i18n, E2E in `e2e/payment-recording/`); tenant notes (NoteService, PrismaNoteRepository, note CRUD API, NotesSection/NoteCard/NoteForm in tenant detail, notes i18n, E2E in `e2e/tenant-notes/`); outstanding balance (BalanceService, balance API, BalanceSection/BalanceStatusIndicator in tenant detail and list, E2E in `e2e/outstanding-balance/`); finance & expense (ExpenseService, FinanceSummaryService, expense CRUD API, finance/summary API, finance overview + expenses list/form, E2E in `e2e/finance-expense-tracking/`); dashboard (DashboardService, dashboard API at `api/properties/[propertyId]/dashboard`, OccupancyCard, FinanceSummaryCard, OutstandingBalancesList, RecentPaymentsList, app root as dashboard page, E2E in `e2e/dashboard-overview/`). Next: Phase 8 (Settings & Staff — settings page, language switcher with options derived from which locale JSON files exist in `locales/`, account section, staff invite/remove UI).
+Phase 0 (Project Foundation) through Phase 8 (Settings & Staff) are complete. Implementation includes the full stack for each: auth flow; multi-property (Property CRUD, switcher, staff assignment, propertyId scoping); room inventory (domain, RoomService, PrismaRoomRepository, room CRUD + status API, list/detail/forms, status filter/indicators, pages, i18n); tenant & room basics (TenantService, PrismaTenantRepository, tenant CRUD + assign-room + move-out API, list/detail/forms, move-out dialog, pages, i18n, E2E in `e2e/tenant-room-basics/`); payment recording (PaymentService, PrismaPaymentRepository, payment CRUD API, PaymentForm/PaymentList/TenantPaymentSection, payment i18n, E2E in `e2e/payment-recording/`); tenant notes (NoteService, PrismaNoteRepository, note CRUD API, NotesSection/NoteCard/NoteForm in tenant detail, notes i18n, E2E in `e2e/tenant-notes/`); outstanding balance (BalanceService, balance API, BalanceSection/BalanceStatusIndicator in tenant detail and list, E2E in `e2e/outstanding-balance/`); finance & expense (ExpenseService, FinanceSummaryService, expense CRUD API, finance/summary API, finance overview + expenses list/form, E2E in `e2e/finance-expense-tracking/`); dashboard (DashboardService, dashboard API at `api/properties/[propertyId]/dashboard`, OccupancyCard, FinanceSummaryCard, OutstandingBalancesList, RecentPaymentsList, app root as dashboard page, E2E in `e2e/dashboard-overview/`); settings (SettingsPage at /settings, LanguageSelector with AVAILABLE_LOCALES, AccountSection, StaffSection for owners, bottom nav, E2E in `e2e/settings-staff-management/`).
 
 ## Feature Development Workflow (TDD)
 

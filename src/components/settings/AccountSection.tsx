@@ -50,7 +50,7 @@ export function AccountSection({ user, onUserUpdated }: AccountSectionProps) {
       if (updateError) {
         throw updateError;
       }
-      const updatedUser = (data?.user as User) ?? { ...user, name: trimmed };
+      const updatedUser: User = { ...user, name: trimmed };
       onUserUpdated(updatedUser);
       const message = t("settings.account.updateSuccess");
       setSuccessMessage(message);

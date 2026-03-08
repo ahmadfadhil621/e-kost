@@ -58,17 +58,18 @@ src/
 │   ├── expense/             # Expense form, list
 │   ├── finance/             # Month selector, summary cards, category breakdown
 │   ├── notes/               # Note form, note card, notes section (tenant detail)
+│   ├── settings/            # Settings page, language selector, account section, staff section
 │   ├── layout/              # App shell, header, nav
 │   └── providers/           # React providers (e.g. query client)
 ├── contexts/                # React context (e.g. property-context for active property)
 ├── domain/
-│   ├── schemas/             # Shared Zod schemas (property, room, tenant, payment, expense, auth)
+│   ├── schemas/             # Shared Zod schemas (property, room, tenant, payment, expense, auth, dashboard, tenant-note)
 │   └── interfaces/          # Repository interfaces (property, room, tenant, payment, expense, note)
-├── lib/                     # Services (property, room, tenant, payment, balance, expense, finance-summary, note), repositories (Prisma + stubs), auth, prisma, i18n
+├── lib/                     # Services (property, room, tenant, payment, balance, expense, finance-summary, dashboard, note), repositories (Prisma + stubs), auth, prisma, i18n
 ├── generated/               # Prisma client output (do not edit)
 ├── hooks/                   # Custom React hooks
 └── test/                    # Test setup, fixtures, faults (fault injection), mocks (MSW when used)
-e2e/                         # Playwright E2E specs (auth, multi-property-management, room-inventory-management, tenant-room-basics, payment-recording, outstanding-balance, dashboard-overview, finance-expense-tracking, tenant-notes)
+e2e/                         # Playwright E2E specs (auth, multi-property-management, room-inventory-management, tenant-room-basics, payment-recording, outstanding-balance, dashboard-overview, finance-expense-tracking, tenant-notes, settings-staff-management)
 locales/
 ├── en.json                  # English translations
 └── id.json                  # Indonesian translations
@@ -107,7 +108,7 @@ CI uses a PostgreSQL 16 service container and sets `DATABASE_URL`, `BETTER_AUTH_
 
 ## Development Status
 
-### Completed (Phases 0–7)
+### Completed (Phases 0–8)
 
 | Phase | Feature | Summary |
 |-------|---------|---------|
@@ -121,13 +122,9 @@ CI uses a PostgreSQL 16 service container and sets `DATABASE_URL`, `BETTER_AUTH_
 | 6b | **Outstanding Balance** | Balance per tenant (rent − payments), balance in list and detail, status indicators |
 | 6c | **Finance & Expense Tracking** | Expense CRUD, monthly income/expense summary, category breakdown |
 | 7 | **Dashboard / Overview** | Occupancy stats, finance summary card, outstanding balances list, recent payments, app root as dashboard |
+| 8 | **Settings & Staff** | Settings page at /settings, language switcher (from `locales/*.json`), account section (name edit), staff invite/remove (owner-only), bottom nav entry |
 
 All of the above include full stack (domain, services, API, UI), i18n (en + id), and E2E tests where specified. Full Vitest and Playwright suites pass in CI.
-
-### Not Yet Implemented
-
-- **Phase 8 — Settings & Staff**
-  Settings page with language switcher (options derived from which locale JSON files exist in `locales/`), account section, and staff invite/remove. Staff API exists from Phase 2; UI and settings flow are pending.
 
 ### Known Limitations
 

@@ -52,7 +52,7 @@ Skeptical consultant approach: "Don't use React unless it clearly wins"
 4. **Hiring pool**: 10x more React developers than Alpine.js or Lit
 5. **Mobile-first libraries**: React Hook Form, Radix UI optimized for touch interfaces
 6. **State management**: Built-in hooks (useState, useContext) sufficient for E-Kost scale
-7. **Testing ecosystem**: Jest, React Testing Library, Playwright integration
+7. **Testing ecosystem**: Vitest, React Testing Library, Playwright integration
 8. **PWA support**: Workbox, service worker libraries well-documented for React
 9. **i18n libraries**: react-i18next mature solution for language-agnostic UI
 10. **Long-term stability**: Meta's backing ensures 5+ year support horizon

@@ -2,7 +2,7 @@
 
 ## 1. UI Layer
 
-- [ ] 1.1 Create SettingsPage layout
+- [x] 1.1 Create SettingsPage layout
   - **Description**: Build the main settings page with section-based layout
   - **Acceptance Criteria**:
     - Route: /settings
@@ -15,7 +15,7 @@
   - **Dependencies**: Phase 1 Auth, Phase 2 Multi-Property
   - **Effort**: M
 
-- [ ] 1.2 Create LanguageSelector component
+- [x] 1.2 Create LanguageSelector component
   - **Description**: Build language switching UI driven by available locale files
   - **Acceptance Criteria**:
     - Displays one option per available locale, where "available" is determined by which locale JSON files exist in `locales/` (or a single shared config/list derived from them at build time)
@@ -28,7 +28,7 @@
   - **Dependencies**: i18n infrastructure (Phase 0); list of available locales (from locales dir or config)
   - **Effort**: S
 
-- [ ] 1.3 Create AccountSection component
+- [x] 1.3 Create AccountSection component
   - **Description**: Build account information display and name editing
   - **Acceptance Criteria**:
     - Displays: profile icon (initials), name, email (read-only badge)
@@ -43,7 +43,7 @@
   - **Dependencies**: Phase 1 Auth (Better Auth client)
   - **Effort**: M
 
-- [ ] 1.4 Integrate StaffManagement into settings
+- [x] 1.4 Integrate StaffManagement into settings
   - **Description**: Add StaffManagement component (from Multi-Property) as a section on the settings page
   - **Acceptance Criteria**:
     - Renders StaffManagement component for active property
@@ -54,7 +54,7 @@
   - **Dependencies**: Phase 2 Multi-Property (StaffManagement component)
   - **Effort**: S
 
-- [ ] 1.5 Add settings entry to bottom navigation
+- [x] 1.5 Add settings entry to bottom navigation
   - **Description**: Add settings page link to the app's bottom navigation
   - **Acceptance Criteria**:
     - Gear icon + translated "Settings" label
@@ -66,7 +66,7 @@
 
 ## 2. Language Persistence
 
-- [ ] 2.1 Define available locales from locale files
+- [x] 2.1 Define available locales from locale files
   - **Description**: Single source of truth for which languages the switcher offers
   - **Acceptance Criteria**:
     - Available locales are derived from which JSON files exist in `locales/` (e.g. build-time list, or shared config used by i18n init and LanguageSelector)
@@ -74,7 +74,7 @@
   - **Dependencies**: i18n infrastructure (Phase 0)
   - **Effort**: S
 
-- [ ] 2.2 Implement language persistence and initialization
+- [x] 2.2 Implement language persistence and initialization
   - **Description**: Ensure language preference persists across sessions
   - **Acceptance Criteria**:
     - On app initialization, read language from localStorage
@@ -87,7 +87,7 @@
 
 ## 3. Internationalization (i18n)
 
-- [ ] 3.1 Extract and translate settings strings
+- [x] 3.1 Extract and translate settings strings
   - **Description**: Add all settings UI text to translation files
   - **Acceptance Criteria**:
     - All section headers, labels, buttons in en.json and id.json
@@ -100,7 +100,7 @@
 
 ## 4. Testing & Validation
 
-- [ ] 4.1 Test language switching workflow
+- [x] 4.1 Test language switching workflow
   - **Description**: Verify language selection updates entire UI
   - **Acceptance Criteria**:
     - Selecting any available language updates all visible text to that language
@@ -111,7 +111,7 @@
   - **Dependencies**: 1.2, 2.1, 2.2
   - **Effort**: M
 
-- [ ] 4.2 Test account update workflow
+- [x] 4.2 Test account update workflow
   - **Description**: Verify name update functionality
   - **Acceptance Criteria**:
     - Can edit and save name
@@ -122,7 +122,7 @@
   - **Dependencies**: 1.3
   - **Effort**: S
 
-- [ ] 4.3 Test staff section visibility
+- [x] 4.3 Test staff section visibility
   - **Description**: Verify staff section shows only for owners
   - **Acceptance Criteria**:
     - Owner sees Language + Account + Staff sections
@@ -131,7 +131,7 @@
   - **Dependencies**: 1.4
   - **Effort**: S
 
-- [ ] 4.4 Test mobile responsiveness
+- [x] 4.4 Test mobile responsiveness
   - **Description**: Verify settings page works on mobile
   - **Acceptance Criteria**:
     - Settings renders at 320px-480px without horizontal scroll
