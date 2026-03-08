@@ -66,7 +66,7 @@ test.describe("update account", () => {
       await page.getByRole("button", { name: /save|simpan/i }).click();
 
       await expect(
-        page.getByText(/updated|berhasil|success|account updated/i)
+        page.getByRole("region", { name: /account|akun/i }).getByText(/account updated|akun berhasil diperbarui/i)
       ).toBeVisible({ timeout: 10000 });
       await expect(
         page.getByText("E2E Updated Name")
@@ -103,19 +103,17 @@ test.describe("update account", () => {
     test("cancel exits edit mode without saving", async ({ page }) => {
       await page.goto("/settings");
 
-      const nameBefore = await page
-        .getByText(/^[A-Za-z\s]{2,}$/)
-        .first()
-        .textContent()
-        .catch(() => null);
-
       await page.getByRole("button", { name: /edit|ubah/i }).click();
-      await page.getByLabel(/name|nama/i).first().fill("Never Saved");
+      const nameInput = page.getByLabel(/name|nama/i).first();
+      await nameInput.waitFor({ state: "visible", timeout: 5000 });
+      const nameBefore = await nameInput.inputValue();
+
+      await nameInput.fill("Never Saved");
       await page.getByRole("button", { name: /cancel|batal/i }).click();
 
-      if (nameBefore) {
+      if (nameBefore.trim()) {
         await expect(
-          page.getByText(nameBefore.trim())
+          page.getByRole("region", { name: /account|akun/i }).getByText(nameBefore.trim())
         ).toBeVisible({ timeout: 3000 });
       }
     });

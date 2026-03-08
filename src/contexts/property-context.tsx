@@ -7,6 +7,9 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import { useQuery } from "@tanstack/react-query";
+
+export type PropertyRole = "owner" | "staff";
 
 const ACTIVE_PROPERTY_KEY = "e-kost-active-property-id";
 
@@ -84,4 +87,37 @@ export function useActiveProperty() {
   const activeId = ctx?.activePropertyId ?? null;
   const active = ctx?.properties.find((p) => p.id === activeId) ?? null;
   return { activeProperty: active, activePropertyId: activeId, ...ctx };
+}
+
+type PropertyWithRole = {
+  id: string;
+  name: string;
+  address: string;
+  ownerId: string;
+  role?: PropertyRole;
+};
+
+export function useProperty() {
+  const { activeProperty, activePropertyId, ...ctx } = useActiveProperty();
+  const { data: propertyWithRole } = useQuery({
+    queryKey: ["property", activePropertyId],
+    queryFn: async (): Promise<PropertyWithRole> => {
+      const res = await fetch(`/api/properties/${activePropertyId}`, {
+        credentials: "include",
+      });
+      if (!res.ok) {
+        throw new Error("Failed to fetch property");
+      }
+      return res.json();
+    },
+    enabled: !!activePropertyId,
+    staleTime: 60 * 1000,
+  });
+  const userRole: PropertyRole | null = propertyWithRole?.role ?? null;
+  return {
+    activeProperty,
+    activePropertyId,
+    userRole,
+    ...ctx,
+  };
 }

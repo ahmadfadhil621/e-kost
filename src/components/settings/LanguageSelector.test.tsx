@@ -111,7 +111,9 @@ describe("LanguageSelector", () => {
     it("displays section header for language", () => {
       render(<LanguageSelector availableLocales={["en", "id"]} />);
       expect(
-        screen.getByText(/language|settings\.language\.title/i)
+        screen.getByRole("heading", {
+          name: /language|settings\.language\.title/i,
+        })
       ).toBeInTheDocument();
     });
   });

@@ -7,7 +7,16 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { Providers } from "@/components/providers";
 import { SettingsPage } from "./SettingsPage";
+
+function renderSettingsPage() {
+  return render(
+    <Providers>
+      <SettingsPage />
+    </Providers>
+  );
+}
 
 const mockUser = {
   id: "u1",
@@ -37,7 +46,7 @@ beforeEach(() => {
 describe("SettingsPage", () => {
   describe("good cases", () => {
     it("displays single page with Language, Account, and Staff sections for owner", () => {
-      render(<SettingsPage />);
+      renderSettingsPage();
 
       expect(
         screen.getByRole("heading", { name: /language|settings\.language/i })
@@ -51,7 +60,7 @@ describe("SettingsPage", () => {
     });
 
     it("renders sections in single-column with separators", () => {
-      const { container } = render(<SettingsPage />);
+      const { container } = renderSettingsPage();
 
       const main = container.querySelector("main") ?? container;
       const sections = main.querySelectorAll(
@@ -61,7 +70,7 @@ describe("SettingsPage", () => {
     });
 
     it("displays section headers for Language, Account, Staff", () => {
-      render(<SettingsPage />);
+      renderSettingsPage();
 
       expect(
         screen.getByText(/language|settings\.language\.title/i)
@@ -80,7 +89,7 @@ describe("SettingsPage", () => {
         activeProperty: null,
         userRole: null,
       });
-      render(<SettingsPage />);
+      renderSettingsPage();
 
       expect(screen.getByText(/loading|memuat/i)).toBeInTheDocument();
     });
@@ -92,7 +101,7 @@ describe("SettingsPage", () => {
         activeProperty: { id: "p1", name: "P" },
         userRole: "staff",
       });
-      render(<SettingsPage />);
+      renderSettingsPage();
 
       const staffHeadings = screen.queryAllByRole("heading", {
         name: /staff for|staff.*property/i,
@@ -103,7 +112,7 @@ describe("SettingsPage", () => {
 
   describe("edge cases", () => {
     it("page has accessible title or heading", () => {
-      render(<SettingsPage />);
+      renderSettingsPage();
       const heading = screen.queryByRole("heading", {
         name: /settings|pengaturan/i,
         level: 1,

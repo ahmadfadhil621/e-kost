@@ -87,6 +87,7 @@
       "addByEmail": "Tambah berdasarkan email",
       "invite": "Undang",
       "invited": "Staf berhasil diundang",
+      "removed": "Staf berhasil dihapus",
       "notFound": "Tidak ada akun terdaftar untuk email ini"
     }
   },
@@ -382,6 +383,35 @@
       "categoryRequired": "Pilih kategori",
       "amountPositive": "Jumlah harus positif",
       "dateRequired": "Tanggal wajib diisi"
+    }
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "language": {
+      "title": "Bahasa",
+      "current": "Bahasa saat ini"
+    },
+    "locale": {
+      "en": "English",
+      "id": "Bahasa Indonesia"
+    },
+    "account": {
+      "title": "Akun",
+      "name": "Nama",
+      "email": "Email",
+      "emailReadOnly": "Email tidak dapat diubah",
+      "edit": "Ubah",
+      "save": "Simpan",
+      "cancel": "Batal",
+      "updateSuccess": "Akun berhasil diperbarui",
+      "updateError": "Gagal memperbarui akun. Silakan coba lagi."
+    },
+    "staff": {
+      "title": "Staf untuk {{propertyName}}",
+      "addStaff": "Tambah Staf"
+    },
+    "validation": {
+      "nameRequired": "Nama wajib diisi"
     }
   }
 }

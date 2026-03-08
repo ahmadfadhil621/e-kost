@@ -52,7 +52,9 @@ describe("StaffSection", () => {
       );
 
       expect(
-        screen.getByText(/staff for sunset villa|sunset villa/i)
+        screen.getByRole("heading", {
+          name: /staff for sunset villa|sunset villa/i,
+        })
       ).toBeInTheDocument();
     });
   });

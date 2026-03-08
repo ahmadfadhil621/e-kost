@@ -87,6 +87,7 @@
       "addByEmail": "Add by email",
       "invite": "Invite",
       "invited": "Staff invited successfully",
+      "removed": "Staff removed successfully",
       "notFound": "No registered account found for this email"
     }
   },
@@ -382,6 +383,35 @@
       "categoryRequired": "Please select a category",
       "amountPositive": "Amount must be a positive number",
       "dateRequired": "Date is required"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "language": {
+      "title": "Language",
+      "current": "Current language"
+    },
+    "locale": {
+      "en": "English",
+      "id": "Bahasa Indonesia"
+    },
+    "account": {
+      "title": "Account",
+      "name": "Name",
+      "email": "Email",
+      "emailReadOnly": "Email cannot be changed",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "updateSuccess": "Account updated",
+      "updateError": "Failed to update account. Please try again."
+    },
+    "staff": {
+      "title": "Staff for {{propertyName}}",
+      "addStaff": "Add Staff"
+    },
+    "validation": {
+      "nameRequired": "Name is required"
     }
   }
 }

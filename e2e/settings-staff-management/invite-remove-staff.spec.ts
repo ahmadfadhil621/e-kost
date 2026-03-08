@@ -8,9 +8,31 @@
 // REQ 3.7 -> test('add and remove have adequate touch targets')
 
 import { test, expect } from "@playwright/test";
+import type { Browser } from "@playwright/test";
 import { stableFill } from "../helpers/forms";
 
 test.use({ storageState: "e2e/.auth/user-with-property.json" });
+
+/** Registers a new user via the /register page in a new context so the user exists in the DB. Leaves the current context (owner) unchanged. */
+async function registerStaffUserInNewContext(
+  browser: Browser,
+  staffEmail: string,
+  password: string,
+  name: string
+): Promise<void> {
+  const ctx = await browser.newContext({ baseURL: "http://localhost:3000" });
+  const page = await ctx.newPage();
+  try {
+    await page.goto("/register");
+    await stableFill(page, () => page.getByLabel(/full name/i), name);
+    await stableFill(page, () => page.getByLabel(/email address/i), staffEmail);
+    await stableFill(page, () => page.getByLabel(/password/i), password);
+    await page.getByRole("button", { name: /register/i }).click();
+    await page.waitForURL((url) => url.pathname === "/", { timeout: 15000 });
+  } finally {
+    await ctx.close();
+  }
+}
 
 test.describe("invite and remove staff", () => {
   test.describe("good cases", () => {
@@ -36,71 +58,66 @@ test.describe("invite and remove staff", () => {
     test("Add Staff shows form to enter email", async ({ page }) => {
       await page.goto("/settings");
 
-      await page.getByRole("button", { name: /add staff|tambah staf/i }).click();
+      const staffSection = page.getByTestId("staff-management");
+      await staffSection.waitFor({ state: "visible", timeout: 10000 });
+      await staffSection.getByRole("button", { name: /add staff|tambah staf/i }).scrollIntoViewIfNeeded();
+      await staffSection.getByRole("button", { name: /add staff|tambah staf/i }).click();
 
       await expect(
-        page.getByLabel(/email/i).or(page.getByPlaceholder(/email/i))
-      ).toBeVisible({ timeout: 5000 });
+        staffSection.locator("#staff-email")
+      ).toBeVisible({ timeout: 10000 });
       await expect(
-        page.getByRole("button", { name: /invite|add|tambah|send/i })
-      ).toBeVisible({ timeout: 3000 });
+        staffSection.getByRole("button", { name: /^invite$|^undang$/i })
+      ).toBeVisible({ timeout: 5000 });
     });
 
     test("submitting valid staff invitation adds staff and shows confirmation", async ({
       page,
-      request,
+      browser,
     }) => {
       const staffEmail = `staff-${Date.now()}@test.com`;
-      await request.post("/api/auth/sign-up/email", {
-        data: {
-          name: "Staff User",
-          email: staffEmail,
-          password: "StaffPass123!",
-        },
-      });
+      await registerStaffUserInNewContext(browser, staffEmail, "StaffPass123!", "Staff User");
 
       await page.goto("/settings");
-      await page.getByRole("button", { name: /add staff|tambah staf/i }).click();
+      const staffSection = page.getByTestId("staff-management");
+      await staffSection.getByRole("button", { name: /add staff|tambah staf/i }).click();
       await stableFill(
         page,
-        () =>
-          page.getByLabel(/email/i).or(page.getByPlaceholder(/email/i)).first(),
+        () => staffSection.locator("#staff-email"),
         staffEmail
       );
-      await page.getByRole("button", { name: /invite|add|tambah|send/i }).click();
+      await staffSection.getByRole("button", { name: /^invite$|^undang$/i }).click();
 
       await expect(
-        page.getByText(/added|invited|berhasil|success|staff/i)
-      ).toBeVisible({ timeout: 10000 });
+        staffSection.getByText(staffEmail).or(
+          page.getByRole("status").filter({ hasText: /invited successfully|berhasil diundang|staff invited/i })
+        )
+      ).toBeVisible({ timeout: 15000 });
     });
 
     test("Remove shows confirmation dialog and removes access on confirm", async ({
       page,
-      request,
+      browser,
     }) => {
       const staffEmail = `remove-${Date.now()}@test.com`;
-      await request.post("/api/auth/sign-up/email", {
-        data: {
-          name: "To Remove",
-          email: staffEmail,
-          password: "RemovePass123!",
-        },
-      });
+      await registerStaffUserInNewContext(browser, staffEmail, "RemovePass123!", "To Remove");
 
       await page.goto("/settings");
-      await page.getByRole("button", { name: /add staff|tambah staf/i }).click();
+      const staffSection = page.getByTestId("staff-management");
+      await staffSection.getByRole("button", { name: /add staff|tambah staf/i }).click();
       await stableFill(
         page,
-        () =>
-          page.getByLabel(/email/i).or(page.getByPlaceholder(/email/i)).first(),
+        () => staffSection.locator("#staff-email"),
         staffEmail
       );
-      await page.getByRole("button", { name: /invite|add|tambah|send/i }).click();
+      await staffSection.getByRole("button", { name: /^invite$|^undang$/i }).click();
       await expect(
-        page.getByText(/added|invited|berhasil|success|staff/i)
-      ).toBeVisible({ timeout: 10000 });
+        staffSection.getByText(staffEmail).or(
+          page.getByRole("status").filter({ hasText: /invited successfully|berhasil diundang|staff invited/i })
+        )
+      ).toBeVisible({ timeout: 15000 });
 
-      await page.getByRole("button", { name: /remove|hapus/i }).first().click();
+      await staffSection.getByRole("listitem").filter({ hasText: staffEmail }).getByRole("button", { name: /remove|hapus|delete/i }).click();
       await expect(
         page.getByRole("dialog").getByRole("button", { name: /confirm|remove|hapus|yes|ya/i })
       ).toBeVisible({ timeout: 5000 });
@@ -110,7 +127,7 @@ test.describe("invite and remove staff", () => {
         .click();
 
       await expect(
-        page.getByText(/removed|berhasil|success/i)
+        page.getByText(/removed successfully|berhasil dihapus/i)
       ).toBeVisible({ timeout: 5000 }).catch(() => {});
     });
 
@@ -130,14 +147,14 @@ test.describe("invite and remove staff", () => {
   test.describe("bad cases", () => {
     test("unregistered email shows error", async ({ page }) => {
       await page.goto("/settings");
-      await page.getByRole("button", { name: /add staff|tambah staf/i }).click();
+      const staffSection = page.getByTestId("staff-management");
+      await staffSection.getByRole("button", { name: /add staff|tambah staf/i }).click();
       await stableFill(
         page,
-        () =>
-          page.getByLabel(/email/i).or(page.getByPlaceholder(/email/i)).first(),
+        () => staffSection.locator("#staff-email"),
         "not-registered@test.com"
       );
-      await page.getByRole("button", { name: /invite|add|tambah|send/i }).click();
+      await staffSection.getByRole("button", { name: /^invite$|^undang$/i }).click();
 
       await expect(
         page.getByText(/no account|not found|no registered|tidak ditemukan/i)

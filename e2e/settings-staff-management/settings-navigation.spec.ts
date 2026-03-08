@@ -22,11 +22,13 @@ test.describe("settings navigation", () => {
     }) => {
       await page.goto("/");
 
-      await page.getByRole("link", { name: /settings|pengaturan/i }).click();
+      await Promise.all([
+        page.waitForURL(/\/settings/, { timeout: 15000 }),
+        page.getByRole("link", { name: /settings|pengaturan/i }).click(),
+      ]);
 
-      await expect(page).toHaveURL(/\/settings/);
       await expect(
-        page.getByRole("heading", { name: /language|account|settings|bahasa|akun|pengaturan/i })
+        page.getByRole("main").getByRole("heading", { name: /language|account|settings|bahasa|akun|pengaturan/i }).first()
       ).toBeVisible({ timeout: 10000 });
     });
 
@@ -84,7 +86,7 @@ test.describe("settings navigation", () => {
 
       await expect(page).toHaveURL(/\/settings/);
       await expect(
-        page.getByRole("heading", { name: /language|account|bahasa|akun/i })
+        page.getByRole("main").getByRole("heading", { name: /language|account|bahasa|akun/i }).first()
       ).toBeVisible({ timeout: 10000 });
     });
   });

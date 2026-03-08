@@ -19,14 +19,15 @@ test.describe("change language", () => {
     }) => {
       await page.goto("/settings");
 
+      const main = page.getByRole("main");
       await expect(
-        page.getByRole("heading", { name: /language|bahasa/i })
+        main.getByRole("heading", { name: /language|bahasa/i })
       ).toBeVisible({ timeout: 10000 });
       await expect(
-        page.getByRole("button", { name: /english|en/i })
+        main.getByRole("button", { name: /^english$/i })
       ).toBeVisible();
       await expect(
-        page.getByRole("button", { name: /indonesian|bahasa indonesia|id/i })
+        main.getByRole("button", { name: /indonesian|bahasa indonesia/i })
       ).toBeVisible();
       await expect(
         page.getByRole("button", { pressed: true })
@@ -38,13 +39,11 @@ test.describe("change language", () => {
     }) => {
       await page.goto("/settings");
 
-      const idButton = page.getByRole("button", {
-        name: /indonesian|bahasa indonesia|id/i,
-      });
-      await idButton.click();
+      const main = page.getByRole("main");
+      await main.getByRole("button", { name: /indonesian|bahasa indonesia/i }).click();
 
       await expect(
-        page.getByRole("heading", { name: /bahasa|language|pengaturan/i })
+        main.getByRole("heading", { name: /bahasa|language|pengaturan/i }).first()
       ).toBeVisible({ timeout: 5000 });
     });
 
@@ -54,7 +53,8 @@ test.describe("change language", () => {
       await page.goto("/settings");
 
       await page
-        .getByRole("button", { name: /indonesian|bahasa indonesia|id/i })
+        .getByRole("main")
+        .getByRole("button", { name: /indonesian|bahasa indonesia/i })
         .click();
 
       const stored = await page.evaluate(() => {
@@ -72,11 +72,12 @@ test.describe("change language", () => {
       await page.goto("/settings");
 
       await page
-        .getByRole("button", { name: /indonesian|bahasa indonesia|id/i })
+        .getByRole("main")
+        .getByRole("button", { name: /indonesian|bahasa indonesia/i })
         .click();
 
       await expect(
-        page.getByRole("heading", { name: /settings|pengaturan|bahasa|language/i })
+        page.getByRole("main").getByRole("heading", { name: /settings|pengaturan|bahasa|language/i }).first()
       ).toBeVisible({ timeout: 5000 });
     });
   });
@@ -86,11 +87,10 @@ test.describe("change language", () => {
       await context.clearCookies();
       await page.goto("/settings");
 
+      await expect(page).toHaveURL(/\/login/, { timeout: 15000 });
       await expect(
-        page
-          .getByText(/log in|login|sign in|unauthorized/i)
-          .or(page.getByRole("link", { name: /log in|login/i }))
-      ).toBeVisible({ timeout: 10000 });
+        page.getByRole("heading", { name: /welcome back|selamat datang/i })
+      ).toBeVisible({ timeout: 5000 });
     });
   });
 
@@ -100,16 +100,15 @@ test.describe("change language", () => {
     }) => {
       await page.goto("/settings");
 
-      await page
-        .getByRole("button", { name: /indonesian|bahasa indonesia|id/i })
-        .click();
+      const main = page.getByRole("main");
+      await main.getByRole("button", { name: /indonesian|bahasa indonesia/i }).click();
       await expect(
-        page.getByRole("heading", { name: /bahasa|language|pengaturan/i })
+        main.getByRole("heading", { name: /bahasa|language|pengaturan/i }).first()
       ).toBeVisible({ timeout: 5000 });
 
-      await page.getByRole("button", { name: /english|en/i }).click();
+      await main.getByRole("button", { name: /^english$/i }).click();
       await expect(
-        page.getByRole("heading", { name: /language|settings/i })
+        main.getByRole("heading", { name: /language|settings/i }).first()
       ).toBeVisible({ timeout: 5000 });
     });
   });

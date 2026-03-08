@@ -3,6 +3,7 @@
 import "@/lib/i18n";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { AppHeader } from "@/components/layout/app-header";
+import { AppNav } from "@/components/layout/app-nav";
 import { PropertyProvider } from "@/contexts/property-context";
 import { Providers } from "@/components/providers";
 
@@ -18,6 +19,7 @@ export default function AppLayout({
           <div className="flex min-h-screen flex-col">
             <AppHeader />
             <main className="flex-1 px-4 py-4">{children}</main>
+            <AppNav />
           </div>
         </PropertyProvider>
       </Providers>

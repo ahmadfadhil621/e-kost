@@ -21,6 +21,7 @@ export async function GET(
       ownerId: property.ownerId,
       createdAt: property.createdAt,
       updatedAt: property.updatedAt,
+      role: access.role,
     });
   } catch (e) {
     if (e instanceof Error && e.message === "Property not found") {

@@ -211,6 +211,9 @@ export default function DashboardPage() {
         <Button asChild className="min-h-[44px] min-w-[44px]">
           <Link href={`/properties/${activeId}/finance`}>{t("nav.finance")}</Link>
         </Button>
+        <Button asChild className="min-h-[44px] min-w-[44px]">
+          <Link href="/settings">{t("nav.settings")}</Link>
+        </Button>
       </div>
     </div>
   );
