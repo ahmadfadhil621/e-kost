@@ -21,4 +21,10 @@ export class StubPaymentRepository implements IPaymentRepository {
   async sumByPropertyAndMonth(): Promise<number> {
     throw new Error("Not implemented");
   }
+
+  async findRecentByProperty(): Promise<
+    Array<{ id: string; tenantName: string; amount: number; paymentDate: Date }>
+  > {
+    throw new Error("Not implemented");
+  }
 }
