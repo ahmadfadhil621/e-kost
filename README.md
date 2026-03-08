@@ -106,14 +106,36 @@ CI uses a PostgreSQL 16 service container and sets `DATABASE_URL`, `BETTER_AUTH_
 
 ## Development Status
 
-**Completed:** Phase 0 (Foundation), Phase 1 (User Authentication), Phase 2 (Multi-Property Management), Phase 3 (Room Inventory), Phase 4 (Tenant & Room Basics), Phase 5 (Payment Recording), Phase 6 (Outstanding Balance), Phase 6a (Tenant Notes), Phase 8 (Finance & Expense Tracking). Outstanding Balance includes BalanceService, balance API routes (single tenant and batch), BalanceSection/BalanceStatusIndicator, balance on tenant list and detail, balance i18n (en + id), and E2E specs in `e2e/outstanding-balance/` (view-tenant-balance, view-tenant-list-balances). Room inventory includes PrismaRoomRepository, room CRUD API routes, RoomList/RoomCard/RoomDetail/StatusFilter/RoomForm/StatusIndicator, and i18n (en + id). Tenant & Room Basics includes TenantService, PrismaTenantRepository, tenant CRUD and assign-room/move-out API routes, TenantForm/TenantList/TenantDetail, assign-room and move-out flows, tenant i18n (en + id), and E2E specs (create-tenant, assign-room, move-out). Payment Recording includes PaymentService, PrismaPaymentRepository, payment CRUD API routes, PaymentForm/PaymentList/TenantPaymentSection, payment i18n (en + id), and E2E specs in `e2e/payment-recording/` (record-payment, view-payment-list, view-tenant-payments). Tenant Notes includes NoteService, PrismaNoteRepository, note CRUD API routes, NotesSection/NoteCard/NoteForm in tenant detail (and moved-out read-only), notes i18n (en + id), and E2E specs in `e2e/tenant-notes/` (create-note, view-notes, edit-note, delete-note, moved-out-tenant-notes). Finance & Expense Tracking includes ExpenseService, FinanceSummaryService, PrismaExpenseRepository, expense CRUD and finance summary API routes, finance overview and expense list/new/edit UI, finance i18n (en + id), and E2E specs in `e2e/finance-expense-tracking/` (view-monthly-summary, add-expense, list-expenses). Dashboard (app root) shows property info and quick links to Rooms, Tenants, Payments, and Finance; full dashboard (occupancy stats, finance summary card, outstanding list, recent payments) is not yet implemented (see specs/dashboard-overview/tasks.md). Full Vitest and Playwright suites pass in CI. Optional manual checks (workflow, filtering, mobile, performance) are listed in `specs/room-inventory-management/tasks.md` (section 7).
+### Completed (Phases 0–6c)
 
-Known limitations:
+| Phase | Feature | Summary |
+|-------|---------|---------|
+| 0 | **Project Foundation** | Next.js, Prisma, shadcn/ui, design tokens, i18n, Vitest, mobile app shell |
+| 1 | **User Authentication** | Better Auth, register/login, session, protected routes, profile |
+| 2 | **Multi-Property Management** | Property CRUD, property switcher, staff assignment, property-scoped access |
+| 3 | **Room Inventory** | Room CRUD, status (available / occupied / renovation), list/detail/forms, filters |
+| 4 | **Tenant & Room Basics** | Tenant CRUD, room assignment, move-out (soft delete), list/detail/forms |
+| 5 | **Payment Recording** | Record and list payments, per-tenant view, currency formatting |
+| 6a | **Tenant Notes** | Per-tenant notes CRUD, notes section in tenant detail |
+| 6b | **Outstanding Balance** | Balance per tenant (rent − payments), balance in list and detail, status indicators |
+| 6c | **Finance & Expense Tracking** | Expense CRUD, monthly income/expense summary, category breakdown |
 
-- Mobile-first design targets smartphone screens (320px–480px width)
-- Manual payment entry only (no automated processing)
-- Basic balance calculation (expected rent minus payments, no late fees or payment plans)
-- Currency: EUR by default, configurable per locale via i18n (no multi-currency within a single property)
+All of the above include full stack (domain, services, API, UI), i18n (en + id), and E2E tests where specified. Full Vitest and Playwright suites pass in CI.
+
+### Not Yet Implemented
+
+- **Phase 7 — Dashboard**  
+  App root currently shows property info and quick links. The full dashboard (occupancy stats, finance summary card, outstanding balances list, recent payments) is not built yet. See `specs/dashboard-overview/tasks.md`.
+
+- **Phase 8 — Settings & Staff**  
+  Settings page (language selector, account section, staff invite/remove) and related E2E. Staff API exists from Phase 2; UI and settings flow are pending.
+
+### Known Limitations
+
+- Mobile-first design targets smartphone screens (320px–480px width).
+- Manual payment entry only (no automated processing).
+- Balance is rent minus payments (no late fees or payment plans).
+- Currency: EUR by default, configurable per locale via i18n (no multi-currency per property).
 
 ## Pre-Deployment Checklist
 
