@@ -100,4 +100,22 @@ export class PrismaPaymentRepository implements IPaymentRepository {
     });
     return toNumber(result._sum?.amount);
   }
+
+  async findRecentByProperty(
+    propertyId: string,
+    limit: number
+  ): Promise<Array<{ id: string; tenantName: string; amount: number; paymentDate: Date }>> {
+    const list = await prisma.payment.findMany({
+      where: { tenant: { propertyId } },
+      include: { tenant: true },
+      orderBy: [{ paymentDate: "desc" }, { createdAt: "desc" }],
+      take: limit,
+    });
+    return list.map((p) => ({
+      id: p.id,
+      tenantName: p.tenant.name,
+      amount: toNumber(p.amount),
+      paymentDate: p.paymentDate,
+    }));
+  }
 }

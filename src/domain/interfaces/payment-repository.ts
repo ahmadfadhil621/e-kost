@@ -14,4 +14,8 @@ export interface IPaymentRepository {
     year: number,
     month: number
   ): Promise<number>;
+  findRecentByProperty(
+    propertyId: string,
+    limit: number
+  ): Promise<Array<{ id: string; tenantName: string; amount: number; paymentDate: Date }>>;
 }

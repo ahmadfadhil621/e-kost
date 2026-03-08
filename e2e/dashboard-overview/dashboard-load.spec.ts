@@ -63,9 +63,7 @@ test.describe("dashboard load", () => {
       await expect(
         page.getByText(/loading|memuat/i).first()
       ).toBeVisible({ timeout: 5000 }).catch(() => {});
-      await expect(
-        page.getByRole("main").or(page.getByText(/occupancy|okupansi|rooms|kamar|dashboard/i))
-      ).toBeVisible({ timeout: 15000 });
+      await expect(page.getByRole("main")).toBeVisible({ timeout: 15000 });
     });
 
     test("dashboard renders single-column on mobile", async ({ page }) => {
@@ -80,9 +78,9 @@ test.describe("dashboard load", () => {
     }) => {
       await goToDashboard(page);
       const body = await page.locator("body").textContent();
-      const hasOccupancy = /occupancy|okupansi|total rooms|total kamar/i.test(body ?? "");
-      const hasFinance = /income|pemasukan|expenses|pengeluaran|net|laba/i.test(body ?? "");
-      const hasOutstanding = /outstanding|tertunggak|all tenants|semua penyewa/i.test(body ?? "");
+      const hasOccupancy = /occupancy|okupansi|total rooms|total kamar|occupied|terisi/i.test(body ?? "");
+      const hasFinance = /income|pemasukan|expenses|pengeluaran|net income|laba bersih|this month|bulan ini/i.test(body ?? "");
+      const hasOutstanding = /outstanding|tertunggak|all tenants|semua penyewa|all paid|sudah lunas/i.test(body ?? "");
       const hasPayments = /recent payments|pembayaran terbaru|no payments|belum ada/i.test(body ?? "");
       expect(hasOccupancy || hasFinance || hasOutstanding || hasPayments).toBe(true);
     });

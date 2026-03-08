@@ -6,6 +6,7 @@ import type {
   UpdateRoomInput,
   RoomStatus,
 } from "@/domain/schemas/room";
+import type { OccupancyStats } from "@/domain/schemas/dashboard";
 import {
   createRoomSchema,
   updateRoomSchema,
@@ -102,5 +103,34 @@ export class RoomService {
     }
     updateRoomStatusSchema.parse({ status });
     return this.repo.updateStatus(id, status);
+  }
+
+  async getRoomStats(userId: string, propertyId: string): Promise<OccupancyStats> {
+    await this.propertyAccess.validateAccess(userId, propertyId);
+    const rooms = await this.repo.findByProperty(propertyId);
+    const totalRooms = rooms.length;
+    let occupied = 0;
+    let available = 0;
+    let underRenovation = 0;
+    for (const r of rooms) {
+      if (r.status === "occupied") {
+        occupied++;
+      } else if (r.status === "available") {
+        available++;
+      } else if (r.status === "under_renovation") {
+        underRenovation++;
+      }
+    }
+    const occupancyRate =
+      totalRooms > 0
+        ? Math.round((occupied / totalRooms) * 1000) / 10
+        : 0;
+    return {
+      totalRooms,
+      occupied,
+      available,
+      underRenovation,
+      occupancyRate,
+    };
   }
 }

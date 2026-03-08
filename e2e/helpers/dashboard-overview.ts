@@ -11,7 +11,10 @@ export function getPropertyId(): string {
 export async function goToDashboard(page: Page) {
   await page.goto("/");
   await page
-    .getByText(/dashboard|overview|ringkasan|occupancy|okupansi|rooms|kamar/i)
+    .getByTestId("occupancy-card")
+    .or(page.getByTestId("finance-summary-card"))
+    .or(page.getByTestId("outstanding-balances-list"))
+    .or(page.getByTestId("recent-payments-list"))
     .first()
     .waitFor({ state: "visible", timeout: 15000 });
 }

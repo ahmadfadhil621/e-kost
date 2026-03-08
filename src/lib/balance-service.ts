@@ -1,3 +1,5 @@
+import type { OutstandingBalance } from "@/domain/schemas/dashboard";
+
 /**
  * BalanceService per specs/outstanding-balance/design.md.
  * Computes outstanding balance = monthlyRent - totalPayments, status = paid when balance <= 0.
@@ -81,5 +83,28 @@ export class BalanceService {
     await this.propertyAccess.validateAccess(userId, propertyId);
     const rows = await this.balanceRepo.getBalanceRows(propertyId, status);
     return rows.map(toResult);
+  }
+
+  async getTopOutstandingBalances(
+    userId: string,
+    propertyId: string,
+    limit: number
+  ): Promise<{ balances: OutstandingBalance[]; totalCount: number }> {
+    await this.propertyAccess.validateAccess(userId, propertyId);
+    const rows = await this.balanceRepo.getBalanceRows(propertyId, "unpaid");
+    const withBalance = rows.map((r) => ({
+      ...r,
+      balance: Math.max(0, r.monthlyRent - r.totalPayments),
+    }));
+    withBalance.sort((a, b) => b.balance - a.balance);
+    const totalCount = withBalance.length;
+    const top = withBalance.slice(0, limit);
+    const balances: OutstandingBalance[] = top.map((r) => ({
+      tenantId: r.tenantId,
+      tenantName: r.tenantName,
+      roomNumber: r.roomNumber,
+      balance: r.balance,
+    }));
+    return { balances, totalCount };
   }
 }

@@ -7,6 +7,7 @@ import type {
 } from "@/domain/schemas/payment";
 import { createPaymentSchema } from "@/domain/schemas/payment";
 import type { PropertyRole } from "@/domain/schemas/property";
+import type { RecentPayment } from "@/domain/schemas/dashboard";
 
 export interface IPropertyAccessValidator {
   validateAccess(userId: string, propertyId: string): Promise<PropertyRole>;
@@ -87,5 +88,20 @@ export class PaymentService {
   ): Promise<number> {
     await this.propertyAccess.validateAccess(userId, propertyId);
     return this.paymentRepo.sumByPropertyAndMonth(propertyId, year, month);
+  }
+
+  async getRecentPayments(
+    userId: string,
+    propertyId: string,
+    limit: number
+  ): Promise<RecentPayment[]> {
+    await this.propertyAccess.validateAccess(userId, propertyId);
+    const list = await this.paymentRepo.findRecentByProperty(propertyId, limit);
+    return list.map((p) => ({
+      paymentId: p.id,
+      tenantName: p.tenantName,
+      amount: p.amount,
+      date: p.paymentDate,
+    }));
   }
 }

@@ -1,7 +1,6 @@
 /**
  * Dashboard service instance. Wires DashboardService to RoomService (getRoomStats),
  * FinanceSummaryService, BalanceService (getTopOutstandingBalances), PaymentService (getRecentPayments).
- * Stub adapters throw until those methods exist on the underlying services.
  */
 import {
   DashboardService,
@@ -11,10 +10,13 @@ import {
   type IRecentPaymentsSource,
 } from "@/lib/dashboard-service";
 import { financeSummaryService } from "@/lib/finance-summary-service-instance";
+import { roomService } from "@/lib/room-service-instance";
+import { balanceService } from "@/lib/balance-service-instance";
+import { paymentService } from "@/lib/payment-service-instance";
 
-const stubRoomStats: IRoomStatsSource = {
-  async getRoomStats() {
-    throw new Error("RoomService.getRoomStats not implemented");
+const roomStatsSource: IRoomStatsSource = {
+  async getRoomStats(userId, propertyId) {
+    return roomService.getRoomStats(userId, propertyId);
   },
 };
 
@@ -36,21 +38,21 @@ const financeSnapshotSource: IFinanceSummarySnapshotSource = {
   },
 };
 
-const stubOutstandingBalances: IOutstandingBalancesSource = {
-  async getTopOutstandingBalances() {
-    throw new Error("BalanceService.getTopOutstandingBalances not implemented");
+const outstandingBalancesSource: IOutstandingBalancesSource = {
+  async getTopOutstandingBalances(userId, propertyId, limit) {
+    return balanceService.getTopOutstandingBalances(userId, propertyId, limit);
   },
 };
 
-const stubRecentPayments: IRecentPaymentsSource = {
-  async getRecentPayments() {
-    throw new Error("PaymentService.getRecentPayments not implemented");
+const recentPaymentsSource: IRecentPaymentsSource = {
+  async getRecentPayments(userId, propertyId, limit) {
+    return paymentService.getRecentPayments(userId, propertyId, limit);
   },
 };
 
 export const dashboardService = new DashboardService(
-  stubRoomStats,
+  roomStatsSource,
   financeSnapshotSource,
-  stubOutstandingBalances,
-  stubRecentPayments
+  outstandingBalancesSource,
+  recentPaymentsSource
 );
