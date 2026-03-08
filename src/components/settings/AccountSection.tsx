@@ -44,7 +44,7 @@ export function AccountSection({ user, onUserUpdated }: AccountSectionProps) {
     setError(null);
     setSaving(true);
     try {
-      const { data, error: updateError } = await authClient.updateUser({
+      const { data: _data, error: updateError } = await authClient.updateUser({
         name: trimmed,
       });
       if (updateError) {
