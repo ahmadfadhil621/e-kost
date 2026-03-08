@@ -96,12 +96,13 @@ sequenceDiagram
 - All text via translation keys
 
 **LanguageSelector Component**
+- Options are derived from which locale JSON files exist in `locales/` (e.g. one option per `locales/<code>.json`); no hardcoded language list in the component
 - Displays current language with visual indicator (check mark or radio)
-- Two options: English, Indonesian
 - Tap to switch immediately (no save button needed)
 - Persists to localStorage
 - Triggers react-i18next language change
 - 44x44px touch targets per option
+- Display names for each locale (e.g. "English", "Bahasa Indonesia") come from translation keys or a small locale-name map keyed by locale code
 
 **AccountSection Component**
 - Displays: profile icon (initials), name, email (read-only)
@@ -139,8 +140,13 @@ No new database models. Settings uses:
 ```typescript
 const LANGUAGE_KEY = 'ekost_language';
 
+// Available locales: derived from which JSON files exist in locales/ (e.g. at build time or via config)
+const AVAILABLE_LOCALES = ['en', 'id']; // In implementation: build from locales/*.json or shared config
+
 function getPersistedLanguage(): string {
-  return localStorage.getItem(LANGUAGE_KEY) ?? 'en';
+  const stored = localStorage.getItem(LANGUAGE_KEY);
+  if (stored && AVAILABLE_LOCALES.includes(stored)) return stored;
+  return AVAILABLE_LOCALES[0] ?? 'en';
 }
 
 function persistLanguage(lang: string): void {
@@ -214,8 +220,12 @@ Handled by existing StaffManagement component (from Multi-Property):
 ### Language Errors
 
 **Locale File Load Failure**:
-- Handling: Fall back to English
-- UI: Display content in English, log error
+- Handling: Fall back to first available locale or configured default (e.g. `en`)
+- UI: Display content in fallback locale, log error
+
+**Persisted language no longer available** (e.g. locale file removed):
+- Handling: Treat as no preference; use default locale
+- UI: LanguageSelector shows current effective language
 
 ## Testing Strategy
 
@@ -264,21 +274,20 @@ function LanguageSelector() {
     persistLanguage(lang);
   };
   
+  // availableLocales: from config/build derived from locales/*.json (e.g. ['en', 'id'])
   return (
     <div>
       <h3>{t('settings.language.title')}</h3>
-      <button 
-        onClick={() => handleLanguageChange('en')}
-        aria-pressed={i18n.language === 'en'}
-      >
-        English {i18n.language === 'en' && '✓'}
-      </button>
-      <button 
-        onClick={() => handleLanguageChange('id')}
-        aria-pressed={i18n.language === 'id'}
-      >
-        Bahasa Indonesia {i18n.language === 'id' && '✓'}
-      </button>
+      {availableLocales.map((localeCode) => (
+        <button
+          key={localeCode}
+          onClick={() => handleLanguageChange(localeCode)}
+          aria-pressed={i18n.language === localeCode}
+          className="min-h-[44px] min-w-[44px]"
+        >
+          {t(`settings.language.${localeCode}`)} {i18n.language === localeCode && '✓'}
+        </button>
+      ))}
     </div>
   );
 }
@@ -301,8 +310,8 @@ async function updateName(name: string) {
 {
   "settings.title": "Settings",
   "settings.language.title": "Language",
-  "settings.language.english": "English",
-  "settings.language.indonesian": "Bahasa Indonesia",
+  "settings.language.en": "English",
+  "settings.language.id": "Bahasa Indonesia",
   "settings.language.current": "Current language",
   "settings.account.title": "Account",
   "settings.account.name": "Name",
@@ -327,7 +336,7 @@ async function updateName(name: string) {
 - Push notification preferences
 - Dark mode / theme settings
 - Currency preference per user (currently locale-level)
-- Additional language support beyond en/id
+- Additional language support is already possible by adding a new `locales/<code>.json` file and registering it; no further Settings UI change needed
 - Profile photo upload
 - Advanced role/permission configuration
 - Data export settings

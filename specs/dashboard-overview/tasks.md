@@ -2,7 +2,7 @@
 
 ## 1. Service Layer
 
-- [ ] 1.1 Implement DashboardService
+- [x] 1.1 Implement DashboardService
   - **Description**: Build service that aggregates data from RoomService, PaymentService, ExpenseService, and BalanceService into a single dashboard response
   - **Acceptance Criteria**:
     - `getDashboardData(propertyId)` returns occupancy, finance, outstanding balances, recent payments
@@ -15,7 +15,7 @@
   - **Dependencies**: RoomService, PaymentService, ExpenseService, BalanceService (from prior phases)
   - **Effort**: L
 
-- [ ] 1.2 Add getRoomStats method to RoomService
+- [x] 1.2 Add getRoomStats method to RoomService
   - **Description**: Add aggregation method for room occupancy statistics
   - **Acceptance Criteria**:
     - Returns total rooms, occupied count, available count, under renovation count
@@ -25,7 +25,7 @@
   - **Dependencies**: RoomService (from Phase 3)
   - **Effort**: S
 
-- [ ] 1.3 Add getTopOutstandingBalances method to BalanceService
+- [x] 1.3 Add getTopOutstandingBalances method to BalanceService
   - **Description**: Add method to retrieve tenants with highest outstanding balances
   - **Acceptance Criteria**:
     - Returns top N tenants sorted by balance descending
@@ -36,7 +36,7 @@
   - **Dependencies**: BalanceService (from Phase 6)
   - **Effort**: S
 
-- [ ] 1.4 Add getRecentPayments method to PaymentService
+- [x] 1.4 Add getRecentPayments method to PaymentService
   - **Description**: Add method to retrieve most recent payments for a property
   - **Acceptance Criteria**:
     - Returns last N payments sorted by date descending
@@ -45,7 +45,7 @@
   - **Dependencies**: PaymentService (from Phase 5)
   - **Effort**: S
 
-- [ ] 1.5 Write unit tests for DashboardService
+- [x] 1.5 Write unit tests for DashboardService
   - **Description**: Test dashboard aggregation and edge cases
   - **Acceptance Criteria**:
     - Tests for occupancy calculation (full, empty, mixed, zero rooms)
@@ -60,7 +60,7 @@
 
 ## 2. API Layer
 
-- [ ] 2.1 Implement dashboard API route
+- [x] 2.1 Implement dashboard API route
   - **Description**: Create REST endpoint for dashboard data
   - **Acceptance Criteria**:
     - GET /api/properties/[propertyId]/dashboard
@@ -71,7 +71,7 @@
   - **Dependencies**: 1.1
   - **Effort**: M
 
-- [ ] 2.2 Write API route tests
+- [x] 2.2 Write API route tests
   - **Description**: Test dashboard endpoint
   - **Acceptance Criteria**:
     - Tests for success response with all sections populated
@@ -85,7 +85,7 @@
 
 ## 3. UI Layer
 
-- [ ] 3.1 Create DashboardPage
+- [x] 3.1 Create DashboardPage
   - **Description**: Build the main dashboard page layout
   - **Acceptance Criteria**:
     - Route: / (app root within authenticated layout)
@@ -100,7 +100,7 @@
   - **Dependencies**: 2.1
   - **Effort**: L
 
-- [ ] 3.2 Create OccupancyCard component
+- [x] 3.2 Create OccupancyCard component
   - **Description**: Build occupancy statistics card
   - **Acceptance Criteria**:
     - Displays: total rooms, occupied, available, under renovation, occupancy rate
@@ -112,7 +112,7 @@
   - **Dependencies**: None
   - **Effort**: M
 
-- [ ] 3.3 Create FinanceSummaryCard component
+- [x] 3.3 Create FinanceSummaryCard component
   - **Description**: Build current month finance summary card
   - **Acceptance Criteria**:
     - Displays: month/year label, income, expenses, net income
@@ -123,7 +123,7 @@
   - **Dependencies**: None
   - **Effort**: M
 
-- [ ] 3.4 Create OutstandingBalancesList component
+- [x] 3.4 Create OutstandingBalancesList component
   - **Description**: Build top outstanding balances list
   - **Acceptance Criteria**:
     - Lists up to 5 tenants: name, room number, balance amount
@@ -136,7 +136,7 @@
   - **Dependencies**: None
   - **Effort**: M
 
-- [ ] 3.5 Create RecentPaymentsList component
+- [x] 3.5 Create RecentPaymentsList component
   - **Description**: Build recent payments list
   - **Acceptance Criteria**:
     - Lists up to 5 payments: tenant name, amount, date
@@ -150,7 +150,7 @@
   - **Dependencies**: None
   - **Effort**: S
 
-- [ ] 3.6 Set dashboard as default route in app layout
+- [x] 3.6 Set dashboard as default route in app layout
   - **Description**: Configure dashboard as the landing page after login
   - **Acceptance Criteria**:
     - Root route / within (app) layout renders DashboardPage
@@ -162,7 +162,7 @@
 
 ## 4. Internationalization (i18n)
 
-- [ ] 4.1 Extract and translate dashboard strings
+- [x] 4.1 Extract and translate dashboard strings
   - **Description**: Add all dashboard UI text to translation files
   - **Acceptance Criteria**:
     - All section titles, labels, messages in en.json and id.json
@@ -175,7 +175,7 @@
 
 ## 5. Testing & Validation
 
-- [ ] 5.1 Test dashboard with populated data
+- [x] 5.1 Test dashboard with populated data
   - **Description**: Verify dashboard displays correct data when property has rooms, tenants, payments, expenses
   - **Acceptance Criteria**:
     - Occupancy stats match actual room statuses
@@ -186,7 +186,7 @@
   - **Dependencies**: 3.1
   - **Effort**: M
 
-- [ ] 5.2 Test dashboard with empty property
+- [x] 5.2 Test dashboard with empty property
   - **Description**: Verify dashboard handles empty state gracefully
   - **Acceptance Criteria**:
     - All sections show appropriate empty states
@@ -195,7 +195,7 @@
   - **Dependencies**: 3.1
   - **Effort**: S
 
-- [ ] 5.3 Test dashboard data freshness
+- [x] 5.3 Test dashboard data freshness
   - **Description**: Verify dashboard reflects recent changes
   - **Acceptance Criteria**:
     - After adding a room, dashboard occupancy updates on refresh
@@ -205,7 +205,7 @@
   - **Dependencies**: 3.1
   - **Effort**: S
 
-- [ ] 5.4 Test mobile responsiveness
+- [x] 5.4 Test mobile responsiveness
   - **Description**: Verify dashboard works on mobile
   - **Acceptance Criteria**:
     - Dashboard renders at 320px-480px without horizontal scroll

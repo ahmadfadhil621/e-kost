@@ -37,9 +37,9 @@ todos:
     status: completed
   - id: phase-7
     content: "Phase 7: Dashboard -- Occupancy stats, finance summary, outstanding balances list, recent payments, i18n, tests"
-    status: pending
+    status: completed
   - id: phase-8
-    content: "Phase 8: Settings & Staff -- Staff invite/remove, language selector, account settings, i18n, tests"
+    content: "Phase 8: Settings & Staff -- Language switcher (options from locales/*.json), staff invite/remove, account settings, i18n, tests"
     status: pending
 isProject: false
 ---
@@ -48,7 +48,7 @@ isProject: false
 
 ## Current State
 
-Phase 0 (Project Foundation), Phase 1 (User Authentication), Phase 2 (Multi-Property Management), Phase 3 (Room Inventory), Phase 4 (Tenant & Room Basics), Phase 5 (Payment Recording), Phase 6a (Tenant Notes), Phase 6b (Outstanding Balance), and Phase 6c (Finance & Expense Tracking) are complete. Implementation includes the full stack for each: auth flow; multi-property (Property CRUD, switcher, staff assignment, propertyId scoping); room inventory (domain, RoomService, PrismaRoomRepository, room CRUD + status API, list/detail/forms, status filter/indicators, pages, i18n); tenant & room basics (TenantService, PrismaTenantRepository, tenant CRUD + assign-room + move-out API, list/detail/forms, move-out dialog, pages, i18n, E2E in `e2e/tenant-room-basics/`); payment recording (PaymentService, PrismaPaymentRepository, payment CRUD API, PaymentForm/PaymentList/TenantPaymentSection, payment i18n, E2E in `e2e/payment-recording/`); tenant notes (NoteService, PrismaNoteRepository, note CRUD API, NotesSection/NoteCard/NoteForm in tenant detail, notes i18n, E2E in `e2e/tenant-notes/`); outstanding balance (BalanceService, balance API, BalanceSection/BalanceStatusIndicator in tenant detail and list, E2E in `e2e/outstanding-balance/`); finance & expense (ExpenseService, FinanceSummaryService, expense CRUD API, finance/summary API, finance overview + expenses list/form, E2E in `e2e/finance-expense-tracking/`). Next: Phase 7 (Dashboard — full occupancy/finance/balances/recent-payments UI and DashboardService), then Phase 8 (Settings & Staff).
+Phase 0 (Project Foundation) through Phase 7 (Dashboard) are complete. Implementation includes the full stack for each: auth flow; multi-property (Property CRUD, switcher, staff assignment, propertyId scoping); room inventory (domain, RoomService, PrismaRoomRepository, room CRUD + status API, list/detail/forms, status filter/indicators, pages, i18n); tenant & room basics (TenantService, PrismaTenantRepository, tenant CRUD + assign-room + move-out API, list/detail/forms, move-out dialog, pages, i18n, E2E in `e2e/tenant-room-basics/`); payment recording (PaymentService, PrismaPaymentRepository, payment CRUD API, PaymentForm/PaymentList/TenantPaymentSection, payment i18n, E2E in `e2e/payment-recording/`); tenant notes (NoteService, PrismaNoteRepository, note CRUD API, NotesSection/NoteCard/NoteForm in tenant detail, notes i18n, E2E in `e2e/tenant-notes/`); outstanding balance (BalanceService, balance API, BalanceSection/BalanceStatusIndicator in tenant detail and list, E2E in `e2e/outstanding-balance/`); finance & expense (ExpenseService, FinanceSummaryService, expense CRUD API, finance/summary API, finance overview + expenses list/form, E2E in `e2e/finance-expense-tracking/`); dashboard (DashboardService, dashboard API at `api/properties/[propertyId]/dashboard`, OccupancyCard, FinanceSummaryCard, OutstandingBalancesList, RecentPaymentsList, app root as dashboard page, E2E in `e2e/dashboard-overview/`). Next: Phase 8 (Settings & Staff — settings page, language switcher with options derived from which locale JSON files exist in `locales/`, account section, staff invite/remove UI).
 
 ## Feature Development Workflow (TDD)
 
@@ -280,7 +280,7 @@ graph TD
 
 **Spec**: [specs/settings-staff-management/requirements.md](specs/settings-staff-management/requirements.md), [design.md](specs/settings-staff-management/design.md), [tasks.md](specs/settings-staff-management/tasks.md)
 
-**Scope**: Settings page (Language, Account, Staff sections); LanguageSelector; AccountSection (name edit); StaffSection (invite/remove, owner-only); staff API from Phase 2.
+**Scope**: Settings page (Language, Account, Staff sections); LanguageSelector with options derived from which locale JSON files exist in `locales/` (one option per file); AccountSection (name edit); StaffSection (invite/remove, owner-only); staff API from Phase 2.
 
 **Workflow (TDD)**:
 
@@ -314,34 +314,50 @@ src/
       register/page.tsx
       layout.tsx
     (app)/
-      page.tsx                    # Dashboard
-      rooms/
-        page.tsx                  # Room list
-        new/page.tsx              # Create room
-        [roomId]/page.tsx         # Room detail/edit
-      tenants/
-        page.tsx                  # Tenant list
-        new/page.tsx              # Create tenant
-        [tenantId]/page.tsx       # Tenant detail
-      payments/
-        page.tsx                  # Payment list
-        new/page.tsx              # Record payment
-      finance/page.tsx            # Finance overview
-      settings/page.tsx           # Settings
+      page.tsx                    # Dashboard (OccupancyCard, FinanceSummaryCard, OutstandingBalancesList, RecentPaymentsList)
+      properties/
+        page.tsx                  # Property list
+        new/page.tsx              # Create property
+        [propertyId]/
+          rooms/page.tsx
+          rooms/new/page.tsx
+          rooms/[roomId]/page.tsx
+          tenants/page.tsx
+          tenants/new/page.tsx
+          tenants/[tenantId]/page.tsx
+          payments/page.tsx
+          payments/new/page.tsx
+          finance/page.tsx
+          finance/expenses/page.tsx
+          finance/expenses/new/page.tsx
+          finance/expenses/[expenseId]/edit/page.tsx
+      settings/page.tsx           # Settings (Phase 8 — not yet)
       layout.tsx                  # Protected layout with header + nav
     api/
       auth/[...all]/route.ts
       properties/
         route.ts
         [propertyId]/
+          route.ts
           rooms/route.ts
           rooms/[roomId]/route.ts
+          rooms/[roomId]/status/route.ts
+          dashboard/route.ts
           tenants/route.ts
           tenants/[tenantId]/route.ts
-          tenants/[tenantId]/notes/route.ts
+          tenants/[tenantId]/assign-room/route.ts
+          tenants/[tenantId]/move-out/route.ts
+          tenants/[tenantId]/payments/route.ts
           tenants/[tenantId]/balance/route.ts
+          tenants/[tenantId]/notes/route.ts
+          tenants/[tenantId]/notes/[noteId]/route.ts
+          staff/route.ts
+          staff/[userId]/route.ts
           payments/route.ts
+          balances/route.ts
           expenses/route.ts
+          expenses/[expenseId]/route.ts
+          finance/summary/route.ts
     globals.css
     layout.tsx
   lib/
@@ -349,17 +365,26 @@ src/
     auth-client.ts                # Better Auth client
     prisma.ts                     # Prisma singleton
     i18n.ts                       # i18n config
+    *-service.ts                  # Business logic (property, room, tenant, payment, balance, expense, finance-summary, note, dashboard)
+    repositories/
+      prisma/                     # Prisma repository implementations
+      stub-*.ts                    # Stubs for tests
   domain/
     schemas/                      # Shared Zod schemas
     interfaces/                   # Repository interfaces
-  services/                       # Business logic services
-  repositories/                   # Prisma implementations
   components/
     ui/                           # shadcn/ui components
     layout/                       # App shell, header, nav
-    rooms/                        # Room-specific components
-    tenants/                      # Tenant-specific components
-    payments/                     # Payment-specific components
+    auth/                         # Auth-related components
+    property/                     # Property CRUD, switcher
+    dashboard/                    # OccupancyCard, FinanceSummaryCard, OutstandingBalancesList, RecentPaymentsList
+    room/                         # Room form, list, filter, cards, status indicator
+    tenant/                       # Tenant form, assign room, move-out
+    payment/                     # Payment form, list, per-tenant section
+    balance/                     # Balance section, status indicator
+    expense/                     # Expense form, list
+    finance/                     # Month selector, summary cards, category breakdown
+    notes/                       # Note form, note card, notes section
   hooks/                          # Custom React hooks
 locales/
   en.json

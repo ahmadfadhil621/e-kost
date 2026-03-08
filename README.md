@@ -19,7 +19,7 @@ The MVP includes ten features:
 - **Dashboard / Overview** — Occupancy statistics, finance summary, outstanding balances list, recent payments
 - **Finance & Expense Tracking** — Monthly income/expense tracker with category breakdown, expense CRUD
 - **Tenant Notes** — Per-tenant notes for recording observations, agreements, or reminders
-- **Settings** — Staff management (owner can add/remove staff), user preferences
+- **Settings** — Language switcher (from `locales/*.json`), staff management (owner can add/remove staff), user preferences
 
 ## Tech Stack
 
@@ -43,13 +43,14 @@ src/
 ├── app/
 │   ├── (auth)/              # Auth pages (login, register) — no header/nav
 │   ├── (app)/               # Authenticated pages — with header/nav
-│   ├── api/                 # API routes (auth, properties, properties/[id]/rooms, tenants, payments, expenses, finance/summary, …)
+│   ├── api/                 # API routes (auth, properties, properties/[id]/rooms, dashboard, tenants, payments, expenses, finance/summary, …)
 │   ├── globals.css          # Design tokens (CSS variables)
 │   └── layout.tsx           # Root layout
 ├── components/
 │   ├── ui/                  # shadcn/ui components
 │   ├── auth/                # Auth-related components
 │   ├── property/            # Property CRUD, switcher
+│   ├── dashboard/           # OccupancyCard, FinanceSummaryCard, OutstandingBalancesList, RecentPaymentsList
 │   ├── room/                # Room form, list, filter, cards, status indicator
 │   ├── tenant/              # Tenant form, assign room, move-out
 │   ├── payment/             # Payment form, list, per-tenant section
@@ -67,7 +68,7 @@ src/
 ├── generated/               # Prisma client output (do not edit)
 ├── hooks/                   # Custom React hooks
 └── test/                    # Test setup, fixtures, faults (fault injection), mocks (MSW when used)
-e2e/                         # Playwright E2E specs (auth, multi-property-management, room-inventory-management, tenant-room-basics, payment-recording, outstanding-balance, finance-expense-tracking, tenant-notes)
+e2e/                         # Playwright E2E specs (auth, multi-property-management, room-inventory-management, tenant-room-basics, payment-recording, outstanding-balance, dashboard-overview, finance-expense-tracking, tenant-notes)
 locales/
 ├── en.json                  # English translations
 └── id.json                  # Indonesian translations
@@ -106,7 +107,7 @@ CI uses a PostgreSQL 16 service container and sets `DATABASE_URL`, `BETTER_AUTH_
 
 ## Development Status
 
-### Completed (Phases 0–6c)
+### Completed (Phases 0–7)
 
 | Phase | Feature | Summary |
 |-------|---------|---------|
@@ -119,16 +120,14 @@ CI uses a PostgreSQL 16 service container and sets `DATABASE_URL`, `BETTER_AUTH_
 | 6a | **Tenant Notes** | Per-tenant notes CRUD, notes section in tenant detail |
 | 6b | **Outstanding Balance** | Balance per tenant (rent − payments), balance in list and detail, status indicators |
 | 6c | **Finance & Expense Tracking** | Expense CRUD, monthly income/expense summary, category breakdown |
+| 7 | **Dashboard / Overview** | Occupancy stats, finance summary card, outstanding balances list, recent payments, app root as dashboard |
 
 All of the above include full stack (domain, services, API, UI), i18n (en + id), and E2E tests where specified. Full Vitest and Playwright suites pass in CI.
 
 ### Not Yet Implemented
 
-- **Phase 7 — Dashboard**  
-  App root currently shows property info and quick links. The full dashboard (occupancy stats, finance summary card, outstanding balances list, recent payments) is not built yet. See `specs/dashboard-overview/tasks.md`.
-
-- **Phase 8 — Settings & Staff**  
-  Settings page (language selector, account section, staff invite/remove) and related E2E. Staff API exists from Phase 2; UI and settings flow are pending.
+- **Phase 8 — Settings & Staff**
+  Settings page with language switcher (options derived from which locale JSON files exist in `locales/`), account section, and staff invite/remove. Staff API exists from Phase 2; UI and settings flow are pending.
 
 ### Known Limitations
 

@@ -9,7 +9,7 @@ Note: The core staff invitation/removal API is implemented as part of the Multi-
 ## Goals
 
 - Provide a unified settings page accessible from the main navigation
-- Enable managers to select their preferred display language (English or Indonesian)
+- Enable managers to select their preferred display language from the set of languages for which a locale file exists in `locales/` (e.g. `en.json`, `id.json`)
 - Enable managers to update their account details (name)
 - Display and manage staff for the active property (leveraging Multi-Property staff APIs)
 - Deliver a mobile-optimized settings interface with clear sections
@@ -28,7 +28,7 @@ Note: The core staff invitation/removal API is implemented as part of the Multi-
 ## Glossary
 
 - **Settings Page**: A single page with distinct sections for language, account, and staff management
-- **Language Selector**: A control to switch the application language between English and Indonesian
+- **Language Selector**: A control to switch the application language; options are derived from which locale JSON files are present in `locales/` (one option per file, e.g. `en.json` → English, `id.json` → Indonesian)
 - **Account Settings**: Section displaying and allowing edits to the user's name
 - **Staff Section**: Section for managing property staff (uses Multi-Property staff APIs)
 
@@ -40,11 +40,11 @@ Note: The core staff invitation/removal API is implemented as part of the Multi-
 
 #### Acceptance Criteria
 
-1. WHEN a manager views the settings page, THE System SHALL display a language selection section with the currently active language indicated
-2. WHEN a manager selects a language (English or Indonesian), THE System SHALL immediately update all UI text to the selected language without requiring a page reload
+1. WHEN a manager views the settings page, THE System SHALL display a language selection section listing all languages for which a locale file exists in `locales/` (e.g. `en.json`, `id.json`), with the currently active language indicated
+2. WHEN a manager selects a language from the list, THE System SHALL immediately update all UI text to the selected language without requiring a page reload
 3. WHEN a manager selects a language, THE System SHALL persist the preference in localStorage so it survives browser restarts
-4. WHEN a manager opens the application with a persisted language preference, THE System SHALL load the application in that language
-5. WHEN no language preference is persisted, THE System SHALL default to English
+4. WHEN a manager opens the application with a persisted language preference, THE System SHALL load the application in that language (if that locale is still available)
+5. WHEN no language preference is persisted, THE System SHALL default to the first available locale or a configured default (e.g. `en` when `locales/en.json` exists)
 6. WHEN a manager switches language, THE System SHALL also update locale-dependent formatting (date, number, currency) to match the selected locale
 
 ### Requirement 2: Account Information Display and Update
@@ -99,7 +99,7 @@ Note: The core staff invitation/removal API is implemented as part of the Multi-
 ## Constraints
 
 - Language preference persisted in localStorage (no server-side storage needed)
-- Only two languages supported in MVP: English (`en`) and Indonesian (`id`)
+- Available languages are determined by which locale JSON files exist in `locales/` (e.g. `en.json`, `id.json`); adding a new file and registering it with the app makes that language appear in the switcher without further code changes in the Settings UI
 - Account name update uses Better Auth's profile update API
 - Email is read-only in MVP (changing email requires verification flow, post-MVP)
 - Staff management reuses Multi-Property staff APIs (Phase 2)

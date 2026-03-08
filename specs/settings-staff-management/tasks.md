@@ -16,16 +16,16 @@
   - **Effort**: M
 
 - [ ] 1.2 Create LanguageSelector component
-  - **Description**: Build language switching UI
+  - **Description**: Build language switching UI driven by available locale files
   - **Acceptance Criteria**:
-    - Displays two options: English, Bahasa Indonesia
+    - Displays one option per available locale, where "available" is determined by which locale JSON files exist in `locales/` (or a single shared config/list derived from them at build time)
     - Current language indicated with check mark or radio indicator
     - Tap to switch immediately (no save button)
     - Calls `i18n.changeLanguage()` on selection
     - Persists choice to localStorage
     - 44x44px touch targets per language option
-    - All text via translation keys (language names displayed in their own language)
-  - **Dependencies**: i18n infrastructure (Phase 0)
+    - Display name for each locale via translation key (e.g. `settings.language.<code>`) or locale-name map
+  - **Dependencies**: i18n infrastructure (Phase 0); list of available locales (from locales dir or config)
   - **Effort**: S
 
 - [ ] 1.3 Create AccountSection component
@@ -66,15 +66,23 @@
 
 ## 2. Language Persistence
 
-- [ ] 2.1 Implement language persistence and initialization
+- [ ] 2.1 Define available locales from locale files
+  - **Description**: Single source of truth for which languages the switcher offers
+  - **Acceptance Criteria**:
+    - Available locales are derived from which JSON files exist in `locales/` (e.g. build-time list, or shared config used by i18n init and LanguageSelector)
+    - Adding a new `locales/<code>.json` and registering it (e.g. in i18n config and locale list) makes that language appear in the switcher without changing LanguageSelector component logic
+  - **Dependencies**: i18n infrastructure (Phase 0)
+  - **Effort**: S
+
+- [ ] 2.2 Implement language persistence and initialization
   - **Description**: Ensure language preference persists across sessions
   - **Acceptance Criteria**:
     - On app initialization, read language from localStorage
-    - If found, set i18n language to stored value
-    - If not found, default to 'en'
+    - If found and still in available locales, set i18n language to stored value
+    - If not found or stored value no longer available, default to first available locale or configured default (e.g. `en`)
     - On language change, store in localStorage immediately
     - Formatting (dates, numbers, currency) updates to match selected locale
-  - **Dependencies**: i18n infrastructure (Phase 0)
+  - **Dependencies**: i18n infrastructure (Phase 0), 2.1
   - **Effort**: S
 
 ## 3. Internationalization (i18n)
@@ -95,12 +103,12 @@
 - [ ] 4.1 Test language switching workflow
   - **Description**: Verify language selection updates entire UI
   - **Acceptance Criteria**:
-    - Selecting Indonesian updates all visible text to Indonesian
-    - Selecting English updates all visible text to English
+    - Selecting any available language updates all visible text to that language
     - Currency, date, and number formatting updates with language
     - Preference persists after browser restart
-    - Default is English when no preference stored
-  - **Dependencies**: 1.2, 2.1
+    - Default is first available locale (or configured default) when no preference stored
+    - Switcher shows exactly the set of languages for which locale files exist
+  - **Dependencies**: 1.2, 2.1, 2.2
   - **Effort**: M
 
 - [ ] 4.2 Test account update workflow
@@ -136,7 +144,7 @@
 
 ## Open Questions / Assumptions
 
-- **Language Names**: Language options display in their own language (e.g., "Bahasa Indonesia" not "Indonesian") for recognition regardless of current UI language.
+- **Language Names**: Language options display via translation keys (e.g. `settings.language.<code>`) or a locale-name map; display in the language's own name (e.g. "Bahasa Indonesia") for recognition. The list of options is driven by which locale JSON files are present, not hardcoded.
 - **Account Email**: Email is displayed as read-only. Changing email requires verification flow, which is post-MVP.
 - **Password Change**: Not included in MVP. Better Auth supports password change but the UI flow is post-MVP.
 - **Staff API Reuse**: The settings page reuses StaffManagement component and APIs built in Phase 2. No new backend work needed for staff.
