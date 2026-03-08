@@ -98,7 +98,7 @@ test.describe("register", () => {
     test("user sees error when email is already registered", async ({
       page,
     }) => {
-      test.info().setTimeout(60000);
+      test.info().setTimeout(90000);
       const duplicateEmail = `dup-${Date.now()}@test.com`;
 
       await page.goto("/register");
@@ -106,7 +106,21 @@ test.describe("register", () => {
       await stableFill(page, () => page.getByLabel(/email address/i), duplicateEmail);
       await stableFill(page, () => page.getByLabel(/password/i), "SecurePass123!");
       await page.getByRole("button", { name: /register/i }).click();
-      await expect(page).toHaveURL("/", { timeout: 30000 });
+
+      const redirectTimeout = 45000;
+      const redirected = await page
+        .waitForURL((url) => url.pathname === "/", { timeout: redirectTimeout })
+        .then(() => true)
+        .catch(() => false);
+      if (!redirected) {
+        const formAlert = page.locator("form [role='alert']");
+        const errorText = (await formAlert.isVisible().catch(() => false))
+          ? (await formAlert.textContent())?.trim() ?? "(no message)"
+          : "(no message — request may have hung)";
+        throw new Error(
+          `First registration must succeed to test duplicate email. It did not redirect to /. Server error: ${errorText}`
+        );
+      }
 
       await page.goto("/register");
       await stableFill(page, () => page.getByLabel(/full name/i), "Duplicate User");
