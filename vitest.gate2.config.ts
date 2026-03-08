@@ -12,6 +12,7 @@ export default defineConfig({
       "src/lib/payment-service.fault-injection.test.ts",
       "src/lib/note-service.fault-injection.test.ts",
       "src/lib/balance-service.fault-injection.test.ts",
+      "src/lib/dashboard-service.fault-injection.test.ts",
     ],
     exclude: [],
   },

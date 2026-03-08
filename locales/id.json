@@ -297,6 +297,37 @@
     },
     "movedOut": "Penyewa ini sudah pindah. Catatan hanya dapat dibaca."
   },
+  "dashboard": {
+    "title": "Ringkasan",
+    "occupancy": {
+      "title": "Okupansi",
+      "totalRooms": "Total Kamar",
+      "occupied": "Terisi",
+      "available": "Tersedia",
+      "underRenovation": "Dalam Renovasi",
+      "rate": "Tingkat Okupansi",
+      "empty": "Belum ada kamar"
+    },
+    "finance": {
+      "title": "Bulan Ini",
+      "income": "Pemasukan",
+      "expenses": "Pengeluaran",
+      "netIncome": "Laba Bersih"
+    },
+    "outstanding": {
+      "title": "Saldo Tertunggak",
+      "viewAll": "Lihat Semua",
+      "allPaid": "Semua penyewa sudah lunas"
+    },
+    "recentPayments": {
+      "title": "Pembayaran Terbaru",
+      "viewAll": "Lihat Semua",
+      "empty": "Belum ada pembayaran"
+    },
+    "loading": "Memuat ringkasan...",
+    "error": "Tidak dapat memuat ringkasan",
+    "retry": "Coba Lagi"
+  },
   "finance": {
     "title": "Keuangan",
     "income": "Pemasukan",

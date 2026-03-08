@@ -297,6 +297,37 @@
     },
     "movedOut": "This tenant has moved out. Notes are read-only."
   },
+  "dashboard": {
+    "title": "Overview",
+    "occupancy": {
+      "title": "Occupancy",
+      "totalRooms": "Total Rooms",
+      "occupied": "Occupied",
+      "available": "Available",
+      "underRenovation": "Under Renovation",
+      "rate": "Occupancy Rate",
+      "empty": "No rooms added yet"
+    },
+    "finance": {
+      "title": "This Month",
+      "income": "Income",
+      "expenses": "Expenses",
+      "netIncome": "Net Income"
+    },
+    "outstanding": {
+      "title": "Outstanding Balances",
+      "viewAll": "View All",
+      "allPaid": "All tenants are up to date"
+    },
+    "recentPayments": {
+      "title": "Recent Payments",
+      "viewAll": "View All",
+      "empty": "No payments recorded yet"
+    },
+    "loading": "Loading dashboard...",
+    "error": "Unable to load dashboard",
+    "retry": "Try Again"
+  },
   "finance": {
     "title": "Finance",
     "income": "Income",
