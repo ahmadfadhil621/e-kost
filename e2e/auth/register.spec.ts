@@ -10,7 +10,27 @@
 // REQ 7.5 -> test('user can register with exactly 8-character password')
 
 import { test, expect } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { stableFill } from "../helpers/forms";
+
+/** Waits for either redirect to / or form error; throws with error message if error appears first (fail-fast). */
+async function waitForRegistrationOutcome(
+  page: Page,
+  timeout = 30000
+): Promise<void> {
+  const redirectPromise = page
+    .waitForURL((url) => url.pathname === "/", { timeout })
+    .then(() => "redirect" as const);
+  const alertPromise = page
+    .locator("form [role='alert']")
+    .waitFor({ state: "visible", timeout })
+    .then(() => "alert" as const);
+  const outcome = await Promise.race([redirectPromise, alertPromise]);
+  if (outcome === "alert") {
+    const text = (await page.locator("form [role='alert']").textContent())?.trim();
+    throw new Error(`Registration failed: ${text ?? "(no message)"}`);
+  }
+}
 
 test.describe("register", () => {
   test.describe("good cases", () => {
@@ -25,7 +45,8 @@ test.describe("register", () => {
       await stableFill(page, () => page.getByLabel(/password/i), "SecurePass123!");
       await page.getByRole("button", { name: /register/i }).click();
 
-      await expect(page).toHaveURL("/", { timeout: 30000 });
+      await waitForRegistrationOutcome(page);
+      await expect(page).toHaveURL("/");
     });
 
     test("registration page displays all required fields", async ({
@@ -135,7 +156,8 @@ test.describe("register", () => {
       await stableFill(page, () => page.getByLabel(/password/i), "Exactly8");
       await page.getByRole("button", { name: /register/i }).click();
 
-      await expect(page).toHaveURL("/", { timeout: 30000 });
+      await waitForRegistrationOutcome(page);
+      await expect(page).toHaveURL("/");
     });
 
     test("password field masks input", async ({ page }) => {
