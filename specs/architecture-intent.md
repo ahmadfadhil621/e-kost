@@ -130,7 +130,7 @@ This document defines the architectural principles for E-Kost to remain resilien
 
 **Adapters (Implementations)**:
 - PostgreSQL adapter for repositories
-- Simple calculator adapter (rent minus payments)
+- Balance calculation: MVP uses BalanceService directly (rent minus payments); IBalanceCalculator can be introduced when rules evolve (late fees, pro-rating)
 - Email/SMS adapter for notifications (future)
 - OpenAI/Claude/other adapter for AI (future)
 - Better Auth adapter for authentication (current MVP, with Prisma adapter for database sessions)

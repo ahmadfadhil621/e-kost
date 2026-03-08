@@ -33,7 +33,7 @@
     - Excludes moved-out tenants
     - Also returns total count of tenants with balance > 0
     - Returns empty array and count 0 when all tenants paid up
-  - **Dependencies**: BalanceService (from Phase 6b)
+  - **Dependencies**: BalanceService (from Phase 6)
   - **Effort**: S
 
 - [ ] 1.4 Add getRecentPayments method to PaymentService
