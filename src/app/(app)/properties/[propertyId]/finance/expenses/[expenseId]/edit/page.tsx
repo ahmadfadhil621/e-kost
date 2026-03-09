@@ -67,6 +67,7 @@ export default function EditExpensePage() {
       queryClient.invalidateQueries({
         queryKey: ["finance-summary", propertyId],
       });
+      queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
       router.push(`/properties/${propertyId}/finance/expenses`);
     },
   });

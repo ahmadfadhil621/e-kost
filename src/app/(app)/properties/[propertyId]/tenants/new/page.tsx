@@ -2,6 +2,7 @@
 
 import { useRouter, useParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { TenantForm } from "@/components/tenant/tenant-form";
 import type { CreateTenantInput } from "@/domain/schemas/tenant";
@@ -10,6 +11,7 @@ export default function NewTenantPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const params = useParams();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   const propertyId = params.propertyId as string;
 
@@ -31,6 +33,10 @@ export default function NewTenantPage() {
       return;
     }
 
+    queryClient.invalidateQueries({ queryKey: ["tenants", propertyId] });
+    queryClient.invalidateQueries({ queryKey: ["balances", propertyId] });
+    queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
+    await queryClient.refetchQueries({ queryKey: ["tenants", propertyId] });
     toast({ title: t("tenant.create.success") });
     router.push(`/properties/${propertyId}/tenants`);
   };

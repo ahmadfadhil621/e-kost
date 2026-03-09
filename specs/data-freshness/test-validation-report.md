@@ -2,7 +2,8 @@
 
 **Feature:** data-freshness  
 **Date:** 2026-03-09  
-**Scope:** Unit tests (create room, create tenant, edit room pages) + E2E spec `e2e/data-freshness/list-and-dashboard-update-after-mutation.spec.ts`
+**Scope:** Unit tests (create room, create tenant, edit room pages) + E2E spec `e2e/data-freshness/list-and-dashboard-update-after-mutation.spec.ts`  
+**Last validated:** 2026-03-09 (Gate 1 re-run after E2E spec fixes)
 
 ---
 
@@ -69,9 +70,9 @@ Evaluation of data-freshness test files only.
 - **Isolated E2E data:** E2E uses `Date.now()` and unique room/tenant names. PASS.
 
 ### E2E Locator Resilience
-- **Accessible locators:** `getByRole`, `getByLabel`, `getByText`, `[data-testid=room-card]`. PASS.
-- **Regex:** Case-insensitive regex used (e.g. `/create room|save/i`). PASS.
-- **No fragile waits:** `expect(...).toBeVisible({ timeout: ... })` used; no `waitForTimeout`. PASS.
+- **Accessible locators:** E2E uses `getByRole`, `getByLabel`, `getByText`, and `[data-testid=room-card]`. One locator uses `page.locator("a").filter({ has: ... })` (tag "a" for first room link); consider `getByRole('link').filter({ has: ... })` for full consistency. PASS.
+- **Regex:** Case-insensitive regex used (e.g. `/create room|save/i`, `/^rooms$/i`). PASS.
+- **No fragile waits:** `expect(...).toBeVisible({ timeout: ... })` and `waitForURL` used; no `waitForTimeout`. PASS.
 
 **Outcome:** PASS — no blocking findings.
 

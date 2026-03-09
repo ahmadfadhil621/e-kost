@@ -61,6 +61,7 @@ export default function EditTenantPage() {
       }
       queryClient.invalidateQueries({ queryKey: ["tenant", propertyId, tenantId] });
       queryClient.invalidateQueries({ queryKey: ["tenants", propertyId] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
       toast({ title: t("tenant.edit.success") });
       router.push(`/properties/${propertyId}/tenants/${tenantId}`);
     },

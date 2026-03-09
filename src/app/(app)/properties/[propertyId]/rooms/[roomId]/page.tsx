@@ -84,6 +84,7 @@ export default function RoomDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["room", propertyId, roomId] });
       queryClient.invalidateQueries({ queryKey: ["rooms", propertyId] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
       toast({ title: t("room.status.updateSuccess") });
     },
     onError: (err: Error) => {

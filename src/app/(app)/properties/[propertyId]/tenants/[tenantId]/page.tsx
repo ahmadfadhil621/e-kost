@@ -136,6 +136,7 @@ export default function TenantDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["tenant", propertyId, tenantId] });
       queryClient.invalidateQueries({ queryKey: ["tenants", propertyId] });
       queryClient.invalidateQueries({ queryKey: ["rooms", propertyId] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
       toast({ title: t("tenant.assignRoom.success") });
       setAssignOpen(false);
     },
@@ -161,6 +162,10 @@ export default function TenantDetailPage() {
       }
       queryClient.invalidateQueries({ queryKey: ["tenants", propertyId] });
       queryClient.invalidateQueries({ queryKey: ["rooms", propertyId] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
+      queryClient.invalidateQueries({ queryKey: ["balances", propertyId] });
+      queryClient.invalidateQueries({ queryKey: ["tenant", propertyId, tenantId] });
+      queryClient.invalidateQueries({ queryKey: ["payments", "tenant"] });
       toast({ title: t("tenant.moveOut.success") });
       setMoveOutOpen(false);
       router.push(`/properties/${propertyId}/tenants`);

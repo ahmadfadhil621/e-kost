@@ -2,7 +2,7 @@
 
 import { useRouter, useParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { RoomForm } from "@/components/room/room-form";
 import type { CreateRoomInput } from "@/domain/schemas/room";
@@ -32,6 +32,7 @@ export default function EditRoomPage() {
   const { t } = useTranslation();
   const params = useParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   const propertyId = params.propertyId as string;
   const roomId = params.roomId as string;
@@ -63,6 +64,10 @@ export default function EditRoomPage() {
       return;
     }
 
+    queryClient.invalidateQueries({ queryKey: ["room", propertyId, roomId] });
+    queryClient.invalidateQueries({ queryKey: ["rooms", propertyId] });
+    queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
+    await queryClient.refetchQueries({ queryKey: ["rooms", propertyId] });
     toast({ title: t("room.edit.success") });
     router.push(`/properties/${propertyId}/rooms/${roomId}`);
   };

@@ -80,9 +80,14 @@ export default function NewPaymentPage() {
       }
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["payments", propertyId] });
       queryClient.invalidateQueries({ queryKey: ["payments", "tenant"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
+      queryClient.invalidateQueries({
+        queryKey: ["balance", propertyId, variables.tenantId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["balances", propertyId] });
       toast({ title: t("payment.create.success") });
       // Stay on form so success toast is visible (form clears for next entry)
     },

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { MoreVertical } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { usePropertyContext } from "@/contexts/property-context";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -29,6 +30,7 @@ import {
 export default function PropertiesListPage() {
   const { t } = useTranslation();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   const { user } = useAuth();
   const ctx = usePropertyContext();
@@ -74,6 +76,11 @@ export default function PropertiesListPage() {
         return;
       }
       await refetch();
+      if (propertyToDelete.id === activePropertyId) {
+        queryClient.invalidateQueries({
+          queryKey: ["dashboard", propertyToDelete.id],
+        });
+      }
       toast({ title: t("property.delete.success") });
       setPropertyToDelete(null);
     } catch {
