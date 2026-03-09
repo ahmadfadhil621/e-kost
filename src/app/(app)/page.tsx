@@ -210,7 +210,7 @@ export default function DashboardPage() {
               (finance?.netIncome ?? 0) >= 0 ? "text-finance-profit-positive" : "text-finance-profit-negative"
             }`}
           >
-            {finance !== null ? formatCurrency(finance.netIncome) : "—"}
+            {finance !== undefined && finance !== null ? formatCurrency(finance.netIncome) : "—"}
           </span>
           <span className="text-xs text-muted-foreground">{t("dashboard.quickStats.netProfit")}</span>
         </Link>
