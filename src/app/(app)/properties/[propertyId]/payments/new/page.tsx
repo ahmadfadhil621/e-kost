@@ -38,7 +38,7 @@ async function fetchTenants(propertyId: string): Promise<TenantRow[]> {
         hasTenants: "tenants" in data,
         typeOfTenants: typeof _rawTenants,
         isArray: Array.isArray(_rawTenants),
-        constructorName: _rawTenants != null && typeof _rawTenants === "object" ? ( _rawTenants as object).constructor?.name : String(_rawTenants),
+        constructorName: _rawTenants !== null && _rawTenants !== undefined && typeof _rawTenants === "object" ? ( _rawTenants as object).constructor?.name : String(_rawTenants),
         topLevelKeys: typeof data === "object" && data !== null ? Object.keys(data) : [],
       },
       timestamp: Date.now(),
@@ -78,7 +78,7 @@ export default function NewPaymentPage() {
   // #region agent log
   const _tenantsType = typeof tenants;
   const _tenantsIsArray = Array.isArray(tenants);
-  const _tenantsConstructor = tenants != null ? (tenants as object).constructor?.name : "null/undefined";
+  const _tenantsConstructor = tenants !== null && tenants !== undefined ? (tenants as object).constructor?.name : "null/undefined";
   fetch("http://127.0.0.1:7266/ingest/aaf93920-0ed8-4918-8ed8-89e8713375fa", {
     method: "POST",
     headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "c14ddc" },
@@ -91,7 +91,7 @@ export default function NewPaymentPage() {
         isArray: _tenantsIsArray,
         constructorName: _tenantsConstructor,
         hasFilter: typeof (tenants as unknown as { filter?: unknown })?.filter,
-        sampleKeys: tenants != null && typeof tenants === "object" && !Array.isArray(tenants) ? Object.keys(tenants as object).slice(0, 10) : undefined,
+        sampleKeys: tenants !== null && tenants !== undefined && typeof tenants === "object" && !Array.isArray(tenants) ? Object.keys(tenants as object).slice(0, 10) : undefined,
       },
       timestamp: Date.now(),
       hypothesisId: "A",
