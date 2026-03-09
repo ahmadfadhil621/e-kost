@@ -10,7 +10,9 @@ async function fetchDashboard(propertyId: string) {
   const res = await fetch(`/api/properties/${propertyId}/dashboard`, {
     credentials: "include",
   });
-  if (!res.ok) throw new Error("Failed to load dashboard");
+  if (!res.ok) {
+    throw new Error("Failed to load dashboard");
+  }
   return res.json();
 }
 
@@ -25,7 +27,7 @@ export function AppHeader() {
   });
 
   const occupancy = data?.occupancy;
-  const showRoomStats = !!activeId && occupancy != null;
+  const showRoomStats = !!activeId && occupancy !== null;
 
   return (
     <header role="banner" className="sticky top-0 z-50 border-b border-border bg-card">

@@ -15,7 +15,7 @@ export interface OutstandingBalancesListProps {
 
 export function OutstandingBalancesList({
   balances,
-  totalCount,
+  totalCount: _totalCount,
   propertyId,
   formatCurrency,
   isLoading = false,

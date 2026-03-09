@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -50,7 +49,6 @@ function formatDate(d: Date): string {
 
 export default function DashboardPage() {
   const { t } = useTranslation();
-  const router = useRouter();
   const ctx = usePropertyContext();
   const formatCurrency = useFormatCurrency();
   const [property, setProperty] = useState<PropertyDetail | null>(null);
@@ -212,7 +210,7 @@ export default function DashboardPage() {
               (finance?.netIncome ?? 0) >= 0 ? "text-finance-profit-positive" : "text-finance-profit-negative"
             }`}
           >
-            {finance != null ? formatCurrency(finance.netIncome) : "—"}
+            {finance !== null ? formatCurrency(finance.netIncome) : "—"}
           </span>
           <span className="text-xs text-muted-foreground">{t("dashboard.quickStats.netProfit")}</span>
         </Link>
