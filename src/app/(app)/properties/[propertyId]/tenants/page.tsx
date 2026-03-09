@@ -62,10 +62,11 @@ export default function TenantListPage() {
   const params = useParams();
   const propertyId = params.propertyId as string;
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["tenants", propertyId],
     queryFn: () => fetchTenants(propertyId),
     enabled: !!propertyId,
+    retry: false,
   });
 
   const { data: balancesData } = useQuery({
@@ -93,6 +94,19 @@ export default function TenantListPage() {
     return (
       <div className="flex min-h-[200px] items-center justify-center">
         <p className="text-muted-foreground">{t("common.loading")}</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="space-y-4">
+        <p className="text-muted-foreground" role="alert">
+          {t("property.errors.notFound")}
+        </p>
+        <Button asChild variant="secondary" className="min-h-[44px] min-w-[44px]">
+          <Link href="/">{t("common.back")}</Link>
+        </Button>
       </div>
     );
   }

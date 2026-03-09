@@ -79,6 +79,9 @@
       "confirm": "Delete",
       "success": "Property deleted"
     },
+    "errors": {
+      "notFound": "Property not found"
+    },
     "role": {
       "owner": "Owner",
       "staff": "Staff"

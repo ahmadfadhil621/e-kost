@@ -79,6 +79,9 @@
       "confirm": "Hapus",
       "success": "Properti dihapus"
     },
+    "errors": {
+      "notFound": "Properti tidak ditemukan"
+    },
     "role": {
       "owner": "Pemilik",
       "staff": "Staf"
