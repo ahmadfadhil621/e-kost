@@ -1,7 +1,7 @@
 // Traceability: settings-staff-management
-// REQ 5.1 -> test('settings link is available in navigation')
-// REQ 5.2 -> test('tapping settings link navigates to settings page')
-// REQ 5.3 -> test('settings page indicates active navigation state')
+// REQ 5.1 -> test('settings is available via header avatar popover')
+// REQ 5.2 -> test('tapping settings in avatar popover navigates to settings page')
+// REQ 5.3 -> test('settings page shows expected content')
 
 import { test, expect } from "@playwright/test";
 
@@ -9,54 +9,71 @@ test.use({ storageState: "e2e/.auth/user-with-property.json" });
 
 test.describe("settings navigation", () => {
   test.describe("good cases", () => {
-    test("settings link is available in navigation", async ({ page }) => {
-      await page.goto("/");
-
-      await expect(
-        page.getByRole("link", { name: /settings|pengaturan/i })
-      ).toBeVisible({ timeout: 10000 });
-    });
-
-    test("tapping settings link navigates to settings page", async ({
+    test("settings is available via header avatar popover", async ({
       page,
     }) => {
       await page.goto("/");
 
-      await Promise.all([
-        page.waitForURL(/\/settings/, { timeout: 15000 }),
-        page.getByRole("link", { name: /settings|pengaturan/i }).click(),
-      ]);
+      await page
+        .getByRole("button", { name: /user profile/i })
+        .click({ timeout: 10000 });
 
       await expect(
-        page.getByRole("main").getByRole("heading", { name: /language|account|settings|bahasa|akun|pengaturan/i }).first()
+        page.getByRole("menuitem", { name: /settings|pengaturan/i })
       ).toBeVisible({ timeout: 10000 });
     });
 
-    test("settings page indicates active navigation state", async ({
+    test("tapping settings in avatar popover navigates to settings page", async ({
       page,
     }) => {
+      await page.goto("/");
+
+      await page
+        .getByRole("button", { name: /user profile/i })
+        .click({ timeout: 10000 });
+      await page
+        .getByRole("menuitem", { name: /settings|pengaturan/i })
+        .click();
+
+      await expect(page).toHaveURL(/\/settings/, { timeout: 15000 });
+      await expect(
+        page
+          .getByRole("main")
+          .getByRole("heading", {
+            name: /language|account|settings|bahasa|akun|pengaturan/i,
+          })
+          .first()
+      ).toBeVisible({ timeout: 10000 });
+    });
+
+    test("settings page shows expected content", async ({ page }) => {
       await page.goto("/settings");
 
-      const settingsLink = page.getByRole("link", {
-        name: /settings|pengaturan/i,
-      });
-      await expect(settingsLink).toBeVisible();
-      await expect(settingsLink).toHaveAttribute("href", "/settings");
-      const linkClasses = await settingsLink.getAttribute("class");
-      expect(
-        linkClasses?.includes("font-semibold") ||
-          linkClasses?.includes("bg-") ||
-          linkClasses?.includes("active") ||
-          linkClasses?.includes("text-primary")
-      ).toBe(true);
+      await expect(page).toHaveURL(/\/settings/);
+      await expect(
+        page
+          .getByRole("main")
+          .getByRole("heading", {
+            name: /language|account|bahasa|akun/i,
+          })
+          .first()
+      ).toBeVisible({ timeout: 10000 });
     });
 
-    test("settings link has adequate touch target", async ({ page }) => {
+    test("settings item in avatar dropdown has adequate touch target", async ({
+      page,
+    }) => {
       await page.goto("/");
 
-      const link = page.getByRole("link", { name: /settings|pengaturan/i });
-      await expect(link).toBeVisible();
-      const box = await link.boundingBox();
+      await page
+        .getByRole("button", { name: /user profile/i })
+        .click({ timeout: 10000 });
+
+      const settingsItem = page.getByRole("menuitem", {
+        name: /settings|pengaturan/i,
+      });
+      await expect(settingsItem).toBeVisible();
+      const box = await settingsItem.boundingBox();
       expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
       expect(box?.width ?? 0).toBeGreaterThanOrEqual(44);
     });

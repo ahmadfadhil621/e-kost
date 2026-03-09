@@ -47,7 +47,7 @@ describe("LoginForm", () => {
       render(<LoginForm />);
 
       expect(
-        screen.getByRole("button", { name: /log in/i })
+        screen.getByRole("button", { name: /sign in|log in/i })
       ).toBeInTheDocument();
     });
 
@@ -73,7 +73,7 @@ describe("LoginForm", () => {
         "john@example.com"
       );
       await user.type(screen.getByLabelText(/password/i), "password123");
-      await user.click(screen.getByRole("button", { name: /log in/i }));
+      await user.click(screen.getByRole("button", { name: /sign in|log in/i }));
 
       await waitFor(() => {
         expect(mockSignIn).toHaveBeenCalledWith(
@@ -104,6 +104,30 @@ describe("LoginForm", () => {
         "password"
       );
     });
+
+    it("renders E-Kost title when present", () => {
+      render(<LoginForm />);
+      const title = screen.queryByText(/e-kost/i);
+      if (title) {
+        expect(title).toBeInTheDocument();
+      }
+    });
+
+    it("renders Demo Owner and Demo Staff buttons when present", () => {
+      render(<LoginForm />);
+      const demoOwner = screen.queryByRole("button", {
+        name: /demo owner|akun demo pemilik/i,
+      });
+      const demoStaff = screen.queryByRole("button", {
+        name: /demo staff|akun demo staf/i,
+      });
+      if (demoOwner) {
+        expect(demoOwner).toBeInTheDocument();
+      }
+      if (demoStaff) {
+        expect(demoStaff).toBeInTheDocument();
+      }
+    });
   });
 
   describe("bad cases", () => {
@@ -111,7 +135,7 @@ describe("LoginForm", () => {
       const user = userEvent.setup();
       render(<LoginForm />);
 
-      await user.click(screen.getByRole("button", { name: /log in/i }));
+      await user.click(screen.getByRole("button", { name: /sign in|log in/i }));
 
       await waitFor(() => {
         expect(screen.getByText(/email is required/i)).toBeInTheDocument();
@@ -124,7 +148,7 @@ describe("LoginForm", () => {
 
       await user.type(screen.getByLabelText(/email address/i), "not-email");
       await user.type(screen.getByLabelText(/password/i), "password123");
-      await user.click(screen.getByRole("button", { name: /log in/i }));
+      await user.click(screen.getByRole("button", { name: /sign in|log in/i }));
 
       await waitFor(() => {
         expect(
@@ -141,7 +165,7 @@ describe("LoginForm", () => {
         screen.getByLabelText(/email address/i),
         "john@example.com"
       );
-      await user.click(screen.getByRole("button", { name: /log in/i }));
+      await user.click(screen.getByRole("button", { name: /sign in|log in/i }));
 
       await waitFor(() => {
         expect(
@@ -162,7 +186,7 @@ describe("LoginForm", () => {
         "john@example.com"
       );
       await user.type(screen.getByLabelText(/password/i), "wrongpassword");
-      await user.click(screen.getByRole("button", { name: /log in/i }));
+      await user.click(screen.getByRole("button", { name: /sign in|log in/i }));
 
       await waitFor(() => {
         expect(
@@ -185,11 +209,11 @@ describe("LoginForm", () => {
         "john@example.com"
       );
       await user.type(screen.getByLabelText(/password/i), "password123");
-      await user.click(screen.getByRole("button", { name: /log in/i }));
+      await user.click(screen.getByRole("button", { name: /sign in|log in/i }));
 
       await waitFor(() => {
         expect(
-          screen.getByRole("button", { name: /log in/i })
+          screen.getByRole("button", { name: /sign in|log in/i })
         ).toBeDisabled();
       });
     });

@@ -35,7 +35,7 @@ test.describe("login", () => {
       await page.goto("/login");
       await stableFill(page, () => page.getByLabel(/email address/i), testUserEmail);
       await stableFill(page, () => page.getByLabel(/password/i), TEST_USER_PASSWORD);
-      await page.getByRole("button", { name: /log in/i }).click();
+      await page.getByRole("button", { name: /sign in|log in/i }).click();
 
       await expect(page).toHaveURL("/", { timeout: 25000 });
       await page.waitForLoadState("domcontentloaded");
@@ -46,14 +46,14 @@ test.describe("login", () => {
 
     test("login page displays all required fields", async ({ page }) => {
       await page.goto("/login");
-      await expect(page.getByRole("button", { name: /log in/i })).toBeVisible({
+      await expect(page.getByRole("button", { name: /sign in|log in/i })).toBeVisible({
         timeout: 10000,
       });
 
       await expect(page.getByLabel(/email address/i)).toBeVisible();
       await expect(page.getByLabel(/password/i)).toBeVisible();
       await expect(
-        page.getByRole("button", { name: /log in/i })
+        page.getByRole("button", { name: /sign in|log in/i })
       ).toBeVisible();
     });
 
@@ -71,7 +71,7 @@ test.describe("login", () => {
       await page.goto("/login");
 
       await stableFill(page, () => page.getByLabel(/password/i), "SomePassword123");
-      await page.getByRole("button", { name: /log in/i }).click();
+      await page.getByRole("button", { name: /sign in|log in/i }).click();
 
       await expect(page.getByText(/email is required/i)).toBeVisible({
         timeout: 15000,
@@ -82,7 +82,7 @@ test.describe("login", () => {
       await page.goto("/login");
 
       await stableFill(page, () => page.getByLabel(/email address/i), "test@test.com");
-      await page.getByRole("button", { name: /log in/i }).click();
+      await page.getByRole("button", { name: /sign in|log in/i }).click();
 
       await expect(page.getByText(/password is required/i)).toBeVisible();
     });
@@ -92,7 +92,7 @@ test.describe("login", () => {
 
       await stableFill(page, () => page.getByLabel(/email address/i), "wrong@test.com");
       await stableFill(page, () => page.getByLabel(/password/i), "WrongPassword123");
-      await page.getByRole("button", { name: /log in/i }).click();
+      await page.getByRole("button", { name: /sign in|log in/i }).click();
 
       await expect(
         page.locator("form [role='alert']").or(

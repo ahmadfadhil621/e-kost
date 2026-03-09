@@ -3,7 +3,7 @@
 // REQ 4.2 -> it('renders profile icon with user initials')
 // REQ 4.3 -> it('shows dropdown with user name and email on click')
 // REQ 4.4 -> it('shows logout option in dropdown')
-// REQ 5.1 -> it('shows logout option in dropdown')
+// REQ 5.1 -> it('shows logout option in dropdown'), it('shows Settings link in dropdown'), it('clicking Settings navigates to /settings')
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -80,6 +80,38 @@ describe("ProfileDropdown", () => {
 
       await waitFor(() => {
         expect(screen.getByText(/log out/i)).toBeInTheDocument();
+      });
+    });
+
+    it("shows Settings link in dropdown", async () => {
+      const user = userEvent.setup();
+      render(<ProfileDropdown />);
+
+      await user.click(
+        screen.getByRole("button", { name: /user profile/i })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("menuitem", { name: /settings|pengaturan/i })).toBeInTheDocument();
+      });
+    });
+
+    it("clicking Settings navigates to /settings", async () => {
+      const user = userEvent.setup();
+      render(<ProfileDropdown />);
+
+      await user.click(
+        screen.getByRole("button", { name: /user profile/i })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("menuitem", { name: /settings|pengaturan/i })).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByRole("menuitem", { name: /settings|pengaturan/i }));
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith("/settings");
       });
     });
 
