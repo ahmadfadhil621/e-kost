@@ -25,6 +25,27 @@ async function fetchTenants(propertyId: string): Promise<TenantRow[]> {
     throw new Error("Failed to fetch tenants");
   }
   const data = await res.json();
+  // #region agent log
+  const _rawTenants = data.tenants;
+  fetch("http://127.0.0.1:7266/ingest/aaf93920-0ed8-4918-8ed8-89e8713375fa", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "c14ddc" },
+    body: JSON.stringify({
+      sessionId: "c14ddc",
+      location: "payments/new/page.tsx:fetchTenants",
+      message: "API response data.tenants",
+      data: {
+        hasTenants: "tenants" in data,
+        typeOfTenants: typeof _rawTenants,
+        isArray: Array.isArray(_rawTenants),
+        constructorName: _rawTenants != null && typeof _rawTenants === "object" ? ( _rawTenants as object).constructor?.name : String(_rawTenants),
+        topLevelKeys: typeof data === "object" && data !== null ? Object.keys(data) : [],
+      },
+      timestamp: Date.now(),
+      hypothesisId: "D",
+    }),
+  }).catch(() => {});
+  // #endregion
   return data.tenants ?? [];
 }
 
@@ -46,11 +67,37 @@ export default function NewPaymentPage() {
   const { toast } = useToast();
   const propertyId = params.propertyId as string;
 
-  const { data: tenants = [] } = useQuery({
+  const tenantsQuery = useQuery({
     queryKey: ["tenants", propertyId],
     queryFn: () => fetchTenants(propertyId),
     enabled: !!propertyId,
   });
+  const tenantsData = tenantsQuery.data;
+  const tenants = tenantsData ?? [];
+
+  // #region agent log
+  const _tenantsType = typeof tenants;
+  const _tenantsIsArray = Array.isArray(tenants);
+  const _tenantsConstructor = tenants != null ? (tenants as object).constructor?.name : "null/undefined";
+  fetch("http://127.0.0.1:7266/ingest/aaf93920-0ed8-4918-8ed8-89e8713375fa", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "c14ddc" },
+    body: JSON.stringify({
+      sessionId: "c14ddc",
+      location: "payments/new/page.tsx:tenants",
+      message: "tenants value before filter",
+      data: {
+        typeof: _tenantsType,
+        isArray: _tenantsIsArray,
+        constructorName: _tenantsConstructor,
+        hasFilter: typeof (tenants as unknown as { filter?: unknown })?.filter,
+        sampleKeys: tenants != null && typeof tenants === "object" && !Array.isArray(tenants) ? Object.keys(tenants as object).slice(0, 10) : undefined,
+      },
+      timestamp: Date.now(),
+      hypothesisId: "A",
+    }),
+  }).catch(() => {});
+  // #endregion
 
   const { data: rooms = [] } = useQuery({
     queryKey: ["rooms", propertyId],
@@ -58,7 +105,8 @@ export default function NewPaymentPage() {
     enabled: !!propertyId,
   });
 
-  const activeTenants: TenantOption[] = tenants
+  const tenantsList: TenantRow[] = Array.isArray(tenants) ? tenants : [];
+  const activeTenants: TenantOption[] = tenantsList
     .filter((t: TenantRow) => t.roomId && !t.movedOutAt)
     .map((t: TenantRow) => ({
       id: t.id,
