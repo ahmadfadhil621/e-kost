@@ -29,13 +29,10 @@ test.describe("update account", () => {
     test("email is displayed as read-only", async ({ page }) => {
       await page.goto("/settings");
 
-      const emailSection = page.getByRole("heading", {
-        name: /account|akun/i,
-      }).locator("..");
-      await expect(emailSection.getByText(/.+@.+/)).toBeVisible();
+      await expect(page.locator("#account-email")).toBeVisible();
       await expect(
-        page.getByLabel(/email/i).first()
-      ).toHaveAttribute("readonly", "").catch(() => {});
+        page.locator("#account-email").evaluate((el) => el.tagName)
+      ).resolves.toBe("P");
     });
 
     test("tapping Edit shows editable name field", async ({ page }) => {

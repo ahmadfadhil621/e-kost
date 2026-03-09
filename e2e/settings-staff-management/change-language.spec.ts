@@ -89,7 +89,7 @@ test.describe("change language", () => {
 
       await expect(page).toHaveURL(/\/login/, { timeout: 15000 });
       await expect(
-        page.getByRole("heading", { name: /welcome back|selamat datang/i })
+        page.getByRole("heading", { name: /e-kost/i })
       ).toBeVisible({ timeout: 5000 });
     });
   });

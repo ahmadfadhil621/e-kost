@@ -42,8 +42,11 @@ test.describe("invite and remove staff", () => {
       await page.goto("/settings");
 
       await expect(
-        page.getByRole("heading", { name: /staff for|staff.*property/i })
+        page.getByRole("main").getByRole("heading", { name: /settings|pengaturan/i })
       ).toBeVisible({ timeout: 10000 });
+      await expect(
+        page.getByRole("heading", { name: /staff for|staff.*property/i })
+      ).toBeVisible({ timeout: 15000 });
     });
 
     test("staff section displays list of assigned staff", async ({ page }) => {
@@ -117,7 +120,9 @@ test.describe("invite and remove staff", () => {
         page.getByRole("status").filter({ hasText: /invited successfully|berhasil diundang|staff invited/i })
       ).toBeVisible({ timeout: 15000 });
 
-      await staffSection.getByRole("listitem").filter({ hasText: staffEmail }).getByRole("button", { name: /remove|hapus|delete/i }).click();
+      const listItem = staffSection.getByRole("listitem").filter({ hasText: staffEmail });
+      await expect(listItem).toBeVisible({ timeout: 15000 });
+      await listItem.getByRole("button", { name: /remove|hapus|delete/i }).click();
       await expect(
         page.getByRole("dialog").getByRole("button", { name: /confirm|remove|hapus|yes|ya/i })
       ).toBeVisible({ timeout: 5000 });
@@ -134,6 +139,9 @@ test.describe("invite and remove staff", () => {
     test("add and remove have adequate touch targets", async ({ page }) => {
       await page.goto("/settings");
 
+      await expect(
+        page.getByRole("heading", { name: /staff for|staff.*property/i })
+      ).toBeVisible({ timeout: 15000 });
       const addButton = page.getByRole("button", {
         name: /add staff|tambah staf/i,
       });

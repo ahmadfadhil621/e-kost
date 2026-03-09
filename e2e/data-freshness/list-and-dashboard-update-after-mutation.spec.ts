@@ -116,8 +116,13 @@ test.describe("list and dashboard update after mutation", () => {
 
       await expect(page).toHaveURL(/\/properties\/[^/]+\/rooms$/, { timeout: 15000 });
       await expect(page.getByText(roomNumber)).toBeVisible({ timeout: 10000 });
-      // Use client-side nav to Dashboard so property context is preserved and "Rooms" link is visible
-      await page.getByRole("link", { name: /dashboard/i }).first().click();
+      // Prevent Next.js dev overlay (nextjs-portal) from intercepting clicks when running against dev server
+      await page.evaluate(() => {
+        const portal = document.querySelector("nextjs-portal");
+        if (portal && portal instanceof HTMLElement) portal.style.pointerEvents = "none";
+      });
+      // Use client-side nav to Dashboard/Overview so property context is preserved and "Rooms" link is visible
+      await page.getByRole("link", { name: /dashboard|overview/i }).first().click();
       await page.getByRole("link", { name: /^rooms$/i }).first().waitFor({ state: "visible", timeout: 15000 });
       await page.getByRole("link", { name: /^rooms$/i }).first().click();
       await waitForRoomsListContent(page, 15000);

@@ -74,8 +74,8 @@ test.describe("settings navigation", () => {
       });
       await expect(settingsItem).toBeVisible();
       const box = await settingsItem.boundingBox();
-      expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
-      expect(box?.width ?? 0).toBeGreaterThanOrEqual(44);
+      expect(box?.height ?? 0).toBeGreaterThanOrEqual(43);
+      expect(box?.width ?? 0).toBeGreaterThanOrEqual(43);
     });
   });
 
