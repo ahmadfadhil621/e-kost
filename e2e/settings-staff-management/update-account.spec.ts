@@ -22,7 +22,7 @@ test.describe("update account", () => {
         page.getByRole("heading", { name: /account|akun/i })
       ).toBeVisible({ timeout: 10000 });
       await expect(
-        page.getByText(/.+@.+/)
+        page.locator("#account-email")
       ).toBeVisible();
     });
 

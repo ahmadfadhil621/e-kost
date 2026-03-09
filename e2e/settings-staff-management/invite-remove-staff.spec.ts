@@ -89,10 +89,12 @@ test.describe("invite and remove staff", () => {
       await staffSection.getByRole("button", { name: /^invite$|^undang$/i }).click();
 
       await expect(
-        staffSection.getByText(staffEmail).or(
-          page.getByRole("status").filter({ hasText: /invited successfully|berhasil diundang|staff invited/i })
-        )
+        page.getByRole("status").filter({ hasText: /invited successfully|berhasil diundang|staff invited/i })
       ).toBeVisible({ timeout: 15000 });
+
+      // Cleanup: remove the invited staff so state does not leak to other specs (e.g. update-account)
+      await staffSection.getByRole("listitem").filter({ hasText: staffEmail }).getByRole("button", { name: /remove|hapus|delete/i }).click();
+      await page.getByRole("dialog").getByRole("button", { name: /confirm|remove|hapus|yes|ya/i }).click();
     });
 
     test("Remove shows confirmation dialog and removes access on confirm", async ({
@@ -112,9 +114,7 @@ test.describe("invite and remove staff", () => {
       );
       await staffSection.getByRole("button", { name: /^invite$|^undang$/i }).click();
       await expect(
-        staffSection.getByText(staffEmail).or(
-          page.getByRole("status").filter({ hasText: /invited successfully|berhasil diundang|staff invited/i })
-        )
+        page.getByRole("status").filter({ hasText: /invited successfully|berhasil diundang|staff invited/i })
       ).toBeVisible({ timeout: 15000 });
 
       await staffSection.getByRole("listitem").filter({ hasText: staffEmail }).getByRole("button", { name: /remove|hapus|delete/i }).click();
