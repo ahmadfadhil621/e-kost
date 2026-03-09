@@ -9,6 +9,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "overview": "Overview",
     "rooms": "Rooms",
     "tenants": "Tenants",
     "payments": "Payments",
@@ -66,7 +67,11 @@
       "viewAll": "View all properties",
       "addProperty": "Add property",
       "empty": "No properties yet. Create your first property to get started.",
-      "active": "Active"
+      "active": "Active",
+      "roomCount": "{{count}} rooms"
+    },
+    "selector": {
+      "title": "Select Property"
     },
     "delete": {
       "title": "Delete property",
@@ -102,9 +107,12 @@
     "login": {
       "title": "Log In",
       "pageTitle": "Welcome back",
-      "submit": "Log In",
+      "submit": "Sign In",
+      "signIn": "Sign In",
       "email": "Email Address",
-      "password": "Password"
+      "password": "Password",
+      "demoOwner": "Demo Owner Account",
+      "demoStaff": "Demo Staff Account"
     },
     "logout": "Log Out",
     "profile": {
@@ -318,12 +326,19 @@
     "outstanding": {
       "title": "Outstanding Balances",
       "viewAll": "View All",
+      "viewAllTenants": "View all tenants →",
       "allPaid": "All tenants are up to date"
     },
     "recentPayments": {
       "title": "Recent Payments",
       "viewAll": "View All",
+      "viewFinances": "View finances →",
       "empty": "No payments recorded yet"
+    },
+    "quickStats": {
+      "rooms": "Rooms",
+      "tenants": "Tenants",
+      "netProfit": "Net Profit"
     },
     "loading": "Loading dashboard...",
     "error": "Unable to load dashboard",

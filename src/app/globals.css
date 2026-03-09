@@ -47,6 +47,14 @@
     --balance-paid-foreground: 144 80% 10%;
     --balance-outstanding: 0 84% 60%;
     --balance-outstanding-foreground: 0 80% 10%;
+
+    /* Domain-specific: finance */
+    --finance-income: 142 71% 45%;
+    --finance-income-foreground: 144 80% 10%;
+    --finance-expense: 0 84% 60%;
+    --finance-expense-foreground: 0 80% 10%;
+    --finance-profit-positive: 142 71% 45%;
+    --finance-profit-negative: 0 84% 60%;
   }
 
   .dark {
@@ -91,6 +99,14 @@
     --balance-paid-foreground: 142 60% 90%;
     --balance-outstanding: 0 84% 50%;
     --balance-outstanding-foreground: 0 60% 90%;
+
+    /* Domain-specific: finance (dark mode) */
+    --finance-income: 142 71% 35%;
+    --finance-income-foreground: 142 60% 90%;
+    --finance-expense: 0 84% 50%;
+    --finance-expense-foreground: 0 60% 90%;
+    --finance-profit-positive: 142 71% 35%;
+    --finance-profit-negative: 0 84% 50%;
   }
 }
 
@@ -100,6 +116,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground text-sm;
   }
+  /* Typography: headings font-semibold; body text-sm; captions text-xs */
 }

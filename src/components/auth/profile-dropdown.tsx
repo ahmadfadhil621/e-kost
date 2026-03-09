@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { LogOut } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { getInitials } from "@/lib/get-initials";
 import {
@@ -45,14 +45,21 @@ export function ProfileDropdown() {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium">{user.name}</p>
+            <p className="text-sm font-medium text-foreground">{user.name}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onClick={handleLogout}
+          onClick={() => router.push("/settings")}
           className="min-h-[44px] cursor-pointer"
+        >
+          <Settings className="mr-2 h-4 w-4" />
+          {t("nav.settings")}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="min-h-[44px] cursor-pointer text-destructive focus:text-destructive"
         >
           <LogOut className="mr-2 h-4 w-4" />
           {t("auth.logout")}

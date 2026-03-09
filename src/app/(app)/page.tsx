@@ -92,19 +92,6 @@ export default function DashboardPage() {
     })();
   }, [activeId]);
 
-  useEffect(() => {
-    if (isLoading) {
-      return;
-    }
-    if (properties.length === 0) {
-      return;
-    }
-    if (!activeId && properties.length > 0) {
-      router.replace("/properties");
-      return;
-    }
-  }, [isLoading, properties.length, activeId, router]);
-
   if (properties.length === 0) {
     return (
       <div className="space-y-4">
@@ -161,13 +148,12 @@ export default function DashboardPage() {
       date: typeof p.date === "string" ? new Date(p.date) : p.date,
     })) ?? [];
 
+  const occupancy = dashboardData?.occupancy;
+  const finance = dashboardData?.finance;
+  const tenantCount = occupancy?.occupied ?? 0;
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold">{property.name}</h2>
-        <p className="text-sm text-muted-foreground">{property.address || "—"}</p>
-      </div>
-
       {dashboardLoading && (
         <p className="text-sm text-muted-foreground" role="status">
           {t("dashboard.loading")}
@@ -198,22 +184,38 @@ export default function DashboardPage() {
         isLoading={dashboardLoading}
       />
 
-      <div className="flex flex-col gap-2">
-        <Button asChild className="min-h-[44px] min-w-[44px]">
-          <Link href={`/properties/${activeId}/rooms`}>{t("nav.rooms")}</Link>
-        </Button>
-        <Button asChild className="min-h-[44px] min-w-[44px]">
-          <Link href={`/properties/${activeId}/tenants`}>{t("nav.tenants")}</Link>
-        </Button>
-        <Button asChild className="min-h-[44px] min-w-[44px]">
-          <Link href={`/properties/${activeId}/payments`}>{t("nav.payments")}</Link>
-        </Button>
-        <Button asChild className="min-h-[44px] min-w-[44px]">
-          <Link href={`/properties/${activeId}/finance`}>{t("nav.finance")}</Link>
-        </Button>
-        <Button asChild className="min-h-[44px] min-w-[44px]">
-          <Link href="/settings">{t("nav.settings")}</Link>
-        </Button>
+      <div className="grid grid-cols-3 gap-3">
+        <Link
+          href={`/properties/${activeId}/rooms`}
+          className="flex min-h-[44px] flex-col justify-center rounded-lg border border-border bg-card p-4 transition-colors hover:bg-accent"
+        >
+          <span className="text-2xl font-bold tabular-nums text-foreground">
+            {occupancy?.totalRooms ?? "—"}
+          </span>
+          <span className="text-xs text-muted-foreground">{t("dashboard.quickStats.rooms")}</span>
+        </Link>
+        <Link
+          href={`/properties/${activeId}/tenants`}
+          className="flex min-h-[44px] flex-col justify-center rounded-lg border border-border bg-card p-4 transition-colors hover:bg-accent"
+        >
+          <span className="text-2xl font-bold tabular-nums text-foreground">
+            {tenantCount}
+          </span>
+          <span className="text-xs text-muted-foreground">{t("dashboard.quickStats.tenants")}</span>
+        </Link>
+        <Link
+          href={`/properties/${activeId}/finance`}
+          className="flex min-h-[44px] flex-col justify-center rounded-lg border border-border bg-card p-4 transition-colors hover:bg-accent"
+        >
+          <span
+            className={`text-lg font-bold tabular-nums ${
+              (finance?.netIncome ?? 0) >= 0 ? "text-finance-profit-positive" : "text-finance-profit-negative"
+            }`}
+          >
+            {finance != null ? formatCurrency(finance.netIncome) : "—"}
+          </span>
+          <span className="text-xs text-muted-foreground">{t("dashboard.quickStats.netProfit")}</span>
+        </Link>
       </div>
     </div>
   );

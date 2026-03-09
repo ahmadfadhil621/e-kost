@@ -36,7 +36,8 @@ describe("OutstandingBalancesList", () => {
       );
 
       expect(screen.getByText("Alice")).toBeInTheDocument();
-      expect(screen.getByText(/A1.*500,000/)).toBeInTheDocument();
+      expect(screen.getByText("A1")).toBeInTheDocument();
+      expect(screen.getByText(/€500,000/)).toBeInTheDocument();
       expect(screen.getByRole("link", { name: /Alice/ })).toHaveAttribute(
         "href",
         `/properties/${propertyId}/tenants/t1`
@@ -61,14 +62,15 @@ describe("OutstandingBalancesList", () => {
         />
       );
 
-      const balanceEl = screen.getByText(/B2.*100,000/);
-      expect(balanceEl).toHaveClass("text-[hsl(var(--status-occupied))]");
+      expect(screen.getByText("B2")).toBeInTheDocument();
+      const balanceEl = screen.getByText(/€100,000/);
+      expect(balanceEl).toHaveClass("text-balance-outstanding");
       expect(balanceEl).toBeInTheDocument();
     });
   });
 
   describe("bad cases", () => {
-    it("does not show View All when totalCount is zero", () => {
+    it("shows View all tenants link and status when totalCount is zero", () => {
       render(
         <OutstandingBalancesList
           balances={[]}
@@ -77,7 +79,8 @@ describe("OutstandingBalancesList", () => {
           formatCurrency={formatCurrency}
         />
       );
-      expect(screen.queryByRole("link", { name: /view all/i })).not.toBeInTheDocument();
+      expect(screen.getByRole("link", { name: /view all tenants/i })).toBeInTheDocument();
+      expect(screen.getByRole("link")).toHaveAttribute("href", `/properties/${propertyId}/tenants`);
       expect(screen.getByRole("status")).toBeInTheDocument();
     });
   });
@@ -118,7 +121,7 @@ describe("OutstandingBalancesList", () => {
       );
 
       const viewAll = screen.getByRole("link", {
-        name: /view all/i,
+        name: /view all tenants/i,
       });
       expect(viewAll).toBeInTheDocument();
       expect(viewAll).toHaveAttribute(
@@ -127,7 +130,7 @@ describe("OutstandingBalancesList", () => {
       );
     });
 
-    it("does not show View All when totalCount <= 5", () => {
+    it("shows View all tenants link when totalCount <= 5", () => {
       render(
         <OutstandingBalancesList
           balances={[]}
@@ -137,7 +140,7 @@ describe("OutstandingBalancesList", () => {
         />
       );
 
-      expect(screen.queryByRole("link", { name: /view all/i })).not.toBeInTheDocument();
+      expect(screen.getByRole("link", { name: /view all tenants/i })).toBeInTheDocument();
     });
 
     it("shows skeleton when loading", () => {

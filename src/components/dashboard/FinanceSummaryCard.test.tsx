@@ -56,7 +56,7 @@ describe("FinanceSummaryCard", () => {
       );
 
       const netEl = screen.getByLabelText(/Net income €1,000,000/i);
-      expect(netEl).toHaveClass("text-[hsl(var(--status-available))]");
+      expect(netEl).toHaveClass("text-finance-profit-positive");
     });
 
     it("shows negative indicator when net income < 0", () => {
@@ -74,7 +74,7 @@ describe("FinanceSummaryCard", () => {
       );
 
       const netEl = screen.getByLabelText(/Net income.*500,000/i);
-      expect(netEl).toHaveClass("text-[hsl(var(--status-occupied))]");
+      expect(netEl).toHaveClass("text-finance-profit-negative");
     });
 
     it("uses formatCurrency for amounts", () => {
@@ -148,8 +148,8 @@ describe("FinanceSummaryCard", () => {
       );
 
       const netEl = screen.getByLabelText(/Net income €0.00/i);
-      expect(netEl).not.toHaveClass("text-[hsl(var(--status-available))]");
-      expect(netEl).not.toHaveClass("text-[hsl(var(--status-occupied))]");
+      expect(netEl).not.toHaveClass("text-finance-profit-positive");
+      expect(netEl).not.toHaveClass("text-finance-profit-negative");
     });
   });
 });

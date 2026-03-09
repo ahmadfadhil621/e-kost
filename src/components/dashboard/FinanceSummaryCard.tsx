@@ -54,26 +54,28 @@ export function FinanceSummaryCard({
           {t("dashboard.finance.title")} — {monthLabel}
         </span>
       </CardHeader>
-      <CardContent className="space-y-2">
-        <p className="text-sm">
-          {t("dashboard.finance.income")}:{" "}
-          <span aria-label={`Income ${formatCurrency(finance.income)}`}>
-            {formatCurrency(finance.income)}
-          </span>
-        </p>
-        <p className="text-sm">
-          {t("dashboard.finance.expenses")}:{" "}
-          <span aria-label={`Expenses ${formatCurrency(finance.expenses)}`}>
-            {formatCurrency(finance.expenses)}
-          </span>
-        </p>
+      <CardContent className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <p className="text-xs text-muted-foreground">{t("dashboard.finance.income")}</p>
+            <p className="text-lg font-semibold tabular-nums text-finance-income" aria-label={`Income ${formatCurrency(finance.income)}`}>
+              {formatCurrency(finance.income)}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">{t("dashboard.finance.expenses")}</p>
+            <p className="text-lg font-semibold tabular-nums text-finance-expense" aria-label={`Expenses ${formatCurrency(finance.expenses)}`}>
+              {formatCurrency(finance.expenses)}
+            </p>
+          </div>
+        </div>
         <p
           className={`text-lg font-semibold tabular-nums ${
             isPositive
-              ? "text-[hsl(var(--status-available))]"
+              ? "text-finance-profit-positive"
               : isNegative
-                ? "text-[hsl(var(--status-occupied))]"
-                : ""
+                ? "text-finance-profit-negative"
+                : "text-foreground"
           }`}
           aria-label={`Net income ${formatCurrency(finance.netIncome)}`}
         >

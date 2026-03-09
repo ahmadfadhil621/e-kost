@@ -43,19 +43,17 @@ export function OutstandingBalancesList({
         <span className="text-muted-foreground text-sm">
           {t("dashboard.outstanding.title")}
         </span>
-        {totalCount > 5 && (
-          <Link
-            href={`/properties/${propertyId}/tenants`}
-            className="text-primary text-sm underline min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
-          >
-            {t("dashboard.outstanding.viewAll")}
-          </Link>
-        )}
+        <Link
+          href={`/properties/${propertyId}/tenants`}
+          className="text-primary text-sm underline hover:underline min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
+        >
+          {t("dashboard.outstanding.viewAllTenants")}
+        </Link>
       </CardHeader>
       <CardContent>
         {balances.length === 0 ? (
           <p
-            className="text-sm text-[hsl(var(--status-available))]"
+            className="text-sm text-balance-paid"
             role="status"
           >
             {t("dashboard.outstanding.allPaid")}
@@ -66,11 +64,14 @@ export function OutstandingBalancesList({
               <li key={b.tenantId}>
                 <Link
                   href={`/properties/${propertyId}/tenants/${b.tenantId}`}
-                  className="flex min-h-[44px] min-w-[44px] items-center justify-between rounded-md border p-2 text-left hover:bg-muted"
+                  className="flex min-h-[44px] min-w-[44px] items-center justify-between gap-2 rounded-md border p-2 text-left hover:bg-accent"
                 >
-                  <span>{b.tenantName}</span>
-                  <span className="text-sm text-[hsl(var(--status-occupied))] font-medium">
-                    {b.roomNumber} — {formatCurrency(b.balance)}
+                  <div className="min-w-0 flex-1">
+                    <span className="text-foreground">{b.tenantName}</span>
+                    <span className="ml-1 text-sm text-muted-foreground">{b.roomNumber}</span>
+                  </div>
+                  <span className="text-sm font-semibold text-balance-outstanding shrink-0">
+                    {formatCurrency(b.balance)}
                   </span>
                 </Link>
               </li>

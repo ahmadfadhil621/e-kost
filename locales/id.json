@@ -9,6 +9,7 @@
   },
   "nav": {
     "dashboard": "Dasbor",
+    "overview": "Ringkasan",
     "rooms": "Kamar",
     "tenants": "Penyewa",
     "payments": "Pembayaran",
@@ -66,7 +67,11 @@
       "viewAll": "Lihat semua properti",
       "addProperty": "Tambah properti",
       "empty": "Belum ada properti. Buat properti pertama untuk memulai.",
-      "active": "Aktif"
+      "active": "Aktif",
+      "roomCount": "{{count}} kamar"
+    },
+    "selector": {
+      "title": "Pilih Properti"
     },
     "delete": {
       "title": "Hapus properti",
@@ -103,8 +108,11 @@
       "title": "Masuk",
       "pageTitle": "Selamat datang kembali",
       "submit": "Masuk",
+      "signIn": "Masuk",
       "email": "Alamat Email",
-      "password": "Kata Sandi"
+      "password": "Kata Sandi",
+      "demoOwner": "Akun Demo Pemilik",
+      "demoStaff": "Akun Demo Staf"
     },
     "logout": "Keluar",
     "profile": {
@@ -318,12 +326,19 @@
     "outstanding": {
       "title": "Saldo Tertunggak",
       "viewAll": "Lihat Semua",
+      "viewAllTenants": "Lihat semua penyewa →",
       "allPaid": "Semua penyewa sudah lunas"
     },
     "recentPayments": {
       "title": "Pembayaran Terbaru",
       "viewAll": "Lihat Semua",
+      "viewFinances": "Lihat keuangan →",
       "empty": "Belum ada pembayaran"
+    },
+    "quickStats": {
+      "rooms": "Kamar",
+      "tenants": "Penyewa",
+      "netProfit": "Laba Bersih"
     },
     "loading": "Memuat ringkasan...",
     "error": "Tidak dapat memuat ringkasan",

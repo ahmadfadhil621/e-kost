@@ -25,10 +25,10 @@ describe("OccupancyCard", () => {
 
       expect(screen.getByText(/60%/)).toBeInTheDocument();
       expect(screen.getByLabelText(/Occupancy Rate 60%/)).toBeInTheDocument();
-      expect(screen.getByText(/Total Rooms: 10/)).toBeInTheDocument();
-      expect(screen.getByText(/Occupied: 6/)).toBeInTheDocument();
-      expect(screen.getByText(/Available: 3/)).toBeInTheDocument();
-      expect(screen.getByText(/Under Renovation: 1/)).toBeInTheDocument();
+      expect(screen.getByText(/6\s+Occupied/)).toBeInTheDocument();
+      expect(screen.getByText(/3\s+Available/)).toBeInTheDocument();
+      expect(screen.getByText(/1\s+Under Renovation/)).toBeInTheDocument();
+      expect(screen.getByRole("progressbar")).toBeInTheDocument();
       expect(screen.getByTestId("occupancy-card")).toBeInTheDocument();
     });
 

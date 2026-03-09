@@ -58,7 +58,7 @@ describe("RecentPaymentsList", () => {
       expect(screen.getByText(/IDR 999/)).toBeInTheDocument();
     });
 
-    it("View All links to payments page", () => {
+    it("View finances link goes to finance page", () => {
       render(
         <RecentPaymentsList
           payments={[]}
@@ -68,10 +68,10 @@ describe("RecentPaymentsList", () => {
         />
       );
 
-      const viewAll = screen.getByRole("link", { name: /view all/i });
-      expect(viewAll).toHaveAttribute(
+      const viewFinances = screen.getByRole("link", { name: /view finances/i });
+      expect(viewFinances).toHaveAttribute(
         "href",
-        `/properties/${propertyId}/payments`
+        `/properties/${propertyId}/finance`
       );
     });
   });

@@ -58,6 +58,13 @@ const config: Config = {
         "balance-outstanding": "hsl(var(--balance-outstanding))",
         "balance-outstanding-foreground":
           "hsl(var(--balance-outstanding-foreground))",
+        "finance-income": "hsl(var(--finance-income))",
+        "finance-income-foreground": "hsl(var(--finance-income-foreground))",
+        "finance-expense": "hsl(var(--finance-expense))",
+        "finance-expense-foreground":
+          "hsl(var(--finance-expense-foreground))",
+        "finance-profit-positive": "hsl(var(--finance-profit-positive))",
+        "finance-profit-negative": "hsl(var(--finance-profit-negative))",
       },
       borderRadius: {
         lg: "var(--radius)",

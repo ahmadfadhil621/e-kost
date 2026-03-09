@@ -44,10 +44,10 @@ export function RecentPaymentsList({
           {t("dashboard.recentPayments.title")}
         </span>
         <Link
-          href={`/properties/${propertyId}/payments`}
-          className="text-primary text-sm underline min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
+          href={`/properties/${propertyId}/finance`}
+          className="text-primary text-sm underline hover:underline min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
         >
-          {t("dashboard.recentPayments.viewAll")}
+          {t("dashboard.recentPayments.viewFinances")}
         </Link>
       </CardHeader>
       <CardContent>
@@ -60,12 +60,13 @@ export function RecentPaymentsList({
             {payments.map((p) => (
               <li key={p.paymentId}>
                 <Link
-                  href={`/properties/${propertyId}/payments`}
-                  className="flex min-h-[44px] min-w-[44px] items-center justify-between rounded-md border p-2 text-left hover:bg-muted"
+                  href={`/properties/${propertyId}/finance`}
+                  className="flex min-h-[44px] min-w-[44px] items-center justify-between rounded-md border p-2 text-left hover:bg-accent"
                 >
-                  <span>{p.tenantName}</span>
-                  <span className="text-sm tabular-nums">
-                    {formatCurrency(p.amount)} — {formatDate(p.date)}
+                  <span className="text-foreground">{p.tenantName}</span>
+                  <span className="text-sm tabular-nums text-muted-foreground">{formatDate(p.date)}</span>
+                  <span className="text-sm font-semibold tabular-nums text-balance-paid">
+                    {formatCurrency(p.amount)}
                   </span>
                 </Link>
               </li>
