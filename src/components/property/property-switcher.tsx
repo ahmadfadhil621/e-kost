@@ -48,7 +48,12 @@ export function PropertySwitcher() {
           <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-64 p-0">
+      <PopoverContent
+        align="start"
+        className="w-64 p-0"
+        role="dialog"
+        aria-label={t("property.list.title")}
+      >
         {properties.length === 0 ? (
           <div className="p-2 space-y-1">
             <p className="px-2 py-2 text-sm text-muted-foreground">
