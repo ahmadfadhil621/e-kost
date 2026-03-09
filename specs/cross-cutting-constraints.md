@@ -139,6 +139,23 @@ en.json:
 
 ---
 
+## 8. Data Freshness After Mutations
+
+**Applies to**: All UI-triggered mutations (create, update, delete) that change data displayed elsewhere (lists, detail views, dashboard, balances)
+
+- After any successful mutation, the UI must refetch and display updated data **without** requiring a full page refresh
+- Every mutation flow that uses TanStack Query for reading data must invalidate the relevant query keys after a successful response (e.g. `queryClient.invalidateQueries({ queryKey: [...] })`)
+- Mutations that affect dashboard stats (rooms, tenants, payments, expenses) must invalidate `["dashboard", propertyId]`
+- Mutations that affect list or detail views must invalidate the corresponding list/detail query keys
+- Property list is updated via PropertyContext `refetch()` for create/delete property; when using TanStack Query for other data, invalidate affected keys there too
+- **Do not** invalidate on mutation failure; only after success
+
+**Rationale**: Stale lists and dashboard after create/edit flows confuse users and force manual refresh. Invalidating the right query keys ensures the UI shows fresh data as soon as the user navigates or the component re-renders.
+
+**Reference**: Full mutation inventory and required invalidations are in **`specs/data-freshness/`** (requirements, design, tasks). When adding a new mutation page or flow, check that spec and invalidate every query key that displays data affected by the mutation.
+
+---
+
 ## Implementation Checklist
 
 When implementing any feature, verify:
@@ -157,3 +174,4 @@ When implementing any feature, verify:
 - [ ] HTTPS for all data transmission
 - [ ] Date/number/currency formatting respects locale
 - [ ] Currency code sourced from i18n config, not hardcoded
+- [ ] After mutations: invalidate affected TanStack Query keys (and PropertyContext refetch if applicable) so lists/dashboard/balances update without refresh — see `specs/data-freshness/`
