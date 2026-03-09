@@ -152,7 +152,26 @@ en.json:
 
 **Rationale**: Stale lists and dashboard after create/edit flows confuse users and force manual refresh. Invalidating the right query keys ensures the UI shows fresh data as soon as the user navigates or the component re-renders.
 
-**Reference**: Full mutation inventory and required invalidations are in **`specs/data-freshness/`** (requirements, design, tasks). When adding a new mutation page or flow, check that spec and invalidate every query key that displays data affected by the mutation.
+**Invalidation checklist** (when adding or changing a mutation, invalidate these keys after success):
+
+| Mutation | Query keys to invalidate |
+|----------|--------------------------|
+| **Room** create | `["rooms", propertyId]`, `["dashboard", propertyId]` |
+| **Room** edit or status change | `["room", propertyId, roomId]`, `["rooms", propertyId]`, `["dashboard", propertyId]` |
+| **Tenant** create | `["tenants", propertyId]`, `["balances", propertyId]`, `["dashboard", propertyId]` |
+| **Tenant** edit or assign room | `["tenant", propertyId, tenantId]`, `["tenants", propertyId]`, `["rooms", propertyId]` (if assign), `["dashboard", propertyId]` |
+| **Tenant** move-out | `["tenants", propertyId]`, `["rooms", propertyId]`, `["dashboard", propertyId]`, `["balances", propertyId]`, `["tenant", propertyId, tenantId]`, `["payments", "tenant"]` |
+| **Payment** create | `["payments", propertyId]`, `["payments", "tenant"]`, `["dashboard", propertyId]`, `["balance", propertyId, tenantId]` (if scoped), `["balances", propertyId]` |
+| **Expense** create or edit | `["expenses", propertyId]`, `["finance-summary", propertyId]`, `["dashboard", propertyId]` |
+| **Property** delete | `PropertyContext.refetch()`; if deleted property was active, also `queryClient.invalidateQueries({ queryKey: ["dashboard", deletedPropertyId] })` |
+| **Property** create | `PropertyContext.refetch()` |
+| **Notes** (tenant) create/update/delete | `["tenant-notes", propertyId, tenantId]` (or equivalent key used by the notes query) |
+| **Staff** add/remove | `["staff", propertyId]` |
+
+- Use `queryClient.invalidateQueries({ queryKey: [...] })` after a successful API response; do not invalidate on failure.
+- For property list changes (create/delete property), use PropertyContext `refetch()`; for all other list/detail/dashboard data, use TanStack Query invalidation.
+
+**Reference**: Full requirements and task history in **`specs/data-freshness/`**.
 
 ---
 

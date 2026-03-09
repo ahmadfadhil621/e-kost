@@ -89,7 +89,7 @@
 
 ## 5. Documentation (Optional)
 
-- [ ] 5.1 Document invalidation checklist for future mutations
+- [x] 5.1 Document invalidation checklist for future mutations
   - **Description**: Add a short checklist or reference in `specs/cross-cutting-constraints.md` or keep this spec (`specs/data-freshness/`) as the canonical list so future mutation pages don’t miss invalidations.
   - **Acceptance Criteria**: New mutation flows have a clear place to check which query keys (and PropertyContext refetch) to invalidate.
   - **Dependencies**: None
