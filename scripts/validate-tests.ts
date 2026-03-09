@@ -477,6 +477,7 @@ const BAD_CASE_PATTERNS = [
   /toBeNull/,
   /not\s*\.\s*toBeInTheDocument/,
   /queryByText/,                       // RTL: querying for absence
+  /\.not\.toHaveBeenCalled/,           // no invalidation / no navigation on failure
 ];
 
 function checkBadCaseAssertions(source: string, filePath: string): Issue[] {
