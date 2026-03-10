@@ -55,7 +55,7 @@ test.describe("list and dashboard update after mutation", () => {
     }) => {
       test.info().setTimeout(90000);
       await goToRoomsList(page);
-      const firstRoomLink = page.locator("a").filter({ has: page.locator("[data-testid=room-card]") }).first();
+      const firstRoomLink = page.locator("[data-testid=room-card]").first();
       await expect(firstRoomLink).toBeVisible({ timeout: 10000 });
       await firstRoomLink.click();
       await page.waitForURL(/\/properties\/[^/]+\/rooms\/[^/]+$/, { timeout: 20000 });
