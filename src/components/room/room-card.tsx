@@ -187,10 +187,10 @@ export function RoomCard({
               <span
                 className="inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium bg-balance-paid/15 text-balance-paid-foreground"
                 role="status"
-                aria-label={t("balance.badge.paid")}
+                aria-label={t("balance.status.paid")}
               >
                 <Check className="h-3.5 w-3.5" aria-hidden />
-                {t("balance.badge.paid")}
+                {t("balance.status.paid")}
               </span>
             ) : (
               <span
@@ -198,8 +198,8 @@ export function RoomCard({
                 role="status"
                 aria-label={
                   room.outstandingBalance !== undefined && room.outstandingBalance !== null
-                    ? `${formatCurrency(room.outstandingBalance)} ${t("balance.badge.unpaid")}`
-                    : t("balance.badge.unpaid")
+                    ? `${formatCurrency(room.outstandingBalance)} ${t("balance.status.unpaid")}`
+                    : t("balance.status.unpaid")
                 }
               >
                 {room.outstandingBalance !== undefined && room.outstandingBalance !== null
