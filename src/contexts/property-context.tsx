@@ -39,7 +39,9 @@ export function PropertyProvider({ children }: { children: React.ReactNode }) {
   // (server has no localStorage, so we must not use it in initial state)
   useEffect(() => {
     const stored = localStorage.getItem(ACTIVE_PROPERTY_KEY);
-    if (stored) setActiveState(stored);
+    if (stored) {
+      setActiveState(stored);
+    }
   }, []);
 
   const refetch = useCallback(async () => {
