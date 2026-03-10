@@ -19,7 +19,7 @@ todos:
     status: completed
   - id: rooms-page
     content: Rooms page — grid, staggered fade-in, room card states (Available, Renovation, Occupied)
-    status: pending
+    status: completed
   - id: tenants-page
     content: Tenants page — Tenants (N) + Add Tenant, tenant cards with badges
     status: pending

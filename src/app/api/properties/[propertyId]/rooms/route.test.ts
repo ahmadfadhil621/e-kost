@@ -34,9 +34,23 @@ vi.mock("@/lib/room-service-instance", () => ({
   },
 }));
 
+vi.mock("@/lib/tenant-service-instance", () => ({
+  tenantService: {
+    listTenants: vi.fn(),
+  },
+}));
+
+vi.mock("@/lib/balance-service-instance", () => ({
+  balanceService: {
+    calculateBalances: vi.fn(),
+  },
+}));
+
 const { getSession } = await import("@/lib/auth-api");
 const { withPropertyAccess } = await import("@/lib/property-access");
 const { roomService } = await import("@/lib/room-service-instance");
+const { tenantService } = await import("@/lib/tenant-service-instance");
+const { balanceService } = await import("@/lib/balance-service-instance");
 
 beforeEach(() => {
   vi.mocked(getSession).mockResolvedValue({ session: mockSession });
@@ -45,6 +59,8 @@ beforeEach(() => {
     role: "owner",
     errorResponse: null,
   });
+  vi.mocked(tenantService.listTenants).mockResolvedValue([]);
+  vi.mocked(balanceService.calculateBalances).mockResolvedValue([]);
 });
 
 describe("POST /api/properties/[propertyId]/rooms", () => {
@@ -256,6 +272,54 @@ describe("GET /api/properties/[propertyId]/rooms", () => {
         propertyId,
         { status: "available" }
       );
+    });
+
+    it("GET returns occupied room with tenantId, tenantName, outstandingBalance when tenant and balance exist", async () => {
+      const roomId = "room-1";
+      const tenantId = "tenant-1";
+      const rooms = [
+        createRoom({ id: roomId, propertyId, status: "occupied" }),
+      ];
+      vi.mocked(roomService.listRooms).mockResolvedValue(rooms);
+      vi.mocked(tenantService.listTenants).mockResolvedValue([
+        {
+          id: tenantId,
+          propertyId,
+          name: "Budi Santoso",
+          phone: "",
+          email: "",
+          roomId,
+          assignedAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          movedOutAt: null,
+        },
+      ]);
+      vi.mocked(balanceService.calculateBalances).mockResolvedValue([
+        {
+          tenantId,
+          tenantName: "Budi Santoso",
+          roomNumber: "101",
+          monthlyRent: 200,
+          totalPayments: 0,
+          outstandingBalance: 200,
+          status: "unpaid",
+        },
+      ]);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms`
+      );
+      const response = await GET(request, {
+        params: Promise.resolve({ propertyId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.rooms).toHaveLength(1);
+      expect(data.rooms[0].tenantId).toBe(tenantId);
+      expect(data.rooms[0].tenantName).toBe("Budi Santoso");
+      expect(data.rooms[0].outstandingBalance).toBe(200);
     });
   });
 

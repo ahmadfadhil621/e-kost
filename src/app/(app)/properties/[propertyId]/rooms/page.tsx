@@ -71,7 +71,7 @@ export default function RoomListPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-lg font-semibold">{t("room.list.title")}</h2>
+        <h2 className="text-lg font-semibold text-foreground">{t("room.list.title")}</h2>
         <Button asChild className="min-h-[44px] min-w-[44px]">
           <Link href={`/properties/${propertyId}/rooms/new`}>
             {t("room.create.title")}
@@ -84,12 +84,21 @@ export default function RoomListPage() {
       {filteredRooms.length === 0 ? (
         <p className="text-muted-foreground">{t("room.list.empty")}</p>
       ) : (
-        <ul className="flex flex-col gap-3">
-          {filteredRooms.map((room) => (
-            <li key={room.id}>
+        <ul className="grid grid-cols-1 gap-4 list-none p-0 m-0">
+          {filteredRooms.map((room, index) => (
+            <li
+              key={room.id}
+              className="animate-fade-in"
+              style={{ animationDelay: `${index * 60}ms`, opacity: 0 }}
+            >
               <RoomCard
                 room={room}
-                href={`/properties/${propertyId}/rooms/${room.id}`}
+                propertyId={propertyId}
+                tenantHref={
+                  room.tenantId
+                    ? `/properties/${propertyId}/tenants/${room.tenantId}`
+                    : undefined
+                }
               />
             </li>
           ))}

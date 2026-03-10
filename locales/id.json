@@ -159,6 +159,12 @@
       "filterOccupied": "Terisi",
       "filterRenovation": "Dalam Renovasi"
     },
+    "card": {
+      "roomLabel": "Kamar",
+      "assignTenant": "Tugaskan Penyewa",
+      "changeStatus": "Ubah status kamar",
+      "perMonth": "/bulan"
+    },
     "detail": {
       "title": "Detail Kamar",
       "edit": "Ubah",

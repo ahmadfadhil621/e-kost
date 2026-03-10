@@ -159,6 +159,12 @@
       "filterOccupied": "Occupied",
       "filterRenovation": "Under Renovation"
     },
+    "card": {
+      "roomLabel": "Room",
+      "assignTenant": "Assign Tenant",
+      "changeStatus": "Change room status",
+      "perMonth": "/mo"
+    },
     "detail": {
       "title": "Room Details",
       "edit": "Edit",

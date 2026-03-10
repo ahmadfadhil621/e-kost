@@ -3,6 +3,8 @@ import { z } from "zod";
 import { createRoomSchema } from "@/domain/schemas/room";
 import { withPropertyAccess } from "@/lib/property-access";
 import { roomService } from "@/lib/room-service-instance";
+import { tenantService } from "@/lib/tenant-service-instance";
+import { balanceService } from "@/lib/balance-service-instance";
 
 export async function POST(
   request: Request,
@@ -70,7 +72,52 @@ export async function GET(
         ? { status: status as "available" | "occupied" | "under_renovation" }
         : undefined;
     const rooms = await roomService.listRooms(access.userId!, propertyId, filters);
-    return NextResponse.json({ rooms, count: rooms.length });
+
+    const [tenants, balances] = await Promise.all([
+      tenantService.listTenants(access.userId!, propertyId),
+      balanceService.calculateBalances(access.userId!, propertyId),
+    ]);
+    const tenantByRoomId = new Map<string, { id: string; name: string }>();
+    for (const t of tenants) {
+      if (t.roomId && !t.movedOutAt) {
+        tenantByRoomId.set(t.roomId, { id: t.id, name: t.name });
+      }
+    }
+    const balanceByTenantId = new Map(
+      balances.map((b) => [b.tenantId, b.outstandingBalance])
+    );
+
+    const roomsWithTenantInfo = rooms.map((room) => {
+      const base = {
+        id: room.id,
+        propertyId: room.propertyId,
+        roomNumber: room.roomNumber,
+        roomType: room.roomType,
+        monthlyRent: room.monthlyRent,
+        status: room.status,
+        createdAt: room.createdAt,
+        updatedAt: room.updatedAt,
+      };
+      if (room.status !== "occupied") {
+        return base;
+      }
+      const tenant = tenantByRoomId.get(room.id);
+      if (!tenant) {
+        return base;
+      }
+      const outstandingBalance = balanceByTenantId.get(tenant.id) ?? 0;
+      return {
+        ...base,
+        tenantId: tenant.id,
+        tenantName: tenant.name,
+        outstandingBalance,
+      };
+    });
+
+    return NextResponse.json({
+      rooms: roomsWithTenantInfo,
+      count: roomsWithTenantInfo.length,
+    });
   } catch (err) {
     if (err instanceof Error && err.message.includes("Forbidden")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
