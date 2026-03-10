@@ -32,10 +32,15 @@ const PropertyContext = createContext<PropertyContextValue | null>(null);
 
 export function PropertyProvider({ children }: { children: React.ReactNode }) {
   const [properties, setProperties] = useState<PropertySummary[]>([]);
-  const [activePropertyId, setActiveState] = useState<string | null>(() =>
-    typeof window !== "undefined" ? localStorage.getItem(ACTIVE_PROPERTY_KEY) : null
-  );
+  const [activePropertyId, setActiveState] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Sync activePropertyId from localStorage after mount to avoid hydration mismatch
+  // (server has no localStorage, so we must not use it in initial state)
+  useEffect(() => {
+    const stored = localStorage.getItem(ACTIVE_PROPERTY_KEY);
+    if (stored) setActiveState(stored);
+  }, []);
 
   const refetch = useCallback(async () => {
     try {
