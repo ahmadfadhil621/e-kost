@@ -27,7 +27,7 @@ export function AppHeader() {
   });
 
   const occupancy = data?.occupancy;
-  const showRoomStats = !!activeId && occupancy != null;
+  const showRoomStats = !!activeId && occupancy !== null;
 
   return (
     <header role="banner" className="sticky top-0 z-50 border-b border-border bg-card">

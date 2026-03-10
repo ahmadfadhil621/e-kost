@@ -119,7 +119,9 @@ test.describe("list and dashboard update after mutation", () => {
       // Prevent Next.js dev overlay (nextjs-portal) from intercepting clicks when running against dev server
       await page.evaluate(() => {
         const portal = document.querySelector("nextjs-portal");
-        if (portal && portal instanceof HTMLElement) portal.style.pointerEvents = "none";
+        if (portal && portal instanceof HTMLElement) {
+          portal.style.pointerEvents = "none";
+        }
       });
       // Use client-side nav to Dashboard/Overview so property context is preserved and "Rooms" link is visible
       await page.getByRole("link", { name: /dashboard|overview/i }).first().click();
