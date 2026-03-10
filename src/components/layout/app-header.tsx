@@ -27,7 +27,9 @@ export function AppHeader() {
   });
 
   const occupancy = data?.occupancy;
-  const showRoomStats = !!activeId && occupancy !== null;
+  // Only show stats when occupancy is loaded (undefined while query is loading)
+  const showRoomStats =
+    !!activeId && occupancy !== undefined && occupancy !== null;
 
   return (
     <header role="banner" className="sticky top-0 z-50 border-b border-border bg-card">

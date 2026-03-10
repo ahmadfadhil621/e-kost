@@ -22,16 +22,23 @@ test.describe("switch property", () => {
     });
 
     test("user can switch active property from header", async ({ page }) => {
+      const propertiesResponse = page.waitForResponse(
+        (res) =>
+          res.url().includes("/api/properties") &&
+          res.request().method() === "GET",
+        { timeout: 15000 }
+      );
       await page.goto("/");
+      await page.getByRole("banner").waitFor({ state: "visible" });
+      await propertiesResponse;
 
-      const header = page.getByRole("banner").or(page.locator("header"));
-      const propertyTrigger = header.getByText(/property|switch|select/i).first();
-      if ((await propertyTrigger.count()) > 0) {
-        await propertyTrigger.click();
-        await expect(
-          page.getByRole("dialog").or(page.getByRole("listbox"))
-        ).toBeVisible({ timeout: 3000 });
-      }
+      const propertyTrigger = page.getByRole("button", {
+        name: /my properties|properti saya/i,
+      });
+      await propertyTrigger.click();
+      await expect(
+        page.getByRole("dialog").or(page.getByRole("listbox"))
+      ).toBeVisible({ timeout: 10000 });
     });
   });
 
@@ -49,16 +56,23 @@ test.describe("switch property", () => {
     test("tapping property name opens switcher when multiple properties", async ({
       page,
     }) => {
+      const propertiesResponse = page.waitForResponse(
+        (res) =>
+          res.url().includes("/api/properties") &&
+          res.request().method() === "GET",
+        { timeout: 15000 }
+      );
       await page.goto("/");
+      await page.getByRole("banner").waitFor({ state: "visible" });
+      await propertiesResponse;
 
-      const header = page.getByRole("banner").or(page.locator("header"));
-      const clickable = header.locator("button, [role=button]").first();
-      if ((await clickable.count()) > 0) {
-        await clickable.click();
-        await expect(
-          page.getByRole("dialog").or(page.getByRole("listbox"))
-        ).toBeVisible({ timeout: 3000 });
-      }
+      const propertyTrigger = page.getByRole("button", {
+        name: /my properties|properti saya/i,
+      });
+      await propertyTrigger.click();
+      await expect(
+        page.getByRole("dialog").or(page.getByRole("listbox"))
+      ).toBeVisible({ timeout: 10000 });
     });
   });
 });
