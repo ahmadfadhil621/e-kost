@@ -31,6 +31,7 @@ This document defines the minimal data storage architecture for E-Kost MVP, focu
 - Owner (foreign key to user)
 - Staff list (many-to-many with users)
 - Creation timestamp (UTC)
+- Soft delete (deletedAt) for property deletion
 
 **Why Relational**: Parent entity for rooms, tenants, expenses. Ownership and staff relationships require referential integrity. Multi-property queries need JOIN support.
 

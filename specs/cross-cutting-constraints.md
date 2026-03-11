@@ -193,4 +193,4 @@ When implementing any feature, verify:
 - [ ] HTTPS for all data transmission
 - [ ] Date/number/currency formatting respects locale
 - [ ] Currency code sourced from i18n config, not hardcoded
-- [ ] After mutations: invalidate affected TanStack Query keys (and PropertyContext refetch if applicable) so lists/dashboard/balances update without refresh — see `specs/data-freshness/`
+- [ ] When adding new mutations: invalidate affected TanStack Query keys (and PropertyContext refetch if applicable) so lists/dashboard/balances update without refresh — see `specs/data-freshness/`

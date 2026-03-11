@@ -69,7 +69,7 @@ src/
 ├── generated/               # Prisma client output (do not edit)
 ├── hooks/                   # Custom React hooks
 └── test/                    # Test setup, fixtures, faults (fault injection), mocks (MSW when used)
-e2e/                         # Playwright E2E specs (auth, multi-property-management, room-inventory-management, tenant-room-basics, payment-recording, outstanding-balance, dashboard-overview, finance-expense-tracking, tenant-notes, settings-staff-management)
+e2e/                         # Playwright E2E specs (auth, multi-property-management, room-inventory-management, tenant-room-basics, payment-recording, outstanding-balance, dashboard-overview, finance-expense-tracking, tenant-notes, settings-staff-management, data-freshness, property-selector, navigation)
 locales/
 ├── en.json                  # English translations
 └── id.json                  # Indonesian translations
@@ -125,6 +125,8 @@ CI uses a PostgreSQL 16 service container and sets `DATABASE_URL`, `BETTER_AUTH_
 | 8 | **Settings & Staff** | Settings page at /settings, language switcher (from `locales/*.json`), account section (name edit), staff invite/remove (owner-only), bottom nav entry |
 
 All of the above include full stack (domain, services, API, UI), i18n (en + id), and E2E tests where specified. Full Vitest and Playwright suites pass in CI.
+
+**Data freshness:** Query invalidation after mutations is implemented per `specs/data-freshness/` so lists, dashboard, and balances update without full page refresh.
 
 ### Known Limitations
 
