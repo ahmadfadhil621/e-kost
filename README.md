@@ -145,4 +145,9 @@ Before deploying to production, address these items:
 
 ## Contributing
 
-This project follows a spec-driven development approach. All features are documented in `specs/` with formal requirements, design documents, and task breakdowns. Review the relevant spec before implementing or suggesting changes to ensure alignment with MVP goals.
+This project follows a **spec-driven, test-first** development approach:
+
+- All features are documented in `specs/` with requirements, design, and tasks. Review the relevant spec before implementing.
+- Development workflow: **TDD** (write tests → quality gates → implement → regression). Commits at layer boundaries (domain, service, API, UI, i18n) with conventional commit messages.
+
+Full workflow (6-step TDD loop, quality gates, commit checkpoints) is in **[docs/development-workflow.md](docs/development-workflow.md)**.
