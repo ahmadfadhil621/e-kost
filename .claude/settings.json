@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run test:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run dev)",
+      "Bash(npm run build)",
+      "Bash(npx vitest*)",
+      "Bash(npx playwright*)",
+      "Bash(npx tsx scripts/*)",
+      "Bash(npx prisma generate)",
+      "Bash(npx prisma db push)",
+      "Bash(npx eslint*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -oP '\"file_path\"\\s*:\\s*\"\\K[^\"]+'); if [[ \"$file\" == *.ts || \"$file\" == *.tsx ]]; then npx eslint --quiet \"$file\" 2>/dev/null || true; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

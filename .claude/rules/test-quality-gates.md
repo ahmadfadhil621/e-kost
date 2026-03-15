@@ -1,0 +1,68 @@
+---
+description: Test quality gates — review checklist and gate documentation
+paths:
+  - "src/**/*.test.ts"
+  - "src/**/*.test.tsx"
+  - "e2e/**/*.spec.ts"
+---
+
+# Test Quality Gates
+
+Three gates validate test quality between test authoring (steps 1-2) and implementation (step 4). All three must pass before implementation begins.
+
+## Gate Summary
+
+1. **Gate 1: Structural Analysis** -- automated script (`npx tsx scripts/validate-tests.ts --feature <name>`)
+2. **Gate 2: Fault Injection** -- agent-driven, uses the `test-validator` skill
+3. **Gate 3: Review Checklist** -- human or agent review using the checklist below
+
+## Gate 3: Review Checklist
+
+After Gates 1 and 2 pass, evaluate the test files against each category below. For each item, mark PASS or FLAG with a brief note.
+
+### Assertion Specificity
+
+- [ ] **Response shape AND content**: API/service tests check both the status/success indicator AND the response body contents (not just one or the other)
+- [ ] **Exact value checks**: Tests assert specific expected values (`toBe('available')`, `toEqual({ ... })`) rather than only existence checks (`toBeDefined()`)
+- [ ] **Error message content**: Bad-case tests verify the error message text or error code, not just that an error occurred
+- [ ] **Multi-field verification**: Creation/update tests verify all returned fields match the input, not just one or two fields
+
+### Mock Integrity
+
+- [ ] **MSW handlers match Zod schemas**: The response shapes in MSW handlers align with the Zod schemas defined in `src/domain/schemas/`. If the schema has required fields, the mock returns them
+- [ ] **Tests exercise real logic**: If you removed all business logic from the code-under-test and replaced it with a pass-through to the mock, at least one test in each describe block would fail
+- [ ] **Mock data uses factories**: Test data comes from factory functions in `src/test/fixtures/`, not inline object literals
+- [ ] **No echo-chamber tests**: Tests are not simply asserting that a mock returns what it was told to return — there must be transformation, validation, or state change being verified
+
+### Boundary Coverage
+
+- [ ] **Empty inputs**: Tests cover empty string, null, and undefined for string fields
+- [ ] **Zero and negative values**: Tests cover 0 and negative numbers for numeric fields (amounts, counts)
+- [ ] **Max-length strings**: At least one test uses the maximum allowed length for each string field
+- [ ] **Boundary dates**: Tests cover edge date values if the feature involves timestamps (epoch, far-future)
+- [ ] **Concurrent operations**: If the feature has uniqueness constraints, at least one edge-case test addresses what happens with simultaneous conflicting operations
+
+### Generator Quality (Property-Based Tests)
+
+- [ ] **Domain-realistic ranges**: fast-check generators produce values within the real domain boundaries (e.g., rent amounts between 0.01 and a realistic maximum, not unbounded floats)
+- [ ] **Boundary inclusion**: Generators explicitly include boundary values (empty string, min/max length, zero, negative)
+- [ ] **Filter justification**: Any `.filter()` on generators is necessary and documented — filters that reject too many values (>50%) indicate a poorly chosen base generator
+- [ ] **Invariant assertions**: Property tests assert invariants that hold for ALL valid inputs, not just checking that one specific output field exists
+
+### Test Independence
+
+- [ ] **No shared mutable state**: Tests do not depend on state left behind by a previous test. Each test sets up its own preconditions
+- [ ] **No ordering dependencies**: Tests can run in any order (Vitest shuffles by default when using `--sequence.shuffle`)
+- [ ] **Isolated E2E data**: E2E tests use unique identifiers (timestamps, random suffixes) to avoid collisions with other tests or leftover data
+
+### E2E Locator Resilience
+
+- [ ] **Accessible locators only**: E2E tests use `getByRole`, `getByLabel`, `getByText`, or `getByTestId` — never CSS selectors or XPath
+- [ ] **Regex for flexibility**: Text locators use case-insensitive regex (`/submit/i`) rather than exact strings to tolerate copy changes
+- [ ] **No fragile waits**: Tests use Playwright's built-in auto-waiting (`await expect(locator).toBeVisible()`) rather than explicit `waitForTimeout()`
+
+## Outcome
+
+- **PASS**: All checklist items are PASS or have only minor notes
+- **FLAG**: Any item has a significant finding — document it and determine if tests need strengthening before implementation
+- **FAIL**: Multiple flags or a critical gap (e.g., echo-chamber tests, missing boundary coverage on a critical field) — return to test authoring and re-run all gates after fixes
