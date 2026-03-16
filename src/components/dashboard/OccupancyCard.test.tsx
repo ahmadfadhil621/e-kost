@@ -4,6 +4,7 @@
 // REQ 1.5 -> it('shows empty state when no rooms')
 // REQ 1.6 -> it('displays stats in compact card format')
 // REQ 5.4 -> it('shows skeleton when loading')
+// Issue #9 -> it('renders three segments in meter bar')
 
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
@@ -28,8 +29,28 @@ describe("OccupancyCard", () => {
       expect(screen.getByText(/6\s+Occupied/)).toBeInTheDocument();
       expect(screen.getByText(/3\s+Available/)).toBeInTheDocument();
       expect(screen.getByText(/1\s+Under Renovation/)).toBeInTheDocument();
-      expect(screen.getByRole("progressbar")).toBeInTheDocument();
+      expect(screen.getByRole("meter")).toBeInTheDocument();
       expect(screen.getByTestId("occupancy-card")).toBeInTheDocument();
+    });
+
+    it("renders three segments in meter bar for all room states", () => {
+      const occupancy = createOccupancyStats({
+        totalRooms: 10,
+        occupied: 6,
+        available: 3,
+        underRenovation: 1,
+        occupancyRate: 60,
+      });
+
+      render(<OccupancyCard occupancy={occupancy} />);
+
+      const occupiedSegment = screen.getByTestId("meter-segment-occupied");
+      const renovationSegment = screen.getByTestId("meter-segment-renovation");
+      const availableSegment = screen.getByTestId("meter-segment-available");
+
+      expect(occupiedSegment).toHaveStyle({ width: "60%" });
+      expect(renovationSegment).toHaveStyle({ width: "10%" });
+      expect(availableSegment).toHaveStyle({ width: "30%" });
     });
 
     it("displays 100% when all rooms occupied", () => {
@@ -44,6 +65,9 @@ describe("OccupancyCard", () => {
       render(<OccupancyCard occupancy={occupancy} />);
 
       expect(screen.getByText(/100%/)).toBeInTheDocument();
+      expect(screen.getByTestId("meter-segment-occupied")).toHaveStyle({ width: "100%" });
+      expect(screen.queryByTestId("meter-segment-renovation")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("meter-segment-available")).not.toBeInTheDocument();
     });
 
     it("displays stats in compact card format", () => {
@@ -83,12 +107,32 @@ describe("OccupancyCard", () => {
 
       expect(screen.getByText(/0%/)).toBeInTheDocument();
       expect(screen.getByTestId("occupancy-card")).toBeInTheDocument();
+      // No segments when zero rooms
+      expect(screen.queryByTestId("meter-segment-occupied")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("meter-segment-renovation")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("meter-segment-available")).not.toBeInTheDocument();
     });
 
     it("shows skeleton when loading", () => {
       render(<OccupancyCard occupancy={null} isLoading />);
 
       expect(screen.getByTestId("occupancy-card-skeleton")).toBeInTheDocument();
+    });
+
+    it("hides segments with zero count", () => {
+      const occupancy = createOccupancyStats({
+        totalRooms: 8,
+        occupied: 3,
+        available: 5,
+        underRenovation: 0,
+        occupancyRate: 37.5,
+      });
+
+      render(<OccupancyCard occupancy={occupancy} />);
+
+      expect(screen.getByTestId("meter-segment-occupied")).toBeInTheDocument();
+      expect(screen.queryByTestId("meter-segment-renovation")).not.toBeInTheDocument();
+      expect(screen.getByTestId("meter-segment-available")).toBeInTheDocument();
     });
   });
 });

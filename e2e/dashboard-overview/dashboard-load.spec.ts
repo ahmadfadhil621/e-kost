@@ -7,6 +7,7 @@
 // REQ 5.4 -> test('dashboard shows loading then content')
 // REQ 6.1, 6.2 -> test('dashboard renders single-column on mobile')
 // REQ 6.5 -> test('dashboard shows occupancy then finance then outstanding then payments')
+// Issue #9 -> test('occupancy meter shows segments for all room states')
 
 import { test, expect } from "@playwright/test";
 import { goToDashboard } from "../helpers/dashboard-overview";
@@ -71,6 +72,21 @@ test.describe("dashboard load", () => {
       await expect(page.getByRole("main")).toBeVisible({ timeout: 10000 });
       const main = page.getByRole("main");
       await expect(main).toBeVisible();
+    });
+
+    test("occupancy meter shows segments for all room states", async ({ page }) => {
+      await goToDashboard(page);
+      const card = page.getByTestId("occupancy-card");
+      await expect(card).toBeVisible({ timeout: 10000 });
+
+      // The meter bar should use role="meter"
+      const meter = card.getByRole("meter");
+      await expect(meter).toBeVisible();
+
+      // Legend must show all three states with color dots + text labels (accessibility)
+      await expect(card.getByText(/occupied|terisi/i).first()).toBeVisible();
+      await expect(card.getByText(/under renovation|dalam renovasi/i).first()).toBeVisible();
+      await expect(card.getByText(/available|tersedia/i).first()).toBeVisible();
     });
 
     test("dashboard shows occupancy then finance then outstanding then payments", async ({
