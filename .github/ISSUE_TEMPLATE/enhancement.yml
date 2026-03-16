@@ -1,0 +1,89 @@
+name: Enhancement
+description: New feature or improvement to existing functionality
+title: "[Area] — Short description of the enhancement"
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - "high"
+        - "medium"
+        - "low"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - cross-cutting
+        - dashboard
+        - rooms
+        - tenant
+        - finance
+        - properties
+        - settings
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What should be built or changed, and why?
+    validations:
+      required: true
+
+  - type: input
+    id: scope
+    attributes:
+      label: Scope
+      description: Which component(s), page(s), API route(s), or layer(s) are affected?
+      placeholder: "e.g. Room API, repository, Room Detail UI"
+    validations:
+      required: true
+
+  - type: textarea
+    id: approach
+    attributes:
+      label: Approach
+      description: Suggested implementation approach (optional but helpful)
+      placeholder: "e.g. Use shadcn Dialog, add archivedAt column to Room model"
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints
+      description: Any rules that must be respected (schema changes, accessibility, i18n, touch targets, etc.)
+      placeholder: "e.g. Schema changes require explicit approval before touching prisma/schema.prisma"
+
+  - type: textarea
+    id: blockers
+    attributes:
+      label: Blockers / Dependencies
+      description: Other issues that must be resolved first, or issues that depend on this one
+      placeholder: "e.g. Blocked by #12 (Property Detail page)"
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Additional context, edge cases, or flags
+
+  - type: checkboxes
+    id: dod
+    attributes:
+      label: Definition of Done
+      options:
+        - label: Vitest tests written (Good / Bad / Edge)
+        - label: Playwright E2E test written (if UI is affected)
+        - label: All three quality gates pass (structural, fault injection, review checklist)
+        - label: Implementation complete and all tests pass
+        - label: i18n keys added to `locales/en.json` and `locales/id.json` (if any new strings)
+        - label: Schema changes approved and `prisma/schema.prisma` updated (if applicable)
+        - label: Full regression suite passes (`npm run test:run` + `npm run test:e2e`)
+        - label: No existing tests weakened

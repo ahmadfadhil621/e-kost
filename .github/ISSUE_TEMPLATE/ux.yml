@@ -1,0 +1,73 @@
+name: UX / Design Improvement
+description: Visual polish, layout change, or interaction pattern improvement
+title: "[Area] — Short description of the UX change"
+labels: ["ux"]
+body:
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - "high"
+        - "medium"
+        - "low"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - cross-cutting
+        - dashboard
+        - rooms
+        - tenant
+        - finance
+        - properties
+        - settings
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What should change and what is the desired outcome?
+    validations:
+      required: true
+
+  - type: input
+    id: scope
+    attributes:
+      label: Scope
+      description: Which component(s) or page(s) are affected?
+      placeholder: "e.g. Room card component, Tenant Detail page"
+    validations:
+      required: true
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints
+      description: Rules that must be respected (touch targets, accessibility, color usage, etc.)
+      placeholder: "e.g. Must maintain 44×44px touch target minimum"
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Additional context or related issues
+
+  - type: checkboxes
+    id: dod
+    attributes:
+      label: Definition of Done
+      options:
+        - label: Playwright E2E test written for the affected interaction
+        - label: Mobile viewport verified (320px–480px, no horizontal scroll)
+        - label: Touch targets verified (minimum 44×44px on all interactive elements)
+        - label: Accessibility verified (color + icon + text, keyboard-accessible, WCAG AA contrast)
+        - label: i18n keys added to `locales/en.json` and `locales/id.json` (if any new strings)
+        - label: Full regression suite passes (`npm run test:run` + `npm run test:e2e`)

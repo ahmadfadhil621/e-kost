@@ -1,0 +1,63 @@
+name: Cleanup / Removal
+description: Remove a UI element, dead code, or redundant functionality
+title: "[Area] — Short description of what to remove"
+labels: ["cleanup"]
+body:
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - "high"
+        - "medium"
+        - "low"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - cross-cutting
+        - dashboard
+        - rooms
+        - tenant
+        - finance
+        - properties
+        - settings
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What should be removed and why?
+    validations:
+      required: true
+
+  - type: input
+    id: scope
+    attributes:
+      label: Scope
+      description: Which component(s), file(s), or page(s) are affected?
+      placeholder: "e.g. Finance page, FinanceSummaryCard component"
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Any side effects, related issues, or things to verify after removal
+
+  - type: checkboxes
+    id: dod
+    attributes:
+      label: Definition of Done
+      options:
+        - label: Element/code fully removed (no dead references left behind)
+        - label: i18n keys removed from `locales/en.json` and `locales/id.json` (if applicable)
+        - label: Full regression suite passes (`npm run test:run` + `npm run test:e2e`)

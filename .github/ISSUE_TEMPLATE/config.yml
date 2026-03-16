@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Development Workflow
+    url: https://github.com/ahmadfadhil621/e-kost/blob/main/docs/development-workflow.md
+    about: Read the development workflow before starting implementation

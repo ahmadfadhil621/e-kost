@@ -1,0 +1,74 @@
+name: Bug Report
+description: Something isn't working as expected
+title: "[Area] — Short description of the bug"
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - "high"
+        - "medium"
+        - "low"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - cross-cutting
+        - dashboard
+        - rooms
+        - tenant
+        - finance
+        - properties
+        - settings
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What is broken and what should happen instead?
+    validations:
+      required: true
+
+  - type: input
+    id: scope
+    attributes:
+      label: Scope
+      description: Which component(s), page(s), or layer(s) are affected?
+      placeholder: "e.g. OccupancyCard component"
+    validations:
+      required: true
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints
+      description: Any rules that must be respected (accessibility, i18n, touch targets, etc.)
+      placeholder: "e.g. Must use color + icon + text — never color alone"
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Additional context, edge cases, or related issues
+
+  - type: checkboxes
+    id: dod
+    attributes:
+      label: Definition of Done
+      options:
+        - label: Vitest tests written (Good / Bad / Edge)
+        - label: Playwright E2E test written (if UI is affected)
+        - label: All three quality gates pass (structural, fault injection, review checklist)
+        - label: Implementation complete and all tests pass
+        - label: i18n keys added to `locales/en.json` and `locales/id.json` (if any new strings)
+        - label: Full regression suite passes (`npm run test:run` + `npm run test:e2e`)
+        - label: No existing tests weakened
