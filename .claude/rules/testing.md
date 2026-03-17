@@ -9,31 +9,24 @@ paths:
 
 # Testing Standards (TDD)
 
-Tests are written FIRST, before implementation. Tests define the specification. Implementation code is written to make tests pass.
+Tests are written BEFORE implementation. Tests define the specification. Implementation code is written to make tests pass. Tests are the source of truth -- only modify them if genuinely broken.
 
-## Feature Development Workflow
+Testing is part of the issue-driven workflow defined in `CLAUDE.md`. After deriving specs from a GitHub issue, the test-implementation cycle is:
 
-Every feature follows this 6-step loop:
-
-1. **Define unit/integration tests** -- Write Vitest tests for domain services, API routes, and components (good, bad, edge cases). Use the `test-author` skill.
-2. **Define small E2E tests** -- Write Playwright tests for atomic user actions within the feature (good, bad, edge cases). Use the `e2e-test-author` skill.
-3. **Validate test quality** -- Run the three quality gates before any implementation begins. Use the `test-validator` skill.
-   - **Gate 1:** Run `npx tsx scripts/validate-tests.ts --feature <name>` -- zero errors required
-   - **Gate 2:** Create faulty stubs, run tests against them, verify all faults are killed
-   - **Gate 3:** Walk the review checklist in `.claude/rules/test-quality-gates.md`
-4. **Implement the code** -- Write production code to make all tests pass
-5. **Iterate until all green** -- Fix failures, re-run the current feature's tests, repeat until 0 failures
-6. **Full regression check** -- Run the entire Vitest suite (`npx vitest run`) and entire Playwright suite (`npx playwright test`) to catch regressions in previously completed features
-
-Steps 1-3 happen before any implementation code is written. A feature is not complete until step 6 passes with 0 failures across all tests.
+1. **Write Vitest tests** -- domain services, API routes, components. Skill: `/test-author`
+2. **Write Playwright E2E tests** -- atomic user actions. Skill: `/e2e-test-author`
+3. **Validate test quality** -- 3 gates: structural, fault injection, review checklist. Skill: `/test-validator`
+4. **Implement** -- write code to make tests pass
+5. **Iterate** -- fix implementation, not tests
+6. **Regression** -- full suite (`npm run test:run` + `npm run test:e2e`)
 
 ### Regression Failure Rule
 
-If a test from a **previous** feature fails during step 6, the new implementation caused a regression. The fix must be in the **implementation code**, not in the old test. Old tests are the source of truth for previously shipped behavior -- never weaken or modify them to accommodate new code.
+If a previously-passing test fails during regression, the new implementation caused a regression. Fix the **implementation**, not the old test.
 
 ### Test Quality Gate Failure Rule
 
-If a fault survives Gate 2, the fix must be to ADD or STRENGTHEN test assertions -- never weaken the fault or skip it. If Gate 3 review finds echo-chamber tests or missing boundary coverage, return to step 1 or 2 to fix the tests, then re-run all three gates from Gate 1.
+If a fault survives Gate 2, ADD or STRENGTHEN test assertions -- never weaken the fault. If Gate 3 finds issues, fix the tests, then re-run all gates from Gate 1.
 
 ## Libraries
 

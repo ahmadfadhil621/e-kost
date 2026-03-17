@@ -1,94 +1,98 @@
 # Development Workflow
 
-This document describes how to develop features and changes in E-Kost: spec-driven, test-first (TDD), with quality gates and incremental commits.
+Issue-driven, test-first development with quality gates and incremental commits.
 
-## Overview
+## Starting Point: GitHub Issue
 
-1. **Spec-first** — Every feature has requirements, design, and tasks in `specs/<feature>/`. Read them before coding.
-2. **Test-first (TDD)** — Write tests (unit, API, E2E) before implementation; then implement until all tests pass.
-3. **Quality gates** — Run three validation steps on new tests before writing production code.
-4. **Commit checkpoints** — Commit at natural boundaries (domain, service, API, UI, i18n); update docs when needed.
+Every piece of work starts from a GitHub issue. The project uses four issue templates (`.github/ISSUE_TEMPLATE/`):
 
----
+- **Bug** — Something broken. Fields: priority, area, description, scope, constraints, definition of done.
+- **Enhancement** — New feature or improvement. Fields: priority, area, description, scope, approach, constraints, blockers, definition of done.
+- **UX** — Visual or interaction improvement. Fields: priority, area, description, scope, constraints, definition of done.
+- **Cleanup** — Remove dead code or redundant elements. Fields: priority, area, description, scope, definition of done.
 
-## Feature Development (TDD 6-Step Loop)
+Read the issue thoroughly before starting. Pay attention to scope, constraints, and definition of done.
 
-Every feature follows this loop. Steps 1–3 are done **before** any implementation code.
+## Step 1: Derive Specs
 
-| Step | What to do |
-|------|------------|
-| **1. Unit/integration tests** | Write Vitest tests for domain services, API routes, and components. Use Good/Bad/Edge structure. See `.cursor/rules/testing.mdc` and `e-kost-test-author` skill. |
-| **2. E2E tests** | Write Playwright tests for atomic user actions in the feature (Good/Bad/Edge). Location: `e2e/<feature>/`. See `e-kost-e2e-test-author` skill. |
-| **3. Validate test quality** | Run the three quality gates (see below). Use `e-kost-test-validator` skill. No implementation until all gates pass. |
-| **4. Implement** | Write production code so all tests pass. |
-| **5. Iterate** | Fix failures, re-run the feature’s tests until 0 failures. |
-| **6. Regression** | Run full Vitest suite (`npx vitest run`) and full Playwright suite (`npx playwright test`). Fix any regressions in implementation, not in existing tests. |
+From the issue, create specification files in `specs/<feature>/` in this order:
 
-**Rules:**
+1. **`requirements.md`** — Acceptance criteria derived from the issue description and constraints. Each requirement should be testable.
+2. **`design.md`** — Technical design: API routes, data models, component structure, correctness properties, test data generators, i18n keys.
+3. **`tasks.md`** — Implementation tasks broken down by layer (domain, service, API, UI, i18n). Each task maps to a commit checkpoint.
 
-- If an **existing** test fails in step 6, the new code caused a regression → fix the implementation, not the old test.
-- If a **quality gate** fails (e.g. a fault survives Gate 2), improve the tests (add/strengthen assertions), not the fault or the implementation.
+If specs already exist for the feature, update them based on the issue.
 
-### Test quality gates (step 3)
+## Step 2: Write Vitest Tests
 
-Before implementing, all three must pass:
+Unit and integration tests, written BEFORE implementation. Skill: `/test-author`
 
-1. **Gate 1 — Structural**  
-   `npx tsx scripts/validate-tests.ts --feature <name>`  
-   Must report zero errors.
+- Tests for domain services, API routes, and components
+- Co-located as `<module>.test.ts` or `<component>.test.tsx`
+- Good/Bad/Edge structure in every file
+- Factory fixtures from `src/test/fixtures/`
+- Property-based tests (fast-check) for correctness properties from `design.md`
 
-2. **Gate 2 — Fault injection**  
-   Introduce faulty stubs (e.g. wrong return values); run tests. Every fault must be *killed* (at least one test fails). If a fault survives, add or strengthen test assertions.
+## Step 3: Write Playwright E2E Tests
 
-3. **Gate 3 — Review checklist**  
-   Walk the checklist in `.cursor/rules/test-quality-gates.mdc` (assertion specificity, mock integrity, boundary coverage, etc.). Fix any FLAGs before implementation.
+Browser-based tests for atomic user actions. Skill: `/e2e-test-author`
 
-Detailed test structure (Good/Bad/Edge, file locations, E2E tiers) is in `.cursor/rules/testing.mdc`.
+- One spec file per key user action
+- Placed in `e2e/<feature>/<action>.spec.ts`
+- Good/Bad/Edge structure
+- Accessible locators only (getByRole, getByLabel, getByText)
+- Mobile viewport (375x667) by default
 
----
+## Step 4: Validate Test Quality
 
-## Commit Checkpoints
+Run all three quality gates before writing any implementation code. Skill: `/test-validator`
 
-After completing a logical unit of work, pause and consider a commit. Good boundaries:
+1. **Gate 1 — Structural**: `npx tsx scripts/validate-tests.ts --feature <name>` — zero errors required.
+2. **Gate 2 — Fault Injection**: Create faulty stubs, run tests, verify all faults are killed. If a fault survives, add/strengthen assertions.
+3. **Gate 3 — Review Checklist**: Walk the checklist in `.claude/rules/test-quality-gates.md`.
 
-- Domain layer done (entities, interfaces, schemas)
-- Service layer done (business logic + unit tests)
-- API layer done (routes + repository implementation)
-- UI layer done (components + hooks)
-- i18n done (translation keys in `locales/en.json`, `locales/id.json`)
-- Standalone fix, refactor, or config change
+Do NOT proceed to implementation until all three gates pass.
 
-**Before committing:**
+## Step 5: Implement
 
-1. **Summarize** — `git diff --stat`; 2–3 bullet summary; file/line counts.
-2. **Docs** — If you changed behavior or structure, consider updating:
-   - `README.md` (Development Status, Getting Started, Project Structure)
-   - `specs/architecture-intent.md`, `specs/data-architecture.md` (structural/data model changes)
-   - `specs/<feature>/tasks.md` (task completed)
-   - `specs/<feature>/design.md` (design change)
-3. **Commit message** — Use conventional commits: `type(scope): short description` (e.g. `feat(rooms): add status filter`). Second line blank; then bullet list of changes. The project does not auto-commit; you run `git add` and `git commit` yourself.
+Write production code to make all tests pass. Follow the layered architecture:
 
-Full checkpoint workflow and message format: `.cursor/rules/commit-checkpoints.mdc`.
+1. Domain layer (schemas, interfaces)
+2. Repository layer (Prisma implementations)
+3. Service layer (business logic)
+4. API layer (route handlers)
+5. UI layer (components, hooks)
+6. i18n (translation keys)
 
----
+Pause at each layer boundary for a commit checkpoint (see Step 8).
 
-## Where things live
+## Step 6: Iterate
 
-| Topic | Location |
-|------|----------|
-| Feature specs | `specs/<feature>/` (requirements.md, design.md, tasks.md) |
-| Architecture | `specs/architecture-intent.md`, `specs/data-architecture.md` |
-| Cross-cutting rules | `specs/cross-cutting-constraints.md` |
-| Testing standards (full) | `.cursor/rules/testing.mdc` |
-| Test quality gates (checklist) | `.cursor/rules/test-quality-gates.mdc` |
-| Commit checkpoints (full) | `.cursor/rules/commit-checkpoints.mdc` |
-| Test validation script | `npx tsx scripts/validate-tests.ts --feature <name>` |
+If tests fail, fix the implementation — not the tests. Tests are the source of truth.
 
----
+Only modify tests if they are genuinely broken or based on incorrect assumptions. This should be rare and requires justification.
 
-## E2E test strategy
+## Step 7: Regression
 
-- **Tier 1 (per feature):** Atomic user-action tests in `e2e/<feature>/`. Written with the feature. One spec file per key action (e.g. `e2e/auth/register.spec.ts`).
-- **Tier 2 (post-MVP):** Cross-feature journey tests in `e2e/journeys/`. Written after all features are complete (e.g. full onboarding flow).
+Run the full test suite:
 
-During feature work, only Tier 1 is written; Tier 2 is for later.
+```bash
+npm run test:run     # Vitest
+npm run test:e2e     # Playwright
+```
+
+If a previously-passing test fails, the new code caused a regression. Fix the implementation, not the old test.
+
+## Step 8: Commit Checkpoints
+
+After completing a logical unit of work, pause and:
+
+1. Summarize changes (`git diff --stat`, 2-3 bullet points)
+2. Review if any docs need updating (README, specs, etc.)
+3. Propose a conventional commit message: `type(scope): description`
+4. Ask the user if they want to commit
+5. **Never run git commands** — the user handles all git operations
+
+Good checkpoint boundaries: domain layer, service layer, API layer, UI layer, i18n, standalone fix/refactor.
+
+Commit types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`

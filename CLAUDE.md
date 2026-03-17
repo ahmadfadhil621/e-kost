@@ -1,7 +1,6 @@
 # E-Kost
 
-@README.md
-@docs/development-workflow.md
+A mobile-first web app for small landlords to manage rental rooms, tenants, payments, and balances.
 
 ## Quick Setup
 
@@ -40,34 +39,30 @@ npx playwright install chromium  # For E2E tests
 
 Routes call services, services call repositories. Never skip layers.
 
-## Code Conventions
+## Development Workflow (Issue-Driven TDD)
 
-- **TypeScript**: Strict mode, no `any`, `const` by default, named exports
-- **Naming**: files `kebab-case`, components `PascalCase`, functions `camelCase`, constants `UPPER_SNAKE_CASE`
-- **Validation**: Zod schemas shared between frontend and backend (`src/domain/schemas/`)
-- **API responses**: Success `{ data: T }`, failure `{ error: string }` with correct HTTP status
-- **React**: Functional components, shadcn/ui primitives, React Hook Form + Zod, TanStack Query for data
-- **Styling**: Tailwind only, no inline styles, CSS variables in `globals.css`, mobile-first (`320px-480px`)
-- **i18n**: All UI text via `useTranslation()`, translations in `locales/en.json` and `locales/id.json`
-- **Touch targets**: Minimum `44x44px` on all interactive elements
-- **Design principles**: YAGNI, DRY (rule of three), KISS, composition over inheritance, fail fast
+All work starts from a GitHub issue. See `.github/ISSUE_TEMPLATE/` for templates (bug, enhancement, ux, cleanup).
 
-## Testing (TDD)
+| Step | Action | Details |
+|------|--------|---------|
+| 1 | **GitHub Issue** | Read the issue. Understand scope, constraints, and definition of done. |
+| 2 | **Derive Specs** | Create `specs/<feature>/requirements.md` → `design.md` → `tasks.md` (in that order). |
+| 3 | **Write Vitest Tests** | Unit/integration tests. Good/Bad/Edge structure. Use `/test-author` skill. |
+| 4 | **Write E2E Tests** | Playwright tests for atomic user actions. Use `/e2e-test-author` skill. |
+| 5 | **Validate Tests** | Run 3 quality gates: structural, fault injection, review checklist. Use `/test-validator` skill. |
+| 6 | **Implement** | Write production code to make all tests pass. Layer by layer. |
+| 7 | **Iterate** | If tests fail, fix implementation — never weaken tests. Tests are source of truth. |
+| 8 | **Regression** | Run full `npm run test:run` + `npm run test:e2e`. Fix regressions in implementation. |
+| 9 | **Commit** | Pause at logical boundaries. Propose commit message. User handles git. |
 
-6-step workflow: (1) Write Vitest tests → (2) Write Playwright E2E → (3) Validate quality gates → (4) Implement → (5) Iterate → (6) Full regression
+Tests are the source of truth. Only modify tests if they are genuinely broken or incorrect — this should be rare.
 
-- **Structure**: Good / Bad / Edge cases in every test file
-- **Vitest**: Co-located `*.test.ts(x)` files, factory fixtures in `src/test/fixtures/`
-- **Playwright**: `e2e/<feature>/<action>.spec.ts`, accessible locators only, mobile viewport
-- **Property-based**: fast-check, min 100 iterations, one per correctness property
-- **Quality gates**: Gate 1 (structural), Gate 2 (fault injection), Gate 3 (review checklist)
-- **Regression rule**: If an old test fails, fix implementation — never weaken old tests
+Full workflow details: `docs/development-workflow.md`
 
 ## Commit Format
 
 Conventional commits: `type(scope): description`
 Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
-Checkpoint at layer boundaries (domain, service, API, UI, i18n).
 
 ## Important Paths
 
@@ -76,6 +71,7 @@ Checkpoint at layer boundaries (domain, service, API, UI, i18n).
 | `specs/` | Feature specifications (requirements, design, tasks) |
 | `prisma/schema.prisma` | Database schema |
 | `.github/workflows/ci.yml` | CI pipeline |
+| `.github/ISSUE_TEMPLATE/` | Issue templates (bug, enhancement, ux, cleanup) |
 | `src/domain/schemas/` | Shared Zod schemas |
 | `src/domain/interfaces/` | Repository interfaces |
 | `src/test/fixtures/` | Test factory functions |
@@ -85,12 +81,3 @@ Checkpoint at layer boundaries (domain, service, API, UI, i18n).
 
 - `prisma/schema.prisma` — Database schema changes affect the entire stack
 - `.github/workflows/ci.yml` — CI pipeline changes affect all contributors
-
-## Cross-Cutting Constraints
-
-- **Mobile-first**: 320-480px viewport, single-column, no horizontal scroll
-- **i18n**: Never hardcode strings, use `Intl.NumberFormat` for currency (EUR default)
-- **Data integrity**: UTC timestamps, soft delete for move-out, immutable UUIDs
-- **Accessibility**: WCAG AA contrast, labels on all fields, keyboard-accessible, color + icon + text
-- **Performance**: Status updates <2s, balance calculations <2s, forms <5s
-- **Security**: No PII in logs, HTTPS, no hardcoded credentials
