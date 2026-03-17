@@ -283,6 +283,10 @@
       "paid": "Terbayar",
       "unpaid": "Belum bayar"
     },
+    "banner": {
+      "outstanding": "Saldo tertunggak",
+      "fullyPaid": "Lunas"
+    },
     "noRoom": "Belum ada kamar — saldo tidak tersedia",
     "loadFailed": "Gagal memuat saldo"
   },

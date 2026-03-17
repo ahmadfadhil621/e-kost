@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { TenantPaymentSection } from "@/components/payment/tenant-payment-section";
 import { BalanceSection } from "@/components/balance/balance-section";
+import { TenantBalanceBanner } from "@/components/balance/tenant-balance-banner";
 import { NotesSection } from "@/components/notes/notes-section";
 import type { Payment } from "@/domain/schemas/payment";
 
@@ -234,6 +235,8 @@ export default function TenantDetailPage() {
 
   return (
     <div className="space-y-6">
+      <TenantBalanceBanner propertyId={propertyId} tenantId={tenantId} />
+
       <h2 className="text-lg font-semibold">{t("tenant.detail.title")}</h2>
 
       <div className="space-y-2">

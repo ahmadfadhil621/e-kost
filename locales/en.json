@@ -283,6 +283,10 @@
       "paid": "Paid",
       "unpaid": "Unpaid"
     },
+    "banner": {
+      "outstanding": "Outstanding balance",
+      "fullyPaid": "Fully Paid"
+    },
     "noRoom": "No room assigned — balance not available",
     "loadFailed": "Failed to load balance"
   },
