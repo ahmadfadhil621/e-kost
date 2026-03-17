@@ -19,6 +19,7 @@ out/
 .next/
 .nuxt/
 coverage/
+tsconfig.tsbuildinfo
 
 # IDE and editor files
 .vscode/
