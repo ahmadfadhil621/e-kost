@@ -3,7 +3,6 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
-import { BalanceStatusIndicator } from "./balance-status-indicator";
 
 interface BalanceSectionProps {
   propertyId: string;
@@ -86,9 +85,6 @@ export function BalanceSection({ propertyId, tenantId }: BalanceSectionProps) {
       </h2>
       <Card className="w-full">
         <CardContent className="pt-4 space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <BalanceStatusIndicator status={data.status} size="large" />
-          </div>
           <dl className="grid gap-2 text-sm">
             <div className="flex justify-between gap-2">
               <dt className="text-muted-foreground">
