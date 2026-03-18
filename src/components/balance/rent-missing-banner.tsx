@@ -34,8 +34,8 @@ async function fetchBalance(
     `/api/properties/${propertyId}/tenants/${tenantId}/balance`,
     { credentials: "include" }
   );
-  if (res.status === 400) return null;
-  if (!res.ok) throw new Error("Failed to fetch balance");
+  if (res.status === 400) {return null;}
+  if (!res.ok) {throw new Error("Failed to fetch balance");}
   return res.json();
 }
 
@@ -53,7 +53,7 @@ export function RentMissingBanner({
     enabled: !!propertyId && !!tenantId,
   });
 
-  if (isLoading || !data || data.status === "paid") return null;
+  if (isLoading || !data || data.status === "paid") {return null;}
 
   const amount = formatCurrency(
     data.outstandingBalance,

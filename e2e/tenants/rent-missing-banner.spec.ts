@@ -34,7 +34,7 @@ async function createRoomAndUnpaidTenant(
       },
     }
   );
-  if (!roomRes.ok()) return null;
+  if (!roomRes.ok()) {return null;}
   const { id: roomId } = await roomRes.json();
 
   const tenantRes = await request.post(
@@ -47,14 +47,14 @@ async function createRoomAndUnpaidTenant(
       },
     }
   );
-  if (!tenantRes.ok()) return null;
+  if (!tenantRes.ok()) {return null;}
   const { id: tenantId } = await tenantRes.json();
 
   const assignRes = await request.post(
     `/api/properties/${propertyId}/tenants/${tenantId}/assign-room`,
     { data: { roomId } }
   );
-  if (!assignRes.ok()) return null;
+  if (!assignRes.ok()) {return null;}
 
   return { tenantId, roomId };
 }
@@ -76,7 +76,7 @@ async function createRoomAndPaidTenant(
       },
     }
   );
-  if (!roomRes.ok()) return null;
+  if (!roomRes.ok()) {return null;}
   const { id: roomId } = await roomRes.json();
 
   const tenantRes = await request.post(
@@ -89,21 +89,21 @@ async function createRoomAndPaidTenant(
       },
     }
   );
-  if (!tenantRes.ok()) return null;
+  if (!tenantRes.ok()) {return null;}
   const { id: tenantId } = await tenantRes.json();
 
   const assignRes = await request.post(
     `/api/properties/${propertyId}/tenants/${tenantId}/assign-room`,
     { data: { roomId } }
   );
-  if (!assignRes.ok()) return null;
+  if (!assignRes.ok()) {return null;}
 
   const paymentDate = new Date().toISOString().split("T")[0];
   const paymentRes = await request.post(
     `/api/properties/${propertyId}/payments`,
     { data: { tenantId, amount: monthlyRent, paymentDate } }
   );
-  if (!paymentRes.ok()) return null;
+  if (!paymentRes.ok()) {return null;}
 
   return { tenantId };
 }
@@ -124,7 +124,7 @@ async function createTenantNoRoom(
       },
     }
   );
-  if (!tenantRes.ok()) return null;
+  if (!tenantRes.ok()) {return null;}
   const { id: tenantId } = await tenantRes.json();
   return { tenantId };
 }
