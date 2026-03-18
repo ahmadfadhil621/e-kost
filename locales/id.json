@@ -361,10 +361,8 @@
     "noData": "Tidak ada data keuangan untuk bulan ini",
     "positive": "Laba",
     "negative": "Rugi",
-    "categoryBreakdown": "Rincian Pengeluaran",
     "previousMonth": "Bulan sebelumnya",
     "nextMonth": "Bulan berikutnya",
-    "viewExpenses": "Lihat pengeluaran",
     "addExpense": "Tambah pengeluaran"
   },
   "expense": {

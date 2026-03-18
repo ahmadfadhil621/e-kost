@@ -8,7 +8,6 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { MonthSelector } from "@/components/finance/month-selector";
 import { SummaryCard } from "@/components/finance/summary-card";
-import { CategoryBreakdownList } from "@/components/finance/category-breakdown-list";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
 import type { FinanceSummary } from "@/domain/schemas/expense";
 
@@ -113,26 +112,10 @@ export default function FinanceOverviewPage() {
               formatCurrency={formatCurrency}
             />
           </div>
-
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">
-              {t("finance.categoryBreakdown")}
-            </h3>
-            <CategoryBreakdownList
-              categories={data.categoryBreakdown}
-              totalExpenses={data.expenses}
-              formatCurrency={formatCurrency}
-            />
-          </div>
         </>
       )}
 
       <div className="flex flex-col gap-2">
-        <Button asChild className="min-h-[44px] min-w-[44px]">
-          <Link href={`/properties/${propertyId}/finance/expenses`}>
-            {t("finance.viewExpenses")}
-          </Link>
-        </Button>
         <Button asChild variant="outline" className="min-h-[44px] min-w-[44px]">
           <Link href={`/properties/${propertyId}/finance/expenses/new`}>
             {t("finance.addExpense")}
