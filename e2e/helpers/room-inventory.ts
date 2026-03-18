@@ -51,3 +51,11 @@ export async function goToNewRoomPage(page: Page) {
     .first()
     .waitFor({ state: "visible", timeout: 15000 });
 }
+
+export async function goToRoomDetail(page: Page, roomId: string) {
+  const propertyId = getPropertyId();
+  await page.goto(`/properties/${propertyId}/rooms/${roomId}`, GOTO_OPTIONS);
+  await page.waitForURL(/\/properties\/[^/]+\/rooms\/[^/]+$/, { timeout: 8000 }).catch(() => {});
+  // Wait for room content to load (not new/edit pages)
+  await page.getByText(/danger zone/i).waitFor({ state: "visible", timeout: 15000 });
+}
