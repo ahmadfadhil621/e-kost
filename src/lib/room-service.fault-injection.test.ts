@@ -10,6 +10,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { RoomService } from "./room-service";
 import type { IRoomRepository } from "@/domain/interfaces/room-repository";
+import type { ITenantRepository } from "@/domain/interfaces/tenant-repository";
 import { createRoom } from "@/test/fixtures/room";
 
 function createMockRepo(overrides: Partial<IRoomRepository> = {}): IRoomRepository {
@@ -19,6 +20,22 @@ function createMockRepo(overrides: Partial<IRoomRepository> = {}): IRoomReposito
     findByProperty: vi.fn(),
     update: vi.fn(),
     updateStatus: vi.fn(),
+    delete: vi.fn(),
+    archive: vi.fn(),
+    unarchive: vi.fn(),
+    ...overrides,
+  };
+}
+
+function createMockTenantRepo(overrides: Partial<ITenantRepository> = {}): ITenantRepository {
+  return {
+    create: vi.fn(),
+    findById: vi.fn(),
+    findByProperty: vi.fn().mockResolvedValue([]),
+    update: vi.fn(),
+    assignRoom: vi.fn(),
+    removeRoomAssignment: vi.fn(),
+    softDelete: vi.fn(),
     ...overrides,
   };
 }
@@ -42,7 +59,7 @@ describe("Gate 2: Fault injection (room-inventory-management)", () => {
       findByProperty: vi.fn().mockResolvedValue([]),
       create: vi.fn().mockResolvedValue(faultyCreated),
     });
-    const service = new RoomService(repo, createMockPropertyAccess());
+    const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
     const result = await service.createRoom(
       "user-1",
@@ -61,7 +78,7 @@ describe("Gate 2: Fault injection (room-inventory-management)", () => {
       findByProperty: vi.fn().mockResolvedValue([]),
       create: vi.fn().mockResolvedValue(noId),
     });
-    const service = new RoomService(repo, createMockPropertyAccess());
+    const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
     const result = await service.createRoom("user-1", propertyId, {
       roomNumber: "A1",
@@ -75,7 +92,7 @@ describe("Gate 2: Fault injection (room-inventory-management)", () => {
 
   it("fault no-validation-negative-rent: createRoom accepts negative rent — KILLED by validation", async () => {
     const repo = createMockRepo();
-    const service = new RoomService(repo, createMockPropertyAccess());
+    const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
     await expect(
       service.createRoom("user-1", "prop-1", {
@@ -88,7 +105,7 @@ describe("Gate 2: Fault injection (room-inventory-management)", () => {
 
   it("fault no-validation-empty-roomnumber: createRoom accepts empty room number — KILLED by validation", async () => {
     const repo = createMockRepo();
-    const service = new RoomService(repo, createMockPropertyAccess());
+    const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
     await expect(
       service.createRoom("user-1", "prop-1", {
@@ -105,7 +122,7 @@ describe("Gate 2: Fault injection (room-inventory-management)", () => {
     const repo = createMockRepo({
       findById: vi.fn().mockResolvedValue(existing),
     });
-    const service = new RoomService(repo, createMockPropertyAccess());
+    const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
     await expect(
       service.updateRoomStatus(
@@ -123,7 +140,7 @@ describe("Gate 2: Fault injection (room-inventory-management)", () => {
       findByProperty: vi.fn().mockResolvedValue([]),
       create: vi.fn().mockResolvedValue(createRoom({ propertyId, roomNumber: "A101" })),
     });
-    const service = new RoomService(repo, createMockPropertyAccess());
+    const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
     await service.createRoom("user-1", propertyId, {
       roomNumber: "A101",
@@ -157,7 +174,7 @@ describe("Gate 2: Fault injection (room-inventory-management)", () => {
       findByProperty: vi.fn().mockResolvedValue([existing]),
       update: vi.fn().mockResolvedValue(updatedWrong),
     });
-    const service = new RoomService(repo, createMockPropertyAccess());
+    const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
     const result = await service.updateRoom("user-1", propertyId, "room-1", {
       roomNumber: "A2",
@@ -175,7 +192,7 @@ describe("Gate 2: Fault injection (room-inventory-management)", () => {
     const repo = createMockRepo({
       findByProperty: vi.fn().mockResolvedValue(wrongStatus),
     });
-    const service = new RoomService(repo, createMockPropertyAccess());
+    const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
     const result = await service.listRooms("user-1", propertyId, {
       status: "available",

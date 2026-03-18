@@ -1,4 +1,4 @@
-import type { Room, RoomStatus } from "@/domain/schemas/room";
+import type { Room, RoomStatus, RoomFilters } from "@/domain/schemas/room";
 import type { IRoomRepository } from "@/domain/interfaces/room-repository";
 import { prisma } from "@/lib/prisma";
 
@@ -37,6 +37,7 @@ function toRoom(r: {
   roomType: string | null;
   monthlyRent: unknown;
   status: string;
+  archivedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }): Room {
@@ -47,6 +48,7 @@ function toRoom(r: {
     roomType: r.roomType ?? "",
     monthlyRent: toNumber(r.monthlyRent),
     status: toDomainStatus(r.status),
+    archivedAt: r.archivedAt,
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
   };
@@ -86,7 +88,7 @@ export class PrismaRoomRepository implements IRoomRepository {
 
   async findByProperty(
     propertyId: string,
-    filters?: { status?: RoomStatus }
+    filters?: RoomFilters
   ): Promise<Room[]> {
     const list = await prisma.room.findMany({
       where: {
@@ -94,6 +96,7 @@ export class PrismaRoomRepository implements IRoomRepository {
         ...(filters?.status && {
           status: DOMAIN_TO_PRISMA[filters.status],
         }),
+        ...(!filters?.includeArchived && { archivedAt: null }),
       },
       orderBy: [{ roomNumber: "asc" }],
     });
@@ -131,6 +134,26 @@ export class PrismaRoomRepository implements IRoomRepository {
     const updated = await prisma.room.update({
       where: { id },
       data: { status: DOMAIN_TO_PRISMA[status] },
+    });
+    return toRoom(updated);
+  }
+
+  async delete(id: string): Promise<void> {
+    await prisma.room.delete({ where: { id } });
+  }
+
+  async archive(id: string): Promise<Room> {
+    const updated = await prisma.room.update({
+      where: { id },
+      data: { archivedAt: new Date() },
+    });
+    return toRoom(updated);
+  }
+
+  async unarchive(id: string): Promise<Room> {
+    const updated = await prisma.room.update({
+      where: { id },
+      data: { archivedAt: null },
     });
     return toRoom(updated);
   }

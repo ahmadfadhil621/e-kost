@@ -12,7 +12,7 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextResponse } from "next/server";
-import { GET, PUT } from "./route";
+import { GET, PUT, DELETE } from "./route";
 import { createRoom } from "@/test/fixtures/room";
 import { createTenant } from "@/test/fixtures/tenant";
 
@@ -31,6 +31,7 @@ vi.mock("@/lib/room-service-instance", () => ({
   roomService: {
     getRoom: vi.fn(),
     updateRoom: vi.fn(),
+    deleteRoom: vi.fn(),
   },
 }));
 
@@ -318,6 +319,108 @@ describe("PUT /api/properties/[propertyId]/rooms/[roomId]", () => {
       });
 
       expect(response.status).toBe(400);
+    });
+  });
+});
+
+describe("DELETE /api/properties/[propertyId]/rooms/[roomId]", () => {
+  describe("good cases", () => {
+    it("DELETE returns 204 on successful deletion", async () => {
+      vi.mocked(roomService.deleteRoom).mockResolvedValue(undefined);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`,
+        { method: "DELETE" }
+      );
+
+      const response = await DELETE(request, {
+        params: Promise.resolve({ propertyId, roomId }),
+      });
+
+      expect(response.status).toBe(204);
+      expect(roomService.deleteRoom).toHaveBeenCalledWith(
+        "test-user-id",
+        propertyId,
+        roomId
+      );
+    });
+  });
+
+  describe("bad cases", () => {
+    it("DELETE returns 404 when room not found", async () => {
+      vi.mocked(roomService.deleteRoom).mockRejectedValue(
+        new Error("Room not found")
+      );
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`,
+        { method: "DELETE" }
+      );
+
+      const response = await DELETE(request, {
+        params: Promise.resolve({ propertyId, roomId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(404);
+      expect(data.error).toMatch(/not found/i);
+    });
+
+    it("DELETE returns 409 when room has active tenant", async () => {
+      vi.mocked(roomService.deleteRoom).mockRejectedValue(
+        new Error("Cannot delete room with active tenant")
+      );
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`,
+        { method: "DELETE" }
+      );
+
+      const response = await DELETE(request, {
+        params: Promise.resolve({ propertyId, roomId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(409);
+      expect(data.error).toMatch(/active tenant/i);
+    });
+
+    it("DELETE returns 403 when access is forbidden", async () => {
+      vi.mocked(roomService.deleteRoom).mockRejectedValue(
+        new Error("Forbidden")
+      );
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`,
+        { method: "DELETE" }
+      );
+
+      const response = await DELETE(request, {
+        params: Promise.resolve({ propertyId, roomId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(data.error).toMatch(/forbidden/i);
+    });
+
+    it("DELETE returns 401 when not authenticated", async () => {
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: null,
+        role: null,
+        errorResponse: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+      });
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`,
+        { method: "DELETE" }
+      );
+
+      const response = await DELETE(request, {
+        params: Promise.resolve({ propertyId, roomId }),
+      });
+
+      expect(response.status).toBe(401);
     });
   });
 });

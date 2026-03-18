@@ -1,4 +1,5 @@
 import type { IRoomRepository } from "@/domain/interfaces/room-repository";
+import type { ITenantRepository } from "@/domain/interfaces/tenant-repository";
 import type {
   CreateRoomInput,
   Room,
@@ -21,6 +22,7 @@ export interface IPropertyAccessValidator {
 export class RoomService {
   constructor(
     private readonly repo: IRoomRepository,
+    private readonly tenantRepo: ITenantRepository,
     private readonly propertyAccess: IPropertyAccessValidator
   ) {}
 
@@ -31,7 +33,7 @@ export class RoomService {
   ): Promise<Room> {
     await this.propertyAccess.validateAccess(userId, propertyId);
     const parsed = createRoomSchema.parse(data);
-    const existing = await this.repo.findByProperty(propertyId);
+    const existing = await this.repo.findByProperty(propertyId, { includeArchived: true });
     const duplicate = existing.some(
       (r) => r.roomNumber.toLowerCase() === parsed.roomNumber.trim().toLowerCase()
     );
@@ -75,7 +77,7 @@ export class RoomService {
     }
     const parsed = updateRoomSchema.parse(data);
     if (parsed.roomNumber !== undefined) {
-      const rooms = await this.repo.findByProperty(propertyId);
+      const rooms = await this.repo.findByProperty(propertyId, { includeArchived: true });
       const duplicate = rooms.some(
         (r) =>
           r.id !== id &&
@@ -132,5 +134,64 @@ export class RoomService {
       underRenovation,
       occupancyRate,
     };
+  }
+
+  async deleteRoom(
+    userId: string,
+    propertyId: string,
+    roomId: string
+  ): Promise<void> {
+    await this.propertyAccess.validateAccess(userId, propertyId);
+    const room = await this.repo.findById(roomId);
+    if (!room || room.propertyId !== propertyId) {
+      throw new Error("Room not found");
+    }
+    const tenants = await this.tenantRepo.findByProperty(propertyId);
+    const activeTenant = tenants.find(
+      (t) => t.roomId === roomId && !t.movedOutAt
+    );
+    if (activeTenant) {
+      throw new Error("Cannot delete room with active tenant");
+    }
+    await this.repo.delete(roomId);
+  }
+
+  async archiveRoom(
+    userId: string,
+    propertyId: string,
+    roomId: string
+  ): Promise<Room> {
+    await this.propertyAccess.validateAccess(userId, propertyId);
+    const room = await this.repo.findById(roomId);
+    if (!room || room.propertyId !== propertyId) {
+      throw new Error("Room not found");
+    }
+    if (room.archivedAt) {
+      throw new Error("Room is already archived");
+    }
+    const tenants = await this.tenantRepo.findByProperty(propertyId);
+    const activeTenant = tenants.find(
+      (t) => t.roomId === roomId && !t.movedOutAt
+    );
+    if (activeTenant) {
+      throw new Error("Cannot archive room with active tenant");
+    }
+    return this.repo.archive(roomId);
+  }
+
+  async unarchiveRoom(
+    userId: string,
+    propertyId: string,
+    roomId: string
+  ): Promise<Room> {
+    await this.propertyAccess.validateAccess(userId, propertyId);
+    const room = await this.repo.findById(roomId);
+    if (!room || room.propertyId !== propertyId) {
+      throw new Error("Room not found");
+    }
+    if (!room.archivedAt) {
+      throw new Error("Room is not archived");
+    }
+    return this.repo.unarchive(roomId);
   }
 }

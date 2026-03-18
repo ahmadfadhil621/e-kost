@@ -29,6 +29,7 @@ export async function GET(
       roomType: room.roomType,
       monthlyRent: room.monthlyRent,
       status: room.status,
+      archivedAt: room.archivedAt,
       createdAt: room.createdAt,
       updatedAt: room.updatedAt,
     };
@@ -98,6 +99,37 @@ export async function PUT(
     if (err instanceof Error && err.message === "Room number already exists") {
       return NextResponse.json(
         { error: "Room number already exists" },
+        { status: 409 }
+      );
+    }
+    if (err instanceof Error && err.message.includes("Forbidden")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  context: { params: Promise<{ propertyId: string; roomId: string }> }
+) {
+  const { propertyId, roomId } = await context.params;
+  const access = await withPropertyAccess(propertyId, { request });
+  if (access.errorResponse) {return access.errorResponse;}
+
+  try {
+    await roomService.deleteRoom(access.userId!, propertyId, roomId);
+    return new NextResponse(null, { status: 204 });
+  } catch (err) {
+    if (err instanceof Error && err.message === "Room not found") {
+      return NextResponse.json({ error: "Room not found" }, { status: 404 });
+    }
+    if (err instanceof Error && err.message === "Cannot delete room with active tenant") {
+      return NextResponse.json(
+        { error: "Cannot delete room with active tenant" },
         { status: 409 }
       );
     }

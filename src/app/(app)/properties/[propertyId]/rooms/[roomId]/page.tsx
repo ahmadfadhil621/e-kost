@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
@@ -15,6 +16,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import type { RoomStatus } from "@/domain/schemas/room";
 
 type RoomDetail = {
@@ -24,6 +32,7 @@ type RoomDetail = {
   roomType: string;
   monthlyRent: number;
   status: RoomStatus;
+  archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
   tenantId?: string;
@@ -64,6 +73,59 @@ async function updateStatus(
   return res.json();
 }
 
+async function deleteRoom(
+  propertyId: string,
+  roomId: string
+): Promise<void> {
+  const res = await fetch(
+    `/api/properties/${propertyId}/rooms/${roomId}`,
+    {
+      method: "DELETE",
+      credentials: "include",
+    }
+  );
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body?.error ?? "Failed to delete room");
+  }
+}
+
+async function archiveRoom(
+  propertyId: string,
+  roomId: string
+): Promise<RoomDetail> {
+  const res = await fetch(
+    `/api/properties/${propertyId}/rooms/${roomId}/archive`,
+    {
+      method: "POST",
+      credentials: "include",
+    }
+  );
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body?.error ?? "Failed to archive room");
+  }
+  return res.json();
+}
+
+async function unarchiveRoom(
+  propertyId: string,
+  roomId: string
+): Promise<RoomDetail> {
+  const res = await fetch(
+    `/api/properties/${propertyId}/rooms/${roomId}/unarchive`,
+    {
+      method: "POST",
+      credentials: "include",
+    }
+  );
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body?.error ?? "Failed to restore room");
+  }
+  return res.json();
+}
+
 export default function RoomDetailPage() {
   const { t } = useTranslation();
   const params = useParams();
@@ -74,20 +136,76 @@ export default function RoomDetailPage() {
   const propertyId = params.propertyId as string;
   const roomId = params.roomId as string;
 
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
+
   const { data: room, isLoading, error } = useQuery({
     queryKey: ["room", propertyId, roomId],
     queryFn: () => fetchRoom(propertyId, roomId),
     enabled: !!propertyId && !!roomId,
   });
 
+  const invalidateRoomQueries = () => {
+    queryClient.invalidateQueries({ queryKey: ["room", propertyId, roomId] });
+    queryClient.invalidateQueries({ queryKey: ["rooms", propertyId] });
+    queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
+  };
+
   const statusMutation = useMutation({
     mutationFn: (status: RoomStatus) =>
       updateStatus(propertyId, roomId, status),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["room", propertyId, roomId] });
-      queryClient.invalidateQueries({ queryKey: ["rooms", propertyId] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
+      invalidateRoomQueries();
       toast({ title: t("room.status.updateSuccess") });
+    },
+    onError: (err: Error) => {
+      toast({
+        title: t("auth.error.generic"),
+        description: err.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteRoom(propertyId, roomId),
+    onSuccess: () => {
+      invalidateRoomQueries();
+      toast({ title: t("room.delete.success") });
+      setDeleteOpen(false);
+      router.push(`/properties/${propertyId}/rooms`);
+    },
+    onError: (err: Error) => {
+      toast({
+        title: t("auth.error.generic"),
+        description: err.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const archiveMutation = useMutation({
+    mutationFn: () => archiveRoom(propertyId, roomId),
+    onSuccess: () => {
+      invalidateRoomQueries();
+      toast({ title: t("room.archive.success") });
+      setArchiveOpen(false);
+      router.push(`/properties/${propertyId}/rooms`);
+    },
+    onError: (err: Error) => {
+      toast({
+        title: t("auth.error.generic"),
+        description: err.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const unarchiveMutation = useMutation({
+    mutationFn: () => unarchiveRoom(propertyId, roomId),
+    onSuccess: () => {
+      invalidateRoomQueries();
+      toast({ title: t("room.unarchive.success") });
     },
     onError: (err: Error) => {
       toast({
@@ -123,6 +241,8 @@ export default function RoomDetailPage() {
     );
   }
 
+  const isArchived = !!room.archivedAt;
+
   const createdAt = room.createdAt
     ? new Date(room.createdAt).toLocaleDateString(undefined, {
         year: "numeric",
@@ -138,19 +258,26 @@ export default function RoomDetailPage() {
       <div className="space-y-2">
         <p>
           <span className="font-medium">{room.roomNumber}</span>
+          {isArchived && (
+            <span className="ml-2 inline-block rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+              {t("room.status.archived")}
+            </span>
+          )}
         </p>
         <p className="text-sm text-muted-foreground">
           {room.roomType} · {formatCurrency(room.monthlyRent)}
         </p>
-        <div className="flex items-center gap-2">
-          <StatusIndicator status={room.status} size="large" />
-        </div>
+        {!isArchived && (
+          <div className="flex items-center gap-2">
+            <StatusIndicator status={room.status} size="large" />
+          </div>
+        )}
         <p className="text-sm text-muted-foreground">
           {t("common.date")}: {createdAt}
         </p>
       </div>
 
-      {room.status === "occupied" && room.tenantId && (
+      {!isArchived && room.status === "occupied" && room.tenantId && (
         <div className="space-y-1">
           <span className="text-sm font-medium text-muted-foreground">
             {t("room.detail.currentTenant")}
@@ -166,41 +293,136 @@ export default function RoomDetailPage() {
         </div>
       )}
 
-      <div className="flex flex-col gap-2">
-        <Button asChild className="min-h-[44px] min-w-[44px]">
-          <Link href={`/properties/${propertyId}/rooms/${roomId}/edit`}>
-            {t("room.detail.edit")}
-          </Link>
-        </Button>
-
+      {isArchived ? (
         <div className="flex flex-col gap-2">
-          <span className="text-sm font-medium">
-            {t("room.detail.changeStatus")}
-          </span>
-          <Select
-            value={room.status}
-            onValueChange={(value) =>
-              statusMutation.mutate(value as RoomStatus)
-            }
-            disabled={statusMutation.isPending}
+          <Button
+            className="min-h-[44px] min-w-[44px] w-full"
+            onClick={() => unarchiveMutation.mutate()}
+            disabled={unarchiveMutation.isPending}
+            aria-label={t("room.unarchive.title")}
           >
-            <SelectTrigger className="min-h-[44px] min-w-[44px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="available" className="min-h-[44px]">
-                {t("room.status.available")}
-              </SelectItem>
-              <SelectItem value="occupied" className="min-h-[44px]">
-                {t("room.status.occupied")}
-              </SelectItem>
-              <SelectItem value="under_renovation" className="min-h-[44px]">
-                {t("room.status.under_renovation")}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+            {t("room.unarchive.confirm")}
+          </Button>
         </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          <Button asChild className="min-h-[44px] min-w-[44px]">
+            <Link href={`/properties/${propertyId}/rooms/${roomId}/edit`}>
+              {t("room.detail.edit")}
+            </Link>
+          </Button>
+
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium">
+              {t("room.detail.changeStatus")}
+            </span>
+            <Select
+              value={room.status}
+              onValueChange={(value) =>
+                statusMutation.mutate(value as RoomStatus)
+              }
+              disabled={statusMutation.isPending}
+            >
+              <SelectTrigger className="min-h-[44px] min-w-[44px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="available" className="min-h-[44px]">
+                  {t("room.status.available")}
+                </SelectItem>
+                <SelectItem value="occupied" className="min-h-[44px]">
+                  {t("room.status.occupied")}
+                </SelectItem>
+                <SelectItem value="under_renovation" className="min-h-[44px]">
+                  {t("room.status.under_renovation")}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      )}
+
+      {/* G-3: Destructive actions at bottom */}
+      <div className="border-t pt-6 space-y-3">
+        <h3 className="text-sm font-semibold text-destructive">
+          {t("room.dangerZone")}
+        </h3>
+        {!isArchived && (
+          <Button
+            variant="outline"
+            className="min-h-[44px] min-w-[44px] w-full"
+            onClick={() => setArchiveOpen(true)}
+            aria-label={t("room.archive.title")}
+          >
+            {t("room.archive.title")}
+          </Button>
+        )}
+        <Button
+          variant="destructive"
+          className="min-h-[44px] min-w-[44px] w-full"
+          onClick={() => setDeleteOpen(true)}
+          aria-label={t("room.delete.title")}
+        >
+          {t("room.delete.title")}
+        </Button>
       </div>
+
+      {/* Archive confirmation dialog */}
+      <Dialog open={archiveOpen} onOpenChange={setArchiveOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t("room.archive.title")}</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            {t("room.archive.confirmMessage", { roomNumber: room.roomNumber })}
+          </p>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              className="min-h-[44px] min-w-[44px]"
+              onClick={() => setArchiveOpen(false)}
+            >
+              {t("room.archive.cancel")}
+            </Button>
+            <Button
+              className="min-h-[44px] min-w-[44px]"
+              onClick={() => archiveMutation.mutate()}
+              disabled={archiveMutation.isPending}
+            >
+              {t("room.archive.confirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete confirmation dialog */}
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t("room.delete.title")}</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            {t("room.delete.confirmMessage", { roomNumber: room.roomNumber })}
+          </p>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              className="min-h-[44px] min-w-[44px]"
+              onClick={() => setDeleteOpen(false)}
+            >
+              {t("room.delete.cancel")}
+            </Button>
+            <Button
+              variant="destructive"
+              className="min-h-[44px] min-w-[44px]"
+              onClick={() => deleteMutation.mutate()}
+              disabled={deleteMutation.isPending}
+            >
+              {t("room.delete.confirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

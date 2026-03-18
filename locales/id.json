@@ -175,6 +175,7 @@
       "available": "Tersedia",
       "occupied": "Terisi",
       "under_renovation": "Dalam Renovasi",
+      "archived": "Diarsipkan",
       "updateSuccess": "Status kamar berhasil diperbarui"
     },
     "validation": {
@@ -183,6 +184,28 @@
       "monthlyRentRequired": "Sewa bulanan wajib diisi",
       "monthlyRentPositive": "Sewa bulanan harus angka positif"
     },
+    "archive": {
+      "title": "Arsipkan Kamar",
+      "confirmMessage": "Arsipkan kamar {{roomNumber}}? Kamar akan disembunyikan dari daftar kamar tetapi dapat dipulihkan nanti.",
+      "confirm": "Arsipkan",
+      "cancel": "Batal",
+      "success": "Kamar berhasil diarsipkan",
+      "errorActiveTenant": "Tidak dapat mengarsipkan kamar dengan penyewa aktif. Pindahkan penyewa terlebih dahulu."
+    },
+    "unarchive": {
+      "title": "Pulihkan Kamar",
+      "confirm": "Pulihkan",
+      "success": "Kamar berhasil dipulihkan"
+    },
+    "delete": {
+      "title": "Hapus Kamar",
+      "confirmMessage": "Apakah Anda yakin ingin menghapus kamar {{roomNumber}} secara permanen? Tindakan ini tidak dapat dibatalkan.",
+      "confirm": "Hapus",
+      "cancel": "Batal",
+      "success": "Kamar berhasil dihapus",
+      "errorActiveTenant": "Tidak dapat menghapus kamar dengan penyewa aktif. Pindahkan penyewa terlebih dahulu."
+    },
+    "dangerZone": "Zona Berbahaya",
     "errors": {
       "duplicateRoomNumber": "Nomor kamar sudah ada",
       "notFound": "Kamar tidak ditemukan",

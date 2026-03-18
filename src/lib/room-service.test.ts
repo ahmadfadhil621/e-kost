@@ -26,8 +26,10 @@ import { describe, it, expect, vi } from "vitest";
 import fc from "fast-check";
 import { RoomService } from "./room-service";
 import type { IRoomRepository } from "@/domain/interfaces/room-repository";
+import type { ITenantRepository } from "@/domain/interfaces/tenant-repository";
 import type { RoomStatus } from "@/domain/schemas/room";
 import { createRoom } from "@/test/fixtures/room";
+import { createTenant } from "@/test/fixtures/tenant";
 
 function createMockRepo(overrides: Partial<IRoomRepository> = {}): IRoomRepository {
   return {
@@ -36,6 +38,22 @@ function createMockRepo(overrides: Partial<IRoomRepository> = {}): IRoomReposito
     findByProperty: vi.fn(),
     update: vi.fn(),
     updateStatus: vi.fn(),
+    delete: vi.fn(),
+    archive: vi.fn(),
+    unarchive: vi.fn(),
+    ...overrides,
+  };
+}
+
+function createMockTenantRepo(overrides: Partial<ITenantRepository> = {}): ITenantRepository {
+  return {
+    create: vi.fn(),
+    findById: vi.fn(),
+    findByProperty: vi.fn().mockResolvedValue([]),
+    update: vi.fn(),
+    assignRoom: vi.fn(),
+    removeRoomAssignment: vi.fn(),
+    softDelete: vi.fn(),
     ...overrides,
   };
 }
@@ -61,7 +79,7 @@ describe("RoomService", () => {
           findByProperty: vi.fn().mockResolvedValue([]),
           create: vi.fn().mockResolvedValue(created),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         const result = await service.createRoom(userId, propertyId, {
           roomNumber: "B202",
@@ -99,7 +117,7 @@ describe("RoomService", () => {
           create: vi.fn().mockResolvedValue(created),
           findById: vi.fn().mockResolvedValue(created),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         const result = await service.createRoom(userId, propertyId, {
           roomNumber: "X99",
@@ -123,7 +141,7 @@ describe("RoomService", () => {
           findByProperty: vi.fn().mockResolvedValue([]),
           create: vi.fn().mockResolvedValue(created),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         const result = await service.createRoom(
           crypto.randomUUID(),
@@ -138,7 +156,7 @@ describe("RoomService", () => {
     describe("bad cases", () => {
       it("rejects when room number is missing", async () => {
         const repo = createMockRepo();
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         await expect(
           service.createRoom(crypto.randomUUID(), crypto.randomUUID(), {
@@ -151,7 +169,7 @@ describe("RoomService", () => {
 
       it("rejects when room type is missing", async () => {
         const repo = createMockRepo();
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         await expect(
           service.createRoom(crypto.randomUUID(), crypto.randomUUID(), {
@@ -164,7 +182,7 @@ describe("RoomService", () => {
 
       it("rejects when monthly rent is negative", async () => {
         const repo = createMockRepo();
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         await expect(
           service.createRoom(crypto.randomUUID(), crypto.randomUUID(), {
@@ -182,7 +200,7 @@ describe("RoomService", () => {
             createRoom({ propertyId, roomNumber: "A101" }),
           ]),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         await expect(
           service.createRoom(crypto.randomUUID(), propertyId, {
@@ -206,7 +224,7 @@ describe("RoomService", () => {
           findByProperty: vi.fn().mockResolvedValue([]),
           create: vi.fn().mockResolvedValue(created),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         await service.createRoom(crypto.randomUUID(), propertyId, {
           roomNumber: "  X1  ",
@@ -227,7 +245,7 @@ describe("RoomService", () => {
         const propertyAccess = {
           validateAccess: vi.fn().mockRejectedValue(new Error("Forbidden")),
         };
-        const service = new RoomService(repo, propertyAccess);
+        const service = new RoomService(repo, createMockTenantRepo(), propertyAccess);
 
         await expect(
           service.createRoom("user-1", "prop-1", {
@@ -248,7 +266,7 @@ describe("RoomService", () => {
         const repo = createMockRepo({
           findById: vi.fn().mockResolvedValue(room),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         const result = await service.getRoom("user-1", propertyId, "room-1");
 
@@ -259,7 +277,7 @@ describe("RoomService", () => {
     describe("bad cases", () => {
       it("returns null when room not found", async () => {
         const repo = createMockRepo({ findById: vi.fn().mockResolvedValue(null) });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         const result = await service.getRoom(
           "user-1",
@@ -279,7 +297,7 @@ describe("RoomService", () => {
         const repo = createMockRepo({
           findById: vi.fn().mockResolvedValue(room),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         const result = await service.getRoom("user-1", "my-property", "room-1");
 
@@ -292,7 +310,7 @@ describe("RoomService", () => {
       it("returns room when propertyId matches", async () => {
         const room = createRoom({ propertyId: "p1", id: "r1" });
         const repo = createMockRepo({ findById: vi.fn().mockResolvedValue(room) });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         const result = await service.getRoom("user-1", "p1", "r1");
 
@@ -312,7 +330,7 @@ describe("RoomService", () => {
         const repo = createMockRepo({
           findByProperty: vi.fn().mockResolvedValue(rooms),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         const result = await service.listRooms("user-1", propertyId);
 
@@ -329,7 +347,7 @@ describe("RoomService", () => {
         const repo = createMockRepo({
           findByProperty: vi.fn().mockResolvedValue(availableRooms),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         const result = await service.listRooms("user-1", propertyId, {
           status: "available",
@@ -348,7 +366,7 @@ describe("RoomService", () => {
         const repo = createMockRepo({
           findByProperty: vi.fn().mockResolvedValue([]),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         const result = await service.listRooms("user-1", "prop-1");
 
@@ -362,7 +380,7 @@ describe("RoomService", () => {
         const repo = createMockRepo({
           findByProperty: vi.fn().mockResolvedValue([]),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         await service.listRooms("user-1", "prop-1", { status: "under_renovation" });
 
@@ -395,7 +413,7 @@ describe("RoomService", () => {
           findByProperty: vi.fn().mockResolvedValue([existing]),
           update: vi.fn().mockResolvedValue(updated),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         const result = await service.updateRoom("user-1", propertyId, "room-1", {
           roomNumber: "A2",
@@ -430,7 +448,7 @@ describe("RoomService", () => {
           findByProperty: vi.fn().mockResolvedValue([existing]),
           update: vi.fn().mockResolvedValue(updated),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         const result = await service.updateRoom("user-1", propertyId, "room-1", {
           roomNumber: "A2",
@@ -454,7 +472,7 @@ describe("RoomService", () => {
           findById: vi.fn().mockResolvedValue(existing),
           findByProperty: vi.fn().mockResolvedValue([existing]),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         await expect(
           service.updateRoom("user-1", propertyId, "room-1", {
@@ -479,7 +497,7 @@ describe("RoomService", () => {
           findById: vi.fn().mockResolvedValue(existing),
           findByProperty: vi.fn().mockResolvedValue([existing, other]),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         await expect(
           service.updateRoom("user-1", propertyId, "room-1", {
@@ -490,7 +508,7 @@ describe("RoomService", () => {
 
       it("throws room not found when room does not exist", async () => {
         const repo = createMockRepo({ findById: vi.fn().mockResolvedValue(null) });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         await expect(
           service.updateRoom("user-1", "prop-1", "missing", {
@@ -510,7 +528,7 @@ describe("RoomService", () => {
           findByProperty: vi.fn().mockResolvedValue([existing]),
           update: vi.fn().mockResolvedValue(updated),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         await service.updateRoom("user-1", propertyId, "room-1", {
           roomType: "double",
@@ -538,7 +556,7 @@ describe("RoomService", () => {
           findById: vi.fn().mockResolvedValue(existing),
           updateStatus: vi.fn().mockResolvedValue(updated),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         const result = await service.updateRoomStatus(
           "user-1",
@@ -563,7 +581,7 @@ describe("RoomService", () => {
           findById: vi.fn().mockResolvedValue(existing),
           updateStatus: vi.fn().mockResolvedValue(updated),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         const result = await service.updateRoomStatus(
           "user-1",
@@ -587,7 +605,7 @@ describe("RoomService", () => {
         const repo = createMockRepo({
           findById: vi.fn().mockResolvedValue(existing),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         await expect(
           service.updateRoomStatus(
@@ -601,7 +619,7 @@ describe("RoomService", () => {
 
       it("throws room not found when room does not exist", async () => {
         const repo = createMockRepo({ findById: vi.fn().mockResolvedValue(null) });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         await expect(
           service.updateRoomStatus("user-1", "prop-1", "missing", "available")
@@ -618,7 +636,7 @@ describe("RoomService", () => {
           findById: vi.fn().mockResolvedValue(existing),
           updateStatus: vi.fn().mockResolvedValue(updated),
         });
-        const service = new RoomService(repo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         const result = await service.updateRoomStatus(
           "user-1",
@@ -628,6 +646,313 @@ describe("RoomService", () => {
         );
 
         expect(result.status).toBe("available");
+      });
+    });
+  });
+
+  describe("deleteRoom", () => {
+    describe("good cases", () => {
+      it("deletes available room with no tenants", async () => {
+        const propertyId = crypto.randomUUID();
+        const room = createRoom({ propertyId, id: "room-1", status: "available" });
+        const repo = createMockRepo({
+          findById: vi.fn().mockResolvedValue(room),
+          delete: vi.fn().mockResolvedValue(undefined),
+        });
+        const tenantRepo = createMockTenantRepo({
+          findByProperty: vi.fn().mockResolvedValue([]),
+        });
+        const service = new RoomService(repo, tenantRepo, createMockPropertyAccess());
+
+        await service.deleteRoom("user-1", propertyId, "room-1");
+
+        expect(repo.delete).toHaveBeenCalledWith("room-1");
+      });
+
+      it("deletes room with only moved-out tenants", async () => {
+        const propertyId = crypto.randomUUID();
+        const room = createRoom({ propertyId, id: "room-1", status: "available" });
+        const movedOutTenant = createTenant({
+          propertyId,
+          roomId: "room-1",
+          movedOutAt: new Date("2025-06-01"),
+        });
+        const repo = createMockRepo({
+          findById: vi.fn().mockResolvedValue(room),
+          delete: vi.fn().mockResolvedValue(undefined),
+        });
+        const tenantRepo = createMockTenantRepo({
+          findByProperty: vi.fn().mockResolvedValue([movedOutTenant]),
+        });
+        const service = new RoomService(repo, tenantRepo, createMockPropertyAccess());
+
+        await service.deleteRoom("user-1", propertyId, "room-1");
+
+        expect(repo.delete).toHaveBeenCalledWith("room-1");
+      });
+
+      it("deletes room under renovation with no active tenants", async () => {
+        const propertyId = crypto.randomUUID();
+        const room = createRoom({ propertyId, id: "room-1", status: "under_renovation" });
+        const repo = createMockRepo({
+          findById: vi.fn().mockResolvedValue(room),
+          delete: vi.fn().mockResolvedValue(undefined),
+        });
+        const tenantRepo = createMockTenantRepo({
+          findByProperty: vi.fn().mockResolvedValue([]),
+        });
+        const service = new RoomService(repo, tenantRepo, createMockPropertyAccess());
+
+        await service.deleteRoom("user-1", propertyId, "room-1");
+
+        expect(repo.delete).toHaveBeenCalledWith("room-1");
+      });
+    });
+
+    describe("bad cases", () => {
+      it("throws when room not found", async () => {
+        const repo = createMockRepo({ findById: vi.fn().mockResolvedValue(null) });
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
+
+        await expect(
+          service.deleteRoom("user-1", "prop-1", "missing")
+        ).rejects.toThrow(/not found/i);
+      });
+
+      it("throws when room belongs to different property", async () => {
+        const room = createRoom({ propertyId: "other-prop", id: "room-1" });
+        const repo = createMockRepo({ findById: vi.fn().mockResolvedValue(room) });
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
+
+        await expect(
+          service.deleteRoom("user-1", "my-prop", "room-1")
+        ).rejects.toThrow(/not found/i);
+      });
+
+      it("throws when room has active tenant", async () => {
+        const propertyId = crypto.randomUUID();
+        const room = createRoom({ propertyId, id: "room-1", status: "occupied" });
+        const activeTenant = createTenant({
+          propertyId,
+          roomId: "room-1",
+          movedOutAt: null,
+        });
+        const repo = createMockRepo({
+          findById: vi.fn().mockResolvedValue(room),
+        });
+        const tenantRepo = createMockTenantRepo({
+          findByProperty: vi.fn().mockResolvedValue([activeTenant]),
+        });
+        const service = new RoomService(repo, tenantRepo, createMockPropertyAccess());
+
+        await expect(
+          service.deleteRoom("user-1", propertyId, "room-1")
+        ).rejects.toThrow(/cannot delete room with active tenant/i);
+        expect(repo.delete).not.toHaveBeenCalled();
+      });
+
+      it("throws when user has no property access", async () => {
+        const repo = createMockRepo();
+        const propertyAccess = {
+          validateAccess: vi.fn().mockRejectedValue(new Error("Forbidden")),
+        };
+        const service = new RoomService(repo, createMockTenantRepo(), propertyAccess);
+
+        await expect(
+          service.deleteRoom("user-1", "prop-1", "room-1")
+        ).rejects.toThrow(/forbidden/i);
+      });
+    });
+
+    describe("edge cases", () => {
+      it("blocks delete when room has both active and moved-out tenants", async () => {
+        const propertyId = crypto.randomUUID();
+        const room = createRoom({ propertyId, id: "room-1", status: "occupied" });
+        const activeTenant = createTenant({
+          propertyId,
+          roomId: "room-1",
+          movedOutAt: null,
+        });
+        const movedOutTenant = createTenant({
+          propertyId,
+          roomId: "room-1",
+          movedOutAt: new Date("2025-01-01"),
+        });
+        const repo = createMockRepo({
+          findById: vi.fn().mockResolvedValue(room),
+        });
+        const tenantRepo = createMockTenantRepo({
+          findByProperty: vi.fn().mockResolvedValue([activeTenant, movedOutTenant]),
+        });
+        const service = new RoomService(repo, tenantRepo, createMockPropertyAccess());
+
+        await expect(
+          service.deleteRoom("user-1", propertyId, "room-1")
+        ).rejects.toThrow(/cannot delete room with active tenant/i);
+        expect(repo.delete).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe("archiveRoom", () => {
+    describe("good cases", () => {
+      it("archives available room with no tenants", async () => {
+        const propertyId = crypto.randomUUID();
+        const room = createRoom({ propertyId, id: "room-1", status: "available" });
+        const archived = createRoom({ ...room, archivedAt: new Date() });
+        const repo = createMockRepo({
+          findById: vi.fn().mockResolvedValue(room),
+          archive: vi.fn().mockResolvedValue(archived),
+        });
+        const tenantRepo = createMockTenantRepo({
+          findByProperty: vi.fn().mockResolvedValue([]),
+        });
+        const service = new RoomService(repo, tenantRepo, createMockPropertyAccess());
+
+        const result = await service.archiveRoom("user-1", propertyId, "room-1");
+
+        expect(result.archivedAt).toBeInstanceOf(Date);
+        expect(repo.archive).toHaveBeenCalledWith("room-1");
+      });
+
+      it("archives room under renovation with no active tenants", async () => {
+        const propertyId = crypto.randomUUID();
+        const room = createRoom({ propertyId, id: "room-1", status: "under_renovation" });
+        const archived = createRoom({ ...room, archivedAt: new Date() });
+        const repo = createMockRepo({
+          findById: vi.fn().mockResolvedValue(room),
+          archive: vi.fn().mockResolvedValue(archived),
+        });
+        const tenantRepo = createMockTenantRepo({
+          findByProperty: vi.fn().mockResolvedValue([]),
+        });
+        const service = new RoomService(repo, tenantRepo, createMockPropertyAccess());
+
+        const result = await service.archiveRoom("user-1", propertyId, "room-1");
+
+        expect(result.archivedAt).toBeInstanceOf(Date);
+      });
+    });
+
+    describe("bad cases", () => {
+      it("throws when room not found", async () => {
+        const repo = createMockRepo({ findById: vi.fn().mockResolvedValue(null) });
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
+
+        await expect(
+          service.archiveRoom("user-1", "prop-1", "missing")
+        ).rejects.toThrow(/not found/i);
+      });
+
+      it("throws when room belongs to different property", async () => {
+        const room = createRoom({ propertyId: "other-prop", id: "room-1" });
+        const repo = createMockRepo({ findById: vi.fn().mockResolvedValue(room) });
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
+
+        await expect(
+          service.archiveRoom("user-1", "my-prop", "room-1")
+        ).rejects.toThrow(/not found/i);
+      });
+
+      it("throws when room is already archived", async () => {
+        const propertyId = crypto.randomUUID();
+        const room = createRoom({ propertyId, id: "room-1", archivedAt: new Date() });
+        const repo = createMockRepo({ findById: vi.fn().mockResolvedValue(room) });
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
+
+        await expect(
+          service.archiveRoom("user-1", propertyId, "room-1")
+        ).rejects.toThrow(/already archived/i);
+      });
+
+      it("throws when room has active tenant", async () => {
+        const propertyId = crypto.randomUUID();
+        const room = createRoom({ propertyId, id: "room-1", status: "occupied" });
+        const activeTenant = createTenant({
+          propertyId,
+          roomId: "room-1",
+          movedOutAt: null,
+        });
+        const repo = createMockRepo({
+          findById: vi.fn().mockResolvedValue(room),
+        });
+        const tenantRepo = createMockTenantRepo({
+          findByProperty: vi.fn().mockResolvedValue([activeTenant]),
+        });
+        const service = new RoomService(repo, tenantRepo, createMockPropertyAccess());
+
+        await expect(
+          service.archiveRoom("user-1", propertyId, "room-1")
+        ).rejects.toThrow(/cannot archive room with active tenant/i);
+        expect(repo.archive).not.toHaveBeenCalled();
+      });
+    });
+
+    describe("edge cases", () => {
+      it("archives room with only moved-out tenants", async () => {
+        const propertyId = crypto.randomUUID();
+        const room = createRoom({ propertyId, id: "room-1", status: "available" });
+        const archived = createRoom({ ...room, archivedAt: new Date() });
+        const movedOutTenant = createTenant({
+          propertyId,
+          roomId: "room-1",
+          movedOutAt: new Date("2025-06-01"),
+        });
+        const repo = createMockRepo({
+          findById: vi.fn().mockResolvedValue(room),
+          archive: vi.fn().mockResolvedValue(archived),
+        });
+        const tenantRepo = createMockTenantRepo({
+          findByProperty: vi.fn().mockResolvedValue([movedOutTenant]),
+        });
+        const service = new RoomService(repo, tenantRepo, createMockPropertyAccess());
+
+        const result = await service.archiveRoom("user-1", propertyId, "room-1");
+
+        expect(result.archivedAt).toBeInstanceOf(Date);
+        expect(repo.archive).toHaveBeenCalledWith("room-1");
+      });
+    });
+  });
+
+  describe("unarchiveRoom", () => {
+    describe("good cases", () => {
+      it("unarchives an archived room", async () => {
+        const propertyId = crypto.randomUUID();
+        const room = createRoom({ propertyId, id: "room-1", archivedAt: new Date() });
+        const unarchived = createRoom({ ...room, archivedAt: null });
+        const repo = createMockRepo({
+          findById: vi.fn().mockResolvedValue(room),
+          unarchive: vi.fn().mockResolvedValue(unarchived),
+        });
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
+
+        const result = await service.unarchiveRoom("user-1", propertyId, "room-1");
+
+        expect(result.archivedAt).toBeNull();
+        expect(repo.unarchive).toHaveBeenCalledWith("room-1");
+      });
+    });
+
+    describe("bad cases", () => {
+      it("throws when room not found", async () => {
+        const repo = createMockRepo({ findById: vi.fn().mockResolvedValue(null) });
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
+
+        await expect(
+          service.unarchiveRoom("user-1", "prop-1", "missing")
+        ).rejects.toThrow(/not found/i);
+      });
+
+      it("throws when room is not archived", async () => {
+        const propertyId = crypto.randomUUID();
+        const room = createRoom({ propertyId, id: "room-1", archivedAt: null });
+        const repo = createMockRepo({ findById: vi.fn().mockResolvedValue(room) });
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
+
+        await expect(
+          service.unarchiveRoom("user-1", propertyId, "room-1")
+        ).rejects.toThrow(/not archived/i);
       });
     });
   });
@@ -664,7 +989,7 @@ describe("property-based tests", () => {
             findByProperty: vi.fn().mockResolvedValue([]),
             create: vi.fn().mockResolvedValue(created),
           });
-          const service = new RoomService(repo, createMockPropertyAccess());
+          const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
           const result = await service.createRoom(userId, propertyId, roomData);
 

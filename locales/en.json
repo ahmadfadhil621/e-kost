@@ -175,6 +175,7 @@
       "available": "Available",
       "occupied": "Occupied",
       "under_renovation": "Under Renovation",
+      "archived": "Archived",
       "updateSuccess": "Room status updated successfully"
     },
     "validation": {
@@ -183,6 +184,28 @@
       "monthlyRentRequired": "Monthly rent is required",
       "monthlyRentPositive": "Monthly rent must be a positive number"
     },
+    "archive": {
+      "title": "Archive Room",
+      "confirmMessage": "Archive room {{roomNumber}}? It will be hidden from the room list but can be restored later.",
+      "confirm": "Archive",
+      "cancel": "Cancel",
+      "success": "Room archived successfully",
+      "errorActiveTenant": "Cannot archive room with an active tenant. Move the tenant out first."
+    },
+    "unarchive": {
+      "title": "Restore Room",
+      "confirm": "Restore",
+      "success": "Room restored successfully"
+    },
+    "delete": {
+      "title": "Delete Room",
+      "confirmMessage": "Are you sure you want to permanently delete room {{roomNumber}}? This action cannot be undone.",
+      "confirm": "Delete",
+      "cancel": "Cancel",
+      "success": "Room deleted successfully",
+      "errorActiveTenant": "Cannot delete room with an active tenant. Move the tenant out first."
+    },
+    "dangerZone": "Danger Zone",
     "errors": {
       "duplicateRoomNumber": "Room number already exists",
       "notFound": "Room not found",

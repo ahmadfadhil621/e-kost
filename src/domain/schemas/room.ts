@@ -50,6 +50,7 @@ export type UpdateRoomStatusInput = z.infer<typeof updateRoomStatusSchema>;
 
 export interface RoomFilters {
   status?: RoomStatus;
+  includeArchived?: boolean;
 }
 
 export interface Room {
@@ -59,6 +60,7 @@ export interface Room {
   roomType: string;
   monthlyRent: number;
   status: RoomStatus;
+  archivedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
