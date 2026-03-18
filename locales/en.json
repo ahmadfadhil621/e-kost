@@ -287,7 +287,7 @@
     "noRoom": "No room assigned — balance not available",
     "loadFailed": "Failed to load balance",
     "rentMissingBanner": {
-      "message": "Rent missing — {{amount}} outstanding"
+      "message": "Rent missing — {{amount}}"
     }
   },
   "notes": {
