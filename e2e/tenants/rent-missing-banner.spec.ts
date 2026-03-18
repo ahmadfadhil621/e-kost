@@ -146,7 +146,11 @@ test.describe("rent missing banner", () => {
 
       await goToTenantDetail(page, data.tenantId);
 
-      const banner = page.getByRole("alert");
+      // CSS locator avoids shadow-DOM pierce: Next.js AppRouterAnnouncer also
+      // has role="alert" but lives inside a shadow root, so getByRole() would
+      // return 2 elements (strict-mode violation). CSS [role] selectors stay
+      // scoped to the light DOM and only match our banner.
+      const banner = page.locator('[role="alert"]:not(#__next-route-announcer__)');
       await expect(banner).toBeVisible({ timeout: 15000 });
       await expect(banner).toContainText(
         /rent missing|sewa belum dibayar/i
@@ -164,7 +168,7 @@ test.describe("rent missing banner", () => {
 
       await goToTenantDetail(page, data.tenantId);
 
-      const banner = page.getByRole("alert");
+      const banner = page.locator('[role="alert"]:not(#__next-route-announcer__)');
       await expect(banner).toBeVisible({ timeout: 15000 });
 
       // Banner must be higher on page than the action buttons
@@ -193,7 +197,7 @@ test.describe("rent missing banner", () => {
         page.getByRole("button", { name: /move out|pindah keluar/i })
       ).toBeVisible({ timeout: 15000 });
 
-      await expect(page.getByRole("alert")).not.toBeVisible();
+      await expect(page.locator('[role="alert"]:not(#__next-route-announcer__)')).not.toBeVisible();
     });
 
     test("tenant with no room shows no banner", async ({ page, request }) => {
@@ -209,7 +213,7 @@ test.describe("rent missing banner", () => {
         page.getByRole("button", { name: /assign room|tambah kamar/i })
       ).toBeVisible({ timeout: 15000 });
 
-      await expect(page.getByRole("alert")).not.toBeVisible();
+      await expect(page.locator('[role="alert"]:not(#__next-route-announcer__)')).not.toBeVisible();
     });
   });
 
@@ -224,7 +228,7 @@ test.describe("rent missing banner", () => {
       if (!data) { test.skip(); return; }
 
       await goToTenantDetail(page, data.tenantId);
-      await expect(page.getByRole("alert")).toBeVisible({ timeout: 15000 });
+      await expect(page.locator('[role="alert"]:not(#__next-route-announcer__)')).toBeVisible({ timeout: 15000 });
 
       const hasHorizontalScroll = await page.evaluate(
         () => document.documentElement.scrollWidth > window.innerWidth
@@ -243,7 +247,7 @@ test.describe("rent missing banner", () => {
 
       await goToTenantDetail(page, data.tenantId);
 
-      const banner = page.getByRole("alert");
+      const banner = page.locator('[role="alert"]:not(#__next-route-announcer__)');
       await expect(banner).toBeVisible({ timeout: 15000 });
 
       // Icon must be present with aria-hidden (color + icon + text, not color alone)
