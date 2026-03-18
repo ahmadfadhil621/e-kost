@@ -24,8 +24,6 @@ export interface RoomCardProps {
   room: RoomForCard;
   /** Used for room detail and for Available action links */
   propertyId: string;
-  /** Used when occupied and we have tenantId — tap goes to tenant detail */
-  tenantHref?: string;
   /** Optional: called when user taps "Assign Tenant" (Available rooms). If not set, links to room detail. */
   onAssignTenant?: (roomId: string) => void;
   /** Optional: called when user taps "Change room status" (Available rooms). If not set, links to room detail. */
@@ -39,14 +37,12 @@ function roomDetailHref(propertyId: string, roomId: string): string {
 export function RoomCard({
   room,
   propertyId,
-  tenantHref,
   onAssignTenant,
   onChangeStatus,
 }: RoomCardProps) {
   const { t } = useTranslation();
   const formatCurrency = useFormatCurrency();
   const roomHref = roomDetailHref(propertyId, room.id);
-  const occupiedHref = tenantHref ?? roomHref;
   const typeRent = `${room.roomType} · ${formatCurrency(room.monthlyRent)}${t("room.card.perMonth")}`;
 
   const baseCardClasses =
@@ -164,7 +160,7 @@ export function RoomCard({
     room.outstandingBalance === undefined || room.outstandingBalance <= 0;
   return (
     <Link
-      href={occupiedHref}
+      href={roomHref}
       className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
       data-testid="room-card"
     >

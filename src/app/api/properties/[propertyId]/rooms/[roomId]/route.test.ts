@@ -4,11 +4,17 @@
 // REQ 4.2 -> it('PUT returns 200 and updated room when body is valid')
 // REQ 4.5 -> it('PUT returns 400 when monthly rent is negative')
 // REQ 4.4 -> it('PUT returns 200 and updated room when body is valid')
+//
+// Traceability: room-detail-navigation
+// REQ 3.1 -> it('GET returns tenantId and tenantName for occupied room with tenant')
+// REQ 3.2 -> it('GET returns base fields without tenant data for available room')
+// REQ 3.3 -> it('GET returns base fields without tenant data for occupied room with no tenant')
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextResponse } from "next/server";
 import { GET, PUT } from "./route";
 import { createRoom } from "@/test/fixtures/room";
+import { createTenant } from "@/test/fixtures/tenant";
 
 const propertyId = "prop-123";
 const roomId = "room-456";
@@ -28,8 +34,15 @@ vi.mock("@/lib/room-service-instance", () => ({
   },
 }));
 
+vi.mock("@/lib/tenant-service-instance", () => ({
+  tenantService: {
+    listTenants: vi.fn(),
+  },
+}));
+
 const { withPropertyAccess } = await import("@/lib/property-access");
 const { roomService } = await import("@/lib/room-service-instance");
+const { tenantService } = await import("@/lib/tenant-service-instance");
 
 beforeEach(() => {
   vi.mocked(withPropertyAccess).mockResolvedValue({
@@ -51,6 +64,7 @@ describe("GET /api/properties/[propertyId]/rooms/[roomId]", () => {
         status: "available",
       });
       vi.mocked(roomService.getRoom).mockResolvedValue(room);
+      vi.mocked(tenantService.listTenants).mockResolvedValue([]);
 
       const request = new Request(
         `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`
@@ -109,6 +123,7 @@ describe("GET /api/properties/[propertyId]/rooms/[roomId]", () => {
     it("GET returns 200 when room exists in property", async () => {
       const room = createRoom({ id: roomId, propertyId });
       vi.mocked(roomService.getRoom).mockResolvedValue(room);
+      vi.mocked(tenantService.listTenants).mockResolvedValue([]);
 
       const request = new Request(
         `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`
@@ -119,6 +134,73 @@ describe("GET /api/properties/[propertyId]/rooms/[roomId]", () => {
       });
 
       expect(response.status).toBe(200);
+    });
+
+    // REQ 3.1 — occupied room with assigned tenant includes tenantId and tenantName
+    it("GET returns tenantId and tenantName for occupied room with tenant", async () => {
+      const room = createRoom({ id: roomId, propertyId, status: "occupied" });
+      const tenant = createTenant({
+        id: "tenant-789",
+        propertyId,
+        name: "Jane Doe",
+        roomId: roomId,
+        movedOutAt: null,
+      });
+      vi.mocked(roomService.getRoom).mockResolvedValue(room);
+      vi.mocked(tenantService.listTenants).mockResolvedValue([tenant]);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`
+      );
+
+      const response = await GET(request, {
+        params: Promise.resolve({ propertyId, roomId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.tenantId).toBe("tenant-789");
+      expect(data.tenantName).toBe("Jane Doe");
+    });
+
+    // REQ 3.2 — non-occupied room does not include tenant fields
+    it("GET returns base fields without tenant data for available room", async () => {
+      const room = createRoom({ id: roomId, propertyId, status: "available" });
+      vi.mocked(roomService.getRoom).mockResolvedValue(room);
+      vi.mocked(tenantService.listTenants).mockResolvedValue([]);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`
+      );
+
+      const response = await GET(request, {
+        params: Promise.resolve({ propertyId, roomId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.tenantId).toBeUndefined();
+      expect(data.tenantName).toBeUndefined();
+    });
+
+    // REQ 3.3 — occupied room with no matching tenant returns base fields only
+    it("GET returns base fields without tenant data for occupied room with no tenant", async () => {
+      const room = createRoom({ id: roomId, propertyId, status: "occupied" });
+      vi.mocked(roomService.getRoom).mockResolvedValue(room);
+      vi.mocked(tenantService.listTenants).mockResolvedValue([]);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`
+      );
+
+      const response = await GET(request, {
+        params: Promise.resolve({ propertyId, roomId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.tenantId).toBeUndefined();
+      expect(data.tenantName).toBeUndefined();
     });
   });
 });

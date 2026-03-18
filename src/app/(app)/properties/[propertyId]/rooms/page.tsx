@@ -94,11 +94,6 @@ export default function RoomListPage() {
               <RoomCard
                 room={room}
                 propertyId={propertyId}
-                tenantHref={
-                  room.tenantId
-                    ? `/properties/${propertyId}/tenants/${room.tenantId}`
-                    : undefined
-                }
               />
             </li>
           ))}

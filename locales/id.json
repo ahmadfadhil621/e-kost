@@ -168,7 +168,8 @@
     "detail": {
       "title": "Detail Kamar",
       "edit": "Ubah",
-      "changeStatus": "Ubah Status"
+      "changeStatus": "Ubah Status",
+      "currentTenant": "Penyewa Saat Ini"
     },
     "status": {
       "available": "Tersedia",

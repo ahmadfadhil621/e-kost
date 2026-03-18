@@ -168,7 +168,8 @@
     "detail": {
       "title": "Room Details",
       "edit": "Edit",
-      "changeStatus": "Change Status"
+      "changeStatus": "Change Status",
+      "currentTenant": "Current Tenant"
     },
     "status": {
       "available": "Available",

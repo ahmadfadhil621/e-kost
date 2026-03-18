@@ -26,6 +26,8 @@ type RoomDetail = {
   status: RoomStatus;
   createdAt: string;
   updatedAt: string;
+  tenantId?: string;
+  tenantName?: string;
 };
 
 async function fetchRoom(
@@ -147,6 +149,22 @@ export default function RoomDetailPage() {
           {t("common.date")}: {createdAt}
         </p>
       </div>
+
+      {room.status === "occupied" && room.tenantId && (
+        <div className="space-y-1">
+          <span className="text-sm font-medium text-muted-foreground">
+            {t("room.detail.currentTenant")}
+          </span>
+          <p>
+            <Link
+              href={`/properties/${propertyId}/tenants/${room.tenantId}`}
+              className="text-primary underline underline-offset-2 font-medium"
+            >
+              {room.tenantName}
+            </Link>
+          </p>
+        </div>
+      )}
 
       <div className="flex flex-col gap-2">
         <Button asChild className="min-h-[44px] min-w-[44px]">

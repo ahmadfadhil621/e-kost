@@ -3,6 +3,7 @@ import { z } from "zod";
 import { updateRoomSchema } from "@/domain/schemas/room";
 import { withPropertyAccess } from "@/lib/property-access";
 import { roomService } from "@/lib/room-service-instance";
+import { tenantService } from "@/lib/tenant-service-instance";
 
 export async function GET(
   request: Request,
@@ -21,7 +22,7 @@ export async function GET(
     if (!room) {
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
-    return NextResponse.json({
+    const base = {
       id: room.id,
       propertyId: room.propertyId,
       roomNumber: room.roomNumber,
@@ -30,7 +31,24 @@ export async function GET(
       status: room.status,
       createdAt: room.createdAt,
       updatedAt: room.updatedAt,
-    });
+    };
+    if (room.status === "occupied") {
+      const tenants = await tenantService.listTenants(
+        access.userId!,
+        propertyId
+      );
+      const tenant = tenants.find(
+        (t) => t.roomId === room.id && !t.movedOutAt
+      );
+      if (tenant) {
+        return NextResponse.json({
+          ...base,
+          tenantId: tenant.id,
+          tenantName: tenant.name,
+        });
+      }
+    }
+    return NextResponse.json(base);
   } catch (err) {
     if (err instanceof Error && err.message.includes("Forbidden")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
