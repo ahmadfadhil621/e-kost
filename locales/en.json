@@ -285,7 +285,10 @@
       "unpaid": "Unpaid"
     },
     "noRoom": "No room assigned — balance not available",
-    "loadFailed": "Failed to load balance"
+    "loadFailed": "Failed to load balance",
+    "rentMissingBanner": {
+      "message": "Rent missing — {{amount}} outstanding"
+    }
   },
   "notes": {
     "title": "Notes",

@@ -18,7 +18,7 @@ Testing is part of the issue-driven workflow defined in `CLAUDE.md`. After deriv
 3. **Validate test quality** -- 3 gates: structural, fault injection, review checklist. Skill: `/test-validator`
 4. **Implement** -- write code to make tests pass
 5. **Iterate** -- fix implementation, not tests
-6. **Regression** -- full suite (`npm run test:run` + `npm run test:e2e`)
+6. **Regression** -- `npm run test:run`. E2E runs in CI.
 
 ### Regression Failure Rule
 

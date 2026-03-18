@@ -285,7 +285,10 @@
       "unpaid": "Belum bayar"
     },
     "noRoom": "Belum ada kamar — saldo tidak tersedia",
-    "loadFailed": "Gagal memuat saldo"
+    "loadFailed": "Gagal memuat saldo",
+    "rentMissingBanner": {
+      "message": "Sewa belum dibayar — {{amount}} tertunggak"
+    }
   },
   "notes": {
     "title": "Catatan",

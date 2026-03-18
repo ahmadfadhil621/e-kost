@@ -52,7 +52,7 @@ All work starts from a GitHub issue. See `.github/ISSUE_TEMPLATE/` for templates
 | 5 | **Validate Tests** | Run 3 quality gates: structural, fault injection, review checklist. Use `/test-validator` skill. |
 | 6 | **Implement** | Write production code to make all tests pass. Layer by layer. |
 | 7 | **Iterate** | If tests fail, fix implementation — never weaken tests. Tests are source of truth. |
-| 8 | **Regression** | Run full `npm run test:run` + `npm run test:e2e`. Fix regressions in implementation. |
+| 8 | **Regression** | Run `npm run test:run`. Fix regressions in implementation. E2E tests run in CI — push to trigger. |
 | 9 | **Commit** | Pause at logical boundaries. Propose commit message. User handles git. |
 
 Tests are the source of truth. Only modify tests if they are genuinely broken or incorrect — this should be rare.

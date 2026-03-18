@@ -114,18 +114,6 @@ export function BalanceSection({ propertyId, tenantId }: BalanceSectionProps) {
                 )}
               </dd>
             </div>
-            <div className="flex justify-between gap-2">
-              <dt className="text-muted-foreground">
-                {t("balance.outstanding")}
-              </dt>
-              <dd className="font-medium">
-                {formatCurrency(
-                  data.outstandingBalance,
-                  currencyLocale,
-                  currencyCode
-                )}
-              </dd>
-            </div>
           </dl>
         </CardContent>
       </Card>

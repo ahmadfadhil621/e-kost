@@ -23,8 +23,7 @@ Write Playwright E2E tests as part of the issue-driven TDD workflow. For general
 2. Identify key user actions (1 spec file per action)
 3. Write Playwright spec files in `e2e/<feature>/`
 4. Add traceability comments (same format as unit tests -- see `test-author` skill)
-5. Run `npx playwright test e2e/<feature>/ --reporter=list` to verify syntax
-6. Hand off to test validation using the `/test-validator` skill
+5. Hand off to test validation using the `/test-validator` skill
 
 ## What to Test
 
