@@ -2,7 +2,7 @@
 
 ## 1. Domain Layer
 
-- [ ] 1.1 Define Balance entity and validation schemas
+- [x] 1.1 Define Balance entity and validation schemas
   - **Description**: Create TypeScript interfaces for BalanceResult and balance-related types
   - **Acceptance Criteria**:
     - TypeScript interfaces for BalanceResult (tenantId, monthlyRent, totalPayments, outstandingBalance, status)
@@ -11,7 +11,7 @@
   - **Dependencies**: None
   - **Effort**: S
 
-- [ ] 1.2 Define IBalanceCalculator interface
+- [x] 1.2 Define IBalanceCalculator interface
   - **Description**: Create interface for balance calculation operations
   - **Acceptance Criteria**:
     - Methods: calculateBalance(tenantId), calculateBalances(tenantIds) for batch
@@ -22,7 +22,7 @@
 
 ## 2. Service Layer
 
-- [ ] 2.1 Implement BalanceService
+- [x] 2.1 Implement BalanceService
   - **Description**: Build service layer with balance calculation business logic
   - **Acceptance Criteria**:
     - `calculateBalance` retrieves tenant's room monthly rent and sums all payments, computes difference
@@ -35,7 +35,7 @@
   - **Dependencies**: 1.2
   - **Effort**: M
 
-- [ ] 2.2 Write unit tests for BalanceService
+- [x] 2.2 Write unit tests for BalanceService
   - **Description**: Test all balance calculation business logic
   - **Acceptance Criteria**:
     - Tests for calculation (no payments = full rent, partial payment, exact payment, overpayment = zero)
@@ -50,7 +50,7 @@
 
 ## 3. Data Layer
 
-- [ ] 3.1 Implement balance calculation queries
+- [x] 3.1 Implement balance calculation queries
   - **Description**: Build optimized database queries for balance computation
   - **Acceptance Criteria**:
     - Single-tenant query: JOIN tenant → room (monthly rent) + aggregate payments
@@ -62,7 +62,7 @@
 
 ## 4. API Layer
 
-- [ ] 4.1 Implement balance API routes
+- [x] 4.1 Implement balance API routes
   - **Description**: Create REST endpoints for balance retrieval scoped to a property
   - **Acceptance Criteria**:
     - GET /api/properties/[propertyId]/tenants/[tenantId]/balance — single tenant balance (authenticated)
@@ -74,7 +74,7 @@
   - **Dependencies**: 2.1, 3.1
   - **Effort**: M
 
-- [ ] 4.2 Write API route tests
+- [x] 4.2 Write API route tests
   - **Description**: Test all balance API endpoints
   - **Acceptance Criteria**:
     - Tests for single tenant balance (paid, unpaid, no payments, overpaid)
@@ -86,7 +86,7 @@
 
 ## 5. UI Layer
 
-- [ ] 5.1 Create BalanceSection component
+- [x] 5.1 Create BalanceSection component
   - **Description**: Build balance display section for tenant detail page
   - **Acceptance Criteria**:
     - Displays outstanding balance prominently
@@ -100,7 +100,7 @@
   - **Dependencies**: 4.1
   - **Effort**: M
 
-- [ ] 5.2 Create BalanceStatusIndicator component
+- [x] 5.2 Create BalanceStatusIndicator component
   - **Description**: Build color-coded status indicator for payment status
   - **Acceptance Criteria**:
     - Green indicator + text label for paid status
@@ -113,7 +113,7 @@
   - **Dependencies**: None
   - **Effort**: S
 
-- [ ] 5.3 Add balance info to tenant list cards
+- [x] 5.3 Add balance info to tenant list cards
   - **Description**: Display balance and status in tenant list view
   - **Acceptance Criteria**:
     - Each tenant card shows outstanding balance amount
@@ -126,7 +126,7 @@
   - **Dependencies**: 4.1, 5.2
   - **Effort**: M
 
-- [ ] 5.4 Integrate BalanceSection into tenant detail page
+- [x] 5.4 Integrate BalanceSection into tenant detail page
   - **Description**: Add balance section to existing tenant detail page
   - **Acceptance Criteria**:
     - Balance section appears prominently in tenant detail view
@@ -136,7 +136,7 @@
   - **Dependencies**: 5.1
   - **Effort**: S
 
-- [ ] 5.5 Add optional balance sorting to tenant list
+- [x] 5.5 Add optional balance sorting to tenant list
   - **Description**: Allow sorting/filtering tenants by balance status
   - **Acceptance Criteria**:
     - Option to show unpaid tenants first
@@ -148,7 +148,7 @@
 
 ## 6. Internationalization (i18n)
 
-- [ ] 6.1 Extract and translate balance display strings
+- [x] 6.1 Extract and translate balance display strings
   - **Description**: Add all balance UI text to translation files
   - **Acceptance Criteria**:
     - All balance labels, status labels in en.json and id.json
@@ -161,7 +161,7 @@
 
 ## 7. Testing & Validation
 
-- [ ] 7.1 Test balance calculation accuracy
+- [x] 7.1 Test balance calculation accuracy
   - **Description**: Verify balance calculations are correct
   - **Acceptance Criteria**:
     - Balance equals rent when no payments recorded
@@ -171,7 +171,7 @@
   - **Dependencies**: 2.1
   - **Effort**: S
 
-- [ ] 7.2 Test balance updates after payment
+- [x] 7.2 Test balance updates after payment
   - **Description**: Verify balance recalculates when payment recorded
   - **Acceptance Criteria**:
     - Balance updates within 2 seconds after payment
@@ -179,7 +179,7 @@
   - **Dependencies**: 5.1, 5.2
   - **Effort**: S
 
-- [ ] 7.3 Test balance updates after room change
+- [x] 7.3 Test balance updates after room change
   - **Description**: Verify balance recalculates when room assignment changes
   - **Acceptance Criteria**:
     - Balance updates within 2 seconds after room change
@@ -188,7 +188,7 @@
   - **Dependencies**: 5.1
   - **Effort**: S
 
-- [ ] 7.4 Test status indicators
+- [x] 7.4 Test status indicators
   - **Description**: Verify status indicators meet accessibility requirements
   - **Acceptance Criteria**:
     - Indicators visually distinct at phone scale
@@ -197,7 +197,7 @@
   - **Dependencies**: 5.2, 5.3
   - **Effort**: S
 
-- [ ] 7.5 Test mobile responsiveness
+- [x] 7.5 Test mobile responsiveness
   - **Description**: Verify all balance displays work on mobile
   - **Acceptance Criteria**:
     - All screens render at 320px-480px without horizontal scroll
@@ -206,7 +206,7 @@
   - **Dependencies**: 5.1, 5.3
   - **Effort**: M
 
-- [ ] 7.6 Test performance with 1,000 tenants
+- [x] 7.6 Test performance with 1,000 tenants
   - **Description**: Verify balance calculations at scale
   - **Acceptance Criteria**:
     - Batch balance query completes in <500ms for 1,000 tenants
@@ -214,6 +214,10 @@
     - No performance degradation
   - **Dependencies**: 5.3
   - **Effort**: S
+
+## Progress Note
+
+All tasks (1.1–7.6) complete. BalanceService, balance calculation queries, API routes (GET /balances, GET /tenants/[id]/balance), BalanceSection, BalanceStatusIndicator, tenant list balance display, i18n keys, and E2E tests are implemented and passing in CI.
 
 ## Open Questions / Assumptions
 

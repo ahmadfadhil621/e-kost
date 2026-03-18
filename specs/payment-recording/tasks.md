@@ -2,7 +2,7 @@
 
 ## 1. Domain Layer
 
-- [ ] 1.1 Define Payment entity and validation schemas
+- [x] 1.1 Define Payment entity and validation schemas
   - **Description**: Create shared Zod schemas for payment CRUD and TypeScript interfaces for Payment
   - **Acceptance Criteria**:
     - `createPaymentSchema` validates tenantId (required, valid UUID), amount (positive number, required), paymentDate (valid date, required)
@@ -11,7 +11,7 @@
   - **Dependencies**: None
   - **Effort**: S
 
-- [ ] 1.2 Define IPaymentRepository interface
+- [x] 1.2 Define IPaymentRepository interface
   - **Description**: Create repository interface for payment data access
   - **Acceptance Criteria**:
     - Methods: create, findByProperty, findByTenant, findById
@@ -23,7 +23,7 @@
 
 ## 2. Service Layer
 
-- [ ] 2.1 Implement PaymentService
+- [x] 2.1 Implement PaymentService
   - **Description**: Build service layer with business logic for payment recording and retrieval
   - **Acceptance Criteria**:
     - `createPayment` validates tenant exists, tenant has active room assignment (not moved out), amount is positive, date is valid
@@ -34,7 +34,7 @@
   - **Dependencies**: 1.2
   - **Effort**: M
 
-- [ ] 2.2 Write unit tests for PaymentService
+- [x] 2.2 Write unit tests for PaymentService
   - **Description**: Test all payment business logic
   - **Acceptance Criteria**:
     - Tests for creation (valid data, missing fields, negative/zero amount, invalid date, moved-out tenant blocked, no room assignment blocked)
@@ -47,7 +47,7 @@
 
 ## 3. Data Layer
 
-- [ ] 3.1 Verify Prisma schema for Payment
+- [x] 3.1 Verify Prisma schema for Payment
   - **Description**: Ensure Payment model exists in Prisma schema with correct fields, indexes, and relations
   - **Acceptance Criteria**:
     - Payment model: id, tenantId, amount (Decimal), paymentDate (Date), createdAt
@@ -58,7 +58,7 @@
   - **Dependencies**: None (Phase 0 creates schema)
   - **Effort**: S
 
-- [ ] 3.2 Implement PrismaPaymentRepository
+- [x] 3.2 Implement PrismaPaymentRepository
   - **Description**: Implement IPaymentRepository using Prisma client
   - **Acceptance Criteria**:
     - All interface methods implemented
@@ -70,7 +70,7 @@
 
 ## 4. API Layer
 
-- [ ] 4.1 Implement payment API routes
+- [x] 4.1 Implement payment API routes
   - **Description**: Create REST endpoints for payment recording and retrieval scoped to a property
   - **Acceptance Criteria**:
     - POST /api/properties/[propertyId]/payments — record payment (authenticated)
@@ -82,7 +82,7 @@
   - **Dependencies**: 2.1, 3.2
   - **Effort**: M
 
-- [ ] 4.2 Write API route tests
+- [x] 4.2 Write API route tests
   - **Description**: Test all payment API endpoints
   - **Acceptance Criteria**:
     - Tests for each endpoint: success, validation errors, not found, unauthorized
@@ -94,7 +94,7 @@
 
 ## 5. UI Layer
 
-- [ ] 5.1 Create PaymentForm component
+- [x] 5.1 Create PaymentForm component
   - **Description**: Build mobile-responsive form for recording payments
   - **Acceptance Criteria**:
     - Fields: tenant selection (dropdown), payment amount (number), payment date (date picker)
@@ -109,7 +109,7 @@
   - **Dependencies**: 4.1
   - **Effort**: M
 
-- [ ] 5.2 Create PaymentList page
+- [x] 5.2 Create PaymentList page
   - **Description**: Build page showing all payments for the active property
   - **Acceptance Criteria**:
     - Card layout showing tenant name, amount, payment date, recording timestamp
@@ -123,7 +123,7 @@
   - **Dependencies**: 4.1
   - **Effort**: M
 
-- [ ] 5.3 Create TenantPaymentSection component
+- [x] 5.3 Create TenantPaymentSection component
   - **Description**: Build per-tenant payment section for embedding in tenant detail page
   - **Acceptance Criteria**:
     - Displays all payments for a specific tenant
@@ -137,7 +137,7 @@
   - **Dependencies**: 4.1
   - **Effort**: M
 
-- [ ] 5.4 Integrate PaymentSection into tenant detail page
+- [x] 5.4 Integrate PaymentSection into tenant detail page
   - **Description**: Add payment section to existing tenant detail page
   - **Acceptance Criteria**:
     - Payment section appears in tenant detail view
@@ -148,7 +148,7 @@
 
 ## 6. Internationalization (i18n)
 
-- [ ] 6.1 Extract and translate payment recording strings
+- [x] 6.1 Extract and translate payment recording strings
   - **Description**: Add all payment UI text to translation files
   - **Acceptance Criteria**:
     - All form labels, buttons, messages in en.json and id.json
@@ -161,7 +161,7 @@
 
 ## 7. Testing & Validation
 
-- [ ] 7.1 Test payment recording workflow
+- [x] 7.1 Test payment recording workflow
   - **Description**: Verify payment recording meets acceptance criteria
   - **Acceptance Criteria**:
     - Can record payment in under 20 seconds
@@ -172,7 +172,7 @@
   - **Dependencies**: 5.1
   - **Effort**: S
 
-- [ ] 7.2 Test payment list views
+- [x] 7.2 Test payment list views
   - **Description**: Verify payment list and per-tenant views
   - **Acceptance Criteria**:
     - All payments displayed, most recent first
@@ -182,7 +182,7 @@
   - **Dependencies**: 5.2, 5.3
   - **Effort**: S
 
-- [ ] 7.3 Test data persistence
+- [x] 7.3 Test data persistence
   - **Description**: Verify payment data persists correctly
   - **Acceptance Criteria**:
     - Payments visible after closing and reopening application
@@ -191,7 +191,7 @@
   - **Dependencies**: 5.1, 5.2
   - **Effort**: S
 
-- [ ] 7.4 Test mobile responsiveness
+- [x] 7.4 Test mobile responsiveness
   - **Description**: Verify all payment screens work on mobile
   - **Acceptance Criteria**:
     - All screens render at 320px-480px without horizontal scroll
@@ -201,7 +201,7 @@
   - **Dependencies**: 5.1, 5.2, 5.3
   - **Effort**: M
 
-- [ ] 7.5 Test performance with 10,000 payments
+- [x] 7.5 Test performance with 10,000 payments
   - **Description**: Verify system handles required payment capacity
   - **Acceptance Criteria**:
     - List view remains responsive with 10,000 records
@@ -209,6 +209,10 @@
     - No performance degradation
   - **Dependencies**: 5.2
   - **Effort**: S
+
+## Progress Note
+
+All tasks (1.1–7.5) complete. Domain schemas, PaymentService, PrismaPaymentRepository, API routes (POST/GET /payments, GET /tenants/[id]/payments), UI components (PaymentForm, PaymentList, TenantPaymentSection), i18n keys, and E2E tests are implemented and passing in CI.
 
 ## Open Questions / Assumptions
 

@@ -54,7 +54,7 @@ src/
 │   ├── room/                # Room form, list, filter, cards, status indicator
 │   ├── tenant/              # Tenant form, assign room, move-out
 │   ├── payment/             # Payment form, list, per-tenant section
-│   ├── balance/             # Balance section, status indicator (tenant detail & list)
+│   ├── balance/             # Balance section, status indicator, rent-missing banner
 │   ├── expense/             # Expense form, list
 │   ├── finance/             # Month selector, summary cards, category breakdown
 │   ├── notes/               # Note form, note card, notes section (tenant detail)

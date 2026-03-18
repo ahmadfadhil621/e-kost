@@ -88,6 +88,28 @@
   - **Dependencies**: 2.1, 3.2
   - **Effort**: L
 
+- [x] 4.3 Implement room archive, unarchive, and delete API routes
+  - **Description**: Create REST endpoints for archiving, restoring, and hard-deleting rooms
+  - **Acceptance Criteria**:
+    - POST /api/properties/[propertyId]/rooms/[roomId]/archive — soft-archive room (sets archivedAt)
+    - POST /api/properties/[propertyId]/rooms/[roomId]/unarchive — restore archived room (clears archivedAt)
+    - DELETE /api/properties/[propertyId]/rooms/[roomId] — hard delete room
+    - Archived rooms excluded from default room list
+    - Property access middleware applied to all routes
+    - Consistent JSON error responses (400, 404)
+  - **Dependencies**: 2.1, 3.2
+  - **Effort**: M
+
+- [x] 4.4 Write archive/unarchive/delete API route tests
+  - **Description**: Test archive, unarchive, and delete endpoints
+  - **Acceptance Criteria**:
+    - Tests for archive: success, already archived, not found, unauthorized
+    - Tests for unarchive: success, not archived, not found, unauthorized
+    - Tests for delete: success, not found, unauthorized
+    - Tests for property access middleware enforcement
+  - **Dependencies**: 4.3
+  - **Effort**: M
+
 - [x] 4.2 Write API route tests
   - **Description**: Test all room API endpoints
   - **Acceptance Criteria**:
@@ -229,7 +251,7 @@
 
 ## Progress Note
 
-TDD steps 1–3 complete. Domain, service, PrismaRoomRepository, API, RoomForm, RoomList, RoomCard, RoomDetail, StatusFilter, StatusIndicator, and i18n (en.json, id.json) are implemented. Remaining: 7.x manual validation (CRUD workflow, filtering, mobile, performance).
+TDD steps 1–3 complete. Domain, service, PrismaRoomRepository, API (CRUD + archive/unarchive/delete), RoomForm, RoomList, RoomCard, RoomDetail, StatusFilter, StatusIndicator, and i18n (en.json, id.json) are implemented. Remaining: 7.x manual validation (CRUD workflow, filtering, mobile, performance).
 
 ## Open Questions / Assumptions
 
