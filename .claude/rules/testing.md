@@ -20,6 +20,19 @@ Testing is part of the issue-driven workflow defined in `CLAUDE.md`. After deriv
 5. **Iterate** -- fix implementation, not tests
 6. **Regression** -- `npm run test:run`. E2E runs in CI.
 
+### Failing E2E Test Workflow
+
+When a failing E2E test is reported, always follow this order:
+
+1. **Reproduce** — run only the impacted spec(s): `npx playwright test e2e/<spec-file>`
+2. **Identify** — read the exact error, trace it to the root cause in production code
+3. **Resolve** — fix production code first (components, API, locales, etc.)
+
+Rules:
+- **Test modification is last resort** — only when the production code is demonstrably correct and cannot be changed (e.g. framework-level behaviour outside our control)
+- **Never increase timeouts as the sole fix** — that hides the real problem; address the underlying cause
+- When a test must be modified, explain clearly why production code cannot fix it
+
 ### Regression Failure Rule
 
 If a previously-passing test fails during regression, the new implementation caused a regression. Fix the **implementation**, not the old test.

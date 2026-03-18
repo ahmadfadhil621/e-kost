@@ -7,7 +7,7 @@
 // REQ 2.6  -> test('tenant with no room shows no banner')
 // REQ 3.1  -> test('banner has role=alert')
 // REQ 4.1  -> test('banner does not cause horizontal scroll on mobile viewport')
-// REQ 1.1  -> test('outstanding balance row is absent from balance section')
+// REQ 1.1  -> test('outstanding balance section is absent from tenant detail')
 
 import { test, expect, type APIRequestContext } from "@playwright/test";
 import { getPropertyId, goToTenantDetail } from "../helpers/tenant-room-basics";
@@ -258,7 +258,7 @@ test.describe("rent missing banner", () => {
       await expect(banner).toContainText(/rent missing|sewa belum dibayar/i);
     });
 
-    test("outstanding balance row is absent from balance section", async ({
+    test("outstanding balance section is absent from tenant detail", async ({
       page,
       request,
     }) => {
@@ -269,18 +269,15 @@ test.describe("rent missing banner", () => {
 
       await goToTenantDetail(page, data.tenantId);
 
-      // Wait for balance section to load
+      // Wait for page to load (action buttons visible)
       await expect(
-        page.getByText(/monthly rent|sewa bulanan/i)
+        page.getByRole("button", { name: /move out|pindah keluar/i })
       ).toBeVisible({ timeout: 15000 });
 
-      // The "Outstanding balance" dt row must not be present
-      // Note: section heading "Outstanding Balance" (capital B) may still exist — we check
-      // for the specific row label "Outstanding balance" (lowercase b)
-      const outstandingRow = page.getByText("Outstanding balance", {
-        exact: true,
-      });
-      await expect(outstandingRow).not.toBeAttached();
+      // The entire balance section has been removed — neither the heading
+      // nor the outstanding balance row should be present
+      await expect(page.getByText("Outstanding balance", { exact: true })).not.toBeAttached();
+      await expect(page.getByText(/monthly rent|sewa bulanan/i)).not.toBeAttached();
     });
   });
 });
