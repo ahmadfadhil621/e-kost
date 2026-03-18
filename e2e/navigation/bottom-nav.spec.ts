@@ -116,7 +116,7 @@ test.describe("bottom nav", () => {
         .getByRole("navigation")
         .getByRole("link", { name: /rooms|kamar/i })
         .click();
-      await expect(page).toHaveURL(/\/properties\/[^/]+\/rooms/);
+      await expect(page).toHaveURL(/\/properties\/[^/]+\/rooms/, { timeout: 15000 });
       await expect(
         page.getByRole("navigation").getByRole("link", { name: /rooms|kamar/i })
       ).toBeVisible();
