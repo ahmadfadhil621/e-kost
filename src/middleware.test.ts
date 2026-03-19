@@ -46,8 +46,8 @@ const fakeSession = {
 describe("middleware", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(NextResponse.redirect).mockReturnValue({ _type: "redirect" } as any);
-    vi.mocked(NextResponse.next).mockReturnValue({ _type: "next" } as any);
+    vi.mocked(NextResponse.redirect).mockReturnValue({ _type: "redirect" } as unknown as ReturnType<typeof NextResponse.redirect>);
+    vi.mocked(NextResponse.next).mockReturnValue({ _type: "next" } as unknown as ReturnType<typeof NextResponse.next>);
   });
 
   describe("good cases", () => {
@@ -74,7 +74,7 @@ describe("middleware", () => {
     });
 
     it("authenticated user on / passes through", async () => {
-      vi.mocked(auth.api.getSession).mockResolvedValue(fakeSession as any);
+      vi.mocked(auth.api.getSession).mockResolvedValue(fakeSession as unknown as Awaited<ReturnType<typeof auth.api.getSession>>);
 
       await middleware(makeRequest("/"));
 
@@ -105,7 +105,7 @@ describe("middleware", () => {
 
   describe("edge cases", () => {
     it("authenticated user on /login is redirected to /", async () => {
-      vi.mocked(auth.api.getSession).mockResolvedValue(fakeSession as any);
+      vi.mocked(auth.api.getSession).mockResolvedValue(fakeSession as unknown as Awaited<ReturnType<typeof auth.api.getSession>>);
 
       await middleware(makeRequest("/login"));
 
@@ -116,7 +116,7 @@ describe("middleware", () => {
     });
 
     it("authenticated user on /register is redirected to /", async () => {
-      vi.mocked(auth.api.getSession).mockResolvedValue(fakeSession as any);
+      vi.mocked(auth.api.getSession).mockResolvedValue(fakeSession as unknown as Awaited<ReturnType<typeof auth.api.getSession>>);
 
       await middleware(makeRequest("/register"));
 
