@@ -123,7 +123,7 @@ test.describe("archive and delete room", () => {
         await page.getByRole("dialog").getByRole("button", { name: /^archive$/i }).click();
 
         await page.waitForURL(/\/properties\/[^/]+\/rooms$/, { timeout: 15000 });
-        await expect(page.getByText(/room archived successfully/i)).toBeVisible({ timeout: 10000 });
+        await expect(page.getByText("Room archived successfully", { exact: true })).toBeVisible({ timeout: 10000 });
       } finally {
         await deleteRoom(request, baseURL, roomId);
       }
@@ -143,7 +143,7 @@ test.describe("archive and delete room", () => {
       await page.getByRole("dialog").getByRole("button", { name: /^delete$/i }).click();
 
       await page.waitForURL(/\/properties\/[^/]+\/rooms$/, { timeout: 15000 });
-      await expect(page.getByText(/room deleted successfully/i)).toBeVisible({ timeout: 10000 });
+      await expect(page.getByText("Room deleted successfully", { exact: true })).toBeVisible({ timeout: 10000 });
     });
 
     test("user restores archived room and sees active state", async ({
@@ -160,7 +160,7 @@ test.describe("archive and delete room", () => {
         await expect(page.getByText(/^archived$/i)).toBeVisible({ timeout: 5000 });
 
         await page.getByRole("button", { name: /restore/i }).click();
-        await expect(page.getByText(/room restored successfully/i)).toBeVisible({ timeout: 10000 });
+        await expect(page.getByText("Room restored successfully", { exact: true })).toBeVisible({ timeout: 10000 });
         await expect(page.getByText(/^archived$/i)).not.toBeVisible({ timeout: 5000 });
       } finally {
         await deleteRoom(request, baseURL, roomId);
@@ -184,7 +184,7 @@ test.describe("archive and delete room", () => {
         await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
         await page.getByRole("dialog").getByRole("button", { name: /^archive$/i }).click();
         await expect(
-          page.getByText(/cannot archive.*active tenant|move the tenant out/i)
+          page.getByText("Cannot archive room with active tenant", { exact: true })
         ).toBeVisible({ timeout: 10000 });
         // Still on room detail page — no redirect
         await expect(page.getByText(/danger zone/i)).toBeVisible({ timeout: 5000 });
@@ -209,7 +209,7 @@ test.describe("archive and delete room", () => {
         await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
         await page.getByRole("dialog").getByRole("button", { name: /^delete$/i }).click();
         await expect(
-          page.getByText(/cannot delete.*active tenant|move the tenant out/i)
+          page.getByText("Cannot delete room with active tenant", { exact: true })
         ).toBeVisible({ timeout: 10000 });
         // Still on room detail page — no redirect
         await expect(page.getByText(/danger zone/i)).toBeVisible({ timeout: 5000 });
