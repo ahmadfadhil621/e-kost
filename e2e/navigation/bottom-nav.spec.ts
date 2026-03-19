@@ -105,6 +105,21 @@ test.describe("bottom nav", () => {
   });
 
   test.describe("edge cases", () => {
+    test("nav stays fixed at bottom of viewport after scrolling", async ({ page }) => {
+      await page.goto("/");
+      await page.evaluate(() =>
+        document.querySelector("main")?.setAttribute(
+          "style", "height:2000px"
+        )
+      );
+      await page.evaluate(() => window.scrollTo(0, 1000));
+      const nav = page.getByRole("navigation");
+      await expect(nav).toBeVisible();
+      const box = await nav.boundingBox();
+      const viewport = page.viewportSize()!;
+      expect(box!.y + box!.height).toBeCloseTo(viewport.height, -1);
+    });
+
     test("bottom nav remains visible after navigating to a tab", async ({
       page,
     }) => {

@@ -113,5 +113,13 @@ describe("AppNav", () => {
         expect(link.className).toMatch(/min-h-\[44px\]|min-w-\[44px\]/);
       }
     });
+
+    it("nav element has fixed positioning classes", () => {
+      render(<AppNav />);
+      const nav = screen.getByRole("navigation");
+      expect(nav.className).toMatch(/\bfixed\b/);
+      expect(nav.className).toMatch(/\bbottom-0\b/);
+      expect(nav.className).toMatch(/\bz-50\b/);
+    });
   });
 });

@@ -25,7 +25,7 @@ export function AppNav() {
     <nav
       role="navigation"
       aria-label={t("nav.overview")}
-      className="flex h-14 items-center justify-center gap-2 border-t border-border bg-card px-2"
+      className="fixed bottom-0 left-0 right-0 z-50 flex h-14 items-center justify-center gap-2 border-t border-border bg-card px-2"
     >
       {navItems.map(({ hrefSegment, pathMatch, icon: Icon, key }) => {
         const href =
