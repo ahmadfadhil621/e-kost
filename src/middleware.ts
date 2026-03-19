@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 
 const PUBLIC_ROUTES = ["/login", "/register"];
 
 export async function middleware(request: NextRequest) {
-  const session = await auth.api.getSession({ headers: request.headers });
   const { pathname } = request.nextUrl;
   const isPublic = PUBLIC_ROUTES.some((r) => pathname.startsWith(r));
+
+  // Use fetch instead of auth.api.getSession — Prisma is not edge-runtime compatible.
+  // The /api/auth/get-session endpoint is excluded from the matcher so this won't loop.
+  const sessionRes = await fetch(
+    new URL("/api/auth/get-session", request.url),
+    { headers: request.headers }
+  );
+  const session = sessionRes.ok ? await sessionRes.json() : null;
 
   if (!session && !isPublic) {
     return NextResponse.redirect(new URL("/login", request.url));
