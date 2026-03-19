@@ -25,7 +25,7 @@ async function createTenant(
       email: `list-tenant-${suffix}@test.com`,
     },
   });
-  if (!res.ok()) return null;
+  if (!res.ok()) { return null; }
   const { id } = await res.json();
   return { tenantId: id as string, name: `List Tenant ${suffix}`, email: `list-tenant-${suffix}@test.com` };
 }
@@ -42,17 +42,17 @@ async function createRoomAndTenant(
       monthlyRent: 500000,
     },
   });
-  if (!roomRes.ok()) return null;
+  if (!roomRes.ok()) { return null; }
   const { id: roomId } = await roomRes.json();
 
   const tenant = await createTenant(request, propertyId, suffix);
-  if (!tenant) return null;
+  if (!tenant) { return null; }
 
   const assignRes = await request.post(
     `/api/properties/${propertyId}/tenants/${tenant.tenantId}/assign-room`,
     { data: { roomId } }
   );
-  if (!assignRes.ok()) return null;
+  if (!assignRes.ok()) { return null; }
 
   return { ...tenant, roomId };
 }
