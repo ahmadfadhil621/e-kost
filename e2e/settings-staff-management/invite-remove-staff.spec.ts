@@ -8,29 +8,26 @@
 // REQ 3.7 -> test('add and remove have adequate touch targets')
 
 import { test, expect } from "@playwright/test";
-import type { Browser } from "@playwright/test";
 import { stableFill } from "../helpers/forms";
 
 test.use({ storageState: "e2e/.auth/user-with-property.json" });
 
-/** Registers a new user via the /register page in a new context so the user exists in the DB. Leaves the current context (owner) unchanged. */
-async function registerStaffUserInNewContext(
-  browser: Browser,
+/** Registers a new user via the auth API so the user exists in the DB. Uses plain fetch to avoid sending the test's auth cookies. */
+async function registerStaffUserViaApi(
   staffEmail: string,
   password: string,
   name: string
 ): Promise<void> {
-  const ctx = await browser.newContext({ baseURL: "http://localhost:3000" });
-  const page = await ctx.newPage();
-  try {
-    await page.goto("/register");
-    await stableFill(page, () => page.getByLabel(/full name/i), name);
-    await stableFill(page, () => page.getByLabel(/email address/i), staffEmail);
-    await stableFill(page, () => page.getByLabel(/password/i), password);
-    await page.getByRole("button", { name: /register/i }).click();
-    await page.waitForURL((url) => url.pathname === "/", { timeout: 15000 });
-  } finally {
-    await ctx.close();
+  const res = await fetch("http://localhost:3000/api/auth/sign-up/email", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Origin": "http://localhost:3000",
+    },
+    body: JSON.stringify({ name, email: staffEmail, password }),
+  });
+  if (!res.ok) {
+    throw new Error(`Staff registration failed: ${res.status}`);
   }
 }
 
@@ -76,10 +73,9 @@ test.describe("invite and remove staff", () => {
 
     test("submitting valid staff invitation adds staff and shows confirmation", async ({
       page,
-      browser,
     }) => {
       const staffEmail = `staff-${Date.now()}@test.com`;
-      await registerStaffUserInNewContext(browser, staffEmail, "StaffPass123!", "Staff User");
+      await registerStaffUserViaApi(staffEmail, "StaffPass123!", "Staff User");
 
       await page.goto("/settings");
       const staffSection = page.getByTestId("staff-management");
@@ -102,10 +98,9 @@ test.describe("invite and remove staff", () => {
 
     test("Remove shows confirmation dialog and removes access on confirm", async ({
       page,
-      browser,
     }) => {
       const staffEmail = `remove-${Date.now()}@test.com`;
-      await registerStaffUserInNewContext(browser, staffEmail, "RemovePass123!", "To Remove");
+      await registerStaffUserViaApi(staffEmail, "RemovePass123!", "To Remove");
 
       await page.goto("/settings");
       const staffSection = page.getByTestId("staff-management");
