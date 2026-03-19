@@ -144,7 +144,7 @@ describe("middleware", () => {
       expect(NextResponse.redirect).not.toHaveBeenCalled();
     });
 
-    it("passes request headers to session fetch", async () => {
+    it("passes only cookie header to session fetch", async () => {
       mockUnauthenticated();
       const request = makeRequest("/");
 
@@ -152,7 +152,7 @@ describe("middleware", () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.objectContaining({ pathname: "/api/auth/get-session" }),
-        expect.objectContaining({ headers: request.headers })
+        { headers: { cookie: "" } }
       );
     });
   });

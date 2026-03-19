@@ -49,11 +49,18 @@ If no docs need updating, skip silently (do not ask).
 
 After doc updates (if any) are done, generate a commit message following the format below and present it to the user.
 
-**NEVER run `git add`, `git commit`, or any git write commands.** The user will handle all git operations themselves. The agent's role is limited to:
+Ask the user: **"Commit and push?"**
 
-1. Generating the commit message
-2. Presenting it to the user
-3. Asking: "Would you like to continue to the next task?"
+Wait for explicit approval ("yes" or equivalent) before running any git commands.
+
+Once approved:
+
+1. Stage the relevant files with `git add <files>` (never use `git add -A` or `git add .`)
+2. Commit using a HEREDOC to pass the message
+3. Run `git push`
+4. Ask: "Would you like to continue to the next task?"
+
+If the user says no or does not respond with approval, do not run any git commands.
 
 ## Commit Message Format
 
