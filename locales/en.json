@@ -206,6 +206,7 @@
       "errorActiveTenant": "Cannot delete room with an active tenant. Move the tenant out first."
     },
     "dangerZone": "Danger Zone",
+    "occupiedWarning": "Move the current tenant out before archiving or deleting this room.",
     "errors": {
       "duplicateRoomNumber": "Room number already exists",
       "notFound": "Room not found",

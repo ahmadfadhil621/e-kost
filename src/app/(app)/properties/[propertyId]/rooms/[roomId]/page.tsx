@@ -242,6 +242,7 @@ export default function RoomDetailPage() {
   }
 
   const isArchived = !!room.archivedAt;
+  const isOccupied = room.status === "occupied" && !!room.tenantId;
 
   const createdAt = room.createdAt
     ? new Date(room.createdAt).toLocaleDateString(undefined, {
@@ -347,11 +348,17 @@ export default function RoomDetailPage() {
         <h3 className="text-sm font-semibold text-destructive">
           {t("room.dangerZone")}
         </h3>
+        {isOccupied && (
+          <p className="text-sm text-muted-foreground">
+            {t("room.occupiedWarning")}
+          </p>
+        )}
         {!isArchived && (
           <Button
             variant="outline"
             className="min-h-[44px] min-w-[44px] w-full"
             onClick={() => setArchiveOpen(true)}
+            disabled={isOccupied}
             aria-label={t("room.archive.title")}
           >
             {t("room.archive.title")}
@@ -361,6 +368,7 @@ export default function RoomDetailPage() {
           variant="destructive"
           className="min-h-[44px] min-w-[44px] w-full"
           onClick={() => setDeleteOpen(true)}
+          disabled={isOccupied}
           aria-label={t("room.delete.title")}
         >
           {t("room.delete.title")}

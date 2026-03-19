@@ -206,6 +206,7 @@
       "errorActiveTenant": "Tidak dapat menghapus kamar dengan penyewa aktif. Pindahkan penyewa terlebih dahulu."
     },
     "dangerZone": "Zona Berbahaya",
+    "occupiedWarning": "Pindahkan penyewa saat ini terlebih dahulu sebelum mengarsipkan atau menghapus kamar ini.",
     "errors": {
       "duplicateRoomNumber": "Nomor kamar sudah ada",
       "notFound": "Kamar tidak ditemukan",

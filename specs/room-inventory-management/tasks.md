@@ -194,6 +194,20 @@
   - **Dependencies**: None
   - **Effort**: S
 
+- [x] 5.7 Disable Archive/Delete buttons when room is occupied (issue #37)
+  - **Description**: Prevent confusing dead-end interactions by disabling Archive and Delete buttons when the room has an active tenant, and show an explanatory message in the Danger Zone
+  - **Acceptance Criteria**:
+    - `isOccupied` flag derived from `status === "occupied" && !!tenantId`
+    - Archive button disabled (not hidden) when room is occupied
+    - Delete button disabled (not hidden) when room is occupied
+    - Warning message visible below Danger Zone header when occupied
+    - No API change needed — tenantId already returned by GET room endpoint
+    - 44x44px touch targets preserved (buttons remain visible)
+    - `room.occupiedWarning` i18n key added to en.json and id.json
+    - E2E bad-case tests updated to assert disabled state instead of error toast
+  - **Dependencies**: 5.4
+  - **Effort**: S
+
 ## 6. Internationalization (i18n)
 
 - [x] 6.1 Extract and translate room management strings
@@ -251,7 +265,7 @@
 
 ## Progress Note
 
-TDD steps 1–3 complete. Domain, service, PrismaRoomRepository, API (CRUD + archive/unarchive/delete), RoomForm, RoomList, RoomCard, RoomDetail, StatusFilter, StatusIndicator, and i18n (en.json, id.json) are implemented. Remaining: 7.x manual validation (CRUD workflow, filtering, mobile, performance).
+TDD steps 1–3 complete. Domain, service, PrismaRoomRepository, API (CRUD + archive/unarchive/delete), RoomForm, RoomList, RoomCard, RoomDetail, StatusFilter, StatusIndicator, and i18n (en.json, id.json) are implemented. Issue #37 UX fix complete: Archive/Delete buttons disabled (not hidden) when room is occupied, with explanatory warning message. Remaining: 7.x manual validation (CRUD workflow, filtering, mobile, performance).
 
 ## Open Questions / Assumptions
 

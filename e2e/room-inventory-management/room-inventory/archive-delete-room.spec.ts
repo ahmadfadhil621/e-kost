@@ -180,14 +180,13 @@ test.describe("archive and delete room", () => {
 
       try {
         await goToRoomDetail(page, roomId);
-        await page.getByRole("button", { name: /archive room/i }).click();
-        await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
-        await page.getByRole("dialog").getByRole("button", { name: /^archive$/i }).click();
-        await expect(
-          page.getByText("Cannot archive room with active tenant", { exact: true })
-        ).toBeVisible({ timeout: 10000 });
-        // Still on room detail page — no redirect
-        await expect(page.getByText(/danger zone/i)).toBeVisible({ timeout: 5000 });
+        const archiveBtn = page.getByRole("button", { name: /archive room/i });
+        await expect(archiveBtn).toBeVisible({ timeout: 5000 });
+        await expect(archiveBtn).toBeDisabled();
+        await expect(page.getByText(/move the current tenant out/i)).toBeVisible();
+        // Dialog must not open on force click
+        await archiveBtn.click({ force: true });
+        await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 3000 });
       } finally {
         await moveOutTenant(request, baseURL, tenantId);
         await deleteRoom(request, baseURL, roomId);
@@ -205,14 +204,13 @@ test.describe("archive and delete room", () => {
 
       try {
         await goToRoomDetail(page, roomId);
-        await page.getByRole("button", { name: /delete room/i }).click();
-        await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
-        await page.getByRole("dialog").getByRole("button", { name: /^delete$/i }).click();
-        await expect(
-          page.getByText("Cannot delete room with active tenant", { exact: true })
-        ).toBeVisible({ timeout: 10000 });
-        // Still on room detail page — no redirect
-        await expect(page.getByText(/danger zone/i)).toBeVisible({ timeout: 5000 });
+        const deleteBtn = page.getByRole("button", { name: /delete room/i });
+        await expect(deleteBtn).toBeVisible({ timeout: 5000 });
+        await expect(deleteBtn).toBeDisabled();
+        await expect(page.getByText(/move the current tenant out/i)).toBeVisible();
+        // Dialog must not open on force click
+        await deleteBtn.click({ force: true });
+        await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 3000 });
       } finally {
         await moveOutTenant(request, baseURL, tenantId);
         await deleteRoom(request, baseURL, roomId);
