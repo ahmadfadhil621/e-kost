@@ -955,6 +955,20 @@ describe("RoomService", () => {
         ).rejects.toThrow(/not archived/i);
       });
     });
+
+    describe("edge cases", () => {
+      it("treats room belonging to a different property as not found", async () => {
+        const propertyId = crypto.randomUUID();
+        const otherPropertyId = crypto.randomUUID();
+        const room = createRoom({ propertyId: otherPropertyId, id: "room-1", archivedAt: new Date() });
+        const repo = createMockRepo({ findById: vi.fn().mockResolvedValue(room) });
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
+
+        await expect(
+          service.unarchiveRoom("user-1", propertyId, "room-1")
+        ).rejects.toThrow(/not found/i);
+      });
+    });
   });
 });
 

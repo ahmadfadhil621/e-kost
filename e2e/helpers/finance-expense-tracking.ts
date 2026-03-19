@@ -25,3 +25,17 @@ export async function goToExpenseList(page: Page) {
     .first()
     .waitFor({ state: "visible", timeout: 15000 });
 }
+
+export async function goToEditExpensePage(page: Page, expenseId: string) {
+  const propertyId = getPropertyId();
+  await page.goto(`/properties/${propertyId}/finance/expenses/${expenseId}/edit`);
+  await page.waitForURL(/\/expenses\/[^/]+\/edit/, { timeout: 8000 }).catch(() => {});
+  if (page.url().includes("/login")) {
+    throw new Error(
+      "goToEditExpensePage: redirected to login; check auth storage state (e2e/.auth/user-with-property.json)"
+    );
+  }
+  await page
+    .locator("#expense-amount")
+    .waitFor({ state: "visible", timeout: 15000 });
+}

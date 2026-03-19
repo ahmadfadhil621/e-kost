@@ -53,3 +53,17 @@ export async function goToTenantDetail(
     .first()
     .waitFor({ state: "visible", timeout: 90000 });
 }
+
+export async function goToEditTenantPage(page: Page, tenantId: string) {
+  const propertyId = getPropertyId();
+  await page.goto(`/properties/${propertyId}/tenants/${tenantId}/edit`);
+  await page.waitForURL(/\/tenants\/[^/]+\/edit/, { timeout: 8000 }).catch(() => {});
+  if (page.url().includes("/login")) {
+    throw new Error(
+      "goToEditTenantPage: redirected to login; check auth storage state (e2e/.auth/user-with-property.json)"
+    );
+  }
+  await page
+    .locator("#tenant-name")
+    .waitFor({ state: "visible", timeout: 15000 });
+}

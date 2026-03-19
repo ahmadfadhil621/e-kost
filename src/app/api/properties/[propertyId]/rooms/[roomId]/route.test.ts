@@ -423,4 +423,25 @@ describe("DELETE /api/properties/[propertyId]/rooms/[roomId]", () => {
       expect(response.status).toBe(401);
     });
   });
+
+  describe("edge cases", () => {
+    it("DELETE returns 500 when service throws an unexpected error", async () => {
+      vi.mocked(roomService.deleteRoom).mockRejectedValue(
+        new Error("Unexpected database failure")
+      );
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`,
+        { method: "DELETE" }
+      );
+
+      const response = await DELETE(request, {
+        params: Promise.resolve({ propertyId, roomId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(500);
+      expect(data.error).toMatch(/internal server error/i);
+    });
+  });
 });

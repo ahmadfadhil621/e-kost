@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import type { Page } from "@playwright/test";
 
-function getPropertyId(): string {
+export function getPropertyId(): string {
   const filePath = path.join(process.cwd(), "e2e/.auth/property-id.json");
   const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
   return data.propertyId;
@@ -58,4 +58,18 @@ export async function goToRoomDetail(page: Page, roomId: string) {
   await page.waitForURL(/\/properties\/[^/]+\/rooms\/[^/]+$/, { timeout: 8000 }).catch(() => {});
   // Wait for room content to load (not new/edit pages)
   await page.getByText(/danger zone/i).waitFor({ state: "visible", timeout: 15000 });
+}
+
+export async function goToEditRoomPage(page: Page, roomId: string) {
+  const propertyId = getPropertyId();
+  await page.goto(`/properties/${propertyId}/rooms/${roomId}/edit`, GOTO_OPTIONS);
+  await page.waitForURL(/\/rooms\/[^/]+\/edit/, { timeout: 8000 }).catch(() => {});
+  if (page.url().includes("/login")) {
+    throw new Error(
+      "goToEditRoomPage: redirected to login; check auth storage state (e2e/.auth/user-with-property.json)"
+    );
+  }
+  await page
+    .locator("#room-number")
+    .waitFor({ state: "visible", timeout: 15000 });
 }

@@ -63,6 +63,26 @@ describe("RoomCard", () => {
     });
   });
 
+  describe("bad cases", () => {
+    it("occupied room with outstanding balance shows unpaid indicator", () => {
+      render(
+        <RoomCard
+          room={makeRoom({
+            status: "occupied",
+            tenantId: "tenant-789",
+            tenantName: "Jane Doe",
+            outstandingBalance: 500000,
+          })}
+          propertyId={propertyId}
+        />
+      );
+      const card = screen.getByTestId("room-card");
+      expect(card).toBeTruthy();
+      const unpaid = screen.getByRole("status", { name: /unpaid|500/i });
+      expect(unpaid).toBeTruthy();
+    });
+  });
+
   describe("edge cases", () => {
     it("occupied room card without tenantId still links to room detail", () => {
       render(
