@@ -2,12 +2,12 @@
 
 ## Task List
 
-- [ ] 1. Write Vitest unit tests for `src/middleware.ts` (`/test-author`)
-- [ ] 2. Write E2E test: authenticated user visiting `/login` redirects to `/` (`/e2e-test-author`)
-- [ ] 3. Validate tests (`/test-validator`)
-- [ ] 4. Implement `src/middleware.ts`
-- [ ] 5. Run `npm run test:run` — all tests pass
-- [ ] 6. Push and confirm E2E tests pass in CI
+- [x] 1. Write Vitest unit tests for `src/middleware.ts` (`/test-author`)
+- [x] 2. Write E2E test: authenticated user visiting `/login` redirects to `/` (`/e2e-test-author`)
+- [x] 3. Validate tests (`/test-validator`)
+- [x] 4. Implement `src/middleware.ts`
+- [x] 5. Run `npm run test:run` — all tests pass
+- [x] 6. Push and confirm E2E tests pass in CI
 
 ## Traceability
 
