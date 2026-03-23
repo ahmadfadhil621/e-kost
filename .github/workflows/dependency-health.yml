@@ -1,0 +1,159 @@
+name: Monthly Dependency Health Check
+
+on:
+  schedule:
+    - cron: "0 9 1 * *" # 9 AM UTC on the 1st of every month
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for major updates and deprecations
+        id: report
+        run: |
+          REPORT=""
+          HAS_FINDINGS=false
+
+          # 1. Major version updates available
+          OUTDATED=$(npm outdated --json 2>/dev/null || true)
+          MAJORS=$(echo "$OUTDATED" | node -e "
+            const data = JSON.parse(require('fs').readFileSync('/dev/stdin', 'utf8') || '{}');
+            const rows = [];
+            for (const [pkg, info] of Object.entries(data)) {
+              const current = (info.current || '').split('.')[0];
+              const latest = (info.latest || '').split('.')[0];
+              if (current && latest && current !== latest) {
+                rows.push('| ' + pkg + ' | ' + info.current + ' | ' + info.latest + ' |');
+              }
+            }
+            if (rows.length) console.log(rows.join('\n'));
+          " 2>/dev/null || true)
+
+          if [ -n "$MAJORS" ]; then
+            HAS_FINDINGS=true
+            REPORT="${REPORT}## Major Version Updates Available\n\n"
+            REPORT="${REPORT}| Package | Current | Latest |\n"
+            REPORT="${REPORT}|---------|---------|--------|\n"
+            REPORT="${REPORT}${MAJORS}\n\n"
+          fi
+
+          # 2. Security audit
+          AUDIT=$(npm audit --json 2>/dev/null || true)
+          VULN_COUNT=$(echo "$AUDIT" | node -e "
+            const data = JSON.parse(require('fs').readFileSync('/dev/stdin', 'utf8') || '{}');
+            const meta = data.metadata || {};
+            const v = meta.vulnerabilities || {};
+            const total = (v.moderate || 0) + (v.high || 0) + (v.critical || 0);
+            console.log(total);
+          " 2>/dev/null || echo "0")
+
+          if [ "$VULN_COUNT" -gt 0 ]; then
+            HAS_FINDINGS=true
+            AUDIT_TABLE=$(echo "$AUDIT" | node -e "
+              const data = JSON.parse(require('fs').readFileSync('/dev/stdin', 'utf8') || '{}');
+              const rows = [];
+              for (const [key, adv] of Object.entries(data.vulnerabilities || {})) {
+                const sev = adv.severity || 'unknown';
+                if (sev === 'moderate' || sev === 'high' || sev === 'critical') {
+                  const fix = adv.fixAvailable ? 'Yes' : 'No';
+                  rows.push('| ' + adv.name + ' | ' + sev + ' | ' + (adv.range || '-') + ' | ' + fix + ' |');
+                }
+              }
+              if (rows.length) console.log(rows.join('\n'));
+            " 2>/dev/null || true)
+
+            REPORT="${REPORT}## Security Vulnerabilities (moderate+)\n\n"
+            REPORT="${REPORT}| Package | Severity | Affected | Fix Available |\n"
+            REPORT="${REPORT}|---------|----------|----------|---------------|\n"
+            REPORT="${REPORT}${AUDIT_TABLE}\n\n"
+          fi
+
+          # 3. Deprecated packages
+          DEPRECATED=$(npm ls --json 2>/dev/null | node -e "
+            function findDeprecated(deps, path = []) {
+              const results = [];
+              for (const [name, info] of Object.entries(deps || {})) {
+                if (info.deprecated) {
+                  results.push('| ' + name + ' | ' + (info.version || '-') + ' | ' + info.deprecated.substring(0, 100) + ' |');
+                }
+                if (info.dependencies) {
+                  results.push(...findDeprecated(info.dependencies, [...path, name]));
+                }
+              }
+              return results;
+            }
+            const data = JSON.parse(require('fs').readFileSync('/dev/stdin', 'utf8') || '{}');
+            const rows = [...new Set(findDeprecated(data.dependencies || {}))];
+            if (rows.length) console.log(rows.join('\n'));
+          " 2>/dev/null || true)
+
+          if [ -n "$DEPRECATED" ]; then
+            HAS_FINDINGS=true
+            REPORT="${REPORT}## Deprecated Packages\n\n"
+            REPORT="${REPORT}| Package | Version | Deprecation Message |\n"
+            REPORT="${REPORT}|---------|---------|--------------------|\n"
+            REPORT="${REPORT}${DEPRECATED}\n\n"
+          fi
+
+          # Write outputs
+          if [ "$HAS_FINDINGS" = true ]; then
+            echo "has_findings=true" >> "$GITHUB_OUTPUT"
+            # Use a temp file for multiline output
+            echo -e "$REPORT" > /tmp/report.md
+          else
+            echo "has_findings=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create or update issue
+        if: steps.report.outputs.has_findings == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('/tmp/report.md', 'utf8');
+            const now = new Date();
+            const month = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+            const title = `Dependency health check — ${month}`;
+
+            // Close previous month's issue if still open
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'dependency-health',
+            });
+            for (const issue of existing.data) {
+              if (issue.title !== title) {
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  state: 'closed',
+                  state_reason: 'not_planned',
+                });
+              }
+            }
+
+            // Create this month's issue
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body: `# Monthly Dependency Health Check\n\n${body}\n\n---\n*Auto-generated by [dependency-health.yml](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/workflows/dependency-health.yml)*`,
+              labels: ['dependency-health'],
+            });
