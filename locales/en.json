@@ -157,7 +157,8 @@
       "filterAll": "All Rooms",
       "filterAvailable": "Available",
       "filterOccupied": "Occupied",
-      "filterRenovation": "Under Renovation"
+      "filterRenovation": "Under Renovation",
+      "searchPlaceholder": "Search by room number or type"
     },
     "card": {
       "roomLabel": "Room",
@@ -217,7 +218,10 @@
     "list": {
       "title": "Tenants",
       "empty": "No tenants found",
-      "addTenant": "Add tenant"
+      "addTenant": "Add tenant",
+      "searchPlaceholder": "Search by name, phone, or email",
+      "filterAll": "All",
+      "filterMissingRent": "Missing rent"
     },
     "create": {
       "title": "Add Tenant",

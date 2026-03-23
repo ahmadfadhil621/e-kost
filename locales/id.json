@@ -157,7 +157,8 @@
       "filterAll": "Semua Kamar",
       "filterAvailable": "Tersedia",
       "filterOccupied": "Terisi",
-      "filterRenovation": "Dalam Renovasi"
+      "filterRenovation": "Dalam Renovasi",
+      "searchPlaceholder": "Cari berdasarkan nomor atau tipe kamar"
     },
     "card": {
       "roomLabel": "Kamar",
@@ -217,7 +218,10 @@
     "list": {
       "title": "Penyewa",
       "empty": "Belum ada penyewa",
-      "addTenant": "Tambah penyewa"
+      "addTenant": "Tambah penyewa",
+      "searchPlaceholder": "Cari berdasarkan nama, telepon, atau email",
+      "filterAll": "Semua",
+      "filterMissingRent": "Sewa kurang"
     },
     "create": {
       "title": "Tambah Penyewa",
