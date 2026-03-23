@@ -11,7 +11,7 @@ import { OccupancyCard } from "@/components/dashboard/OccupancyCard";
 import { FinanceSummaryCard } from "@/components/dashboard/FinanceSummaryCard";
 import { OutstandingBalancesList } from "@/components/dashboard/OutstandingBalancesList";
 import { RecentPaymentsList } from "@/components/dashboard/RecentPaymentsList";
-import type { RecentPayment } from "@/domain/schemas/dashboard";
+import type { RecentPayment, FinanceSummarySnapshot } from "@/domain/schemas/dashboard";
 
 type PropertyDetail = {
   id: string;
@@ -22,7 +22,7 @@ type PropertyDetail = {
 
 type DashboardResponse = {
   occupancy: { totalRooms: number; occupied: number; available: number; underRenovation: number; occupancyRate: number };
-  finance: { month: number; year: number; income: number; expenses: number; netIncome: number };
+  finance: FinanceSummarySnapshot;
   outstandingBalances: Array<{ tenantId: string; tenantName: string; roomNumber: string; balance: number }>;
   outstandingCount: number;
   recentPayments: Array<{ paymentId: string; tenantName: string; amount: number; date: string }>;
