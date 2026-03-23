@@ -25,33 +25,36 @@ export function AppNav() {
     <nav
       role="navigation"
       aria-label={t("nav.overview")}
-      className="fixed bottom-0 left-0 right-0 z-50 flex h-14 items-center justify-center gap-2 border-t border-border bg-card px-2"
+      className="fixed bottom-0 left-0 right-0 z-50 flex h-14 items-center justify-center border-t border-border bg-card"
     >
-      {navItems.map(({ hrefSegment, pathMatch, icon: Icon, key }) => {
-        const href =
-          activeId
-            ? hrefSegment === "/"
-              ? "/"
-              : `${baseHref}${hrefSegment}`
-            : "#";
-        const isActive = pathMatch(pathname);
-        return (
-          <Link
-            key={key}
-            href={href}
-            aria-current={isActive ? "page" : undefined}
-            className={cn(
-              "flex min-h-[44px] min-w-[44px] flex-1 flex-col items-center justify-center gap-0.5 rounded-md px-2 py-2 text-[11px] font-semibold transition-colors",
-              isActive
-                ? "text-primary"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Icon className="h-5 w-5" aria-hidden />
-            <span>{t(`nav.${key}`)}</span>
-          </Link>
-        );
-      })}
+      {/* Shared max-width scale: max-w-[480px] md:max-w-2xl lg:max-w-3xl — keep in sync with layout.tsx and app-header.tsx */}
+      <div className="flex w-full max-w-[480px] md:max-w-2xl lg:max-w-3xl items-center justify-center gap-2 px-2">
+        {navItems.map(({ hrefSegment, pathMatch, icon: Icon, key }) => {
+          const href =
+            activeId
+              ? hrefSegment === "/"
+                ? "/"
+                : `${baseHref}${hrefSegment}`
+              : "#";
+          const isActive = pathMatch(pathname);
+          return (
+            <Link
+              key={key}
+              href={href}
+              aria-current={isActive ? "page" : undefined}
+              className={cn(
+                "flex min-h-[44px] min-w-[44px] flex-1 flex-col items-center justify-center gap-0.5 rounded-md px-2 py-2 text-[11px] font-semibold transition-colors",
+                isActive
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Icon className="h-5 w-5" aria-hidden />
+              <span>{t(`nav.${key}`)}</span>
+            </Link>
+          );
+        })}
+      </div>
     </nav>
   );
 }

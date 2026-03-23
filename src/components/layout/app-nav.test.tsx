@@ -122,4 +122,48 @@ describe("AppNav", () => {
       expect(nav.className).toMatch(/\bz-50\b/);
     });
   });
+
+  describe("responsive layout", () => {
+    it("outer nav is full-width — spans left-0 to right-0 so border-top covers the viewport", () => {
+      render(<AppNav />);
+      const nav = screen.getByRole("navigation");
+      expect(nav.className).toMatch(/\bleft-0\b/);
+      expect(nav.className).toMatch(/\bright-0\b/);
+    });
+
+    it("outer nav does not directly carry a max-w constraint", () => {
+      render(<AppNav />);
+      const nav = screen.getByRole("navigation");
+      expect(nav.className).not.toMatch(/\bmax-w-/);
+    });
+
+    it("inner wrapper div has mobile max-width constraint", () => {
+      const { container } = render(<AppNav />);
+      const nav = container.querySelector("nav");
+      const inner = nav?.firstElementChild as HTMLElement | null;
+      expect(inner?.className).toMatch(/max-w-\[480px\]/);
+    });
+
+    it("inner wrapper div has md breakpoint max-width constraint for tablet scale-up", () => {
+      const { container } = render(<AppNav />);
+      const nav = container.querySelector("nav");
+      const inner = nav?.firstElementChild as HTMLElement | null;
+      expect(inner?.className).toMatch(/md:max-w-2xl/);
+    });
+
+    it("inner wrapper div has lg breakpoint max-width constraint for desktop scale-up", () => {
+      const { container } = render(<AppNav />);
+      const nav = container.querySelector("nav");
+      const inner = nav?.firstElementChild as HTMLElement | null;
+      expect(inner?.className).toMatch(/lg:max-w-3xl/);
+    });
+
+    it("all nav links are rendered inside the inner constrained wrapper", () => {
+      const { container } = render(<AppNav />);
+      const nav = container.querySelector("nav");
+      const inner = nav?.firstElementChild as HTMLElement | null;
+      const links = inner?.querySelectorAll("a");
+      expect(links?.length).toBe(4);
+    });
+  });
 });

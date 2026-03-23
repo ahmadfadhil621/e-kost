@@ -33,15 +33,16 @@ export function AppHeader() {
 
   return (
     <header role="banner" className="sticky top-0 z-50 border-b border-border bg-card">
-      <div className="flex flex-col gap-0">
-        <div className="flex h-14 items-center justify-between gap-2 px-4">
+      {/* Shared max-width scale: max-w-[480px] md:max-w-2xl lg:max-w-3xl — keep in sync with layout.tsx and app-nav.tsx */}
+      <div className="mx-auto w-full max-w-[480px] md:max-w-2xl lg:max-w-3xl px-4">
+        <div className="flex h-14 items-center justify-between gap-2">
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <PropertySwitcher />
           </div>
           <ProfileDropdown />
         </div>
         {showRoomStats && (
-          <div className="flex items-center gap-1.5 px-4 pb-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5 pb-2 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <span className="h-2 w-2 rounded-full bg-status-occupied" aria-hidden />
               {occupancy.occupied} {t("dashboard.occupancy.occupied")}

@@ -22,7 +22,8 @@ function AppLayoutContent({
   return (
     <div className="flex min-h-screen flex-col">
       <AppHeader />
-      <main className="flex-1 px-4 py-4 pb-20 max-w-[480px] mx-auto w-full">
+      {/* Shared max-width scale: max-w-[480px] md:max-w-2xl lg:max-w-3xl — keep in sync with app-header.tsx and app-nav.tsx */}
+      <main className="flex-1 px-4 py-4 pb-20 max-w-[480px] md:max-w-2xl lg:max-w-3xl mx-auto w-full">
         {showPropertySelector ? <PropertySelector /> : children}
       </main>
       <AppNav />
