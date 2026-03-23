@@ -2,6 +2,7 @@
  * Dashboard aggregate types per specs/dashboard-overview/design.md.
  * Used by DashboardService and dashboard API.
  */
+import type { CategoryBreakdown } from "@/domain/schemas/expense";
 
 export interface OccupancyStats {
   totalRooms: number;
@@ -17,6 +18,7 @@ export interface FinanceSummarySnapshot {
   income: number;
   expenses: number;
   netIncome: number;
+  categoryBreakdown: CategoryBreakdown[];
 }
 
 export interface OutstandingBalance {

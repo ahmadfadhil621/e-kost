@@ -9,6 +9,7 @@ import type {
   OutstandingBalance,
   RecentPayment,
 } from "@/domain/schemas/dashboard";
+import type { CategoryBreakdown } from "@/domain/schemas/expense";
 
 export interface IRoomStatsSource {
   getRoomStats(userId: string, propertyId: string): Promise<OccupancyStats>;
@@ -20,7 +21,7 @@ export interface IFinanceSummarySnapshotSource {
     propertyId: string,
     year: number,
     month: number
-  ): Promise<{ year: number; month: number; income: number; expenses: number; netIncome: number }>;
+  ): Promise<{ year: number; month: number; income: number; expenses: number; netIncome: number; categoryBreakdown: CategoryBreakdown[] }>;
 }
 
 export interface IOutstandingBalancesSource {
@@ -73,6 +74,7 @@ export class DashboardService {
       income: financeRaw.income,
       expenses: financeRaw.expenses,
       netIncome: financeRaw.netIncome,
+      categoryBreakdown: financeRaw.categoryBreakdown,
     };
 
     return {

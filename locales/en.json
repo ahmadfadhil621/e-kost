@@ -358,7 +358,15 @@
       "title": "This Month",
       "income": "Income",
       "expenses": "Expenses",
-      "netIncome": "Net Income"
+      "netIncome": "Net Income",
+      "incomeDetail": {
+        "title": "Income Detail",
+        "fromRent": "From rent payments"
+      },
+      "expensesDetail": {
+        "title": "Expense Breakdown",
+        "noExpenses": "No expenses recorded"
+      }
     },
     "outstanding": {
       "title": "Outstanding Balances",

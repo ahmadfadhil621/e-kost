@@ -34,6 +34,7 @@ const financeSnapshotSource: IFinanceSummarySnapshotSource = {
       income: summary.income,
       expenses: summary.expenses,
       netIncome: summary.netIncome,
+      categoryBreakdown: summary.categoryBreakdown,
     };
   },
 };

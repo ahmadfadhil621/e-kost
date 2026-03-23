@@ -358,7 +358,15 @@
       "title": "Bulan Ini",
       "income": "Pemasukan",
       "expenses": "Pengeluaran",
-      "netIncome": "Laba Bersih"
+      "netIncome": "Laba Bersih",
+      "incomeDetail": {
+        "title": "Detail Pemasukan",
+        "fromRent": "Dari pembayaran sewa"
+      },
+      "expensesDetail": {
+        "title": "Rincian Pengeluaran",
+        "noExpenses": "Belum ada pengeluaran"
+      }
     },
     "outstanding": {
       "title": "Saldo Tertunggak",

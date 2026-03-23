@@ -37,6 +37,7 @@ export function createFinanceSummarySnapshot(
     income,
     expenses,
     netIncome: overrides.netIncome ?? income - expenses,
+    categoryBreakdown: overrides.categoryBreakdown ?? [],
     ...overrides,
   };
 }
