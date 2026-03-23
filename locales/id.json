@@ -419,8 +419,14 @@
       "title": "Pengeluaran",
       "empty": "Tidak ada pengeluaran untuk periode ini"
     },
+    "detail": {
+      "title": "Detail Pengeluaran",
+      "notFound": "Pengeluaran tidak ditemukan"
+    },
     "delete": {
+      "title": "Hapus Pengeluaran",
       "confirm": "Hapus pengeluaran ini?",
+      "confirmMessage": "Pengeluaran ini akan dihapus permanen.",
       "success": "Pengeluaran dihapus"
     },
     "category": {

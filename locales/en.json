@@ -419,8 +419,14 @@
       "title": "Expenses",
       "empty": "No expenses recorded for this period"
     },
+    "detail": {
+      "title": "Expense Detail",
+      "notFound": "Expense not found"
+    },
     "delete": {
+      "title": "Delete Expense",
       "confirm": "Delete this expense?",
+      "confirmMessage": "This expense will be permanently deleted.",
       "success": "Expense deleted"
     },
     "category": {

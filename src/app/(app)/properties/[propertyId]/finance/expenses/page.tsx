@@ -80,44 +80,40 @@ export default function ExpenseListPage() {
         <ul className="flex flex-col gap-3 list-none p-0 m-0">
           {expenses.map((expense) => (
             <li key={expense.id}>
-              <Card className="w-full">
-                <CardHeader className="pb-1">
-                  <span className="text-sm font-medium">
-                    {t(`expense.category.${expense.category}`)}
-                  </span>
-                </CardHeader>
-                <CardContent className="space-y-1">
-                  <p className="text-lg font-semibold tabular-nums">
-                    {formatCurrency(expense.amount)}
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    {expense.date.toLocaleDateString(
-                      typeof window !== "undefined"
-                        ? navigator.language
-                        : "en",
-                      {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      }
-                    )}
-                  </p>
-                  {expense.description && (
-                    <p className="text-muted-foreground text-sm line-clamp-2">
-                      {expense.description}
+              <Link
+                href={`/properties/${propertyId}/finance/expenses/${expense.id}`}
+                className="block"
+              >
+                <Card className="w-full hover:bg-muted/50 transition-colors">
+                  <CardHeader className="pb-1">
+                    <span className="text-sm font-medium">
+                      {t(`expense.category.${expense.category}`)}
+                    </span>
+                  </CardHeader>
+                  <CardContent className="space-y-1">
+                    <p className="text-lg font-semibold tabular-nums">
+                      {formatCurrency(expense.amount)}
                     </p>
-                  )}
-                  <div className="flex gap-2 pt-2">
-                    <Button asChild size="sm" variant="outline" className="min-h-[44px] min-w-[44px]">
-                      <Link
-                        href={`/properties/${propertyId}/finance/expenses/${expense.id}/edit`}
-                      >
-                        {t("common.edit")}
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                    <p className="text-muted-foreground text-sm">
+                      {expense.date.toLocaleDateString(
+                        typeof window !== "undefined"
+                          ? navigator.language
+                          : "en",
+                        {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        }
+                      )}
+                    </p>
+                    {expense.description && (
+                      <p className="text-muted-foreground text-sm line-clamp-2">
+                        {expense.description}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              </Link>
             </li>
           ))}
         </ul>
