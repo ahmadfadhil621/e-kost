@@ -1,21 +1,10 @@
 version: 2
 
-updates:
-  - package-ecosystem: "npm"
-    directory: "/"
-    open-pull-requests-limit: 10
-    schedule:
-      interval: "daily"
-    # Security updates only — no version bumps
-    # Dependabot security updates are enabled separately in repo settings,
-    # but this config ensures PRs target the right branch and follow our rules.
-    target-branch: "main"
-    commit-message:
-      prefix: "fix(deps):"
-    labels:
-      - "dependencies"
-      - "security"
+# npm security updates are handled by Dependabot Security Updates (repo setting),
+# NOT by version updates below. Do NOT add an npm section here — it would open
+# PRs for every new version, not just security fixes.
 
+updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
