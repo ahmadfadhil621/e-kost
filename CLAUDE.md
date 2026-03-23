@@ -83,6 +83,13 @@ Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
 - When creating GitHub issues, ALWAYS use `gh` CLI (e.g., `gh issue create`). Read existing issue templates first with `cat .github/ISSUE_TEMPLATE/*.md` before creating any issue.
 - Never modify `prisma/schema.prisma` directly. If a feature requires schema changes, describe the needed changes and let the user apply them manually in Supabase. After they confirm the changes are applied, run `npx prisma db pull` then `npx prisma generate` to sync the client.
 
+## Dependency Management
+
+Automated via GitHub. No manual action needed day-to-day.
+
+- **Dependabot** (`.github/dependabot.yml`) — Opens PRs for npm security vulnerabilities (daily) and GitHub Actions updates (weekly). Patch-level security PRs auto-merge after CI passes (`.github/workflows/dependabot-auto-merge.yml`). Minor/major PRs require manual review.
+- **Monthly health check** (`.github/workflows/dependency-health.yml`) — Runs on the 1st of every month. Scans for major version gaps, security vulnerabilities, and deprecated packages. Opens a GitHub issue labeled `dependency-health` if findings exist. Manually triggerable via Actions tab.
+
 ## Protected Files — DO NOT modify without explicit user approval
 
 - `prisma/schema.prisma` — User manages schema via Supabase; never edit directly
