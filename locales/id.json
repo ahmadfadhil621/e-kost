@@ -364,7 +364,12 @@
       "title": "Saldo Tertunggak",
       "viewAll": "Lihat Semua",
       "viewAllTenants": "Lihat semua penyewa →",
-      "allPaid": "Semua penyewa sudah lunas"
+      "allPaid": "Semua penyewa sudah lunas",
+      "detail": {
+        "room": "Kamar",
+        "owes": "Tertunggak",
+        "viewTenant": "Lihat penyewa →"
+      }
     },
     "recentPayments": {
       "title": "Pembayaran Terbaru",

@@ -364,7 +364,12 @@
       "title": "Outstanding Balances",
       "viewAll": "View All",
       "viewAllTenants": "View all tenants →",
-      "allPaid": "All tenants are up to date"
+      "allPaid": "All tenants are up to date",
+      "detail": {
+        "room": "Room",
+        "owes": "Outstanding",
+        "viewTenant": "View tenant →"
+      }
     },
     "recentPayments": {
       "title": "Recent Payments",

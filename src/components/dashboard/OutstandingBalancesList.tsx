@@ -1,8 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import type { OutstandingBalance } from "@/domain/schemas/dashboard";
 
 export interface OutstandingBalancesListProps {
@@ -21,6 +29,8 @@ export function OutstandingBalancesList({
   isLoading = false,
 }: OutstandingBalancesListProps) {
   const { t } = useTranslation();
+  const [selectedBalance, setSelectedBalance] =
+    useState<OutstandingBalance | null>(null);
 
   if (isLoading) {
     return (
@@ -52,33 +62,63 @@ export function OutstandingBalancesList({
       </CardHeader>
       <CardContent>
         {balances.length === 0 ? (
-          <p
-            className="text-sm text-balance-paid"
-            role="status"
-          >
+          <p className="text-sm text-balance-paid" role="status">
             {t("dashboard.outstanding.allPaid")}
           </p>
         ) : (
           <ul className="space-y-2" role="list">
             {balances.map((b) => (
               <li key={b.tenantId}>
-                <Link
-                  href={`/properties/${propertyId}/tenants/${b.tenantId}`}
-                  className="flex min-h-[44px] min-w-[44px] items-center justify-between gap-2 rounded-md border p-2 text-left hover:bg-accent"
+                <button
+                  onClick={() => setSelectedBalance(b)}
+                  className="flex w-full min-h-[44px] items-center justify-between gap-2 rounded-md border p-2 text-left hover:bg-accent"
                 >
-                  <div className="min-w-0 flex-1">
-                    <span className="text-foreground">{b.tenantName}</span>
-                    <span className="ml-1 text-sm text-muted-foreground">{b.roomNumber}</span>
-                  </div>
+                  <span className="text-foreground">{b.tenantName}</span>
                   <span className="text-sm font-semibold text-balance-outstanding shrink-0">
                     {formatCurrency(b.balance)}
                   </span>
-                </Link>
+                </button>
               </li>
             ))}
           </ul>
         )}
       </CardContent>
+
+      <Dialog
+        open={!!selectedBalance}
+        onOpenChange={(open) => {
+          if (!open) setSelectedBalance(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedBalance?.tenantName}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 text-sm">
+            <p>
+              {t("dashboard.outstanding.detail.room")}:{" "}
+              {selectedBalance?.roomNumber}
+            </p>
+            <p className="font-semibold text-balance-outstanding">
+              {t("dashboard.outstanding.detail.owes")}:{" "}
+              {selectedBalance ? formatCurrency(selectedBalance.balance) : ""}
+            </p>
+          </div>
+          <DialogFooter>
+            <Link
+              href={
+                selectedBalance
+                  ? `/properties/${propertyId}/tenants/${selectedBalance.tenantId}`
+                  : "#"
+              }
+              className="text-primary underline hover:underline"
+              onClick={() => setSelectedBalance(null)}
+            >
+              {t("dashboard.outstanding.detail.viewTenant")}
+            </Link>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
