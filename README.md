@@ -106,6 +106,15 @@ On every push and pull request to `main`, the **CI** workflow (`.github/workflow
 
 CI uses a PostgreSQL 16 service container and sets `DATABASE_URL`, `BETTER_AUTH_SECRET`, and `BETTER_AUTH_URL` in the workflow. No GitHub secrets are required for this default setup. To use your own Supabase database in CI instead, add `DATABASE_URL` (and optionally `BETTER_AUTH_SECRET`) as repository secrets and reference them in the workflow.
 
+## Dependency Management
+
+Dependencies are managed automatically via GitHub:
+
+- **Dependabot** — Monitors npm packages daily for security vulnerabilities and opens PRs. Patch-level security fixes auto-merge after CI passes. Minor/major updates require manual review. Also checks GitHub Actions versions weekly.
+- **Monthly health check** — A scheduled workflow (1st of every month) scans for major version gaps, deprecated packages, and unpatched vulnerabilities. Opens a GitHub issue labeled `dependency-health` if anything needs attention. Can also be triggered manually from the Actions tab.
+
+Configuration: `.github/dependabot.yml`, `.github/workflows/dependabot-auto-merge.yml`, `.github/workflows/dependency-health.yml`.
+
 ## Development Status
 
 ### Completed (Phases 0–8)
