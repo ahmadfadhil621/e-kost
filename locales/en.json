@@ -254,6 +254,7 @@
       "confirm": "Confirm Move Out",
       "success": "Tenant moved out successfully"
     },
+    "dangerZone": "Danger Zone",
     "validation": {
       "nameRequired": "Name is required",
       "phoneRequired": "Phone is required",

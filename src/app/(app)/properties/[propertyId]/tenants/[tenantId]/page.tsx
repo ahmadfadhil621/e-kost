@@ -260,14 +260,6 @@ export default function TenantDetailPage() {
         >
           {t("tenant.detail.assignRoom")}
         </Button>
-        <Button
-          variant="outline"
-          className="min-h-[44px] min-w-[44px]"
-          onClick={() => setMoveOutOpen(true)}
-          aria-label={t("tenant.detail.moveOut")}
-        >
-          {t("tenant.detail.moveOut")}
-        </Button>
         <Button asChild className="min-h-[44px] min-w-[44px]">
           <Link href={`/properties/${propertyId}/tenants/${tenantId}/edit`}>
             {t("tenant.detail.edit")}
@@ -288,6 +280,21 @@ export default function TenantDetailPage() {
       />
 
       <NotesSection propertyId={propertyId} tenantId={tenantId} />
+
+      {/* G-3: Destructive actions at bottom */}
+      <div className="border-t pt-6 space-y-3">
+        <h3 className="text-sm font-semibold text-destructive">
+          {t("tenant.dangerZone")}
+        </h3>
+        <Button
+          variant="outline"
+          className="min-h-[44px] min-w-[44px] w-full"
+          onClick={() => setMoveOutOpen(true)}
+          aria-label={t("tenant.detail.moveOut")}
+        >
+          {t("tenant.detail.moveOut")}
+        </Button>
+      </div>
 
       <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
         <DialogContent className="max-w-md">

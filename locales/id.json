@@ -254,6 +254,7 @@
       "confirm": "Konfirmasi Pindah Keluar",
       "success": "Penyewa berhasil pindah keluar"
     },
+    "dangerZone": "Zona Bahaya",
     "validation": {
       "nameRequired": "Nama wajib diisi",
       "phoneRequired": "Telepon wajib diisi",
