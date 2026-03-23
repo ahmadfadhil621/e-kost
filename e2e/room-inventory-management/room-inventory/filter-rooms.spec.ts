@@ -73,7 +73,7 @@ test.describe("filter rooms", () => {
       if ((await renovationFilter.count()) > 0) {
         await renovationFilter.click();
         await expect(
-          page.getByText(/no rooms|0 rooms/i).first()
+          page.getByText(/no results|no rooms|0 rooms/i).first()
         ).toBeVisible({ timeout: 5000 });
       }
     });

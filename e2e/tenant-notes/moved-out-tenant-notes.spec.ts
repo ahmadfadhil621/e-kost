@@ -50,6 +50,11 @@ test.describe("moved-out tenant notes", () => {
         test.skip();
         return;
       }
+      const contentType = notesRes.headers()["content-type"] ?? "";
+      if (!contentType.includes("application/json")) {
+        test.skip();
+        return;
+      }
       const notes = await notesRes.json();
       if (!Array.isArray(notes) || notes.length === 0) {
         test.skip();

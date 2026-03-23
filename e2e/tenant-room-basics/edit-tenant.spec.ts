@@ -22,12 +22,10 @@ test.beforeAll(async ({ browser, baseURL }) => {
   const context = await browser.newContext({
     storageState: "e2e/.auth/user-with-property.json",
   });
-  const page = await context.newPage();
-  await page.goto(baseURL ?? "http://localhost:3000");
   const unique = "E2E-Edit-" + Date.now();
   originalName = "Edit Tenant " + unique;
-  const res = await page.request.post(
-    `${baseURL}/api/properties/${propertyId}/tenants`,
+  const res = await context.request.post(
+    `${baseURL ?? "http://localhost:3000"}/api/properties/${propertyId}/tenants`,
     {
       data: {
         name: originalName,

@@ -297,11 +297,11 @@ export default function TenantDetailPage() {
       </div>
 
       <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md flex flex-col max-h-[85vh]">
           <DialogHeader>
             <DialogTitle>{t("tenant.assignRoom.title")}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-2">
+          <div className="space-y-2 flex-1 overflow-y-auto min-h-0">
             {availableRooms.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 {t("tenant.assignRoom.noAvailableRooms")}
