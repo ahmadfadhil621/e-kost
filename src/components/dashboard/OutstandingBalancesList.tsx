@@ -87,7 +87,7 @@ export function OutstandingBalancesList({
       <Dialog
         open={!!selectedBalance}
         onOpenChange={(open) => {
-          if (!open) setSelectedBalance(null);
+          if (!open) { setSelectedBalance(null); }
         }}
       >
         <DialogContent>
