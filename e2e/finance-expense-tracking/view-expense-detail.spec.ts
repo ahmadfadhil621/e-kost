@@ -5,7 +5,6 @@
 // REQ D1.4 -> test('delete with confirmation redirects to expense list')
 // REQ D1.5 -> test('non-existent expenseId shows not-found state')
 // REQ D1.6 -> test('expense with no description renders detail page without description')
-// REQ D1.7 -> test('back button returns to expense list')
 // Note: unauthenticated redirect covered by e2e/auth/session-redirect.spec.ts
 
 import { test, expect } from "@playwright/test";
@@ -185,16 +184,5 @@ test.describe("view expense detail", () => {
       ).toHaveCount(0);
     });
 
-    test("back button returns to expense list", async ({ page }) => {
-      test.info().setTimeout(45000);
-      await goToExpenseDetail(page, expenseId);
-
-      await page.getByRole("button", { name: /back|kembali/i }).click();
-
-      await page.waitForURL(/\/finance\/expenses$/, { timeout: 10000 });
-      await expect(
-        page.getByText(/expenses|pengeluaran/i).first()
-      ).toBeVisible({ timeout: 10000 });
-    });
   });
 });

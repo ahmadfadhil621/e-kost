@@ -50,14 +50,11 @@ export async function goToTenantDetail(
     );
   }
   // Active: Edit / Assign room / Move out or "Tenant details" heading.
-  // Moved-out: "Tenant moved out successfully" text, Back link, or heading.
-  // Not-found/error: Back button.
+  // Moved-out: "Tenant moved out successfully" text or heading.
   await page
     .getByRole("button", { name: /edit|assign room|move out/i })
     .or(page.getByText(/tenant details|detail penyewa|detail/i))
     .or(page.getByText(/tenant moved out successfully|moved out successfully|penyewa berhasil pindah keluar|pindah keluar/i))
-    .or(page.getByRole("link", { name: /^back$|kembali/i }))
-    .or(page.getByRole("button", { name: /^back$|kembali/i }))
     .first()
     .waitFor({ state: "visible", timeout: 30000 });
 }

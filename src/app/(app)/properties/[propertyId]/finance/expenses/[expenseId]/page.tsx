@@ -103,15 +103,6 @@ export default function ExpenseDetailPage() {
     return (
       <div className="space-y-4">
         <p className="text-destructive">{t("expense.detail.notFound")}</p>
-        <Button
-          variant="outline"
-          className="min-h-[44px] min-w-[44px]"
-          onClick={() =>
-            router.push(`/properties/${propertyId}/finance/expenses`)
-          }
-        >
-          {t("common.back")}
-        </Button>
       </div>
     );
   }
@@ -165,15 +156,6 @@ export default function ExpenseDetailPage() {
           >
             {t("common.edit")}
           </Link>
-        </Button>
-        <Button
-          variant="outline"
-          className="min-h-[44px] min-w-[44px]"
-          onClick={() =>
-            router.push(`/properties/${propertyId}/finance/expenses`)
-          }
-        >
-          {t("common.back")}
         </Button>
       </div>
 

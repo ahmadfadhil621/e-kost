@@ -195,13 +195,6 @@ export default function TenantDetailPage() {
     return (
       <div className="space-y-4">
         <p className="text-destructive">{t("auth.error.generic")}</p>
-        <Button
-          variant="outline"
-          className="min-h-[44px] min-w-[44px]"
-          onClick={() => router.push(`/properties/${propertyId}/tenants`)}
-        >
-          {t("common.back")}
-        </Button>
       </div>
     );
   }
@@ -216,11 +209,6 @@ export default function TenantDetailPage() {
             {t("tenant.moveOut.success")}
           </p>
         </div>
-        <Button asChild variant="ghost" className="min-h-[44px] min-w-[44px]">
-          <Link href={`/properties/${propertyId}/tenants`}>
-            {t("common.back")}
-          </Link>
-        </Button>
         <NotesSection
           propertyId={propertyId}
           tenantId={tenantId}
@@ -263,11 +251,6 @@ export default function TenantDetailPage() {
         <Button asChild className="min-h-[44px] min-w-[44px]">
           <Link href={`/properties/${propertyId}/tenants/${tenantId}/edit`}>
             {t("tenant.detail.edit")}
-          </Link>
-        </Button>
-        <Button asChild variant="ghost" className="min-h-[44px] min-w-[44px]">
-          <Link href={`/properties/${propertyId}/tenants`}>
-            {t("common.back")}
           </Link>
         </Button>
       </div>

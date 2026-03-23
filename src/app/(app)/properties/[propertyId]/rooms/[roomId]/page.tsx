@@ -230,13 +230,6 @@ export default function RoomDetailPage() {
     return (
       <div className="space-y-4">
         <p className="text-destructive">{t("room.errors.loadFailed")}</p>
-        <Button
-          variant="outline"
-          className="min-h-[44px] min-w-[44px]"
-          onClick={() => router.push(`/properties/${propertyId}/rooms`)}
-        >
-          {t("common.back")}
-        </Button>
       </div>
     );
   }
