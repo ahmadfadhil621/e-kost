@@ -12,30 +12,30 @@
 - [x] Create tasks.md
 
 ## Layer 2: Vitest Tests (written before production code)
-- [ ] `src/hooks/use-debounce.test.ts`
-- [ ] `src/components/common/search-input.test.tsx`
-- [ ] `src/components/tenant/tenant-filter-bar.test.tsx`
-- [ ] `src/app/(app)/properties/[propertyId]/tenants/page.test.tsx`
-- [ ] `src/app/(app)/properties/[propertyId]/rooms/page.test.tsx`
+- [x] `src/hooks/use-debounce.test.ts`
+- [x] `src/components/common/search-input.test.tsx`
+- [x] `src/components/tenant/tenant-filter-bar.test.tsx`
+- [x] `src/app/(app)/properties/[propertyId]/tenants/page.test.tsx`
+- [x] `src/app/(app)/properties/[propertyId]/rooms/page.test.tsx`
 
 ## Layer 3: E2E Tests (written before production code)
-- [ ] `e2e/tenants/tenant-list-search-filter.spec.ts`
-- [ ] `e2e/rooms/room-list-search.spec.ts`
+- [x] `e2e/tenants/tenant-list-search-filter.spec.ts`
+- [x] `e2e/rooms/room-list-search.spec.ts`
 
 ## Layer 4: Test Validation (3 quality gates)
-- [ ] Gate 1: structural analysis
-- [ ] Gate 2: fault injection
-- [ ] Gate 3: review checklist
+- [x] Gate 1: structural analysis
+- [x] Gate 2: fault injection
+- [x] Gate 3: review checklist
 
 ## Layer 5: Implementation
-- [ ] `src/hooks/use-debounce.ts`
-- [ ] `src/components/common/search-input.tsx`
-- [ ] `src/components/tenant/tenant-filter-bar.tsx`
-- [ ] Modify `src/app/(app)/properties/[propertyId]/tenants/page.tsx`
-- [ ] Modify `src/app/(app)/properties/[propertyId]/rooms/page.tsx`
-- [ ] Add i18n keys to `locales/en.json`
-- [ ] Add i18n keys to `locales/id.json`
+- [x] `src/hooks/use-debounce.ts`
+- [x] `src/components/common/search-input.tsx`
+- [x] `src/components/tenant/tenant-filter-bar.tsx`
+- [x] Modify `src/app/(app)/properties/[propertyId]/tenants/page.tsx`
+- [x] Modify `src/app/(app)/properties/[propertyId]/rooms/page.tsx`
+- [x] Add i18n keys to `locales/en.json`
+- [x] Add i18n keys to `locales/id.json`
 
 ## Layer 6: Regression
-- [ ] New E2E specs pass locally
-- [ ] `npm run test:run` passes
+- [x] New E2E specs pass locally
+- [x] `npm run test:run` passes

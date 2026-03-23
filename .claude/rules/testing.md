@@ -131,6 +131,14 @@ test.describe("register", () => {
 - Test accessibility: form labels, ARIA attributes, keyboard navigation
 - Use factory functions from `src/test/fixtures/` for test data, not inline objects
 
+## Page Integration Test Locators
+
+Before writing text assertions in page-level integration tests, grep the child component for how it actually renders the relevant field. Do not assume the raw data value is what appears in the DOM.
+
+Example: `RoomCard` renders `{t("room.card.roomLabel")} {room.roomNumber}` → "Room 101", not "101". A locator like `findByText("101")` will fail; use `findByText(/Room 101/i)` instead.
+
+Rule: if the component under test delegates rendering to a child component, read that child component before writing the locator.
+
 ## Subagent Rule
 
 Test files are the source of truth. Implementation subagents must NOT modify test files. They implement code until all tests pass with 0 failures.
