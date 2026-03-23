@@ -77,7 +77,13 @@ Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
 | `src/test/fixtures/` | Test factory functions |
 | `locales/` | i18n translation files (en, id) |
 
+## Behavior Rules
+
+- When asked to plan or brainstorm, do NOT start reading code files or implementing. Only explore the codebase if explicitly asked to. Ask clarifying questions instead.
+- When creating GitHub issues, ALWAYS use `gh` CLI (e.g., `gh issue create`). Read existing issue templates first with `cat .github/ISSUE_TEMPLATE/*.md` before creating any issue.
+- Never modify `prisma/schema.prisma` directly. If a feature requires schema changes, describe the needed changes and let the user apply them manually in Supabase. After they confirm the changes are applied, run `npx prisma db pull` then `npx prisma generate` to sync the client.
+
 ## Protected Files — DO NOT modify without explicit user approval
 
-- `prisma/schema.prisma` — Database schema changes affect the entire stack
+- `prisma/schema.prisma` — User manages schema via Supabase; never edit directly
 - `.github/workflows/ci.yml` — CI pipeline changes affect all contributors
