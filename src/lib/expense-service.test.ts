@@ -814,12 +814,12 @@ describe("ExpenseService", () => {
       category: expenseCategoryArbitrary,
       amount: fc.double({ min: 0.01, max: 1000000, noNaN: true }),
       date: fc
-        .date({ min: new Date("2020-01-01"), max: new Date("2030-12-31") })
+        .date({ min: new Date("2020-01-01"), max: new Date("2030-12-31"), noInvalidDate: true })
         .map((d) => d.toISOString().split("T")[0]),
       description: fc.option(fc.string({ maxLength: 1000 }), {
         nil: undefined,
       }),
-    });
+    }, { noNullPrototype: true });
 
     it("Property 1: expense creation round trip - created expense has id, timestamps, and matches input", () => {
       fc.assert(

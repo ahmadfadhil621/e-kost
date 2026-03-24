@@ -317,7 +317,7 @@ describe("property-based tests", () => {
             .filter((s) => s.trim().length > 0),
           email: zodSafeEmail,
           password: fc.string({ minLength: 8, maxLength: 50 }),
-        }),
+        }, { noNullPrototype: true }),
         (input) => {
           const result = registrationSchema.safeParse(input);
           expect(result.success).toBe(true);
@@ -341,7 +341,7 @@ describe("property-based tests", () => {
         fc.record({
           email: zodSafeEmail,
           password: fc.string({ minLength: 1, maxLength: 50 }),
-        }),
+        }, { noNullPrototype: true }),
         (input) => {
           const result = loginSchema.safeParse(input);
           expect(result.success).toBe(true);
@@ -362,7 +362,7 @@ describe("property-based tests", () => {
         fc.record({
           email: fc.constantFrom("", undefined as unknown as string),
           password: fc.string({ minLength: 1, maxLength: 50 }),
-        }),
+        }, { noNullPrototype: true }),
         (input) => {
           const result = loginSchema.safeParse(input);
           expect(result.success).toBe(false);
@@ -386,7 +386,7 @@ describe("property-based tests", () => {
         fc.record({
           email: zodSafeEmail,
           password: fc.string({ minLength: 1, maxLength: 50 }),
-        }),
+        }, { noNullPrototype: true }),
         (input) => {
           const result = loginSchema.safeParse(input);
           expect(result.success).toBe(true);

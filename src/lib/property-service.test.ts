@@ -356,7 +356,7 @@ describe("property-based tests", () => {
         fc.record({
           name: fc.string({ minLength: 1, maxLength: 200 }).filter((s) => s.trim().length > 0),
           address: fc.string({ minLength: 1, maxLength: 500 }).filter((s) => s.trim().length > 0),
-        }),
+        }, { noNullPrototype: true }),
         async (data) => {
           const userId = crypto.randomUUID();
           const created = createProperty({

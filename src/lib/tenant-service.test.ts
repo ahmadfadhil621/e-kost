@@ -831,12 +831,9 @@ describe("property-based tests", () => {
             .string({ minLength: 1, maxLength: 20 })
             .filter((s) => s.trim().length > 0),
           email: fc
-            .stringOf(fc.constantFrom("a", "b", "x", "1", "2"), {
-              minLength: 1,
-              maxLength: 15,
-            })
+            .string({ unit: fc.constantFrom("a", "b", "x", "1", "2"), minLength: 1, maxLength: 15 })
             .map((local) => `${local}@example.com`),
-        }),
+        }, { noNullPrototype: true }),
         async (tenantData) => {
           const propertyId = crypto.randomUUID();
           const userId = crypto.randomUUID();

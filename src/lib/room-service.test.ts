@@ -985,7 +985,7 @@ describe("property-based tests", () => {
             .string({ minLength: 1, maxLength: 100 })
             .filter((s) => s.trim().length > 0),
           monthlyRent: fc.double({ min: 0.01, max: 100000, noNaN: true }),
-        }),
+        }, { noNullPrototype: true }),
         async (roomData) => {
           const propertyId = crypto.randomUUID();
           const userId = crypto.randomUUID();

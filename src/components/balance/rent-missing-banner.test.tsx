@@ -248,7 +248,7 @@ describe("RentMissingBanner", () => {
           fc.record({
             monthlyRent: fc.float({ min: Math.fround(100), max: Math.fround(10_000_000), noNaN: true }),
             outstandingBalance: fc.float({ min: Math.fround(1), max: Math.fround(10_000_000), noNaN: true }),
-          }),
+          }, { noNullPrototype: true }),
           ({ monthlyRent, outstandingBalance }) => {
             const balance = createBalanceResult({
               monthlyRent,
@@ -281,7 +281,7 @@ describe("RentMissingBanner", () => {
         fc.property(
           fc.record({
             monthlyRent: fc.float({ min: 100, max: 10_000_000, noNaN: true }),
-          }),
+          }, { noNullPrototype: true }),
           ({ monthlyRent }) => {
             const balance = createBalanceResult({
               monthlyRent,

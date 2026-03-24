@@ -742,7 +742,7 @@ describe("PaymentService", () => {
         fc.asyncProperty(
           fc.uuid(),
           fc.double({ min: 0.01, max: 100000, noNaN: true }).map((n) => Math.round(n * 100) / 100),
-          fc.date({ max: new Date() }),
+          fc.date({ max: new Date(), noInvalidDate: true }),
           async (tenantId, amount, paymentDate) => {
             const propertyId = crypto.randomUUID();
             const tenant = createTenant({

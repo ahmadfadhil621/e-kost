@@ -507,7 +507,7 @@ describe("DashboardService", () => {
             fc.record({
               tenantName: fc.string({ minLength: 1, maxLength: 50 }),
               balance: fc.double({ min: 0.01, max: 100000, noNaN: true }),
-            }),
+            }, { noNullPrototype: true }),
             { minLength: 1, maxLength: 5 }
           ),
           async (entries) => {
@@ -550,7 +550,7 @@ describe("DashboardService", () => {
       fc.assert(
         fc.asyncProperty(
           fc.array(
-            fc.date({ min: new Date("2020-01-01"), max: new Date("2030-12-31") }),
+            fc.date({ min: new Date("2020-01-01"), max: new Date("2030-12-31"), noInvalidDate: true }),
             { minLength: 1, maxLength: 5 }
           ),
           async (dates) => {

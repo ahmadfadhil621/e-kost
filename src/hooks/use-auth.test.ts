@@ -264,7 +264,7 @@ describe("useAuth", () => {
                 fc.stringMatching(/^[a-z]{2,8}\.[a-z]{2,4}$/)
               )
               .map(([local, domain]) => `${local}@${domain}`),
-          }),
+          }, { noNullPrototype: true }),
           async (userData) => {
             const mock = await getMock();
             const { authClient } = mock;

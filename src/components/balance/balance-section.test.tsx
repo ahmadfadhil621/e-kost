@@ -212,7 +212,7 @@ describe("BalanceSection (RT-5 modified)", () => {
           fc.record({
             monthlyRent: fc.float({ min: 0, max: 10_000_000, noNaN: true }),
             totalPayments: fc.float({ min: 0, max: 10_000_000, noNaN: true }),
-          }),
+          }, { noNullPrototype: true }),
           ({ monthlyRent, totalPayments }) => {
             const outstandingBalance = Math.max(0, monthlyRent - totalPayments);
             const status = outstandingBalance <= 0 ? "paid" as const : "unpaid" as const;
@@ -253,7 +253,7 @@ describe("BalanceSection (RT-5 modified)", () => {
           fc.record({
             monthlyRent: fc.float({ min: 0, max: 10_000_000, noNaN: true }),
             totalPayments: fc.float({ min: 0, max: 10_000_000, noNaN: true }),
-          }),
+          }, { noNullPrototype: true }),
           ({ monthlyRent, totalPayments }) => {
             const outstandingBalance = Math.max(0, monthlyRent - totalPayments);
             const status = outstandingBalance <= 0 ? "paid" as const : "unpaid" as const;
