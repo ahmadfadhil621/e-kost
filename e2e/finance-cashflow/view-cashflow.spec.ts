@@ -119,7 +119,7 @@ test.describe("view cashflow", () => {
       const now = new Date();
       const paymentDate = now.toISOString().slice(0, 10);
 
-      await seedPayment(request, baseURL, propertyId, activeTenant!.id, 1_500_000, paymentDate);
+      await seedPayment(request, baseURL, propertyId, activeTenant!.id, 500_000, paymentDate);
 
       await page.goto(`/properties/${propertyId}/finance/cashflow`);
       await page
