@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { MonthSelector } from "@/components/finance/month-selector";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
 import type { CashflowEntry } from "@/domain/schemas/cashflow";
@@ -28,10 +28,17 @@ export default function CashflowPage() {
   const params = useParams();
   const propertyId = params.propertyId as string;
   const formatCurrency = useFormatCurrency();
+  const searchParams = useSearchParams();
 
   const now = useMemo(() => new Date(), []);
-  const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth() + 1);
+  const [year, setYear] = useState(() => {
+    const y = Number(searchParams.get("year"));
+    return y >= 2000 && y <= 2100 ? y : now.getFullYear();
+  });
+  const [month, setMonth] = useState(() => {
+    const m = Number(searchParams.get("month"));
+    return m >= 1 && m <= 12 ? m : now.getMonth() + 1;
+  });
 
   const goPrevious = useCallback(() => {
     if (month === 1) {

@@ -111,9 +111,8 @@ test.describe("view cashflow", () => {
       const tenantsRes = await request.get(
         `${baseURL}/api/properties/${propertyId}/tenants`
       );
-      const tenants = await tenantsRes.json();
-      const activeTenant = (tenants as Array<{ id: string; roomId: string | null; movedOutAt: string | null }>)
-        .find((t) => t.roomId && !t.movedOutAt);
+      const { tenants } = await tenantsRes.json() as { tenants: Array<{ id: string; roomId: string | null; movedOutAt: string | null }> };
+      const activeTenant = tenants.find((t) => t.roomId && !t.movedOutAt);
 
       test.skip(!activeTenant, "No active tenant available to seed payment");
 
