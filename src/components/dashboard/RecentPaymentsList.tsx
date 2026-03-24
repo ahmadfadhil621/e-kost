@@ -59,16 +59,13 @@ export function RecentPaymentsList({
           <ul className="space-y-2" role="list">
             {payments.map((p) => (
               <li key={p.paymentId}>
-                <Link
-                  href={`/properties/${propertyId}/finance`}
-                  className="flex min-h-[44px] min-w-[44px] items-center justify-between rounded-md border p-2 text-left hover:bg-accent"
-                >
+                <div className="flex min-h-[44px] items-center justify-between rounded-md border p-2">
                   <span className="text-foreground">{p.tenantName}</span>
                   <span className="text-sm tabular-nums text-muted-foreground">{formatDate(p.date)}</span>
                   <span className="text-sm font-semibold tabular-nums text-balance-paid">
                     {formatCurrency(p.amount)}
                   </span>
-                </Link>
+                </div>
               </li>
             ))}
           </ul>

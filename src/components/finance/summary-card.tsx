@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
@@ -10,6 +11,7 @@ export interface SummaryCardProps {
   amount: number;
   variant?: SummaryVariant;
   formatCurrency: (amount: number) => string;
+  href?: string;
 }
 
 export function SummaryCard({
@@ -17,13 +19,14 @@ export function SummaryCard({
   amount,
   variant = "neutral",
   formatCurrency,
+  href,
 }: SummaryCardProps) {
   const { t } = useTranslation();
   const formatted = formatCurrency(amount);
   const isPositive = variant === "net" && amount > 0;
   const isNegative = variant === "net" && amount < 0;
 
-  return (
+  const card = (
     <Card className="w-full">
       <CardHeader className="pb-1">
         <span className="text-muted-foreground text-sm">{label}</span>
@@ -54,4 +57,14 @@ export function SummaryCard({
       </CardContent>
     </Card>
   );
+
+  if (href) {
+    return (
+      <Link href={href} className="block min-h-[44px]">
+        {card}
+      </Link>
+    );
+  }
+
+  return card;
 }

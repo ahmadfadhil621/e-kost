@@ -3,6 +3,10 @@
 // REQ 4.4 -> it('shows empty state when no payments')
 // REQ 4.6 -> it('formats amount with formatCurrency')
 // REQ 5.4 -> it('shows skeleton when loading')
+// Traceability: finance-summary-card-navigation
+// REQ 3.1 -> it('payment items are not interactive links')
+// REQ 3.2 -> (covered by existing 'View finances link goes to finance page')
+// REQ 3.3 -> (covered by existing 'displays recent payments with tenant name, amount, date')
 
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
@@ -73,6 +77,27 @@ describe("RecentPaymentsList", () => {
         "href",
         `/properties/${propertyId}/finance`
       );
+    });
+
+    it("payment items are not interactive links", () => {
+      const payments = [
+        createRecentPayment({ paymentId: "p1", tenantName: "Alice", amount: 500000 }),
+        createRecentPayment({ paymentId: "p2", tenantName: "Bob", amount: 750000 }),
+      ];
+
+      render(
+        <RecentPaymentsList
+          payments={payments}
+          propertyId={propertyId}
+          formatCurrency={formatCurrency}
+          formatDate={formatDate}
+        />
+      );
+
+      // Only the header "View Finances" link should exist — individual items must not be links
+      const links = screen.getAllByRole("link");
+      expect(links).toHaveLength(1);
+      expect(links[0]).toHaveAttribute("href", `/properties/${propertyId}/finance`);
     });
   });
 
