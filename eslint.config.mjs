@@ -1,27 +1,19 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals"),
-  ...compat.extends("next/typescript"),
+const eslintConfig = defineConfig([
   {
-    ignores: [
-      "src/generated/**",
-      "node_modules/**",
-      ".next/**",
-      "out/**",
-      "build/**",
-      "next-env.d.ts",
-    ],
+    extends: [nextCoreWebVitals, nextTypescript],
   },
+  globalIgnores([
+    "src/generated/**",
+    "node_modules/**",
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+  ]),
   {
     rules: {
       // Strict but sensible: avoid common bugs and sloppy patterns
@@ -31,6 +23,11 @@ const eslintConfig = [
       "curly": ["error", "all"],
       "no-var": "error",
       "prefer-const": "error",
+      // React Compiler rules: disabled (project does not use React Compiler)
+      "react-hooks/purity": "off",
+      "react-hooks/immutability": "off",
+      "react-hooks/preserve-manual-memoization": "off",
+      "react-hooks/incompatible-library": "off",
       // TypeScript: ban explicit any (no-floating-promises needs type-aware config)
       "@typescript-eslint/no-explicit-any": "error",
       // Unused vars: allow _prefix for intentionally unused; argsIgnorePattern for callbacks
@@ -51,6 +48,6 @@ const eslintConfig = [
       "no-console": "off",
     },
   },
-];
+]);
 
 export default eslintConfig;
