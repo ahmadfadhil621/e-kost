@@ -409,7 +409,11 @@
     "negative": "Rugi",
     "previousMonth": "Bulan sebelumnya",
     "nextMonth": "Bulan berikutnya",
-    "addExpense": "Tambah pengeluaran"
+    "addExpense": "Tambah pengeluaran",
+    "cashflow": {
+      "title": "Arus Kas",
+      "empty": "Tidak ada transaksi bulan ini"
+    }
   },
   "expense": {
     "create": {

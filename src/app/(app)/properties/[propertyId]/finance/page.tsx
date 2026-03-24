@@ -112,6 +112,7 @@ export default function FinanceOverviewPage() {
               amount={data.netIncome}
               variant="net"
               formatCurrency={formatCurrency}
+              href={`/properties/${propertyId}/finance/cashflow`}
             />
           </div>
         </>

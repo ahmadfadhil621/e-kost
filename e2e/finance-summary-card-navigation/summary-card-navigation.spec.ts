@@ -91,7 +91,8 @@ test.describe("summary card navigation", () => {
   });
 
   test.describe("bad cases", () => {
-    test("net income card is not a link", async ({ page }) => {
+    test("net income card links to cashflow page", async ({ page }) => {
+      const propertyId = getPropertyId();
       await goToFinanceOverview(page);
 
       // Net Income card label must be visible
@@ -99,11 +100,16 @@ test.describe("summary card navigation", () => {
         page.getByText(/net income|laba bersih/i).first()
       ).toBeVisible({ timeout: 10000 });
 
-      // No <a> element should wrap the Net Income card
+      // Net Income card is now a link to the cashflow page (issue #69)
       const netIncomeLink = page
         .locator("a")
-        .filter({ has: page.getByText(/net income|laba bersih/i) });
-      await expect(netIncomeLink).toHaveCount(0);
+        .filter({ has: page.getByText(/net income|laba bersih/i) })
+        .first();
+      await expect(netIncomeLink).toBeVisible({ timeout: 5000 });
+      await expect(netIncomeLink).toHaveAttribute(
+        "href",
+        `/properties/${propertyId}/finance/cashflow`
+      );
     });
   });
 

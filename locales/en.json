@@ -409,7 +409,11 @@
     "negative": "Loss",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
-    "addExpense": "Add expense"
+    "addExpense": "Add expense",
+    "cashflow": {
+      "title": "Cashflow",
+      "empty": "No transactions for this month"
+    }
   },
   "expense": {
     "create": {
