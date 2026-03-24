@@ -117,9 +117,7 @@ test.describe("view cashflow", () => {
       test.skip(!activeTenant, "No active tenant available to seed payment");
 
       const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth() + 1;
-      const paymentDate = `${year}-${String(month).padStart(2, "0")}-10`;
+      const paymentDate = now.toISOString().slice(0, 10);
 
       await seedPayment(request, baseURL, propertyId, activeTenant!.id, 1_500_000, paymentDate);
 
@@ -143,9 +141,7 @@ test.describe("view cashflow", () => {
       const propertyId = getPropertyId();
 
       const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth() + 1;
-      const expenseDate = `${year}-${String(month).padStart(2, "0")}-12`;
+      const expenseDate = now.toISOString().slice(0, 10);
 
       await seedExpense(request, baseURL, propertyId, 75_000, expenseDate);
 
