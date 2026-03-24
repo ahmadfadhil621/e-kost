@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
@@ -27,9 +28,10 @@ export function SummaryCard({
   const isNegative = variant === "net" && amount < 0;
 
   const card = (
-    <Card className="w-full">
-      <CardHeader className="pb-1">
+    <Card className={`w-full transition-shadow ${href ? "hover:shadow-md hover:ring-2 hover:ring-primary/20 cursor-pointer" : ""}`}>
+      <CardHeader className="pb-1 flex flex-row items-center justify-between">
         <span className="text-muted-foreground text-sm">{label}</span>
+        {href && <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />}
       </CardHeader>
       <CardContent>
         <p
