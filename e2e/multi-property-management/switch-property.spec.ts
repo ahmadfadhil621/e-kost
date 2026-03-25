@@ -46,7 +46,14 @@ test.describe("switch property", () => {
     test("user without properties sees create prompt or empty state", async ({
       page,
     }) => {
+      const propertiesResponse = page.waitForResponse(
+        (res) =>
+          res.url().includes("/api/properties") &&
+          res.request().method() === "GET",
+        { timeout: 15000 }
+      );
       await page.goto("/");
+      await propertiesResponse;
       const emptyOrCreate = page.getByText(/no properties yet|create your first property|get started/i).first();
       await expect(emptyOrCreate).toBeVisible({ timeout: 10000 });
     });

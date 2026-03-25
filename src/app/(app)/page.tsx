@@ -98,7 +98,7 @@ export default function DashboardPage() {
     })();
   }, [activeId]);
 
-  if (properties.length === 0) {
+  if (!isLoading && properties.length === 0) {
     return (
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">{t("nav.dashboard")}</h2>
