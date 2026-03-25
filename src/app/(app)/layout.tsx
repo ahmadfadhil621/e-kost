@@ -4,8 +4,7 @@ import "@/lib/i18n";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { AppHeader } from "@/components/layout/app-header";
 import { AppNav } from "@/components/layout/app-nav";
-import { PropertySelector } from "@/components/property/property-selector";
-import { PropertyProvider, usePropertyContext } from "@/contexts/property-context";
+import { PropertyProvider } from "@/contexts/property-context";
 import { Providers } from "@/components/providers";
 
 function AppLayoutContent({
@@ -13,18 +12,12 @@ function AppLayoutContent({
 }: {
   children: React.ReactNode;
 }) {
-  const ctx = usePropertyContext();
-  const activeId = ctx?.activePropertyId ?? null;
-  const properties = ctx?.properties ?? [];
-  const isLoading = ctx?.isLoading ?? true;
-  const showPropertySelector = !isLoading && properties.length > 0 && !activeId;
-
   return (
     <div className="flex min-h-screen flex-col">
       <AppHeader />
       {/* Shared max-width scale: max-w-[480px] md:max-w-2xl lg:max-w-3xl — keep in sync with app-header.tsx and app-nav.tsx */}
       <main className="flex-1 px-4 py-4 pb-20 max-w-[480px] md:max-w-2xl lg:max-w-3xl mx-auto w-full">
-        {showPropertySelector ? <PropertySelector /> : children}
+        {children}
       </main>
       <AppNav />
     </div>

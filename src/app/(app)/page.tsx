@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { usePropertyContext } from "@/contexts/property-context";
@@ -49,6 +50,7 @@ function formatDate(d: Date): string {
 
 export default function DashboardPage() {
   const { t } = useTranslation();
+  const router = useRouter();
   const ctx = usePropertyContext();
   const formatCurrency = useFormatCurrency();
   const [property, setProperty] = useState<PropertyDetail | null>(null);
@@ -68,6 +70,12 @@ export default function DashboardPage() {
     enabled: !!activeId,
     staleTime: 60 * 1000,
   });
+
+  useEffect(() => {
+    if (!isLoading && properties.length > 0 && !activeId) {
+      router.replace("/properties");
+    }
+  }, [isLoading, properties.length, activeId, router]);
 
   useEffect(() => {
     if (!activeId) {
@@ -90,25 +98,22 @@ export default function DashboardPage() {
     })();
   }, [activeId]);
 
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[200px] items-center justify-center">
+        <p className="text-muted-foreground">{t("common.loading")}</p>
+      </div>
+    );
+  }
+
   if (properties.length === 0) {
     return (
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">{t("nav.dashboard")}</h2>
         <p className="text-muted-foreground">{t("property.list.empty")}</p>
-        {isLoading && (
-          <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
-        )}
         <Button asChild className="min-h-[44px] min-w-[44px]">
           <Link href="/properties/new">{t("property.create.submit")}</Link>
         </Button>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-[200px] items-center justify-center">
-        <p className="text-muted-foreground">{t("common.loading")}</p>
       </div>
     );
   }
