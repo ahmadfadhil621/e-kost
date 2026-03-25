@@ -30,7 +30,7 @@ export default defineConfig({
         viewport: { width: 375, height: 667 },
         storageState: "e2e/.auth/user.json",
       },
-      dependencies: ["setup"],
+      dependencies: ["setup", "chromium-no-props"],
     },
     {
       name: "setup-with-moved-out-tenant",
@@ -40,7 +40,7 @@ export default defineConfig({
         viewport: { width: 375, height: 667 },
         storageState: "e2e/.auth/user.json",
       },
-      dependencies: ["setup"],
+      dependencies: ["setup", "chromium-no-props"],
     },
     {
       name: "setup-no-active",
@@ -50,7 +50,7 @@ export default defineConfig({
         viewport: { width: 375, height: 667 },
         storageState: "e2e/.auth/user.json",
       },
-      dependencies: ["setup"],
+      dependencies: ["setup", "chromium-no-props"],
     },
     {
       name: "chromium-no-props",
