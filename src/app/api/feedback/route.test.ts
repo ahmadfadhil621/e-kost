@@ -9,6 +9,12 @@
 // AC-5   -> it('does not attach user identity to the webhook payload')
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+vi.mock("next/server", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next/server")>();
+  return { ...actual, after: (p: Promise<unknown>) => void p };
+});
+
 import { POST } from "./route";
 
 const WEBHOOK_URL = "https://n8n.example.com/webhook/test";
