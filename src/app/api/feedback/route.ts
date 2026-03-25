@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { feedbackSchema } from "@/domain/schemas/feedback";
@@ -9,11 +10,13 @@ export async function POST(request: Request) {
 
     const webhookUrl = process.env.N8N_WEBHOOK_URL;
     if (webhookUrl) {
-      void fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: data.message }),
-      });
+      after(
+        fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: data.message }),
+        })
+      );
     } else {
       console.warn("N8N_WEBHOOK_URL is not set — feedback not forwarded");
     }
