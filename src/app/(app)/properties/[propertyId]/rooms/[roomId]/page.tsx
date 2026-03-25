@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/room/status-indicator";
+import { Pencil } from "lucide-react";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
 import {
   Select,
@@ -247,7 +248,22 @@ export default function RoomDetailPage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-semibold">{t("room.detail.title")}</h2>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-lg font-semibold">{t("room.detail.title")}</h2>
+        {!isArchived && (
+          <Button
+            asChild
+            size="sm"
+            variant="ghost"
+            className="min-h-[44px] min-w-[44px] shrink-0"
+          >
+            <Link href={`/properties/${propertyId}/rooms/${roomId}/edit`}>
+              <Pencil className="h-4 w-4" aria-hidden />
+              {t("room.detail.edit")}
+            </Link>
+          </Button>
+        )}
+      </div>
 
       <div className="space-y-2">
         <p>
@@ -300,39 +316,31 @@ export default function RoomDetailPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          <Button asChild className="min-h-[44px] min-w-[44px]">
-            <Link href={`/properties/${propertyId}/rooms/${roomId}/edit`}>
-              {t("room.detail.edit")}
-            </Link>
-          </Button>
-
-          <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium">
-              {t("room.detail.changeStatus")}
-            </span>
-            <Select
-              value={room.status}
-              onValueChange={(value) =>
-                statusMutation.mutate(value as RoomStatus)
-              }
-              disabled={statusMutation.isPending}
-            >
-              <SelectTrigger className="min-h-[44px] min-w-[44px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="available" className="min-h-[44px]">
-                  {t("room.status.available")}
-                </SelectItem>
-                <SelectItem value="occupied" className="min-h-[44px]">
-                  {t("room.status.occupied")}
-                </SelectItem>
-                <SelectItem value="under_renovation" className="min-h-[44px]">
-                  {t("room.status.under_renovation")}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <span className="text-sm font-medium">
+            {t("room.detail.changeStatus")}
+          </span>
+          <Select
+            value={room.status}
+            onValueChange={(value) =>
+              statusMutation.mutate(value as RoomStatus)
+            }
+            disabled={statusMutation.isPending}
+          >
+            <SelectTrigger className="min-h-[44px] min-w-[44px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="available" className="min-h-[44px]">
+                {t("room.status.available")}
+              </SelectItem>
+              <SelectItem value="occupied" className="min-h-[44px]">
+                {t("room.status.occupied")}
+              </SelectItem>
+              <SelectItem value="under_renovation" className="min-h-[44px]">
+                {t("room.status.under_renovation")}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       )}
 

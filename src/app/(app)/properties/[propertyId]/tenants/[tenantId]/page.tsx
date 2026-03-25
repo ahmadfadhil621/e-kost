@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -222,7 +223,20 @@ export default function TenantDetailPage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-semibold">{t("tenant.detail.title")}</h2>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-lg font-semibold">{t("tenant.detail.title")}</h2>
+        <Button
+          asChild
+          size="sm"
+          variant="ghost"
+          className="min-h-[44px] min-w-[44px] shrink-0"
+        >
+          <Link href={`/properties/${propertyId}/tenants/${tenantId}/edit`}>
+            <Pencil className="h-4 w-4" aria-hidden />
+            {t("tenant.detail.edit")}
+          </Link>
+        </Button>
+      </div>
 
       <div className="space-y-2">
         <p>
@@ -247,11 +261,6 @@ export default function TenantDetailPage() {
           aria-label={t("tenant.detail.assignRoom")}
         >
           {t("tenant.detail.assignRoom")}
-        </Button>
-        <Button asChild className="min-h-[44px] min-w-[44px]">
-          <Link href={`/properties/${propertyId}/tenants/${tenantId}/edit`}>
-            {t("tenant.detail.edit")}
-          </Link>
         </Button>
       </div>
 
