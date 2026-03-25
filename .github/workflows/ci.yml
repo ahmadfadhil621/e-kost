@@ -3,7 +3,7 @@ run-name: ${{ github.event.head_commit.message || github.event.pull_request.titl
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/feedback-mechanism]
   pull_request:
     branches: [main]
 
