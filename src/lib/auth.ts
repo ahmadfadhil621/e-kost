@@ -5,6 +5,10 @@ import { prisma } from "./prisma";
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   emailAndPassword: { enabled: true },
+  // Trust the current Vercel deployment origin (covers preview deployments)
+  ...(process.env.VERCEL_URL && {
+    trustedOrigins: [`https://${process.env.VERCEL_URL}`],
+  }),
   // CI: disable rate limit so E2E (same IP) don't hit "Too many requests"
   ...(process.env.CI && { rateLimit: { enabled: false } }),
   session: {
