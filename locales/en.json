@@ -487,6 +487,15 @@
     },
     "validation": {
       "nameRequired": "Name is required"
+    },
+    "feedback": {
+      "title": "Feedback",
+      "placeholder": "Tell us what's working well, what's broken, or what you wish existed…",
+      "submit": "Submit feedback",
+      "submitting": "Submitting…",
+      "success": "Thank you! Your feedback has been submitted.",
+      "error": "Something went wrong. Please try again.",
+      "charsRemaining": "{{count}} characters remaining"
     }
   }
 }

@@ -487,6 +487,15 @@
     },
     "validation": {
       "nameRequired": "Nama wajib diisi"
+    },
+    "feedback": {
+      "title": "Umpan Balik",
+      "placeholder": "Ceritakan apa yang berjalan dengan baik, apa yang rusak, atau apa yang Anda inginkan…",
+      "submit": "Kirim umpan balik",
+      "submitting": "Mengirim…",
+      "success": "Terima kasih! Umpan balik Anda telah dikirim.",
+      "error": "Terjadi kesalahan. Silakan coba lagi.",
+      "charsRemaining": "{{count}} karakter tersisa"
     }
   }
 }

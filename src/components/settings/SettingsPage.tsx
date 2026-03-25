@@ -8,6 +8,7 @@ import { AVAILABLE_LOCALES } from "@/lib/i18n";
 import { LanguageSelector } from "./LanguageSelector";
 import { AccountSection } from "./AccountSection";
 import { StaffSection } from "./StaffSection";
+import { FeedbackSection } from "./FeedbackSection";
 import { Separator } from "@/components/ui/separator";
 
 type User = { id: string; name: string; email: string };
@@ -62,6 +63,8 @@ export function SettingsPage() {
             />
           </>
         )}
+        <Separator />
+        <FeedbackSection />
       </section>
     </main>
   );
