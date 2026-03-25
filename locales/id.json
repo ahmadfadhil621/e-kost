@@ -70,9 +70,6 @@
       "active": "Aktif",
       "roomCount": "{{count}} kamar"
     },
-    "selector": {
-      "title": "Pilih Properti"
-    },
     "delete": {
       "title": "Hapus properti",
       "description": "Semua data terkait (kamar, penyewa, pembayaran, pengeluaran) akan terpengaruh. Tindakan ini tidak dapat dibatalkan.",

@@ -70,9 +70,6 @@
       "active": "Active",
       "roomCount": "{{count}} rooms"
     },
-    "selector": {
-      "title": "Select Property"
-    },
     "delete": {
       "title": "Delete property",
       "description": "All associated data (rooms, tenants, payments, expenses) will be affected. This cannot be undone.",
