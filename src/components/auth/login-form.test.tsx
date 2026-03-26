@@ -9,7 +9,7 @@
 // demo-login REQ 4.1 -> it('renders a single Login with Demo button')
 // demo-login REQ 4.1 -> it('does not render old Demo Owner or Demo Staff buttons')
 // demo-login REQ 4.2 -> it('calls POST /api/auth/demo-login on demo button click')
-// demo-login REQ 4.2 -> it('redirects to / after successful demo login')
+// demo-login REQ 4.2 -> it('redirects to /properties after successful demo login')
 // demo-login REQ 4.3 -> it('disables demo button while demo login is in progress')
 // demo-login REQ 4.4 -> it('shows server error when demo login endpoint returns error')
 
@@ -166,7 +166,7 @@ describe("LoginForm", () => {
       });
     });
 
-    it("redirects to / after successful demo login", async () => {
+    it("redirects to /properties after successful demo login", async () => {
       mockFetch.mockResolvedValueOnce({ ok: true, status: 200 });
       const user = userEvent.setup();
 
@@ -176,7 +176,7 @@ describe("LoginForm", () => {
       );
 
       await waitFor(() => {
-        expect(window.location.href).toBe("/");
+        expect(window.location.href).toBe("/properties");
       });
     });
 
