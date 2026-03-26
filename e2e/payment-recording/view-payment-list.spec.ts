@@ -43,7 +43,7 @@ test.describe("view payment list", () => {
       await expect(
         page.getByText(/log in|login|sign in|unauthorized|forbidden/i).or(
           page.getByRole("link", { name: /log in|login/i })
-        )
+        ).first()
       ).toBeVisible({ timeout: 10000 });
     });
   });

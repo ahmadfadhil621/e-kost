@@ -96,7 +96,7 @@ test.describe("bottom nav", () => {
       await expect(
         page.getByText(/log in|login|sign in/i).or(
           page.getByRole("link", { name: /log in|login/i })
-        )
+        ).first()
       ).toBeVisible({ timeout: 10000 });
       await expect(
         page.getByRole("navigation").getByRole("link", { name: /overview|dashboard/i })
