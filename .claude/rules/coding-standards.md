@@ -52,6 +52,19 @@ paths:
 - **Memoization discipline** -- Do not add `useMemo`/`useCallback` by default. Only use them when there is a measured performance problem or when passing callbacks to memoized children.
 - **No prop drilling** -- If a prop passes through 2+ intermediate components that don't use it, refactor via composition, context, or restructuring.
 
+## Better Auth Server-Side Calls
+
+When calling `auth.api.*` methods in a route handler and needing the raw `Response` object (e.g., to forward `set-cookie` headers), pass `asResponse: true`:
+
+```typescript
+const response = await auth.api.signInEmail({
+  body: { email, password },
+  headers: request.headers,
+  asResponse: true, // returns Response; without this, returns plain object { token, user, ... }
+});
+const cookies = response.headers.getSetCookie();
+```
+
 ## Next.js API Routes
 
 - **Flat route handlers** -- Check auth first, validate input second, call service third, return response. Use early returns to keep the handler flat.

@@ -139,6 +139,31 @@ Example: `RoomCard` renders `{t("room.card.roomLabel")} {room.roomNumber}` → "
 
 Rule: if the component under test delegates rendering to a child component, read that child component before writing the locator.
 
+## Prisma Mocking Pattern
+
+Always create **one `vi.fn()` per model method** — never share a single mock function across multiple models or methods. This is required for per-call assertion accuracy and FK-safe deletion order tests.
+
+```typescript
+// CORRECT — separate mock per model
+const mockPaymentDeleteMany = vi.fn().mockResolvedValue({ count: 0 });
+const mockTenantDeleteMany = vi.fn().mockResolvedValue({ count: 0 });
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    payment: { deleteMany: mockPaymentDeleteMany },
+    tenant: { deleteMany: mockTenantDeleteMany },
+  },
+}));
+```
+
+To track call order across multiple mocks inside a test, use a `callOrder` array with `mockImplementation` closures — do NOT use `invocationCallOrder` (unreliable after `vi.clearAllMocks()`):
+
+```typescript
+const callOrder: string[] = [];
+mockPaymentDeleteMany.mockImplementation(async () => { callOrder.push("payment"); return { count: 0 }; });
+mockTenantDeleteMany.mockImplementation(async () => { callOrder.push("tenant"); return { count: 0 }; });
+```
+
 ## Subagent Rule
 
 Test files are the source of truth. Implementation subagents must NOT modify test files. They implement code until all tests pass with 0 failures.

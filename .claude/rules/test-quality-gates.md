@@ -61,6 +61,10 @@ After Gates 1 and 2 pass, evaluate the test files against each category below. F
 - [ ] **Regex for flexibility**: Text locators use case-insensitive regex (`/submit/i`) rather than exact strings to tolerate copy changes
 - [ ] **No fragile waits**: Tests use Playwright's built-in auto-waiting (`await expect(locator).toBeVisible()`) rather than explicit `waitForTimeout()`
 
+## Gate 2 Baseline Rule
+
+Before injecting any fault, always run the full test file against the **correct implementation** first and confirm all tests pass. This establishes a clean baseline and prevents false positives during fault injection.
+
 ## Outcome
 
 - **PASS**: All checklist items are PASS or have only minor notes
