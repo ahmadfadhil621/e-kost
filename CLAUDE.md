@@ -82,6 +82,8 @@ Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
 - When asked to plan or brainstorm, do NOT start reading code files or implementing. Only explore the codebase if explicitly asked to. Ask clarifying questions instead.
 - When creating GitHub issues, ALWAYS use `gh` CLI (e.g., `gh issue create`). Read existing issue templates first with `cat .github/ISSUE_TEMPLATE/*.md` before creating any issue.
 - Never modify `prisma/schema.prisma` directly. If a feature requires schema changes, describe the needed changes and let the user apply them manually in Supabase. After they confirm the changes are applied, run `npx prisma db pull` then `npx prisma generate` to sync the client.
+- When diagnosing issues, go directly to the most likely source files first. Do not do broad codebase exploration — be surgical. If the user says "just go to the code", stop exploring and act immediately.
+- Do not rely on training data for project-specific facts (directory structures, configurations, feature existence). Always verify against actual files or official docs. When unsure, say so.
 
 ## Dependency Management
 
