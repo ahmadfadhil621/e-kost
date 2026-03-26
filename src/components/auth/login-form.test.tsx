@@ -1,4 +1,4 @@
-// Traceability: user-authentication
+// Traceability: user-authentication, demo-login
 // REQ 2.1 -> it('renders all form fields with labels')
 // REQ 2.2 -> it('submits form with valid data and redirects')
 // REQ 2.3 -> it('shows server error when login fails')
@@ -6,13 +6,20 @@
 // REQ 6.5 -> it('uses email input type for email field'), it('uses password input type')
 // REQ 7.3 -> it('uses password input type for password field')
 // PROP 9  -> it('all interactive elements use semantic roles suitable for touch targets')
+// demo-login REQ 4.1 -> it('renders a single Login with Demo button')
+// demo-login REQ 4.1 -> it('does not render old Demo Owner or Demo Staff buttons')
+// demo-login REQ 4.2 -> it('calls POST /api/auth/demo-login on demo button click')
+// demo-login REQ 4.2 -> it('redirects to / after successful demo login')
+// demo-login REQ 4.3 -> it('disables demo button while demo login is in progress')
+// demo-login REQ 4.4 -> it('shows server error when demo login endpoint returns error')
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LoginForm } from "./login-form";
 
 const mockSignIn = vi.fn();
+const mockFetch = vi.fn();
 
 vi.mock("@/hooks/use-auth", () => ({
   useAuth: () => ({
@@ -26,13 +33,20 @@ vi.mock("@/hooks/use-auth", () => ({
 
 describe("LoginForm", () => {
   const originalLocation = window.location;
+  const originalFetch = global.fetch;
 
   beforeEach(() => {
     mockSignIn.mockClear();
+    mockFetch.mockClear();
+    global.fetch = mockFetch;
     Object.defineProperty(window, "location", {
       writable: true,
       value: { ...originalLocation, href: "" },
     });
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
   });
 
   describe("good cases", () => {
@@ -113,20 +127,114 @@ describe("LoginForm", () => {
       }
     });
 
-    it("renders Demo Owner and Demo Staff buttons when present", () => {
+    it("renders a single Login with Demo button", () => {
       render(<LoginForm />);
-      const demoOwner = screen.queryByRole("button", {
-        name: /demo owner|akun demo pemilik/i,
+
+      // i18n key: auth.login.demo → "Login with Demo" | "Masuk dengan Demo"
+      expect(
+        screen.getByRole("button", { name: /login with demo|masuk dengan demo/i })
+      ).toBeInTheDocument();
+    });
+
+    it("does not render old Demo Owner or Demo Staff buttons", () => {
+      render(<LoginForm />);
+
+      expect(
+        screen.queryByRole("button", { name: /demo owner|akun demo pemilik/i })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /demo staff|akun demo staf/i })
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe("demo login", () => {
+    it("calls POST /api/auth/demo-login when demo button is clicked", async () => {
+      mockFetch.mockResolvedValueOnce({ ok: true, status: 302 });
+      const user = userEvent.setup();
+
+      render(<LoginForm />);
+      await user.click(
+        screen.getByRole("button", { name: /login with demo|masuk dengan demo/i })
+      );
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledWith(
+          "/api/auth/demo-login",
+          expect.objectContaining({ method: "POST" })
+        );
       });
-      const demoStaff = screen.queryByRole("button", {
-        name: /demo staff|akun demo staf/i,
+    });
+
+    it("redirects to / after successful demo login", async () => {
+      mockFetch.mockResolvedValueOnce({ ok: true, status: 200 });
+      const user = userEvent.setup();
+
+      render(<LoginForm />);
+      await user.click(
+        screen.getByRole("button", { name: /login with demo|masuk dengan demo/i })
+      );
+
+      await waitFor(() => {
+        expect(window.location.href).toBe("/");
       });
-      if (demoOwner) {
-        expect(demoOwner).toBeInTheDocument();
-      }
-      if (demoStaff) {
-        expect(demoStaff).toBeInTheDocument();
-      }
+    });
+
+    it("shows server error when demo login endpoint returns an error", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({ error: "Demo user not found" }),
+      });
+      const user = userEvent.setup();
+
+      render(<LoginForm />);
+      await user.click(
+        screen.getByRole("button", { name: /login with demo|masuk dengan demo/i })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("alert")).toBeInTheDocument();
+        expect(screen.getByText(/demo user not found/i)).toBeInTheDocument();
+      });
+    });
+
+    it("disables demo button while demo login is in progress", async () => {
+      let resolvePromise!: (value: unknown) => void;
+      mockFetch.mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolvePromise = resolve;
+        })
+      );
+      const user = userEvent.setup();
+
+      render(<LoginForm />);
+      await user.click(
+        screen.getByRole("button", { name: /login with demo|masuk dengan demo/i })
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: /login with demo|masuk dengan demo/i })
+        ).toBeDisabled();
+      });
+
+      // Clean up
+      resolvePromise({ ok: true, status: 200 });
+    });
+
+    it("shows generic error when demo login fetch throws a network error", async () => {
+      mockFetch.mockRejectedValueOnce(new Error("Network failure"));
+      const user = userEvent.setup();
+
+      render(<LoginForm />);
+      await user.click(
+        screen.getByRole("button", { name: /login with demo|masuk dengan demo/i })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("alert")).toBeInTheDocument();
+      });
     });
   });
 

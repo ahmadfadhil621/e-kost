@@ -21,7 +21,6 @@ export function LoginForm() {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -41,22 +40,23 @@ export function LoginForm() {
     }
   };
 
-  const demoOwnerEmail = process.env.NEXT_PUBLIC_DEMO_OWNER_EMAIL;
-  const demoOwnerPassword = process.env.NEXT_PUBLIC_DEMO_OWNER_PASSWORD;
-  const demoStaffEmail = process.env.NEXT_PUBLIC_DEMO_STAFF_EMAIL;
-  const demoStaffPassword = process.env.NEXT_PUBLIC_DEMO_STAFF_PASSWORD;
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
 
-  const handleDemoOwner = () => {
-    if (demoOwnerEmail && demoOwnerPassword) {
-      setValue("email", demoOwnerEmail);
-      setValue("password", demoOwnerPassword);
-    }
-  };
-
-  const handleDemoStaff = () => {
-    if (demoStaffEmail && demoStaffPassword) {
-      setValue("email", demoStaffEmail);
-      setValue("password", demoStaffPassword);
+  const handleDemoLogin = async () => {
+    setIsDemoLoading(true);
+    setServerError(null);
+    try {
+      const res = await fetch("/api/auth/demo-login", { method: "POST" });
+      if (!res.ok) {
+        const body = await res.json();
+        setServerError(body.error ?? t("auth.error.generic"));
+      } else {
+        window.location.href = "/";
+      }
+    } catch {
+      setServerError(t("auth.error.generic"));
+    } finally {
+      setIsDemoLoading(false);
     }
   };
 
@@ -126,26 +126,15 @@ export function LoginForm() {
             </Button>
           </form>
 
-          <div className="flex flex-col gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="min-h-[44px] w-full border-input bg-background text-muted-foreground text-xs"
-              onClick={handleDemoOwner}
-            >
-              {t("auth.login.demoOwner")}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="min-h-[44px] w-full border-input bg-background text-muted-foreground text-xs"
-              onClick={handleDemoStaff}
-            >
-              {t("auth.login.demoStaff")}
-            </Button>
-          </div>
+          <Button
+            type="button"
+            variant="outline"
+            className="min-h-[44px] w-full border-input bg-background text-muted-foreground"
+            onClick={handleDemoLogin}
+            disabled={isDemoLoading}
+          >
+            {t("auth.login.demo")}
+          </Button>
 
           <p className="text-center text-sm text-muted-foreground">
             {t("auth.noAccount")}{" "}
