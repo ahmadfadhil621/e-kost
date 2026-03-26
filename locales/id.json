@@ -111,8 +111,7 @@
       "signIn": "Masuk",
       "email": "Alamat Email",
       "password": "Kata Sandi",
-      "demoOwner": "Akun Demo Pemilik",
-      "demoStaff": "Akun Demo Staf"
+      "demo": "Masuk dengan Demo"
     },
     "logout": "Keluar",
     "profile": {
@@ -131,6 +130,12 @@
       "login": "Berhasil masuk",
       "register": "Akun berhasil dibuat",
       "logout": "Berhasil keluar"
+    }
+  },
+  "demo": {
+    "banner": {
+      "message": "Anda sedang di akun demo — semua data direset saat login berikutnya",
+      "ariaLabel": "Indikator sesi demo"
     }
   },
   "room": {
