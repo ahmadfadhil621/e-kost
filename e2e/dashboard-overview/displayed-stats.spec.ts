@@ -44,7 +44,7 @@ test.describe("displayed stats", () => {
       await expect(
         page.getByText(/log in|login|sign in/i).or(
           page.getByRole("link", { name: /log in|login/i })
-        )
+        ).first()
       ).toBeVisible({ timeout: 10000 });
     });
   });

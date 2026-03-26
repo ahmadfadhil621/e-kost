@@ -65,6 +65,7 @@ jobs:
       DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
       BETTER_AUTH_SECRET: "ci-secret-min-32-chars-long-for-e2e"
       BETTER_AUTH_URL: "http://localhost:3000"
+      DEMO_PASSWORD: "Demo@395762@"
 
     steps:
       - name: Checkout
