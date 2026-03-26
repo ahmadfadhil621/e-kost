@@ -51,7 +51,7 @@ export function LoginForm() {
         const body = await res.json();
         setServerError(body.error ?? t("auth.error.generic"));
       } else {
-        window.location.href = "/";
+        window.location.href = "/properties";
       }
     } catch {
       setServerError(t("auth.error.generic"));
