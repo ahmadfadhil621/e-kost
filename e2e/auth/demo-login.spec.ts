@@ -1,7 +1,7 @@
 // Traceability: demo-login
 // REQ 4.1 -> test('login page shows Login with Demo button, not old Owner/Staff buttons')
-// REQ 4.2 -> test('user clicks Login with Demo and is redirected to /')
-// REQ 1.7 -> test('user clicks Login with Demo and is redirected to /')
+// REQ 4.2 -> test('user clicks Login with Demo and is redirected to /properties')
+// REQ 1.7 -> test('user clicks Login with Demo and is redirected to /properties')
 // REQ 3.2 -> test('demo banner is visible after demo login')
 // REQ 3.2 -> test('demo banner is not visible after regular login as a non-demo user')
 // REQ 3.3 -> test('demo banner has no dismiss/close button')
@@ -42,7 +42,7 @@ test.describe("demo login", () => {
       ).not.toBeVisible();
     });
 
-    test("user clicks Login with Demo, is redirected to /, and sees demo banner", async ({
+    test("user clicks Login with Demo, is redirected to /properties, and sees demo banner", async ({
       page,
     }) => {
       test.setTimeout(60000);
