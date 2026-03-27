@@ -5,6 +5,7 @@
 import { parseArgs } from "node:util";
 import * as readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 async function prompt(rl: readline.Interface, question: string): Promise<string> {
@@ -26,10 +27,10 @@ async function main() {
 
   const rl = readline.createInterface({ input, output });
 
-  const name = values.name ?? await prompt(rl, "Full name: ");
-  const email = values.email ?? await prompt(rl, "Email: ");
-  const password = values.password ?? await prompt(rl, "Password: ");
-  const propertyName = values.property ?? await prompt(rl, "Property name (your kost): ");
+  const name = (values.name as string | undefined) ?? await prompt(rl, "Full name: ");
+  const email = (values.email as string | undefined) ?? await prompt(rl, "Email: ");
+  const password = (values.password as string | undefined) ?? await prompt(rl, "Password: ");
+  const propertyName = (values.property as string | undefined) ?? await prompt(rl, "Property name (your kost): ");
 
   rl.close();
 
@@ -45,45 +46,21 @@ async function main() {
     process.exit(0);
   }
 
-  // Use better-auth's own password hashing (scrypt via @noble/hashes)
-  const { hashPassword } = await import("better-auth/dist/crypto/password.mjs");
-  const hashedPassword = await hashPassword(password);
-
-  const now = new Date();
-  const userId = crypto.randomUUID();
-
-  const user = await prisma.user.create({
-    data: {
-      id: userId,
-      name,
-      email,
-      emailVerified: true,
-      createdAt: now,
-      updatedAt: now,
-    },
+  // Delegate user creation to Better Auth — handles hashing, account creation, etc.
+  const response = await auth.api.signUpEmail({
+    body: { name, email, password },
   });
 
-  // Create account (credential provider)
-  await prisma.account.create({
-    data: {
-      id: crypto.randomUUID(),
-      userId: user.id,
-      providerId: "credential",
-      accountId: email,
-      password: hashedPassword,
-      createdAt: now,
-      updatedAt: now,
-    },
-  });
+  if (!response?.user) {
+    console.error("Failed to create user via Better Auth.");
+    process.exit(1);
+  }
 
-  // Create property
+  // Create first property owned by the new user
   const property = await prisma.property.create({
     data: {
-      id: crypto.randomUUID(),
       name: propertyName,
-      ownerId: user.id,
-      createdAt: now,
-      updatedAt: now,
+      ownerId: response.user.id,
     },
   });
 
