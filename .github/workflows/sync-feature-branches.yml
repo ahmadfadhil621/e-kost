@@ -1,0 +1,61 @@
+name: Sync feature branches with main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    name: Merge main → feature/*
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git identity
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge main into every feature/* branch
+        run: |
+          # Collect all remote feature/* branches
+          BRANCHES=$(git branch -r | grep 'origin/feature/' | sed 's|origin/||' | tr -d ' ')
+
+          if [ -z "$BRANCHES" ]; then
+            echo "No feature/* branches found — nothing to sync."
+            exit 0
+          fi
+
+          FAILED=""
+
+          for BRANCH in $BRANCHES; do
+            echo "──────────────────────────────────────"
+            echo "Syncing: $BRANCH"
+
+            git checkout "$BRANCH"
+            git merge --no-edit origin/main && \
+              git push origin "$BRANCH" && \
+              echo "✅ $BRANCH synced" || \
+              {
+                echo "⚠️  Merge conflict on $BRANCH — skipping (manual resolution required)"
+                git merge --abort 2>/dev/null || true
+                FAILED="$FAILED $BRANCH"
+              }
+          done
+
+          if [ -n "$FAILED" ]; then
+            echo ""
+            echo "The following branches have conflicts and were NOT updated:"
+            for B in $FAILED; do echo "  - $B"; done
+            echo ""
+            echo "Please rebase or merge main into these branches manually."
+            # Exit 0 — don't fail CI over unresolvable conflicts in feature branches
+          fi
