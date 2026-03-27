@@ -738,7 +738,7 @@ describe("PaymentService", () => {
   describe("property-based tests", () => {
     // Feature: payment-recording, Property 2: Payment Creation Round Trip
     it("payment creation returns complete object with ID and timestamp", () => {
-      fc.assert(
+      return fc.assert(
         fc.asyncProperty(
           fc.uuid(),
           fc.double({ min: 0.01, max: 100000, noNaN: true }).map((n) => Math.round(n * 100) / 100),

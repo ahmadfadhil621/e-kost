@@ -781,7 +781,7 @@ describe("NoteService", () => {
 
   describe("property-based tests", () => {
     it("note creation returns complete object with ID and timestamp", () => {
-      fc.assert(
+      return fc.assert(
         fc.asyncProperty(
           fc.string({ minLength: 1, maxLength: 2000 }).filter((s) => s.trim().length > 0),
           fc.date({ min: new Date("2020-01-01"), max: new Date("2030-12-31"), noInvalidDate: true }),

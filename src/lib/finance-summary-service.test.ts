@@ -306,7 +306,7 @@ describe("FinanceSummaryService", () => {
 
   describe("property-based tests", () => {
     it("Property 2: monthly income equals value from income source", () => {
-      fc.assert(
+      return fc.assert(
         fc.asyncProperty(
           fc.uuid(),
           fc.uuid(),
@@ -342,7 +342,7 @@ describe("FinanceSummaryService", () => {
     });
 
     it("Property 4: net income = income - expenses for any values", () => {
-      fc.assert(
+      return fc.assert(
         fc.asyncProperty(
           fc.integer({ min: 0, max: 10000000 }),
           fc.integer({ min: 0, max: 10000000 }),

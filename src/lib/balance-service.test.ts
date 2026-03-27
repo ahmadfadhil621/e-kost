@@ -441,7 +441,7 @@ describe("BalanceService", () => {
   describe("property-based tests", () => {
     // Feature: outstanding-balance, Property 1: Balance Calculation Formula
     it("balance equals monthlyRent minus totalPayments for any valid row", () => {
-      fc.assert(
+      return fc.assert(
         fc.asyncProperty(
           fc.uuid(),
           fc.double({ min: 100, max: 10000, noNaN: true }).map((n) => Math.round(n * 100) / 100),

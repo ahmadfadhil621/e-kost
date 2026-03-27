@@ -975,7 +975,7 @@ describe("RoomService", () => {
 describe("property-based tests", () => {
   // Feature: room-inventory-management, Property 1: Room Creation Completeness
   it("room creation returns complete object with ID, status, timestamp (PROP 1)", () => {
-    fc.assert(
+    return fc.assert(
       fc.asyncProperty(
         fc.record({
           roomNumber: fc

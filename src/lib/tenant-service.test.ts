@@ -821,7 +821,7 @@ describe("TenantService", () => {
 describe("property-based tests", () => {
   // Feature: tenant-room-basics, Property 1: Tenant Creation Completeness
   it("tenant creation returns complete object with ID and timestamp", () => {
-    fc.assert(
+    return fc.assert(
       fc.asyncProperty(
         fc.record({
           name: fc

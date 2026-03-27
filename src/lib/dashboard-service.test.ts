@@ -380,7 +380,7 @@ describe("DashboardService", () => {
 
   describe("property-based tests", () => {
     it("Property 1: occupancy rate equals (occupied/total)*100, 0 when total 0 (PROP 1)", () => {
-      fc.assert(
+      return fc.assert(
         fc.asyncProperty(
           fc.nat({ max: 100 }),
           fc.nat({ max: 100 }),
@@ -428,7 +428,7 @@ describe("DashboardService", () => {
     });
 
     it("Property 2: occupied + available + underRenovation equals totalRooms (PROP 2)", () => {
-      fc.assert(
+      return fc.assert(
         fc.asyncProperty(
           fc.nat({ max: 50 }),
           fc.nat({ max: 50 }),
@@ -469,7 +469,7 @@ describe("DashboardService", () => {
     });
 
     it("Property 3: finance netIncome equals income minus expenses (PROP 3)", () => {
-      fc.assert(
+      return fc.assert(
         fc.asyncProperty(
           fc.integer({ min: 0, max: 10000000 }),
           fc.integer({ min: 0, max: 10000000 }),
@@ -501,7 +501,7 @@ describe("DashboardService", () => {
     });
 
     it("Property 4: outstanding balances sorted by balance descending (PROP 4)", () => {
-      fc.assert(
+      return fc.assert(
         fc.asyncProperty(
           fc.array(
             fc.record({
@@ -547,7 +547,7 @@ describe("DashboardService", () => {
     });
 
     it("Property 5: recent payments sorted by date descending (PROP 5)", () => {
-      fc.assert(
+      return fc.assert(
         fc.asyncProperty(
           fc.array(
             fc.date({ min: new Date("2020-01-01"), max: new Date("2030-12-31"), noInvalidDate: true }),

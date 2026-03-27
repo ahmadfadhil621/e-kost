@@ -351,7 +351,7 @@ describe("PropertyService", () => {
 describe("property-based tests", () => {
   // Feature: multi-property-management, Property 1: Property Creation Sets Owner
   it("property creation returns object with creating user as owner and unique id", () => {
-    fc.assert(
+    return fc.assert(
       fc.asyncProperty(
         fc.record({
           name: fc.string({ minLength: 1, maxLength: 200 }).filter((s) => s.trim().length > 0),

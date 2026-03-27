@@ -8,6 +8,7 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
+    clearMocks: true,
     include: [
       "src/lib/payment-service.fault-injection.test.ts",
       "src/lib/note-service.fault-injection.test.ts",

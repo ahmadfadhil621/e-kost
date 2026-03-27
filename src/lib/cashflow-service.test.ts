@@ -235,7 +235,7 @@ describe("CashflowService.getMonthlyCashflow", () => {
 
   describe("property-based tests", () => {
     it("Property 2: amount is always positive regardless of entry type", () => {
-      fc.assert(
+      return fc.assert(
         fc.asyncProperty(
           fc.array(
             fc.record({
@@ -271,7 +271,7 @@ describe("CashflowService.getMonthlyCashflow", () => {
     });
 
     it("Property 3: service delegates to repository with correct propertyId/year/month", () => {
-      fc.assert(
+      return fc.assert(
         fc.asyncProperty(
           fc.uuid(),
           fc.uuid(),
@@ -293,7 +293,7 @@ describe("CashflowService.getMonthlyCashflow", () => {
     });
 
     it("Property 5: empty month always returns an array, never null or undefined", () => {
-      fc.assert(
+      return fc.assert(
         fc.asyncProperty(
           fc.integer({ min: 2000, max: 2100 }),
           fc.integer({ min: 1, max: 12 }),

@@ -822,7 +822,7 @@ describe("ExpenseService", () => {
     }, { noNullPrototype: true });
 
     it("Property 1: expense creation round trip - created expense has id, timestamps, and matches input", () => {
-      fc.assert(
+      return fc.assert(
         fc.asyncProperty(
           fc.uuid(),
           fc.uuid(),
@@ -863,7 +863,7 @@ describe("ExpenseService", () => {
 
     it("Property 6: category validation - invalid category rejected", () => {
       const invalidCategories = ["invalid", "unknown", "foo", "bar", ""];
-      fc.assert(
+      return fc.assert(
         fc.asyncProperty(
           fc.constantFrom(...invalidCategories),
           async (invalidCategory) => {
@@ -887,7 +887,7 @@ describe("ExpenseService", () => {
     });
 
     it("Property 7: amount validation - zero or negative amount rejected", () => {
-      fc.assert(
+      return fc.assert(
         fc.asyncProperty(
           fc.double({ max: 0, noNaN: true }).filter((n) => n <= 0),
           async (badAmount) => {
