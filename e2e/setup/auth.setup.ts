@@ -22,6 +22,7 @@ async function createAndAuthUser(
   // The invite gate is UI-only (/register page). E2E setup bypasses it here
   // to avoid a chicken-and-egg problem (no owner → can't create invite → can't register).
   const signUpRes = await page.request.post(`${baseURL}/api/auth/sign-up/email`, {
+    headers: { origin: baseURL },
     data: { name, email, password },
   });
 
@@ -33,6 +34,7 @@ async function createAndAuthUser(
 
   // Sign in to get a session cookie on this page context
   const signInRes = await page.request.post(`${baseURL}/api/auth/sign-in/email`, {
+    headers: { origin: baseURL },
     data: { email, password, rememberMe: true },
   });
 
@@ -57,6 +59,7 @@ setup("authenticate", async ({ page, browser, baseURL }) => {
   const demoPage = await demoCtx.newPage();
   try {
     const demoRes = await demoPage.request.post(`${base}/api/auth/sign-up/email`, {
+      headers: { origin: base },
       data: { name: "Demo User", email: "demo@ekost.app", password: demoPassword },
     });
     // Ignore 422 — demo user may already exist in the test DB
