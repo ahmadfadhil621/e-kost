@@ -14,7 +14,10 @@
     "tenants": "Tenants",
     "payments": "Payments",
     "finance": "Finance",
-    "settings": "Settings"
+    "settings": "Settings",
+    "noActiveProperty": {
+      "tooltip": "Select a property first"
+    }
   },
   "common": {
     "loading": "Loading...",

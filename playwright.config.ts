@@ -53,6 +53,16 @@ export default defineConfig({
       dependencies: ["setup", "chromium-no-props"],
     },
     {
+      name: "setup-single-property",
+      testMatch: /auth-single-property\.setup\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 375, height: 667 },
+        storageState: "e2e/.auth/user.json",
+      },
+      dependencies: ["setup", "chromium-no-props"],
+    },
+    {
       name: "chromium-no-props",
       testMatch: /switch-property\.spec\.ts/,
       use: {
@@ -81,6 +91,16 @@ export default defineConfig({
         storageState: "e2e/.auth/user-properties-no-active.json",
       },
       dependencies: ["setup-no-active"],
+    },
+    {
+      name: "chromium-single-property",
+      testMatch: /nav-disabled-no-property\/.*\.spec\.ts$/,
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 375, height: 667 },
+        storageState: "e2e/.auth/user-single-property-no-active.json",
+      },
+      dependencies: ["setup-single-property"],
     },
     {
       name: "chromium",

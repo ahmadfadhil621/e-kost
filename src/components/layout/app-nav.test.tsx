@@ -99,6 +99,61 @@ describe("AppNav", () => {
       mockActivePropertyId.mockReturnValue(null);
       expect(() => render(<AppNav />)).not.toThrow();
     });
+
+    it("when activePropertyId is null, property-scoped nav items are aria-disabled", () => {
+      mockActivePropertyId.mockReturnValue(null);
+      render(<AppNav />);
+
+      const disabledItems = screen.getAllByRole("link", { hidden: true }).filter(
+        (el) => el.getAttribute("aria-disabled") === "true"
+      );
+      // Rooms, Tenants, Finance should all be disabled
+      expect(disabledItems.length).toBeGreaterThanOrEqual(3);
+    });
+
+    it("when activePropertyId is null, Overview link is still enabled", () => {
+      mockActivePropertyId.mockReturnValue(null);
+      render(<AppNav />);
+
+      const overviewLink = screen.getByRole("link", { name: /overview|dashboard|dasbor/i });
+      expect(overviewLink).not.toHaveAttribute("aria-disabled", "true");
+    });
+
+    it("when activePropertyId is null, disabled items have pointer-events-none", () => {
+      mockActivePropertyId.mockReturnValue(null);
+      render(<AppNav />);
+
+      const disabledItems = screen.getAllByRole("link", { hidden: true }).filter(
+        (el) => el.getAttribute("aria-disabled") === "true"
+      );
+      for (const item of disabledItems) {
+        expect(item.className).toMatch(/pointer-events-none/);
+      }
+    });
+
+    it("when activePropertyId is null, disabled items maintain touch targets ≥44×44px", () => {
+      mockActivePropertyId.mockReturnValue(null);
+      render(<AppNav />);
+
+      const disabledItems = screen.getAllByRole("link", { hidden: true }).filter(
+        (el) => el.getAttribute("aria-disabled") === "true"
+      );
+      for (const item of disabledItems) {
+        expect(item.className).toMatch(/min-h-\[44px\]|min-w-\[44px\]/);
+      }
+    });
+
+    it("when activePropertyId is null, disabled items are keyboard-reachable (tabIndex=0)", () => {
+      mockActivePropertyId.mockReturnValue(null);
+      render(<AppNav />);
+
+      const disabledItems = screen.getAllByRole("link", { hidden: true }).filter(
+        (el) => el.getAttribute("aria-disabled") === "true"
+      );
+      for (const item of disabledItems) {
+        expect(item).toHaveAttribute("tabindex", "0");
+      }
+    });
   });
 
   describe("edge cases", () => {

@@ -5,9 +5,11 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 export type PropertyRole = "owner" | "staff";
 
@@ -34,6 +36,9 @@ export function PropertyProvider({ children }: { children: React.ReactNode }) {
   const [properties, setProperties] = useState<PropertySummary[]>([]);
   const [activePropertyId, setActiveState] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  // Track whether we've already attempted auto-select to avoid repeated redirects
+  const hasAutoSelected = useRef(false);
 
   // Sync activePropertyId from localStorage after mount to avoid hydration mismatch
   // (server has no localStorage, so we must not use it in initial state)
@@ -49,13 +54,26 @@ export function PropertyProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch("/api/properties", { credentials: "include" });
       if (!res.ok) {return;}
       const data = await res.json();
-      setProperties(Array.isArray(data) ? data : []);
+      const fetched: PropertySummary[] = Array.isArray(data) ? data : [];
+      setProperties(fetched);
+
+      // Auto-select when user has exactly one property and none is currently active
+      if (fetched.length === 1 && !hasAutoSelected.current) {
+        const stored = localStorage.getItem(ACTIVE_PROPERTY_KEY);
+        if (!stored) {
+          hasAutoSelected.current = true;
+          const id = fetched[0].id;
+          setActiveState(id);
+          localStorage.setItem(ACTIVE_PROPERTY_KEY, id);
+          router.replace("/");
+        }
+      }
     } catch {
       setProperties([]);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     refetch();
