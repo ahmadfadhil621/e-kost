@@ -4,7 +4,7 @@ async function globalTeardown() {
   try {
     const deleted = await prisma.user.deleteMany({
       where: {
-        email: { startsWith: "e2e-" },
+        email: { endsWith: "@test.com" },
       },
     });
     console.log(`[teardown] Deleted ${deleted.count} E2E test user(s).`);
