@@ -58,9 +58,8 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 375, height: 667 },
-        storageState: "e2e/.auth/user.json",
       },
-      dependencies: ["setup", "chromium-no-props"],
+      dependencies: ["setup"],
     },
     {
       name: "chromium-no-props",
@@ -110,7 +109,7 @@ export default defineConfig({
         viewport: { width: 375, height: 667 },
         storageState: "e2e/.auth/user-with-property.json"
       },
-      dependencies: ["chromium-no-props", "setup-with-property"],
+      dependencies: ["chromium-no-props", "setup-with-property", "setup-single-property"],
     },
     {
       name: "chromium-moved-out-notes",

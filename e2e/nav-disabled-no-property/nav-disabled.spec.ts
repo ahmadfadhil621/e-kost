@@ -78,14 +78,21 @@ test.describe("nav disabled — no active property", () => {
     test("after auto-select, nav items are enabled", async ({ page }) => {
       await page.goto("/");
 
-      // Wait for dashboard to load
-      await page.waitForURL(/\/$/, { timeout: 15000 });
+      // Wait for the dashboard content to appear — confirms activePropertyId is set
+      // and PropertyProvider has propagated it to the nav.
+      await expect(
+        page
+          .getByTestId("occupancy-card")
+          .or(page.getByTestId("finance-summary-card"))
+          .or(page.getByRole("heading", { name: /overview|dashboard|dasbor/i }))
+          .first()
+      ).toBeVisible({ timeout: 20000 });
 
       const nav = page.getByRole("navigation");
-      await expect(nav).toBeVisible({ timeout: 10000 });
-
       const rooms = nav.getByRole("link", { name: /rooms|kamar/i });
-      await expect(rooms).not.toHaveAttribute("aria-disabled", "true");
+      await expect(rooms).not.toHaveAttribute("aria-disabled", "true", {
+        timeout: 10000,
+      });
     });
   });
 

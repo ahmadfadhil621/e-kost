@@ -65,7 +65,10 @@ export function PropertyProvider({ children }: { children: React.ReactNode }) {
           const id = fetched[0].id;
           setActiveState(id);
           localStorage.setItem(ACTIVE_PROPERTY_KEY, id);
-          router.replace("/");
+          // Only redirect if not already on the dashboard root
+          if (typeof window !== "undefined" && window.location.pathname !== "/") {
+            router.replace("/");
+          }
         }
       }
     } catch {
