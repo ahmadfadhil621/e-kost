@@ -63,6 +63,8 @@ Do NOT proceed to implementation until all gates pass.
 
 ## Phase 4: Implement
 
+Before writing any code, run `/layer-mapper <entity>` where `<entity>` is the primary domain entity of the feature (e.g. `expense`, `tenant`, `payment`). Use the returned inventory to know exactly which files exist, which interfaces to conform to, and which call sites need checking. Do not read full files in the main session for orientation — the layer-mapper output is sufficient to begin.
+
 Write production code layer by layer. At each layer boundary, pause for a commit checkpoint (see Phase 6).
 
 Order:
