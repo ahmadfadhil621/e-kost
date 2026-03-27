@@ -8,9 +8,9 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 1,
-  // Use 1 worker in CI and locally to avoid flakiness (form detachment, dev server overload).
   workers: 1,
   reporter: process.env.CI ? [["list"], ["html", { outputFolder: "playwright-report" }]] : "list",
+  globalTeardown: "./e2e/setup/teardown.ts",
   use: {
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",
