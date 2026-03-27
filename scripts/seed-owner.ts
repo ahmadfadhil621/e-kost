@@ -2,6 +2,7 @@
 // Usage: npm run db:seed-owner
 // Or: npm run db:seed-owner -- --name "Ahmad" --email "ahmad@example.com" --password "yourpassword" --property "My Kost"
 
+import "dotenv/config";
 import { parseArgs } from "node:util";
 import * as readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
