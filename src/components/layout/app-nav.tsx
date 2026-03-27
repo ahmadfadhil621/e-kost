@@ -63,7 +63,7 @@ export function AppNav() {
                 ? "text-primary"
                 : "text-muted-foreground",
               isDisabled
-                ? "pointer-events-none cursor-not-allowed opacity-50"
+                ? "cursor-not-allowed opacity-50"
                 : "hover:text-foreground"
             );
 

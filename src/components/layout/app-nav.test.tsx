@@ -119,7 +119,7 @@ describe("AppNav", () => {
       expect(overviewLink).not.toHaveAttribute("aria-disabled", "true");
     });
 
-    it("when activePropertyId is null, disabled items have pointer-events-none", () => {
+    it("when activePropertyId is null, disabled items have cursor-not-allowed", () => {
       mockActivePropertyId.mockReturnValue(null);
       render(<AppNav />);
 
@@ -127,7 +127,7 @@ describe("AppNav", () => {
         (el) => el.getAttribute("aria-disabled") === "true"
       );
       for (const item of disabledItems) {
-        expect(item.className).toMatch(/pointer-events-none/);
+        expect(item.className).toMatch(/cursor-not-allowed/);
       }
     });
 
