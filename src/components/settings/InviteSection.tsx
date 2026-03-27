@@ -184,6 +184,7 @@ export function InviteSection({ userRole }: InviteSectionProps) {
                       <Button
                         size="sm"
                         variant="ghost"
+                        className="w-24 shrink-0"
                         onClick={() => copyLink(invite)}
                       >
                         {copiedId === invite.id ? t("settings.invites.success.copied") : t("settings.invites.list.link")}
