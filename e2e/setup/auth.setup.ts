@@ -1,4 +1,4 @@
-import { test as setup, expect } from "@playwright/test";
+import { test as setup, expect, type Page } from "@playwright/test";
 
 const authFile = "e2e/.auth/user.json";
 const authLogoutFile = "e2e/.auth/user-logout.json";
@@ -12,7 +12,7 @@ const E2E_LOGOUT_USER_EMAIL = `e2e-logout-${Date.now()}@test.com`;
 const E2E_LOGOUT_USER_PASSWORD = "TestPass123!";
 
 async function createAndAuthUser(
-  page: Parameters<Parameters<typeof setup>[1]>[0],
+  page: Page,
   baseURL: string,
   name: string,
   email: string,
