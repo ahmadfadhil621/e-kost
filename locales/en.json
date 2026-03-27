@@ -102,7 +102,13 @@
       "submit": "Register",
       "name": "Full Name",
       "email": "Email Address",
-      "password": "Password"
+      "password": "Password",
+      "inviteRequired": "Registration requires a valid invite link.",
+      "inviteInvalid": "This invite link is invalid or has expired.",
+      "inviteExpired": "This invite link has expired.",
+      "inviteUsed": "This invite link has already been used.",
+      "inviteLoading": "Validating invite...",
+      "emailPreFilled": "Email address (pre-filled from invite)"
     },
     "login": {
       "title": "Log In",
@@ -492,6 +498,39 @@
     },
     "validation": {
       "nameRequired": "Name is required"
+    },
+    "invites": {
+      "title": "Invite Members",
+      "generate": "Generate Invite Link",
+      "form": {
+        "email": "Email Address",
+        "role": "Role",
+        "roleOwner": "Owner",
+        "roleStaff": "Staff",
+        "expiresIn": "Expires In (days)",
+        "submit": "Generate Link",
+        "cancel": "Cancel"
+      },
+      "list": {
+        "title": "Pending Invites",
+        "empty": "No pending invites",
+        "email": "Email",
+        "role": "Role",
+        "expires": "Expires",
+        "link": "Copy Link",
+        "revoke": "Revoke",
+        "used": "Used",
+        "pending": "Pending"
+      },
+      "success": {
+        "created": "Invite link generated",
+        "revoked": "Invite revoked",
+        "copied": "Link copied to clipboard"
+      },
+      "error": {
+        "createFailed": "Failed to generate invite",
+        "revokeFailed": "Failed to revoke invite"
+      }
     }
   }
 }

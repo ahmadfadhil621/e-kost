@@ -16,7 +16,8 @@
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
-    "db:cleanse": "tsx scripts/cleanse-database.ts"
+    "db:cleanse": "tsx scripts/cleanse-database.ts",
+    "db:seed-owner": "tsx scripts/seed-owner.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

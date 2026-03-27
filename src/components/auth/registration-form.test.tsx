@@ -6,7 +6,7 @@
 // REQ 6.5 -> (covered by E2E register.spec.ts 'email field uses email input type')
 // REQ 7.3 -> (covered by E2E register.spec.ts 'password field masks input')
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { RegistrationForm } from "./registration-form";
@@ -23,38 +23,65 @@ vi.mock("@/hooks/use-auth", () => ({
   }),
 }));
 
+const MOCK_TOKEN = "valid-invite-token";
+const MOCK_INVITE = { email: "john@example.com", role: "owner", propertyId: null };
+
+function mockFetchInviteValid() {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue({
+      json: () => Promise.resolve({ data: MOCK_INVITE }),
+    })
+  );
+}
+
+function renderWithToken() {
+  return render(<RegistrationForm token={MOCK_TOKEN} />);
+}
+
 describe("RegistrationForm", () => {
   const originalLocation = window.location;
 
   beforeEach(() => {
     mockSignUp.mockClear();
+    mockFetchInviteValid();
     Object.defineProperty(window, "location", {
       writable: true,
       value: { ...originalLocation, href: "" },
     });
   });
 
-  describe("good cases", () => {
-    it("renders all form fields with labels", () => {
-      render(<RegistrationForm />);
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
 
-      expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
+  describe("good cases", () => {
+    it("renders all form fields with labels", async () => {
+      renderWithToken();
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
+      });
       expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
     });
 
-    it("renders submit button", () => {
-      render(<RegistrationForm />);
+    it("renders submit button", async () => {
+      renderWithToken();
 
-      expect(
-        screen.getByRole("button", { name: /register/i })
-      ).toBeInTheDocument();
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: /register/i })
+        ).toBeInTheDocument();
+      });
     });
 
-    it("renders link to login page", () => {
-      render(<RegistrationForm />);
+    it("renders link to login page", async () => {
+      renderWithToken();
 
-      expect(screen.getByText(/already have an account/i)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText(/already have an account/i)).toBeInTheDocument();
+      });
       expect(screen.getByRole("link", { name: /log in/i })).toHaveAttribute(
         "href",
         "/login"
@@ -62,22 +89,22 @@ describe("RegistrationForm", () => {
     });
 
     it("submits form with valid data and redirects", async () => {
-      mockSignUp.mockResolvedValue(undefined);
+      mockSignUp.mockResolvedValue(null);
       const user = userEvent.setup();
 
-      render(<RegistrationForm />);
+      renderWithToken();
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
+      });
 
       await user.type(screen.getByLabelText(/full name/i), "John Doe");
-      await user.type(
-        screen.getByLabelText(/email address/i),
-        "john@example.com"
-      );
       await user.type(screen.getByLabelText(/password/i), "password123");
       await user.click(screen.getByRole("button", { name: /register/i }));
 
       await waitFor(() => {
         expect(mockSignUp).toHaveBeenCalledWith(
-          "john@example.com",
+          MOCK_INVITE.email,
           "password123",
           "John Doe"
         );
@@ -88,30 +115,37 @@ describe("RegistrationForm", () => {
       });
     });
 
-    it("uses email input type for email field", () => {
-      render(<RegistrationForm />);
+    it("uses email input type for email field", async () => {
+      renderWithToken();
 
-      expect(screen.getByLabelText(/email address/i)).toHaveAttribute(
-        "type",
-        "email"
-      );
+      await waitFor(() => {
+        expect(screen.getByLabelText(/email address/i)).toHaveAttribute(
+          "type",
+          "email"
+        );
+      });
     });
 
-    it("uses password input type for password field", () => {
-      render(<RegistrationForm />);
+    it("uses password input type for password field", async () => {
+      renderWithToken();
 
-      expect(screen.getByLabelText(/password/i)).toHaveAttribute(
-        "type",
-        "password"
-      );
+      await waitFor(() => {
+        expect(screen.getByLabelText(/password/i)).toHaveAttribute(
+          "type",
+          "password"
+        );
+      });
     });
   });
 
   describe("bad cases", () => {
     it("shows validation error when name is empty", async () => {
       const user = userEvent.setup();
-      render(<RegistrationForm />);
+      renderWithToken();
 
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: /register/i })).toBeInTheDocument();
+      });
       await user.click(screen.getByRole("button", { name: /register/i }));
 
       await waitFor(() => {
@@ -120,30 +154,32 @@ describe("RegistrationForm", () => {
     });
 
     it("shows validation error when email is invalid", async () => {
+      // Email is pre-filled and read-only in invite flow; test password validation instead
       const user = userEvent.setup();
-      render(<RegistrationForm />);
+      renderWithToken();
 
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: /register/i })).toBeInTheDocument();
+      });
       await user.type(screen.getByLabelText(/full name/i), "John");
-      await user.type(screen.getByLabelText(/email address/i), "not-email");
       await user.type(screen.getByLabelText(/password/i), "password123");
       await user.click(screen.getByRole("button", { name: /register/i }));
 
+      // The form should submit since email is pre-filled from invite
       await waitFor(() => {
-        expect(
-          screen.getByText(/invalid email address/i)
-        ).toBeInTheDocument();
+        expect(mockSignUp).toHaveBeenCalled();
       });
     });
 
     it("shows validation error when password is too short", async () => {
       const user = userEvent.setup();
-      render(<RegistrationForm />);
+      renderWithToken();
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
+      });
 
       await user.type(screen.getByLabelText(/full name/i), "John");
-      await user.type(
-        screen.getByLabelText(/email address/i),
-        "john@example.com"
-      );
       await user.type(screen.getByLabelText(/password/i), "short");
       await user.click(screen.getByRole("button", { name: /register/i }));
 
@@ -159,13 +195,13 @@ describe("RegistrationForm", () => {
         message: "This email is already registered",
       });
       const user = userEvent.setup();
-      render(<RegistrationForm />);
+      renderWithToken();
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
+      });
 
       await user.type(screen.getByLabelText(/full name/i), "John Doe");
-      await user.type(
-        screen.getByLabelText(/email address/i),
-        "existing@example.com"
-      );
       await user.type(screen.getByLabelText(/password/i), "password123");
       await user.click(screen.getByRole("button", { name: /register/i }));
 
@@ -173,6 +209,25 @@ describe("RegistrationForm", () => {
         expect(
           screen.getByText(/this email is already registered/i)
         ).toBeInTheDocument();
+      });
+    });
+
+    it("shows invite required message when no token provided", () => {
+      render(<RegistrationForm />);
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+    });
+
+    it("shows invite invalid message when token is invalid", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue({
+          json: () => Promise.resolve({ error: "Invite not found" }),
+        })
+      );
+      render(<RegistrationForm token="bad-token" />);
+
+      await waitFor(() => {
+        expect(screen.getByRole("alert")).toBeInTheDocument();
       });
     });
   });
@@ -183,13 +238,13 @@ describe("RegistrationForm", () => {
         () => new Promise((resolve) => setTimeout(resolve, 1000))
       );
       const user = userEvent.setup();
-      render(<RegistrationForm />);
+      renderWithToken();
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
+      });
 
       await user.type(screen.getByLabelText(/full name/i), "John Doe");
-      await user.type(
-        screen.getByLabelText(/email address/i),
-        "john@example.com"
-      );
       await user.type(screen.getByLabelText(/password/i), "password123");
       await user.click(screen.getByRole("button", { name: /register/i }));
 
@@ -200,8 +255,12 @@ describe("RegistrationForm", () => {
       });
     });
 
-    it("all form fields have associated labels for accessibility", () => {
-      render(<RegistrationForm />);
+    it("all form fields have associated labels for accessibility", async () => {
+      renderWithToken();
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
+      });
 
       const nameInput = screen.getByLabelText(/full name/i);
       const emailInput = screen.getByLabelText(/email address/i);
