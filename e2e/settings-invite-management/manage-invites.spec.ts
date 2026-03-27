@@ -47,10 +47,13 @@ test.describe("invite management", () => {
         timeout: 10000,
       });
 
-      // Invite appears in pending list with email and a copy link button
-      await expect(page.getByText(inviteEmail)).toBeVisible({ timeout: 10000 });
+      // Invite appears in pending list — scoped to its own list item
+      const inviteItem = page
+        .getByRole("listitem")
+        .filter({ hasText: inviteEmail });
+      await expect(inviteItem).toBeVisible({ timeout: 10000 });
       await expect(
-        page.getByRole("button", { name: /copy link/i })
+        inviteItem.getByRole("button", { name: /copy link/i })
       ).toBeVisible({ timeout: 5000 });
     });
 
