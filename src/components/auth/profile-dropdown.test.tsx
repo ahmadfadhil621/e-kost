@@ -22,6 +22,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 const mockSignOut = vi.fn();
+const mockSetActivePropertyId = vi.fn();
 let mockUser: { id: string; name: string; email: string } | null = null;
 
 vi.mock("@/hooks/use-auth", () => ({
@@ -34,10 +35,21 @@ vi.mock("@/hooks/use-auth", () => ({
   }),
 }));
 
+vi.mock("@/contexts/property-context", () => ({
+  usePropertyContext: () => ({
+    activePropertyId: "prop-1",
+    setActivePropertyId: mockSetActivePropertyId,
+    properties: [],
+    refetch: vi.fn(),
+    isLoading: false,
+  }),
+}));
+
 describe("ProfileDropdown", () => {
   beforeEach(() => {
     mockPush.mockClear();
     mockSignOut.mockClear();
+    mockSetActivePropertyId.mockClear();
     mockUser = { id: "1", name: "John Doe", email: "john@example.com" };
   });
 
@@ -136,6 +148,26 @@ describe("ProfileDropdown", () => {
 
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith("/login");
+      });
+    });
+
+    it("clears active property before signing out", async () => {
+      mockSignOut.mockResolvedValue(undefined);
+      const user = userEvent.setup();
+      render(<ProfileDropdown />);
+
+      await user.click(
+        screen.getByRole("button", { name: /user profile/i })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(/log out/i)).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByText(/log out/i));
+
+      await waitFor(() => {
+        expect(mockSetActivePropertyId).toHaveBeenCalledWith(null);
       });
     });
 

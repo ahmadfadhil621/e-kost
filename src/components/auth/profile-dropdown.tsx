@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { LogOut, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { getInitials } from "@/lib/get-initials";
+import { usePropertyContext } from "@/contexts/property-context";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,7 @@ export function ProfileDropdown() {
   const { t } = useTranslation();
   const router = useRouter();
   const { user, signOut } = useAuth();
+  const propertyCtx = usePropertyContext();
 
   if (!user) {
     return null;
@@ -27,6 +29,7 @@ export function ProfileDropdown() {
   const initials = getInitials(user.name);
 
   const handleLogout = async () => {
+    propertyCtx?.setActivePropertyId(null);
     await signOut();
     router.push("/login");
   };
