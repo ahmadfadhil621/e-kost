@@ -1,10 +1,33 @@
 import type { IInviteRepository } from "@/domain/interfaces/invite-repository";
 import type { InviteToken } from "@/domain/schemas/invite";
+import { prisma } from "@/lib/prisma";
 
-// TODO: Replace stub with real implementation after schema migration adds InviteToken model.
-// Run: npx prisma db push after adding InviteToken model to prisma/schema.prisma
+function toInviteToken(row: {
+  id: string;
+  token: string;
+  email: string;
+  role: string;
+  propertyId: string | null;
+  expiresAt: Date;
+  usedAt: Date | null;
+  createdBy: string;
+  createdAt: Date;
+}): InviteToken {
+  return {
+    id: row.id,
+    token: row.token,
+    email: row.email,
+    role: row.role as InviteToken["role"],
+    propertyId: row.propertyId,
+    expiresAt: row.expiresAt,
+    usedAt: row.usedAt,
+    createdBy: row.createdBy,
+    createdAt: row.createdAt,
+  };
+}
+
 export class PrismaInviteRepository implements IInviteRepository {
-  async create(_data: {
+  async create(data: {
     token: string;
     email: string;
     role: string;
@@ -12,24 +35,40 @@ export class PrismaInviteRepository implements IInviteRepository {
     expiresAt: Date;
     createdBy: string;
   }): Promise<InviteToken> {
-    throw new Error(
-      "InviteToken schema migration required. Add InviteToken model to prisma/schema.prisma and run: npx prisma db push"
-    );
+    const created = await prisma.inviteToken.create({
+      data: {
+        token: data.token,
+        email: data.email,
+        role: data.role as "owner" | "staff",
+        propertyId: data.propertyId ?? null,
+        expiresAt: data.expiresAt,
+        createdBy: data.createdBy,
+      },
+    });
+    return toInviteToken(created);
   }
 
-  async findByToken(_token: string): Promise<InviteToken | null> {
-    throw new Error("InviteToken schema migration required.");
+  async findByToken(token: string): Promise<InviteToken | null> {
+    const row = await prisma.inviteToken.findUnique({ where: { token } });
+    return row ? toInviteToken(row) : null;
   }
 
-  async findByCreator(_createdBy: string): Promise<InviteToken[]> {
-    throw new Error("InviteToken schema migration required.");
+  async findByCreator(createdBy: string): Promise<InviteToken[]> {
+    const rows = await prisma.inviteToken.findMany({
+      where: { createdBy },
+      orderBy: { createdAt: "desc" },
+    });
+    return rows.map(toInviteToken);
   }
 
-  async markAsUsed(_id: string): Promise<void> {
-    throw new Error("InviteToken schema migration required.");
+  async markAsUsed(id: string): Promise<void> {
+    await prisma.inviteToken.update({
+      where: { id },
+      data: { usedAt: new Date() },
+    });
   }
 
-  async delete(_id: string): Promise<void> {
-    throw new Error("InviteToken schema migration required.");
+  async delete(id: string): Promise<void> {
+    await prisma.inviteToken.delete({ where: { id } });
   }
 }

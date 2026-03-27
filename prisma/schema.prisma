@@ -26,6 +26,7 @@ model User {
   accounts        Account[]
   ownedProperties Property[]    @relation("PropertyOwner")
   staffProperties PropertyStaff[]
+  createdInvites  InviteToken[]  @relation("CreatedInvites")
 
   @@map("user")
 }
@@ -89,11 +90,12 @@ model Property {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  owner    User            @relation("PropertyOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  staff    PropertyStaff[]
-  rooms    Room[]
-  tenants  Tenant[]
-  expenses Expense[]
+  owner        User            @relation("PropertyOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  staff        PropertyStaff[]
+  rooms        Room[]
+  tenants      Tenant[]
+  expenses     Expense[]
+  inviteTokens InviteToken[]
 
   @@map("property")
 }
@@ -210,4 +212,31 @@ model TenantNote {
 
   @@index([tenantId, date])
   @@map("tenant_note")
+}
+
+// ──────────────────────────────────────────────
+// Invite tokens
+// ──────────────────────────────────────────────
+
+enum InviteRole {
+  owner
+  staff
+}
+
+model InviteToken {
+  id         String     @id @default(uuid())
+  token      String     @unique
+  email      String
+  role       InviteRole
+  propertyId String?
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdBy  String
+  createdAt  DateTime   @default(now())
+
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  creator  User      @relation("CreatedInvites", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@index([createdBy])
+  @@map("invite_token")
 }
