@@ -1,17 +1,15 @@
-import { prisma } from "@/lib/prisma";
+import pg from "pg";
 
 async function globalTeardown() {
+  const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
   try {
-    const deleted = await prisma.user.deleteMany({
-      where: {
-        email: { endsWith: "@test.com" },
-      },
-    });
-    console.log(`[teardown] Deleted ${deleted.count} E2E test user(s).`);
+    await client.connect();
+    const result = await client.query(`DELETE FROM "user" WHERE email LIKE '%@test.com'`);
+    console.log(`[teardown] Deleted ${result.rowCount} E2E test user(s).`);
   } catch (err) {
     console.error("[teardown] Failed to delete E2E users:", err);
   } finally {
-    await prisma.$disconnect();
+    await client.end();
   }
 }
 
