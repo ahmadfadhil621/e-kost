@@ -81,8 +81,12 @@ test.describe("session redirect", () => {
     }) => {
       await page.goto("/register");
 
+      // Invite-only: /register is accessible (no auth redirect) but shows
+      // the invite-required error when no token is provided.
       await expect(page).toHaveURL(/\/register/);
-      await expect(page.getByLabel(/full name/i)).toBeVisible();
+      await expect(
+        page.getByText(/registration requires a valid invite link/i)
+      ).toBeVisible();
     });
   });
 });

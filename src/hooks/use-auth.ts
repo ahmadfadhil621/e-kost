@@ -11,12 +11,13 @@ export function useAuth() {
       if (error) {throw error;}
     },
     signUp: async (email: string, password: string, name: string) => {
-      const { error } = await authClient.signUp.email({
+      const { data, error } = await authClient.signUp.email({
         email,
         password,
         name,
       });
       if (error) {throw error;}
+      return data?.user ?? null;
     },
     signOut: async () => {
       const { error } = await authClient.signOut();

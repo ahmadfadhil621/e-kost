@@ -102,7 +102,13 @@
       "submit": "Daftar",
       "name": "Nama Lengkap",
       "email": "Alamat Email",
-      "password": "Kata Sandi"
+      "password": "Kata Sandi",
+      "inviteRequired": "Pendaftaran memerlukan tautan undangan yang valid.",
+      "inviteInvalid": "Tautan undangan ini tidak valid atau sudah kedaluwarsa.",
+      "inviteExpired": "Tautan undangan ini sudah kedaluwarsa.",
+      "inviteUsed": "Tautan undangan ini sudah digunakan.",
+      "inviteLoading": "Memvalidasi undangan...",
+      "emailPreFilled": "Alamat email (diisi dari undangan)"
     },
     "login": {
       "title": "Masuk",
@@ -492,6 +498,39 @@
     },
     "validation": {
       "nameRequired": "Nama wajib diisi"
+    },
+    "invites": {
+      "title": "Undang Anggota",
+      "generate": "Buat Tautan Undangan",
+      "form": {
+        "email": "Alamat Email",
+        "role": "Peran",
+        "roleOwner": "Pemilik",
+        "roleStaff": "Staf",
+        "expiresIn": "Kedaluwarsa Dalam (hari)",
+        "submit": "Buat Tautan",
+        "cancel": "Batal"
+      },
+      "list": {
+        "title": "Undangan Tertunda",
+        "empty": "Tidak ada undangan tertunda",
+        "email": "Email",
+        "role": "Peran",
+        "expires": "Kedaluwarsa",
+        "link": "Salin Tautan",
+        "revoke": "Batalkan",
+        "used": "Sudah Digunakan",
+        "pending": "Tertunda"
+      },
+      "success": {
+        "created": "Tautan undangan dibuat",
+        "revoked": "Undangan dibatalkan",
+        "copied": "Tautan disalin ke clipboard"
+      },
+      "error": {
+        "createFailed": "Gagal membuat undangan",
+        "revokeFailed": "Gagal membatalkan undangan"
+      }
     }
   }
 }
