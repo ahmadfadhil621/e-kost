@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 // Usage: npm run db:seed-owner
-// Or: npm run db:seed-owner -- --name "Ahmad" --email "ahmad@example.com" --password "secret123" --property "My Kost"
+// Or: npm run db:seed-owner -- --name "Ahmad" --email "ahmad@example.com" --password "yourpassword" --property "My Kost"
 
 import { parseArgs } from "node:util";
 import * as readline from "node:readline/promises";
