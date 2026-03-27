@@ -58,39 +58,26 @@ let goodRegToken: string;
 let edgePwToken: string;
 let dupToken: string;
 
-test.beforeAll(async ({ request, baseURL }) => {
+test.beforeAll(async ({ browser, baseURL }) => {
   const base = baseURL ?? "http://localhost:3000";
   const ts = Date.now();
-  const creatorEmail = `reg-creator-${ts}@test.com`;
-  const creatorPassword = "CreatorPass123!";
 
-  // Step 1: sign up creator account (no invite needed — API bypasses the UI gate)
-  await request.post(`${base}/api/auth/sign-up/email`, {
-    headers: { origin: base },
-    data: { name: "Reg Creator", email: creatorEmail, password: creatorPassword },
+  // Reuse the E2E user session created by the setup project rather than
+  // signing up a new account here. This avoids extra sign-ups that would
+  // hit Better Auth's rate limiter in local runs (only disabled in CI).
+  const authCtx = await browser.newContext({
+    storageState: "e2e/.auth/user.json",
   });
-
-  // Step 2: pre-register the duplicate email before signing in as creator
-  const dupEmail = `dup-reg-${ts}@test.com`;
-  await request.post(`${base}/api/auth/sign-up/email`, {
-    headers: { origin: base },
-    data: { name: "First User", email: dupEmail, password: "SecurePass123!" },
-  });
-
-  // Step 3: sign in as creator so subsequent API calls are authenticated
-  const signInRes = await request.post(`${base}/api/auth/sign-in/email`, {
-    headers: { origin: base },
-    data: { email: creatorEmail, password: creatorPassword, rememberMe: true },
-  });
-  if (!signInRes.ok()) {
-    throw new Error(`Creator sign-in failed: ${await signInRes.text()}`);
+  try {
+    sharedToken = await createInviteToken(authCtx.request, base, `shared-reg-${ts}@test.com`);
+    goodRegToken = await createInviteToken(authCtx.request, base, `reg-good-${ts}@test.com`);
+    edgePwToken = await createInviteToken(authCtx.request, base, `edge-pw-${ts}@test.com`);
+    // demo@ekost.app is always registered by auth.setup.ts — perfect for the
+    // duplicate-email test without needing an additional sign-up.
+    dupToken = await createInviteToken(authCtx.request, base, "demo@ekost.app");
+  } finally {
+    await authCtx.close();
   }
-
-  // Step 4: mint all invite tokens the tests need
-  sharedToken = await createInviteToken(request, base, `shared-reg-${ts}@test.com`);
-  goodRegToken = await createInviteToken(request, base, `reg-good-${ts}@test.com`);
-  edgePwToken = await createInviteToken(request, base, `edge-pw-${ts}@test.com`);
-  dupToken = await createInviteToken(request, base, dupEmail);
 });
 
 test.describe("register", () => {
@@ -150,7 +137,9 @@ test.describe("register", () => {
       await page.goto("/register?token=invalid-token-xyz");
 
       await expect(page).toHaveURL(/\/register/);
-      await expect(page.getByRole("alert")).toBeVisible();
+      await expect(
+        page.getByText(/invalid or has expired|invite.*invalid|invalid.*invite/i)
+      ).toBeVisible();
     });
 
     test("user sees validation error for short password", async ({ page }) => {
