@@ -531,6 +531,11 @@
         "createFailed": "Gagal membuat undangan",
         "revokeFailed": "Gagal membatalkan undangan"
       }
+    },
+    "developer": {
+      "title": "Developer",
+      "inviteManagement": "Manajemen Undangan",
+      "inviteManagementDesc": "Buat dan kelola tautan registrasi pemilik"
     }
   }
 }

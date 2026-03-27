@@ -531,6 +531,11 @@
         "createFailed": "Failed to generate invite",
         "revokeFailed": "Failed to revoke invite"
       }
+    },
+    "developer": {
+      "title": "Developer",
+      "inviteManagement": "Invite Management",
+      "inviteManagementDesc": "Create and manage owner registration links"
     }
   }
 }
