@@ -5,7 +5,7 @@ export function useDevStatus() {
     queryKey: ["dev-status"],
     queryFn: async () => {
       const res = await fetch("/api/dev-status");
-      if (!res.ok) return { isDev: false };
+      if (!res.ok) { return { isDev: false }; }
       const json = await res.json();
       return json.data ?? { isDev: false };
     },

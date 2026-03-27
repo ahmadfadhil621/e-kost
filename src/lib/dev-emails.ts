@@ -5,12 +5,12 @@
  */
 export function getDevEmails(): string[] {
   const raw = process.env.DEV_EMAILS;
-  if (!raw) return [];
+  if (!raw) { return []; }
   return raw.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
 }
 
 export function isDevEmail(email: string): boolean {
   const devEmails = getDevEmails();
-  if (devEmails.length === 0) return true; // no restriction when not set
+  if (devEmails.length === 0) { return true; }
   return devEmails.includes(email.toLowerCase());
 }
