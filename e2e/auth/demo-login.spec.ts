@@ -1,7 +1,7 @@
 // Traceability: demo-login
 // REQ 4.1 -> test('login page shows Login with Demo button, not old Owner/Staff buttons')
-// REQ 4.2 -> test('user clicks Login with Demo and is redirected to /properties')
-// REQ 1.7 -> test('user clicks Login with Demo and is redirected to /properties')
+// REQ 4.2 -> test('user clicks Login with Demo and is redirected to /')
+// REQ 1.7 -> test('user clicks Login with Demo and is redirected to /')
 // REQ 3.2 -> test('demo banner is visible after demo login')
 // REQ 3.2 -> test('demo banner is not visible after regular login as a non-demo user')
 // REQ 3.3 -> test('demo banner has no dismiss/close button')
@@ -42,7 +42,7 @@ test.describe("demo login", () => {
       ).not.toBeVisible();
     });
 
-    test("user clicks Login with Demo, is redirected to /properties, and sees demo banner", async ({
+    test("user clicks Login with Demo, is redirected to /, and sees demo banner", async ({
       page,
     }) => {
       test.setTimeout(60000);
@@ -57,7 +57,7 @@ test.describe("demo login", () => {
         .getByRole("button", { name: /login with demo|masuk dengan demo/i })
         .click();
 
-      await expect(page).toHaveURL("/properties", { timeout: 30000 });
+      await expect(page).toHaveURL("/", { timeout: 30000 });
       await page.waitForLoadState("domcontentloaded");
 
       // Demo banner must be visible (REQ 3.2, 3.5)
@@ -75,7 +75,7 @@ test.describe("demo login", () => {
         .getByRole("button", { name: /login with demo|masuk dengan demo/i })
         .click();
 
-      await expect(page).toHaveURL("/properties", { timeout: 30000 });
+      await expect(page).toHaveURL("/", { timeout: 30000 });
       await page.waitForLoadState("domcontentloaded");
 
       await expect(page.getByRole("status")).toBeVisible({ timeout: 10000 });
@@ -94,7 +94,7 @@ test.describe("demo login", () => {
         .getByRole("button", { name: /login with demo|masuk dengan demo/i })
         .click();
 
-      await expect(page).toHaveURL("/properties", { timeout: 30000 });
+      await expect(page).toHaveURL("/", { timeout: 30000 });
       await page.waitForLoadState("domcontentloaded");
 
       const banner = page.getByRole("status");

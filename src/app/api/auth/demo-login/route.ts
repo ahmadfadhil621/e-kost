@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       asResponse: true,
     });
 
-    const redirectResponse = NextResponse.redirect(new URL("/properties", request.url), 302);
+    const redirectResponse = NextResponse.redirect(new URL("/", request.url), 302);
     const cookies = signInResponse.headers.getSetCookie();
     for (const cookie of cookies) {
       redirectResponse.headers.append("set-cookie", cookie);

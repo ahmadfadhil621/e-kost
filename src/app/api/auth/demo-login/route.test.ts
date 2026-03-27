@@ -5,7 +5,7 @@
 // REQ 1.4 -> it('deletes demo data in FK-safe order before seeding')
 // REQ 1.5 -> it('calls seedDemoData with the demo user id')
 // REQ 1.6 -> it('forwards set-cookie headers from Better Auth sign-in response')
-// REQ 1.7 -> it('redirects to /properties on success')
+// REQ 1.7 -> it('redirects to / on success')
 // REQ 6.2 -> (no auth guard; route has no getSession check)
 // REQ 6.5 -> it('returns 500 before touching any data when DEMO_PASSWORD env var is missing')
 // PROP 1  -> it('always calls deleteMany then seedDemoData regardless of call count')
@@ -101,13 +101,13 @@ describe("POST /api/auth/demo-login", () => {
   });
 
   describe("good cases", () => {
-    it("redirects to /properties on success", async () => {
+    it("redirects to / on success", async () => {
       const { POST } = await import("./route");
       const response = await POST(makeRequest());
 
       expect(response.status).toBe(302);
       const location = response.headers.get("location");
-      expect(location).toBe("http://localhost:3000/properties");
+      expect(location).toBe("http://localhost:3000/");
     });
 
     it("is reachable without authentication — no getSession guard", async () => {
