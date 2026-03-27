@@ -525,7 +525,7 @@
       "success": {
         "created": "Invite link generated",
         "revoked": "Invite revoked",
-        "copied": "Link copied to clipboard"
+        "copied": "Copied"
       },
       "error": {
         "createFailed": "Failed to generate invite",

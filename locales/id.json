@@ -525,7 +525,7 @@
       "success": {
         "created": "Tautan undangan dibuat",
         "revoked": "Undangan dibatalkan",
-        "copied": "Tautan disalin ke clipboard"
+        "copied": "Disalin"
       },
       "error": {
         "createFailed": "Gagal membuat undangan",

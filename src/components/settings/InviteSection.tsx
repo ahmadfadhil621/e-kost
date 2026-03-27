@@ -170,37 +170,51 @@ export function InviteSection({ userRole }: InviteSectionProps) {
             {pendingInvites.length === 0 ? (
               <p className="mt-1 text-sm text-muted-foreground">{t("settings.invites.list.empty")}</p>
             ) : (
-              <ul className="mt-2 space-y-2">
-                {pendingInvites.map((invite) => (
-                  <li key={invite.id} className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
-                    <div>
-                      <span className="font-medium">{invite.email}</span>
-                      <span className="ml-2 text-muted-foreground">{invite.role}</span>
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {t("settings.invites.list.expires")}: {new Date(invite.expiresAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="w-24 shrink-0"
-                        onClick={() => copyLink(invite)}
-                      >
-                        {copiedId === invite.id ? t("settings.invites.success.copied") : t("settings.invites.list.link")}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-destructive"
-                        onClick={() => revokeMutation.mutate(invite.id)}
-                        disabled={revokeMutation.isPending}
-                      >
-                        {t("settings.invites.list.revoke")}
-                      </Button>
-                    </div>
-                  </li>
-                ))}
+              <ul className="mt-2 space-y-3">
+                {pendingInvites.map((invite) => {
+                  const link = typeof window !== "undefined"
+                    ? `${window.location.origin}/register?token=${invite.token}`
+                    : `/register?token=${invite.token}`;
+                  return (
+                    <li key={invite.id} className="rounded-md border px-3 py-3 text-sm space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <span className="font-medium break-all">{invite.email}</span>
+                          <div className="mt-0.5 flex gap-2 text-xs text-muted-foreground">
+                            <span>{invite.role}</span>
+                            <span>·</span>
+                            <span>{t("settings.invites.list.expires")}: {new Date(invite.expiresAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-destructive shrink-0"
+                          onClick={() => revokeMutation.mutate(invite.id)}
+                          disabled={revokeMutation.isPending}
+                        >
+                          {t("settings.invites.list.revoke")}
+                        </Button>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          readOnly
+                          value={link}
+                          className="min-w-0 flex-1 rounded border bg-muted px-2 py-1 text-xs text-muted-foreground"
+                          onFocus={(e) => e.target.select()}
+                        />
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="shrink-0"
+                          onClick={() => copyLink(invite)}
+                        >
+                          {copiedId === invite.id ? t("settings.invites.success.copied") : t("settings.invites.list.link")}
+                        </Button>
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
