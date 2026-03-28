@@ -20,6 +20,7 @@ jobs:
     env:
       # Required by prisma.config.ts when loading config (e.g. prisma generate); not used for connections.
       DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+      DIRECT_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -48,6 +49,7 @@ jobs:
 
     env:
       DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+      DIRECT_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
       BETTER_AUTH_SECRET: "ci-secret-min-32-chars-long-for-e2e"
       BETTER_AUTH_URL: "http://localhost:3000"
       DEMO_PASSWORD: "Demo@395762@"
