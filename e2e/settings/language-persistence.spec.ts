@@ -106,7 +106,7 @@ test.describe("language persistence", () => {
       await page.goto("/settings");
 
       await expect(
-        page.getByRole("main").getByRole("heading", { name: /language|bahasa|pengaturan/i })
+        page.getByRole("main").getByRole("heading", { name: /language|bahasa/i })
       ).toBeVisible({ timeout: 10000 });
 
       // Switch to English explicitly first to ensure a known state
@@ -139,7 +139,7 @@ test.describe("language persistence", () => {
       await page.goto("/settings");
 
       await expect(
-        page.getByRole("main").getByRole("heading", { name: /language|bahasa|pengaturan/i })
+        page.getByRole("main").getByRole("heading", { name: /language|bahasa/i })
       ).toBeVisible({ timeout: 10000 });
 
       // Click the already-active language button twice
