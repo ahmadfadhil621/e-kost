@@ -61,7 +61,7 @@ test.describe("demo login", () => {
       await page.waitForLoadState("domcontentloaded");
 
       // Demo banner must be visible (REQ 3.2, 3.5)
-      await expect(page.getByRole("status")).toBeVisible({ timeout: 10000 });
+      await expect(page.getByRole("status", { name: "Demo session indicator" })).toBeVisible({ timeout: 10000 });
       await expect(
         page.getByText(/demo account|akun demo/i)
       ).toBeVisible();
@@ -78,11 +78,11 @@ test.describe("demo login", () => {
       await expect(page).toHaveURL("/", { timeout: 30000 });
       await page.waitForLoadState("domcontentloaded");
 
-      await expect(page.getByRole("status")).toBeVisible({ timeout: 10000 });
+      await expect(page.getByRole("status", { name: "Demo session indicator" })).toBeVisible({ timeout: 10000 });
 
       // No close/dismiss button anywhere on the banner (REQ 3.3)
       await expect(
-        page.getByRole("status").getByRole("button")
+        page.getByRole("status", { name: "Demo session indicator" }).getByRole("button")
       ).not.toBeVisible();
     });
 
@@ -97,7 +97,7 @@ test.describe("demo login", () => {
       await expect(page).toHaveURL("/", { timeout: 30000 });
       await page.waitForLoadState("domcontentloaded");
 
-      const banner = page.getByRole("status");
+      const banner = page.getByRole("status", { name: "Demo session indicator" });
       await expect(banner).toBeVisible({ timeout: 10000 });
       await expect(banner).toHaveAttribute("aria-label");
     });
@@ -203,7 +203,7 @@ test.describe("demo login", () => {
       await page.waitForLoadState("domcontentloaded");
 
       // Demo banner must NOT be visible for a non-demo user (REQ 3.2)
-      await expect(page.getByRole("status")).not.toBeVisible({ timeout: 5000 });
+      await expect(page.getByRole("status", { name: "Demo session indicator" })).not.toBeVisible({ timeout: 5000 });
     });
   });
 });
