@@ -80,6 +80,7 @@ Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
 ## Behavior Rules
 
 - When asked to plan or brainstorm, do NOT start reading code files or implementing. Only explore the codebase if explicitly asked to. Ask clarifying questions instead.
+- When asked to perform a git operation (rebase, push, merge, branch sync), execute it directly. Do not describe or analyze the branch state first unless explicitly asked.
 - When creating GitHub issues, ALWAYS use `gh` CLI (e.g., `gh issue create`). Read existing issue templates first with `cat .github/ISSUE_TEMPLATE/*.md` before creating any issue.
 - Never modify `prisma/schema.prisma` directly. If a feature requires schema changes, describe the needed changes and let the user apply them manually in Supabase. After they confirm the changes are applied, run `npx prisma db pull` then `npx prisma generate` to sync the client.
 - When diagnosing issues, go directly to the most likely source files first. Do not do broad codebase exploration — be surgical. If the user says "just go to the code", stop exploring and act immediately.
