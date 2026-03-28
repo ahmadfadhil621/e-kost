@@ -12,10 +12,12 @@ const TEST_USER_PASSWORD = "LangTest123!";
 
 let testUserEmail: string;
 
-test.beforeAll(async ({ request }) => {
+test.beforeAll(async ({ request, baseURL }) => {
   testUserEmail = `lang-persist-${Date.now()}@test.com`;
+  const origin = baseURL ?? "http://localhost:3000";
 
   const res = await request.post("/api/auth/sign-up/email", {
+    headers: { origin },
     data: {
       name: TEST_USER_NAME,
       email: testUserEmail,
