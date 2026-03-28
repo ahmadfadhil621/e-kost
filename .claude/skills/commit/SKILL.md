@@ -21,7 +21,15 @@ Run this skill when you are ready to commit a logical unit of work.
    npm run lint
    npm run test:run
    ```
-   > Do NOT run the full Playwright suite locally. E2E regression always defers to CI.
+
+   Additionally, if any changed files are under `e2e/`, run only those specific spec files before committing:
+   ```bash
+   # Identify touched E2E specs from git diff
+   git diff --name-only | grep '^e2e/.*\.spec\.ts$'
+   # Run each one, e.g.:
+   npx playwright test e2e/settings/language-persistence.spec.ts
+   ```
+   Fix any failures before proceeding. Do NOT run the full Playwright suite — only the touched specs.
 
 2. **Summarize changes**
    - Run `git diff --stat` to list changed files
