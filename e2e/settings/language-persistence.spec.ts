@@ -7,6 +7,10 @@
 import { test, expect } from "@playwright/test";
 import { stableFill } from "../helpers/forms";
 
+// These tests manage their own login flow — clear any inherited auth state
+// so page.goto("/login") is not redirected away by an active session.
+test.use({ storageState: { cookies: [], origins: [] } });
+
 const TEST_USER_NAME = "Language Persistence User";
 const TEST_USER_PASSWORD = "LangTest123!";
 
