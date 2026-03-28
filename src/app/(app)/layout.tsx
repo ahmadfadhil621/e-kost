@@ -7,12 +7,14 @@ import { AppNav } from "@/components/layout/app-nav";
 import { DemoBanner } from "@/components/demo-banner";
 import { PropertyProvider } from "@/contexts/property-context";
 import { Providers } from "@/components/providers";
+import { useLanguageSync } from "@/hooks/use-language-sync";
 
 function AppLayoutContent({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  useLanguageSync();
   return (
     <div className="flex min-h-screen flex-col">
       <DemoBanner />

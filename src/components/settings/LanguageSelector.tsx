@@ -2,6 +2,7 @@
 
 import { useTranslation } from "react-i18next";
 import { LANGUAGE_KEY } from "@/lib/i18n";
+import { useAuth } from "@/hooks/use-auth";
 
 type LanguageSelectorProps = {
   availableLocales: string[];
@@ -9,11 +10,21 @@ type LanguageSelectorProps = {
 
 export function LanguageSelector({ availableLocales }: LanguageSelectorProps) {
   const { t, i18n } = useTranslation();
+  const { user } = useAuth();
 
   const handleLanguageChange = (localeCode: string) => {
     i18n.changeLanguage(localeCode);
     if (typeof window !== "undefined") {
       localStorage.setItem(LANGUAGE_KEY, localeCode);
+    }
+    if (user) {
+      fetch("/api/user/language", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ language: localeCode }),
+      }).catch(() => {
+        // silent fail — localStorage remains as fallback
+      });
     }
   };
 
