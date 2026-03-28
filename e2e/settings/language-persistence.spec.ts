@@ -44,8 +44,9 @@ async function loginAs(page: Parameters<typeof stableFill>[0], email: string, pa
 }
 
 async function logout(page: Parameters<typeof stableFill>[0]) {
-  await page.getByRole("button", { name: /user profile/i }).click();
-  await page.getByRole("menuitem", { name: /log out/i }).click();
+  // Button label is translated — match both English and Indonesian
+  await page.getByRole("button", { name: /user profile|profil pengguna/i }).click();
+  await page.getByRole("menuitem", { name: /log out|keluar/i }).click();
   await page.waitForURL(/\/login/, { timeout: 20000 });
 }
 
