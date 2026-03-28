@@ -36,9 +36,11 @@ test.beforeAll(async ({ request, baseURL }) => {
 
 async function loginAs(page: Parameters<typeof stableFill>[0], email: string, password: string) {
   await page.goto("/login");
-  await stableFill(page, () => page.getByLabel(/email address/i), email);
-  await stableFill(page, () => page.getByLabel(/password/i), password);
-  await page.getByRole("button", { name: /sign in|log in/i }).click();
+  // Labels may be in English ("Email Address", "Password") or Indonesian
+  // ("Alamat Email", "Kata Sandi") depending on the language persisted in localStorage.
+  await stableFill(page, () => page.getByLabel(/email address|alamat email/i), email);
+  await stableFill(page, () => page.getByLabel(/^password$|kata sandi/i), password);
+  await page.getByRole("button", { name: /^sign in$|^log in$|^masuk$/i }).click();
   await page.waitForURL("/", { timeout: 25000 });
   await page.waitForLoadState("domcontentloaded");
 }
