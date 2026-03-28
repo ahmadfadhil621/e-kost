@@ -2,21 +2,20 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import en from "@/../locales/en.json";
 import id from "@/../locales/id.json";
+import { AVAILABLE_LOCALES, LANGUAGE_KEY } from "@/lib/locales";
+export { AVAILABLE_LOCALES, LANGUAGE_KEY };
 
 const resources = {
   en: { translation: en },
   id: { translation: id },
 };
 
-export const AVAILABLE_LOCALES = Object.keys(resources) as string[];
-export const LANGUAGE_KEY = "ekost_language";
-
 function getPersistedLanguage(): string {
   if (typeof window === "undefined") {
     return "en";
   }
   const stored = localStorage.getItem(LANGUAGE_KEY);
-  if (stored && AVAILABLE_LOCALES.includes(stored)) {
+  if (stored && (AVAILABLE_LOCALES as readonly string[]).includes(stored)) {
     return stored;
   }
   return AVAILABLE_LOCALES[0] ?? "en";

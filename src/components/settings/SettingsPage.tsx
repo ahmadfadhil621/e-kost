@@ -50,7 +50,7 @@ export function SettingsPage() {
       </h1>
 
       <section className="space-y-6">
-        <LanguageSelector availableLocales={AVAILABLE_LOCALES} />
+        <LanguageSelector availableLocales={[...AVAILABLE_LOCALES]} />
         <Separator />
         <AccountSection
           user={user!}
