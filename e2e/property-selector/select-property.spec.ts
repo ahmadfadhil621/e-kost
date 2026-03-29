@@ -28,11 +28,11 @@ test.describe("select property", () => {
       await expect(card).toBeVisible({ timeout: 10000 });
     });
 
-    test("tapping a property card navigates to the property detail page", async ({ page }) => {
+    test("tapping the detail arrow navigates to the property detail page", async ({ page }) => {
       await page.goto("/properties");
 
       await page
-        .getByText(/e2e selector property|selector property|456 selector/i)
+        .getByRole("link", { name: /e2e selector property|selector property|456 selector/i })
         .first()
         .click();
 
