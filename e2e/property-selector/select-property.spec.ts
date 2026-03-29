@@ -28,7 +28,7 @@ test.describe("select property", () => {
       await expect(card).toBeVisible({ timeout: 10000 });
     });
 
-    test("tapping a property card leads to the dashboard", async ({ page }) => {
+    test("tapping a property card navigates to the property detail page", async ({ page }) => {
       await page.goto("/properties");
 
       await page
@@ -36,10 +36,11 @@ test.describe("select property", () => {
         .first()
         .click();
 
-      await expect(page).toHaveURL(/\/$/, { timeout: 15000 });
-      await expect(
-        page.getByRole("main").or(page.getByRole("heading", { name: /overview|dashboard|occupancy|create property/i }))
-      ).toBeVisible({ timeout: 10000 });
+      await expect(page).toHaveURL(
+        /\/properties\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+        { timeout: 15000 }
+      );
+      await expect(page.getByRole("heading").first()).toBeVisible({ timeout: 10000 });
     });
   });
 

@@ -89,30 +89,24 @@ test.describe("property detail page", () => {
       });
     });
 
-    test("property list card has view-details link", async ({ page }) => {
-      await page.goto("/properties");
-
-      // At least one "View details" link must be present
-      await expect(
-        page.getByRole("link", { name: /view details|detail/i }).first()
-      ).toBeVisible({ timeout: 10000 });
-    });
-
-    test("view-details link navigates to property detail page", async ({ page }) => {
+    test("property list card links to the property detail page", async ({ page }) => {
       const propertyId = getPropertyId();
       await page.goto("/properties");
 
-      const detailLink = page
-        .getByRole("link", { name: /view details|detail/i })
-        .first();
-      await expect(detailLink).toBeVisible({ timeout: 10000 });
-      await detailLink.click();
+      // Each property card is now a full link to its detail page
+      await expect(
+        page.locator(`a[href="/properties/${propertyId}"]`).first()
+      ).toBeVisible({ timeout: 10000 });
+    });
 
-      // Verify we landed on a property detail page (any property UUID — the user
-      // may have multiple properties in CI so we can't assume which one is first)
-      await expect(page).toHaveURL(/\/properties\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/, {
-        timeout: 10000,
-      });
+    test("property list card navigates to property detail page when clicked", async ({ page }) => {
+      const propertyId = getPropertyId();
+      await page.goto("/properties");
+
+      await page.locator(`a[href="/properties/${propertyId}"]`).first().click();
+
+      await expect(page).toHaveURL(`/properties/${propertyId}`, { timeout: 10000 });
+      await expect(page.getByRole("heading").first()).toBeVisible({ timeout: 10000 });
     });
 
     test("dashboard has a property info link", async ({ page }) => {
