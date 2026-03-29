@@ -108,7 +108,9 @@ test.describe("property detail page", () => {
       await expect(detailLink).toBeVisible({ timeout: 10000 });
       await detailLink.click();
 
-      await expect(page).toHaveURL(new RegExp(`/properties/${propertyId}`), {
+      // Verify we landed on a property detail page (any property UUID — the user
+      // may have multiple properties in CI so we can't assume which one is first)
+      await expect(page).toHaveURL(/\/properties\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/, {
         timeout: 10000,
       });
     });
