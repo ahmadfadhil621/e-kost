@@ -1,4 +1,4 @@
-// Traceability: settings-staff-management
+// Traceability: settings-staff-management, property-staff-management (issue #26)
 // REQ 3.1 -> test('owner sees staff management section for active property')
 // REQ 3.2 -> test('staff section displays list of assigned staff')
 // REQ 3.3 -> test('Add Staff shows form to enter email')
@@ -6,11 +6,20 @@
 // REQ 3.5 -> test('Remove shows confirmation dialog and removes access on confirm')
 // REQ 3.6 -> (staff user hiding: covered by unit test StaffSection)
 // REQ 3.7 -> test('add and remove have adequate touch targets')
+// Note: Staff section moved from /settings to /properties/[propertyId] (issue #26)
 
+import * as fs from "fs";
+import * as path from "path";
 import { test, expect } from "@playwright/test";
 import { stableFill } from "../helpers/forms";
 
 test.use({ storageState: "e2e/.auth/user-with-property.json" });
+
+function getPropertyId(): string {
+  const filePath = path.join(process.cwd(), "e2e/.auth/property-id.json");
+  const data = JSON.parse(fs.readFileSync(filePath, "utf-8")) as { propertyId: string };
+  return data.propertyId;
+}
 
 /** Registers a new user via the auth API so the user exists in the DB. Uses plain fetch to avoid sending the test's auth cookies. */
 async function registerStaffUserViaApi(
@@ -36,27 +45,25 @@ test.describe("invite and remove staff", () => {
     test("owner sees staff management section for active property", async ({
       page,
     }) => {
-      await page.goto("/settings");
+      const propertyId = getPropertyId();
+      await page.goto(`/properties/${propertyId}`);
 
       await expect(
-        page.getByRole("main").getByRole("heading", { name: /settings|pengaturan/i })
-      ).toBeVisible({ timeout: 10000 });
-      await expect(
-        page.getByRole("heading", { name: /staff for|staff.*property/i })
+        page.getByTestId("staff-management")
       ).toBeVisible({ timeout: 15000 });
     });
 
     test("staff section displays list of assigned staff", async ({ page }) => {
-      await page.goto("/settings");
+      const propertyId = getPropertyId();
+      await page.goto(`/properties/${propertyId}`);
 
-      const staffSection = page.getByRole("heading", {
-        name: /staff for|staff.*property/i,
-      }).locator("..");
+      const staffSection = page.getByTestId("staff-management");
       await expect(staffSection).toBeVisible({ timeout: 10000 });
     });
 
     test("Add Staff shows form to enter email", async ({ page }) => {
-      await page.goto("/settings");
+      const propertyId = getPropertyId();
+      await page.goto(`/properties/${propertyId}`);
 
       const staffSection = page.getByTestId("staff-management");
       await staffSection.waitFor({ state: "visible", timeout: 10000 });
@@ -77,8 +84,10 @@ test.describe("invite and remove staff", () => {
       const staffEmail = `staff-${Date.now()}@test.com`;
       await registerStaffUserViaApi(staffEmail, "StaffPass123!", "Staff User");
 
-      await page.goto("/settings");
+      const propertyId = getPropertyId();
+      await page.goto(`/properties/${propertyId}`);
       const staffSection = page.getByTestId("staff-management");
+      await staffSection.waitFor({ state: "visible", timeout: 10000 });
       await staffSection.getByRole("button", { name: /add staff|tambah staf/i }).click();
       await stableFill(
         page,
@@ -91,7 +100,7 @@ test.describe("invite and remove staff", () => {
         page.getByRole("status").filter({ hasText: /invited successfully|berhasil diundang|staff invited/i })
       ).toBeVisible({ timeout: 15000 });
 
-      // Cleanup: remove the invited staff so state does not leak to other specs (e.g. update-account)
+      // Cleanup: remove the invited staff so state does not leak to other specs
       await staffSection.getByRole("listitem").filter({ hasText: staffEmail }).getByRole("button", { name: /remove|hapus|delete/i }).click();
       await page.getByRole("dialog").getByRole("button", { name: /confirm|remove|hapus|yes|ya/i }).click();
     });
@@ -102,18 +111,23 @@ test.describe("invite and remove staff", () => {
       const staffEmail = `remove-${Date.now()}@test.com`;
       await registerStaffUserViaApi(staffEmail, "RemovePass123!", "To Remove");
 
-      await page.goto("/settings");
+      const propertyId = getPropertyId();
+      await page.goto(`/properties/${propertyId}`);
       const staffSection = page.getByTestId("staff-management");
+      await staffSection.waitFor({ state: "visible", timeout: 10000 });
       await staffSection.getByRole("button", { name: /add staff|tambah staf/i }).click();
       await stableFill(
         page,
         () => staffSection.locator("#staff-email"),
         staffEmail
       );
-      await staffSection.getByRole("button", { name: /^invite$|^undang$/i }).click();
+      await expect(staffSection.locator("#staff-email")).toHaveValue(staffEmail);
+      const inviteBtn = staffSection.getByRole("button", { name: /^invite$|^undang$/i });
+      await expect(inviteBtn).toBeEnabled();
+      await inviteBtn.click();
       await expect(
         page.getByRole("status").filter({ hasText: /invited successfully|berhasil diundang|staff invited/i })
-      ).toBeVisible({ timeout: 15000 });
+      ).toBeVisible({ timeout: 20000 });
 
       const listItem = staffSection.getByRole("listitem").filter({ hasText: staffEmail });
       await expect(listItem).toBeVisible({ timeout: 15000 });
@@ -132,11 +146,11 @@ test.describe("invite and remove staff", () => {
     });
 
     test("add and remove have adequate touch targets", async ({ page }) => {
-      await page.goto("/settings");
+      const propertyId = getPropertyId();
+      await page.goto(`/properties/${propertyId}`);
 
-      await expect(
-        page.getByRole("heading", { name: /staff for|staff.*property/i })
-      ).toBeVisible({ timeout: 15000 });
+      const staffSection = page.getByTestId("staff-management");
+      await expect(staffSection).toBeVisible({ timeout: 15000 });
       const addButton = page.getByRole("button", {
         name: /add staff|tambah staf/i,
       });
@@ -149,8 +163,10 @@ test.describe("invite and remove staff", () => {
 
   test.describe("bad cases", () => {
     test("unregistered email shows error", async ({ page }) => {
-      await page.goto("/settings");
+      const propertyId = getPropertyId();
+      await page.goto(`/properties/${propertyId}`);
       const staffSection = page.getByTestId("staff-management");
+      await staffSection.waitFor({ state: "visible", timeout: 10000 });
       await staffSection.getByRole("button", { name: /add staff|tambah staf/i }).click();
       await stableFill(
         page,
@@ -167,7 +183,8 @@ test.describe("invite and remove staff", () => {
 
   test.describe("edge cases", () => {
     test("staff section shows property name in header", async ({ page }) => {
-      await page.goto("/settings");
+      const propertyId = getPropertyId();
+      await page.goto(`/properties/${propertyId}`);
 
       await expect(
         page.getByRole("heading", { name: /staff for/i })

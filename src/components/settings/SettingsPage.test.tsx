@@ -1,12 +1,13 @@
 // Traceability: settings-staff-management, settings-invite-management
-// REQ 4.1 -> it('displays single page with Language, Account, and Staff sections for owner')
+// REQ 4.1 -> it('displays single page with Language and Account sections')
 // REQ 4.2 -> it('renders sections in single-column with separators')
-// REQ 4.3 -> it('displays section headers for Language, Account, Staff')
+// REQ 4.3 -> it('displays section headers for Language and Account')
 // REQ 4.4 -> (touch targets covered in child component tests)
 // REQ 4.5 -> (mobile layout covered by E2E)
 // REQ 5.1 -> it('shows dev section link when user is a dev')
 // REQ 5.2 -> it('hides dev section link for non-dev users')
 // REQ 5.3 -> it('dev section link navigates to /settings/invites')
+// Note: Staff section moved to /properties/[propertyId] (issue #26)
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
@@ -55,7 +56,7 @@ beforeEach(() => {
 
 describe("SettingsPage", () => {
   describe("good cases", () => {
-    it("displays single page with Language, Account, and Staff sections for owner", () => {
+    it("displays single page with Language and Account sections", () => {
       renderSettingsPage();
 
       expect(
@@ -63,9 +64,6 @@ describe("SettingsPage", () => {
       ).toBeInTheDocument();
       expect(
         screen.getByRole("heading", { name: /account|settings\.account/i })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("heading", { name: /staff|settings\.staff/i })
       ).toBeInTheDocument();
     });
 
@@ -79,7 +77,7 @@ describe("SettingsPage", () => {
       expect(sections.length).toBeGreaterThanOrEqual(2);
     });
 
-    it("displays section headers for Language, Account, Staff", () => {
+    it("displays section headers for Language and Account", () => {
       renderSettingsPage();
 
       expect(
@@ -87,9 +85,6 @@ describe("SettingsPage", () => {
       ).toBeInTheDocument();
       expect(
         screen.getByText(/account|settings\.account\.title/i)
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/staff for|staff.*property|settings\.staff/i)
       ).toBeInTheDocument();
     });
 
@@ -105,20 +100,6 @@ describe("SettingsPage", () => {
     });
   });
 
-  describe("bad cases", () => {
-    it("does not show Staff section when user role is staff", () => {
-      mockUseProperty.mockReturnValue({
-        activeProperty: { id: "p1", name: "P" },
-        userRole: "staff",
-      });
-      renderSettingsPage();
-
-      const staffHeadings = screen.queryAllByRole("heading", {
-        name: /staff for|staff.*property/i,
-      });
-      expect(staffHeadings.length).toBe(0);
-    });
-  });
 
   describe("edge cases", () => {
     it("page has accessible title or heading", () => {

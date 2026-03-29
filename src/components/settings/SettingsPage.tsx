@@ -9,7 +9,6 @@ import { useDevStatus } from "@/hooks/use-dev-status";
 import { AVAILABLE_LOCALES } from "@/lib/i18n";
 import { LanguageSelector } from "./LanguageSelector";
 import { AccountSection } from "./AccountSection";
-import { StaffSection } from "./StaffSection";
 import { Separator } from "@/components/ui/separator";
 
 type User = { id: string; name: string; email: string };
@@ -20,8 +19,6 @@ export function SettingsPage() {
   const [updatedUser, setUpdatedUser] = useState<User | null>(null);
   const user = updatedUser ?? authUser;
   const {
-    activeProperty,
-    userRole,
     isLoading: propertyLoading,
   } = useProperty();
 
@@ -56,16 +53,6 @@ export function SettingsPage() {
           user={user!}
           onUserUpdated={(u) => setUpdatedUser(u)}
         />
-        {activeProperty && (
-          <>
-            <Separator />
-            <StaffSection
-              propertyId={activeProperty.id}
-              propertyName={activeProperty.name}
-              userRole={userRole}
-            />
-          </>
-        )}
         {!devLoading && isDev && (
           <>
             <Separator />

@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StaffSection } from "@/components/settings/StaffSection";
 import {
   Dialog,
   DialogContent,
@@ -290,19 +291,12 @@ export default function PropertyDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Staff placeholder */}
-      <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold">
-              {t("property.staff.title")}
-            </h3>
-            <Badge variant="outline" data-testid="staff-placeholder-badge">
-              {t("property.detail.staffPlaceholder")}
-            </Badge>
-          </div>
-        </CardHeader>
-      </Card>
+      {/* Staff management */}
+      <StaffSection
+        propertyId={property.id}
+        propertyName={property.name}
+        userRole={property.role}
+      />
 
       {/* G-3: Destructive actions at bottom (owner only) */}
       {isOwner && (

@@ -1,8 +1,9 @@
-// Traceability: property-detail — issue #24
+// Traceability: property-detail — issue #24, #26
 // REQ-1.1, REQ-1.2, REQ-1.3 -> it('renders property name, address, role, and creation date')
 // REQ-1.4 -> it('renders stats: totalRooms, tenants, outstandingCount')
 // REQ-1.5 -> it('renders map placeholder')
-// REQ-1.6 -> it('renders staff section placeholder')
+// REQ-1.6 (issue #26) -> it('renders staff management section for owner')
+// REQ-1.6 (issue #26) -> it('hides staff management section for non-owner')
 // REQ-1.7 -> it('renders quick-nav links to sub-sections')
 // REQ-4.1 -> it('shows loading state while fetching')
 // REQ-4.2 -> it('shows error state when property is not found')
@@ -48,6 +49,13 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
 
 vi.mock("@/hooks/use-toast", () => ({
   useToast: () => ({ toast: vi.fn() }),
+}));
+
+vi.mock("@/components/settings/StaffSection", () => ({
+  StaffSection: ({ userRole }: { userRole: string | null }) => {
+    if (userRole !== "owner") { return null; }
+    return <div data-testid="staff-management">Staff Management</div>;
+  },
 }));
 
 import PropertyDetailPage from "./page";
@@ -137,14 +145,25 @@ describe("PropertyDetailPage", () => {
       expect(screen.getByText(/map coming soon/i)).toBeInTheDocument();
     });
 
-    it("renders staff section placeholder", () => {
-      mockBothReady();
+    it("renders staff management section for owner", () => {
+      mockBothReady(); // returns role: "owner"
       render(<PropertyDetailPage />);
 
-      expect(screen.getByRole("heading", { name: /staff/i })).toBeInTheDocument();
-      const badge = screen.getByTestId("staff-placeholder-badge");
-      expect(badge).toBeInTheDocument();
-      expect(badge).toHaveTextContent(/coming soon/i);
+      expect(screen.getByTestId("staff-management")).toBeInTheDocument();
+    });
+
+    it("hides staff management section for non-owner", () => {
+      let callCount = 0;
+      mockUseQuery.mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          return { data: { ...property, role: "staff" }, isLoading: false, isError: false };
+        }
+        return { data: dashboardData, isLoading: false, isError: false };
+      });
+      render(<PropertyDetailPage />);
+
+      expect(screen.queryByTestId("staff-management")).not.toBeInTheDocument();
     });
   });
 

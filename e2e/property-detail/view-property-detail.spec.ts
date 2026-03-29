@@ -2,7 +2,7 @@
 // REQ-1.1, REQ-1.2 -> test('property detail shows name and address')
 // REQ-1.4 -> test('property detail shows stats overview')
 // REQ-1.5 -> test('property detail shows map placeholder')
-// REQ-1.6 -> test('property detail shows staff placeholder')
+// REQ-1.6 (issue #26) -> test('property detail shows live staff management section for owner')
 // REQ-1.7 -> test('property detail shows quick-nav links')
 // REQ-2.1 -> test('property list card has view-details link')
 // REQ-2.2 -> test('dashboard has property info link')
@@ -61,12 +61,11 @@ test.describe("property detail page", () => {
       await expect(page.getByText(/map coming soon/i)).toBeVisible({ timeout: 10000 });
     });
 
-    test("property detail shows staff section placeholder", async ({ page }) => {
+    test("property detail shows live staff management section for owner", async ({ page }) => {
       const propertyId = getPropertyId();
       await page.goto(`/properties/${propertyId}`);
 
-      await expect(page.getByText(/staff/i).first()).toBeVisible({ timeout: 10000 });
-      await expect(page.getByText(/coming soon/i).first()).toBeVisible({ timeout: 10000 });
+      await expect(page.getByTestId("staff-management")).toBeVisible({ timeout: 15000 });
     });
 
     test("property detail shows quick-nav links to Rooms, Tenants, Payments, Finance", async ({
