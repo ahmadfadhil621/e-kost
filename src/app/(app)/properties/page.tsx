@@ -2,18 +2,21 @@
 
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Check, ChevronRight } from "lucide-react";
 import { usePropertyContext } from "@/contexts/property-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 
 export default function PropertiesListPage() {
   const { t } = useTranslation();
+  const router = useRouter();
   const ctx = usePropertyContext();
-  const { properties, activePropertyId, isLoading } =
+  const { properties, activePropertyId, setActivePropertyId, isLoading } =
     ctx ?? {
       properties: [],
       activePropertyId: null,
+      setActivePropertyId: () => {},
       isLoading: true,
     };
 
@@ -46,27 +49,58 @@ export default function PropertiesListPage() {
         </Button>
       </div>
       <ul className="flex flex-col gap-3">
-        {properties.map((p) => (
-          <li key={p.id}>
-            <Link href={`/properties/${p.id}`} className="block">
-              <Card className="transition-colors hover:bg-muted/50">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-medium">{p.name}</span>
-                    {activePropertyId === p.id && (
-                      <Badge variant="secondary">{t("property.list.active")}</Badge>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {p.address || "—"}
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
-          </li>
-        ))}
+        {properties.map((p) => {
+          const isActive = activePropertyId === p.id;
+          return (
+            <li key={p.id}>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  setActivePropertyId(p.id);
+                  router.push("/");
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    setActivePropertyId(p.id);
+                    router.push("/");
+                  }
+                }}
+                className="cursor-pointer"
+              >
+                <Card
+                  className={`transition-colors hover:bg-muted/50 ${isActive ? "border-primary" : ""}`}
+                >
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-primary">
+                          {isActive && (
+                            <Check className="h-3 w-3 text-primary" strokeWidth={3} />
+                          )}
+                        </div>
+                        <span className="font-medium truncate">{p.name}</span>
+                      </div>
+                      <Link
+                        href={`/properties/${p.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                        aria-label={p.name}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {p.address || "—"}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
