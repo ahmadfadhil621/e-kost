@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { Building2, ChevronDown, Plus, List } from "lucide-react";
+import { Building2, ChevronDown, Plus, List, Settings } from "lucide-react";
 import { usePropertyContext } from "@/contexts/property-context";
 import { Button } from "@/components/ui/button";
 import {
@@ -79,13 +80,24 @@ export function PropertySwitcher() {
         ) : (
           <ul className="flex flex-col gap-0.5 p-2">
             {properties.map((p) => (
-              <li key={p.id}>
+              <li key={p.id} className="flex items-center gap-1">
                 <Button
                   variant={p.id === activeId ? "secondary" : "ghost"}
-                  className="h-11 w-full justify-start min-h-[44px]"
+                  className="h-11 min-w-0 flex-1 justify-start min-h-[44px]"
                   onClick={() => handleSelect(p.id)}
                 >
-                  {p.name}
+                  <span className="truncate">{p.name}</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-11 w-11 shrink-0 min-h-[44px] text-muted-foreground hover:text-foreground"
+                  aria-label={`${t("property.detail.title")}: ${p.name}`}
+                  asChild
+                >
+                  <Link href={`/properties/${p.id}`} onClick={() => setOpen(false)}>
+                    <Settings className="h-4 w-4" aria-hidden />
+                  </Link>
                 </Button>
               </li>
             ))}

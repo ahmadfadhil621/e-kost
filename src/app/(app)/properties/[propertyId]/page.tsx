@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { usePropertyContext } from "@/contexts/property-context";
 import type { PropertyRole } from "@/domain/schemas/property";
 
 type PropertyResponse = {
@@ -104,6 +105,7 @@ export default function PropertyDetailPage() {
   const router = useRouter();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const propertyCtx = usePropertyContext();
   const propertyId = params.propertyId as string;
 
   const [archiveOpen, setArchiveOpen] = useState(false);
@@ -128,13 +130,20 @@ export default function PropertyDetailPage() {
 
   const invalidatePropertyQueries = () => {
     queryClient.invalidateQueries({ queryKey: ["property", propertyId] });
-    queryClient.invalidateQueries({ queryKey: ["properties"] });
     queryClient.invalidateQueries({ queryKey: ["property-detail-stats", propertyId] });
+    void propertyCtx?.refetch();
+  };
+
+  const clearActiveIfCurrent = () => {
+    if (propertyCtx?.activePropertyId === propertyId) {
+      propertyCtx.setActivePropertyId(null);
+    }
   };
 
   const archiveMutation = useMutation({
     mutationFn: () => archiveProperty(propertyId),
     onSuccess: () => {
+      clearActiveIfCurrent();
       invalidatePropertyQueries();
       toast({ title: t("property.archive.success") });
       setArchiveOpen(false);
@@ -160,6 +169,7 @@ export default function PropertyDetailPage() {
   const deleteMutation = useMutation({
     mutationFn: () => deleteProperty(propertyId),
     onSuccess: () => {
+      clearActiveIfCurrent();
       invalidatePropertyQueries();
       toast({ title: t("property.delete.success") });
       setDeleteOpen(false);
