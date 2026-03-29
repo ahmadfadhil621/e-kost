@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
-import Link from "next/link";
 import { Building2 } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/domain/schemas/auth";
 import { useAuth } from "@/hooks/use-auth";
@@ -136,12 +135,6 @@ export function LoginForm() {
             {t("auth.login.demo")}
           </Button>
 
-          <p className="text-center text-sm text-muted-foreground">
-            {t("auth.noAccount")}{" "}
-            <Link href="/register" className="text-primary underline">
-              {t("auth.register.title")}
-            </Link>
-          </p>
         </CardContent>
       </Card>
     </div>

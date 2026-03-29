@@ -65,17 +65,6 @@ describe("LoginForm", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders link to registration page", () => {
-      render(<LoginForm />);
-
-      expect(
-        screen.getByText(/don't have an account/i)
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("link", { name: /create account/i })
-      ).toHaveAttribute("href", "/register");
-    });
-
     it("submits form with valid data and redirects", async () => {
       mockSignIn.mockResolvedValue(undefined);
       const user = userEvent.setup();
@@ -346,19 +335,13 @@ describe("LoginForm", () => {
       render(<LoginForm />);
 
       const buttons = screen.getAllByRole("button");
-      const links = screen.getAllByRole("link");
       const inputs = screen.getAllByRole("textbox");
 
       expect(buttons.length).toBeGreaterThanOrEqual(1);
-      expect(links.length).toBeGreaterThanOrEqual(1);
       expect(inputs.length).toBeGreaterThanOrEqual(1);
 
       for (const button of buttons) {
         expect(button.tagName).toBe("BUTTON");
-      }
-      for (const link of links) {
-        expect(link.tagName).toBe("A");
-        expect(link).toHaveAttribute("href");
       }
     });
   });
