@@ -13,6 +13,9 @@ export interface IPropertyRepository {
     data: Partial<{ name: string; address: string }>
   ): Promise<Property>;
   softDelete(id: string): Promise<void>;
+  archive(id: string): Promise<Property>;
+  unarchive(id: string): Promise<Property>;
+  hardDelete(id: string): Promise<void>;
 
   addStaff(propertyId: string, userId: string): Promise<PropertyStaff>;
   removeStaff(propertyId: string, userId: string): Promise<void>;

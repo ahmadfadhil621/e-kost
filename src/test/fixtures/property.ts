@@ -9,6 +9,7 @@ export function createProperty(overrides: Partial<Property> = {}): Property {
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
+    archivedAt: null,
     ...overrides,
   };
 }

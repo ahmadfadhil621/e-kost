@@ -34,14 +34,21 @@ vi.mock("next/link", () => ({
 }));
 
 const mockUseQuery = vi.fn();
+const mockMutate = vi.fn();
 
 vi.mock("@tanstack/react-query", async (importOriginal) => {
   const original = await importOriginal<typeof import("@tanstack/react-query")>();
   return {
     ...original,
     useQuery: () => mockUseQuery(),
+    useMutation: () => ({ mutate: mockMutate, isPending: false }),
+    useQueryClient: () => ({ invalidateQueries: vi.fn() }),
   };
 });
+
+vi.mock("@/hooks/use-toast", () => ({
+  useToast: () => ({ toast: vi.fn() }),
+}));
 
 import PropertyDetailPage from "./page";
 

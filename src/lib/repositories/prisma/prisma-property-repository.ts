@@ -10,6 +10,7 @@ function toProperty(p: {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
+  archivedAt?: Date | null;
 }): Property {
   return {
     id: p.id,
@@ -19,6 +20,7 @@ function toProperty(p: {
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,
     deletedAt: p.deletedAt,
+    archivedAt: p.archivedAt ?? null,
   };
 }
 
@@ -65,6 +67,7 @@ export class PrismaPropertyRepository implements IPropertyRepository {
     const list = await prisma.property.findMany({
       where: {
         deletedAt: null,
+        archivedAt: null,
         OR: [
           { ownerId: userId },
           { staff: { some: { userId } } },
@@ -96,6 +99,26 @@ export class PrismaPropertyRepository implements IPropertyRepository {
     });
   }
 
+  async archive(id: string): Promise<Property> {
+    const updated = await prisma.property.update({
+      where: { id },
+      data: { archivedAt: new Date() },
+    });
+    return toProperty(updated);
+  }
+
+  async unarchive(id: string): Promise<Property> {
+    const updated = await prisma.property.update({
+      where: { id },
+      data: { archivedAt: null },
+    });
+    return toProperty(updated);
+  }
+
+  async hardDelete(id: string): Promise<void> {
+    await prisma.property.delete({ where: { id } });
+  }
+
   async addStaff(propertyId: string, userId: string): Promise<PropertyStaff> {
     const created = await prisma.propertyStaff.create({
       data: { propertyId, userId },
@@ -125,7 +148,7 @@ export class PrismaPropertyRepository implements IPropertyRepository {
   ): Promise<"owner" | "staff" | null> {
     const property = await prisma.property.findUnique({
       where: { id: propertyId },
-      select: { ownerId: true, deletedAt: true },
+      select: { ownerId: true, deletedAt: true, archivedAt: true },
     });
     if (!property || property.deletedAt) {return null;}
     if (property.ownerId === userId) {return "owner";}

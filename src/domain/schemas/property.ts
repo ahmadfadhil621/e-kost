@@ -38,6 +38,7 @@ export interface Property {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
+  archivedAt: Date | null;
 }
 
 export type PropertyRole = "owner" | "staff";

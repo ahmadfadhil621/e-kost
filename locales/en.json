@@ -73,12 +73,31 @@
       "active": "Active",
       "roomCount": "{{count}} rooms"
     },
-    "delete": {
-      "title": "Delete property",
-      "description": "All associated data (rooms, tenants, payments, expenses) will be affected. This cannot be undone.",
-      "confirm": "Delete",
-      "success": "Property deleted"
+    "archive": {
+      "title": "Archive Property",
+      "confirmMessage": "Archive {{name}}? It will be hidden from your property list but can be restored later.",
+      "confirm": "Archive",
+      "cancel": "Cancel",
+      "success": "Property archived successfully",
+      "errorActiveTenants": "Cannot archive property with active tenants. Move all tenants out first."
     },
+    "unarchive": {
+      "title": "Restore Property",
+      "confirm": "Restore",
+      "success": "Property restored successfully"
+    },
+    "delete": {
+      "title": "Delete Property",
+      "confirmMessage": "This will permanently delete {{name}} and all its rooms, tenants, payments, and expenses. This action cannot be undone.",
+      "confirmNameLabel": "Type the property name to confirm",
+      "confirmNamePlaceholder": "{{name}}",
+      "confirm": "Delete",
+      "cancel": "Cancel",
+      "success": "Property deleted successfully",
+      "errorActiveTenants": "Cannot delete property with active tenants. Move all tenants out first."
+    },
+    "dangerZone": "Danger Zone",
+    "occupiedWarning": "Move all tenants out before archiving or deleting this property.",
     "errors": {
       "notFound": "Property not found"
     },

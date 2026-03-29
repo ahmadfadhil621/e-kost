@@ -80,6 +80,7 @@ model Property {
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   deletedAt    DateTime?
+  archivedAt   DateTime?       @db.Timestamptz(6)
   expenses     Expense[]
   inviteTokens InviteToken[]
   owner        User            @relation("PropertyOwner", fields: [ownerId], references: [id], onDelete: Cascade)

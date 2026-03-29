@@ -19,6 +19,7 @@ export async function GET(
       name: property.name,
       address: property.address,
       ownerId: property.ownerId,
+      archivedAt: property.archivedAt,
       createdAt: property.createdAt,
       updatedAt: property.updatedAt,
       role: access.role,
@@ -91,6 +92,15 @@ export async function DELETE(
     await propertyService.deleteProperty(access.userId!, propertyId);
     return new NextResponse(null, { status: 204 });
   } catch (e) {
+    if (e instanceof Error && e.message === "Property not found") {
+      return NextResponse.json({ error: "Property not found" }, { status: 404 });
+    }
+    if (e instanceof Error && e.message === "Cannot delete property with active tenants") {
+      return NextResponse.json(
+        { error: "Cannot delete property with active tenants" },
+        { status: 409 }
+      );
+    }
     if (e instanceof Error && e.name === "ForbiddenError") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

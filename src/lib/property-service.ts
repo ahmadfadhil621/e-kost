@@ -1,4 +1,5 @@
 import type { IPropertyRepository } from "@/domain/interfaces/property-repository";
+import type { ITenantRepository } from "@/domain/interfaces/tenant-repository";
 import type {
   CreatePropertyInput,
   Property,
@@ -26,7 +27,8 @@ export interface IUserByEmailFinder {
 export class PropertyService {
   constructor(
     private readonly repo: IPropertyRepository,
-    private readonly userByEmail?: IUserByEmailFinder
+    private readonly userByEmail?: IUserByEmailFinder,
+    private readonly tenantRepo?: ITenantRepository
   ) {}
 
   async createProperty(userId: string, data: CreatePropertyInput): Promise<Property> {
@@ -63,7 +65,39 @@ export class PropertyService {
   async deleteProperty(userId: string, propertyId: string): Promise<void> {
     const role = await this.validateAccess(userId, propertyId);
     if (role !== "owner") {throw new ForbiddenError("Owner access required");}
-    return this.repo.softDelete(propertyId);
+    const property = await this.repo.findById(propertyId);
+    if (!property) {throw new Error("Property not found");}
+    if (this.tenantRepo) {
+      const tenants = await this.tenantRepo.findByProperty(propertyId);
+      if (tenants.some((t) => !t.movedOutAt)) {
+        throw new Error("Cannot delete property with active tenants");
+      }
+    }
+    return this.repo.hardDelete(propertyId);
+  }
+
+  async archiveProperty(userId: string, propertyId: string): Promise<Property> {
+    const role = await this.validateAccess(userId, propertyId);
+    if (role !== "owner") {throw new ForbiddenError("Owner access required");}
+    const property = await this.repo.findById(propertyId);
+    if (!property) {throw new Error("Property not found");}
+    if (property.archivedAt) {throw new Error("Property is already archived");}
+    if (this.tenantRepo) {
+      const tenants = await this.tenantRepo.findByProperty(propertyId);
+      if (tenants.some((t) => !t.movedOutAt)) {
+        throw new Error("Cannot archive property with active tenants");
+      }
+    }
+    return this.repo.archive(propertyId);
+  }
+
+  async unarchiveProperty(userId: string, propertyId: string): Promise<Property> {
+    const role = await this.validateAccess(userId, propertyId);
+    if (role !== "owner") {throw new ForbiddenError("Owner access required");}
+    const property = await this.repo.findById(propertyId);
+    if (!property) {throw new Error("Property not found");}
+    if (!property.archivedAt) {throw new Error("Property is not archived");}
+    return this.repo.unarchive(propertyId);
   }
 
   async addStaff(

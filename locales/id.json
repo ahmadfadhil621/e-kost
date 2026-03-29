@@ -73,12 +73,31 @@
       "active": "Aktif",
       "roomCount": "{{count}} kamar"
     },
-    "delete": {
-      "title": "Hapus properti",
-      "description": "Semua data terkait (kamar, penyewa, pembayaran, pengeluaran) akan terpengaruh. Tindakan ini tidak dapat dibatalkan.",
-      "confirm": "Hapus",
-      "success": "Properti dihapus"
+    "archive": {
+      "title": "Arsipkan Properti",
+      "confirmMessage": "Arsipkan {{name}}? Properti akan disembunyikan dari daftar tetapi dapat dipulihkan nanti.",
+      "confirm": "Arsipkan",
+      "cancel": "Batal",
+      "success": "Properti berhasil diarsipkan",
+      "errorActiveTenants": "Tidak dapat mengarsipkan properti dengan penyewa aktif. Pindahkan semua penyewa terlebih dahulu."
     },
+    "unarchive": {
+      "title": "Pulihkan Properti",
+      "confirm": "Pulihkan",
+      "success": "Properti berhasil dipulihkan"
+    },
+    "delete": {
+      "title": "Hapus Properti",
+      "confirmMessage": "Ini akan menghapus {{name}} dan semua kamar, penyewa, pembayaran, serta pengeluaran secara permanen. Tindakan ini tidak dapat dibatalkan.",
+      "confirmNameLabel": "Ketik nama properti untuk konfirmasi",
+      "confirmNamePlaceholder": "{{name}}",
+      "confirm": "Hapus",
+      "cancel": "Batal",
+      "success": "Properti berhasil dihapus",
+      "errorActiveTenants": "Tidak dapat menghapus properti dengan penyewa aktif. Pindahkan semua penyewa terlebih dahulu."
+    },
+    "dangerZone": "Zona Berbahaya",
+    "occupiedWarning": "Pindahkan semua penyewa terlebih dahulu sebelum mengarsipkan atau menghapus properti ini.",
     "errors": {
       "notFound": "Properti tidak ditemukan"
     },
