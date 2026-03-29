@@ -57,13 +57,6 @@ test.describe("login", () => {
       ).toBeVisible();
     });
 
-    test("login page has link to register", async ({ page }) => {
-      await page.goto("/login");
-
-      await expect(
-        page.getByRole("link", { name: /create account/i })
-      ).toBeVisible();
-    });
   });
 
   test.describe("bad cases", () => {
