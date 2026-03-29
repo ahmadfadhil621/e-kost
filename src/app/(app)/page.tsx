@@ -160,6 +160,16 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-lg font-semibold">{property.name}</h2>
+        <Link
+          href={`/properties/${activeId}`}
+          className="text-xs text-primary underline-offset-2 hover:underline"
+        >
+          {t("property.detail.propertyInfo")} →
+        </Link>
+      </div>
+
       {dashboardLoading && (
         <p className="text-sm text-muted-foreground" role="status">
           {t("dashboard.loading")}

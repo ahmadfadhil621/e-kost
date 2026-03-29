@@ -168,6 +168,13 @@ export default function PropertiesListPage() {
                 <p className="text-sm text-muted-foreground line-clamp-2">
                   {p.address || "—"}
                 </p>
+                <Link
+                  href={`/properties/${p.id}`}
+                  className="mt-2 inline-block text-xs text-primary underline-offset-2 hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {t("property.detail.viewDetails")}
+                </Link>
               </CardContent>
             </Card>
           </li>

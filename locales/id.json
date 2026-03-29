@@ -97,6 +97,28 @@
       "invited": "Staf berhasil diundang",
       "removed": "Staf berhasil dihapus",
       "notFound": "Tidak ada akun terdaftar untuk email ini"
+    },
+    "detail": {
+      "title": "Detail Properti",
+      "createdAt": "Bergabung sejak",
+      "viewDetails": "Lihat detail",
+      "mapPlaceholder": "Peta segera hadir",
+      "staffPlaceholder": "Segera hadir",
+      "propertyInfo": "Info properti",
+      "nav": {
+        "rooms": "Kamar",
+        "tenants": "Penyewa",
+        "payments": "Pembayaran",
+        "finance": "Keuangan"
+      },
+      "stats": {
+        "totalRooms": "Total Kamar",
+        "tenants": "Penyewa",
+        "outstanding": "Tunggakan"
+      },
+      "error": {
+        "unavailable": "Properti tidak tersedia"
+      }
     }
   },
   "auth": {

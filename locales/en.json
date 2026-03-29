@@ -97,6 +97,28 @@
       "invited": "Staff invited successfully",
       "removed": "Staff removed successfully",
       "notFound": "No registered account found for this email"
+    },
+    "detail": {
+      "title": "Property Details",
+      "createdAt": "Member since",
+      "viewDetails": "View details",
+      "mapPlaceholder": "Map coming soon",
+      "staffPlaceholder": "Coming soon",
+      "propertyInfo": "Property info",
+      "nav": {
+        "rooms": "Rooms",
+        "tenants": "Tenants",
+        "payments": "Payments",
+        "finance": "Finance"
+      },
+      "stats": {
+        "totalRooms": "Total Rooms",
+        "tenants": "Tenants",
+        "outstanding": "Outstanding"
+      },
+      "error": {
+        "unavailable": "Property unavailable"
+      }
     }
   },
   "auth": {
