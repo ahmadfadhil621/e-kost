@@ -80,6 +80,7 @@ test.describe("room edit button placement", () => {
 
         await expect(heading).toBeVisible({ timeout: 5000 });
         await expect(editBtn).toBeVisible({ timeout: 5000 });
+        await page.waitForLoadState("networkidle");
 
         // Both must be in the same row: vertical midpoints within 8px
         const headingBox = await heading.boundingBox();
