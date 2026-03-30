@@ -20,6 +20,7 @@ test.describe("delete expense", () => {
       test.info().setTimeout(60000);
       const propertyId = getPropertyId();
       const date = new Date().toISOString().split("T")[0];
+      const uniqueDesc = `E2E delete test expense ${Date.now()}`;
 
       // Create a throwaway expense via API
       const res = await page.request.post(
@@ -29,7 +30,7 @@ test.describe("delete expense", () => {
             category: "cleaning",
             amount: 88000,
             date,
-            description: "E2E delete test expense",
+            description: uniqueDesc,
           },
         }
       );
@@ -37,10 +38,10 @@ test.describe("delete expense", () => {
 
       await goToExpenseList(page);
 
-      // Click the Delete button on the first expense card
-      await page
+      // Find the specific expense card and click its Delete button
+      const expenseCard = page.locator("li").filter({ hasText: uniqueDesc });
+      await expenseCard
         .getByRole("button", { name: /delete expense|hapus pengeluaran/i })
-        .first()
         .click({ timeout: 10000 });
 
       // Confirmation dialog should appear — click the confirm button
@@ -55,7 +56,7 @@ test.describe("delete expense", () => {
 
       // The deleted expense's description should no longer be visible
       await expect(
-        page.getByText(/E2E delete test expense/)
+        page.getByText(uniqueDesc)
       ).toHaveCount(0, { timeout: 10000 });
     });
   });
