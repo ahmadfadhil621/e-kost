@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "next/navigation";
 import { MonthSelector } from "@/components/finance/month-selector";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
+import { Card, CardContent } from "@/components/ui/card";
 import type { CashflowEntry } from "@/domain/schemas/cashflow";
 
 async function fetchCashflow(
@@ -97,32 +98,34 @@ export default function CashflowPage() {
       )}
 
       {!isLoading && !error && entries.length > 0 && (
-        <ul className="flex flex-col gap-2 list-none p-0 m-0">
+        <ul className="flex flex-col gap-3 list-none p-0 m-0">
           {entries.map((entry) => (
             <li key={entry.id}>
-              <div className="flex items-center justify-between py-3 px-4 rounded-lg border bg-card min-h-[44px]">
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="text-sm font-medium truncate">
-                    {entry.description}
+              <Card className="w-full">
+                <CardContent className="flex items-center justify-between py-3 px-4 min-h-[44px]">
+                  <div className="flex flex-col gap-0.5 min-w-0">
+                    <span className="text-sm font-medium truncate">
+                      {entry.description}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(entry.date).toLocaleDateString(
+                        typeof window !== "undefined" ? navigator.language : "en",
+                        { year: "numeric", month: "short", day: "numeric" }
+                      )}
+                    </span>
+                  </div>
+                  <span
+                    className={`text-sm font-semibold tabular-nums shrink-0 ml-4 ${
+                      entry.type === "income"
+                        ? "text-[hsl(var(--status-available))]"
+                        : "text-[hsl(var(--status-occupied))]"
+                    }`}
+                  >
+                    {entry.type === "income" ? "+" : "−"}
+                    {formatCurrency(entry.amount)}
                   </span>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(entry.date).toLocaleDateString(
-                      typeof window !== "undefined" ? navigator.language : "en",
-                      { year: "numeric", month: "short", day: "numeric" }
-                    )}
-                  </span>
-                </div>
-                <span
-                  className={`text-sm font-semibold tabular-nums shrink-0 ml-4 ${
-                    entry.type === "income"
-                      ? "text-[hsl(var(--status-available))]"
-                      : "text-[hsl(var(--status-occupied))]"
-                  }`}
-                >
-                  {entry.type === "income" ? "+" : "−"}
-                  {formatCurrency(entry.amount)}
-                </span>
-              </div>
+                </CardContent>
+              </Card>
             </li>
           ))}
         </ul>

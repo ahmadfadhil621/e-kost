@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import { Pencil } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -122,9 +123,17 @@ export default function ExpenseDetailPage() {
 
   return (
     <div className="space-y-6 w-full max-w-md mx-auto">
-      <h2 className="text-lg font-semibold">{t("expense.detail.title")}</h2>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-lg font-semibold">{t("expense.detail.title")}</h2>
+        <Button asChild size="sm" variant="ghost" className="min-h-[44px] min-w-[44px] shrink-0">
+          <Link href={`/properties/${propertyId}/finance/expenses/${expenseId}/edit`}>
+            <Pencil className="h-4 w-4" aria-hidden />
+            {t("common.edit")}
+          </Link>
+        </Button>
+      </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <div>
           <p className="text-sm text-muted-foreground">{t("expense.form.category")}</p>
           <p className="font-medium">{t(`expense.category.${expense.category}`)}</p>
@@ -147,16 +156,6 @@ export default function ExpenseDetailPage() {
             <p className="font-medium">{expense.description}</p>
           </div>
         )}
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Button asChild className="min-h-[44px] min-w-[44px]">
-          <Link
-            href={`/properties/${propertyId}/finance/expenses/${expenseId}/edit`}
-          >
-            {t("common.edit")}
-          </Link>
-        </Button>
       </div>
 
       {/* G-3: Destructive actions at bottom */}

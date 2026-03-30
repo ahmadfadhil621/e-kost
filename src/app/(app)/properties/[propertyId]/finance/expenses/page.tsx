@@ -85,7 +85,7 @@ export default function ExpenseListPage() {
                 className="block"
               >
                 <Card className="w-full hover:bg-muted/50 transition-colors">
-                  <CardHeader className="pb-1">
+                  <CardHeader className="pb-2">
                     <span className="text-sm font-medium">
                       {t(`expense.category.${expense.category}`)}
                     </span>
