@@ -72,8 +72,18 @@ export default function ExpenseListPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (expenseId: string) => deleteExpense(propertyId, expenseId),
+    onMutate: async (expenseId) => {
+      await queryClient.cancelQueries({ queryKey: ["expenses", propertyId] });
+      const previousExpenses = queryClient.getQueryData<Expense[]>(["expenses", propertyId]);
+      queryClient.setQueryData<Expense[]>(["expenses", propertyId], (old) =>
+        (old ?? []).filter((e) => e.id !== expenseId)
+      );
+      return { previousExpenses };
+    },
+    onError: (_err, _expenseId, context) => {
+      queryClient.setQueryData(["expenses", propertyId], context?.previousExpenses);
+    },
     onSuccess: () => {
-      setPendingDeleteId(null);
       queryClient.invalidateQueries({ queryKey: ["expenses", propertyId] });
     },
   });
@@ -192,7 +202,9 @@ export default function ExpenseListPage() {
               disabled={deleteMutation.isPending}
               onClick={() => {
                 if (pendingDeleteId) {
-                  deleteMutation.mutate(pendingDeleteId);
+                  const id = pendingDeleteId;
+                  setPendingDeleteId(null);
+                  deleteMutation.mutate(id);
                 }
               }}
             >
