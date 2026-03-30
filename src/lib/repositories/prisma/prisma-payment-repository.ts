@@ -101,6 +101,10 @@ export class PrismaPaymentRepository implements IPaymentRepository {
     return toNumber(result._sum?.amount);
   }
 
+  async delete(id: string): Promise<void> {
+    await prisma.payment.delete({ where: { id } });
+  }
+
   async findRecentByProperty(
     propertyId: string,
     limit: number

@@ -18,4 +18,5 @@ export interface IPaymentRepository {
     propertyId: string,
     limit: number
   ): Promise<Array<{ id: string; tenantName: string; amount: number; paymentDate: Date }>>;
+  delete(id: string): Promise<void>;
 }

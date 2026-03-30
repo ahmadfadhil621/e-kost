@@ -23,6 +23,7 @@ function createMockPaymentRepo(
     findByProperty: vi.fn(),
     findByTenant: vi.fn(),
     sumByPropertyAndMonth: vi.fn(),
+    delete: vi.fn(),
     ...overrides,
   };
 }

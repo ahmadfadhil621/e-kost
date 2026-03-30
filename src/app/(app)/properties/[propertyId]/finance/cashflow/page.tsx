@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "next/navigation";
 import { MonthSelector } from "@/components/finance/month-selector";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { CashflowEntry } from "@/domain/schemas/cashflow";
 
 async function fetchCashflow(
@@ -75,7 +75,7 @@ export default function CashflowPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-md mx-auto">
+    <div className="flex flex-col gap-6 w-full">
       <h2 className="text-lg font-semibold">{t("finance.cashflow.title")}</h2>
 
       <MonthSelector
@@ -102,20 +102,9 @@ export default function CashflowPage() {
           {entries.map((entry) => (
             <li key={entry.id}>
               <Card className="w-full">
-                <CardContent className="flex items-center justify-between py-3 px-4 min-h-[44px]">
-                  <div className="flex flex-col gap-0.5 min-w-0">
-                    <span className="text-sm font-medium truncate">
-                      {entry.description}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(entry.date).toLocaleDateString(
-                        typeof window !== "undefined" ? navigator.language : "en",
-                        { year: "numeric", month: "short", day: "numeric" }
-                      )}
-                    </span>
-                  </div>
-                  <span
-                    className={`text-sm font-semibold tabular-nums shrink-0 ml-4 ${
+                <CardHeader className="pb-2">
+                  <CardTitle
+                    className={`text-lg font-semibold tabular-nums ${
                       entry.type === "income"
                         ? "text-[hsl(var(--status-available))]"
                         : "text-[hsl(var(--status-occupied))]"
@@ -123,7 +112,16 @@ export default function CashflowPage() {
                   >
                     {entry.type === "income" ? "+" : "−"}
                     {formatCurrency(entry.amount)}
-                  </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1">
+                  <p className="text-sm font-medium">{entry.description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(entry.date).toLocaleDateString(
+                      typeof window !== "undefined" ? navigator.language : "en",
+                      { year: "numeric", month: "short", day: "numeric" }
+                    )}
+                  </p>
                 </CardContent>
               </Card>
             </li>

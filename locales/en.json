@@ -349,6 +349,12 @@
       "dateRequired": "Payment date is required",
       "dateFuture": "Payment date cannot be in the future"
     },
+    "delete": {
+      "button": "Delete Payment",
+      "title": "Delete Payment?",
+      "description": "This action cannot be undone. The payment record will be permanently removed.",
+      "confirm": "Delete"
+    },
     "errors": {
       "noRoom": "Cannot record payment: tenant has no room assignment",
       "movedOut": "Cannot record payment: tenant has moved out",

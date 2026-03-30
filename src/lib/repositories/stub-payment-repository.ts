@@ -27,4 +27,8 @@ export class StubPaymentRepository implements IPaymentRepository {
   > {
     throw new Error("Not implemented");
   }
+
+  async delete(): Promise<void> {
+    throw new Error("Not implemented");
+  }
 }

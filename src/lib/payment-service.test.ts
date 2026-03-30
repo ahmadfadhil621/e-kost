@@ -32,6 +32,7 @@ function createMockPaymentRepo(
     findByProperty: vi.fn(),
     findByTenant: vi.fn(),
     sumByPropertyAndMonth: vi.fn(),
+    delete: vi.fn(),
     ...overrides,
   };
 }
@@ -731,6 +732,110 @@ describe("PaymentService", () => {
 
         expect(result.payments).toHaveLength(0);
         expect(result.count).toBe(0);
+      });
+    });
+  });
+
+  describe("deletePayment", () => {
+    describe("good cases", () => {
+      it("deletePayment succeeds when payment exists and belongs to property", async () => {
+        // Traceability: AC-API-1, AC-API-4
+        const propertyId = crypto.randomUUID();
+        const paymentId = crypto.randomUUID();
+        const tenantId = crypto.randomUUID();
+        const payment = createPayment({ id: paymentId, tenantId });
+        const tenant = createTenant({ id: tenantId, propertyId });
+        const mockDelete = vi.fn().mockResolvedValue(undefined);
+        const paymentRepo = createMockPaymentRepo({
+          findById: vi.fn().mockResolvedValue(payment),
+          delete: mockDelete,
+        });
+        const tenantRepo = createMockTenantRepo({
+          findById: vi.fn().mockResolvedValue(tenant),
+        });
+        const service = new PaymentService(
+          paymentRepo,
+          tenantRepo,
+          createMockPropertyAccess()
+        );
+
+        await expect(
+          service.deletePayment("user-1", propertyId, paymentId)
+        ).resolves.toBeUndefined();
+        expect(mockDelete).toHaveBeenCalledWith(paymentId);
+      });
+    });
+
+    describe("bad cases", () => {
+      it("deletePayment throws when payment not found", async () => {
+        // Traceability: AC-API-2
+        const paymentRepo = createMockPaymentRepo({
+          findById: vi.fn().mockResolvedValue(null),
+        });
+        const service = new PaymentService(
+          paymentRepo,
+          createMockTenantRepo(),
+          createMockPropertyAccess()
+        );
+
+        await expect(
+          service.deletePayment("user-1", "prop-1", "non-existent")
+        ).rejects.toThrow(/not found/i);
+      });
+
+      it("deletePayment throws when payment belongs to another property", async () => {
+        // Traceability: AC-API-4
+        const paymentId = crypto.randomUUID();
+        const tenantId = crypto.randomUUID();
+        const payment = createPayment({ id: paymentId, tenantId });
+        const tenantFromOtherProperty = createTenant({
+          id: tenantId,
+          propertyId: "other-property",
+        });
+        const paymentRepo = createMockPaymentRepo({
+          findById: vi.fn().mockResolvedValue(payment),
+        });
+        const tenantRepo = createMockTenantRepo({
+          findById: vi.fn().mockResolvedValue(tenantFromOtherProperty),
+        });
+        const service = new PaymentService(
+          paymentRepo,
+          tenantRepo,
+          createMockPropertyAccess()
+        );
+
+        await expect(
+          service.deletePayment("user-1", "my-property", paymentId)
+        ).rejects.toThrow(/not found|forbidden/i);
+      });
+    });
+
+    describe("edge cases", () => {
+      it("deletePayment calls repository delete with the correct id", async () => {
+        // Traceability: AC-API-1
+        const propertyId = crypto.randomUUID();
+        const paymentId = "exact-payment-id-123";
+        const tenantId = crypto.randomUUID();
+        const payment = createPayment({ id: paymentId, tenantId });
+        const tenant = createTenant({ id: tenantId, propertyId });
+        const mockDelete = vi.fn().mockResolvedValue(undefined);
+        const paymentRepo = createMockPaymentRepo({
+          findById: vi.fn().mockResolvedValue(payment),
+          delete: mockDelete,
+        });
+        const tenantRepo = createMockTenantRepo({
+          findById: vi.fn().mockResolvedValue(tenant),
+        });
+        const service = new PaymentService(
+          paymentRepo,
+          tenantRepo,
+          createMockPropertyAccess()
+        );
+
+        await service.deletePayment("user-1", propertyId, paymentId);
+
+        expect(mockDelete).toHaveBeenCalledTimes(1);
+        expect(mockDelete).toHaveBeenCalledWith(paymentId);
       });
     });
   });

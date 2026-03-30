@@ -90,6 +90,23 @@ export class PaymentService {
     return this.paymentRepo.sumByPropertyAndMonth(propertyId, year, month);
   }
 
+  async deletePayment(
+    userId: string,
+    propertyId: string,
+    paymentId: string
+  ): Promise<void> {
+    await this.propertyAccess.validateAccess(userId, propertyId);
+    const payment = await this.paymentRepo.findById(paymentId);
+    if (!payment) {
+      throw new Error("Payment not found");
+    }
+    const tenant = await this.tenantRepo.findById(payment.tenantId);
+    if (!tenant || tenant.propertyId !== propertyId) {
+      throw new Error("Payment not found");
+    }
+    await this.paymentRepo.delete(paymentId);
+  }
+
   async getRecentPayments(
     userId: string,
     propertyId: string,

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PaymentList } from "@/components/payment/payment-list";
@@ -23,15 +23,33 @@ async function fetchPayments(propertyId: string): Promise<Payment[]> {
   }));
 }
 
+async function deletePayment(propertyId: string, paymentId: string): Promise<void> {
+  const res = await fetch(`/api/properties/${propertyId}/payments/${paymentId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok && res.status !== 204) {
+    throw new Error("Failed to delete payment");
+  }
+}
+
 export default function PaymentListPage() {
   const { t } = useTranslation();
   const params = useParams();
   const propertyId = params.propertyId as string;
+  const queryClient = useQueryClient();
 
   const { data: payments = [], isLoading } = useQuery({
     queryKey: ["payments", propertyId],
     queryFn: () => fetchPayments(propertyId),
     enabled: !!propertyId,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (paymentId: string) => deletePayment(propertyId, paymentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["payments", propertyId] });
+    },
   });
 
   if (!propertyId) {
@@ -53,7 +71,12 @@ export default function PaymentListPage() {
         </Button>
       </div>
 
-      <PaymentList payments={payments} isLoading={isLoading} />
+      <PaymentList
+        payments={payments}
+        isLoading={isLoading}
+        onDeletePayment={(paymentId) => deleteMutation.mutate(paymentId)}
+        isDeletingPayment={deleteMutation.isPending}
+      />
     </div>
   );
 }

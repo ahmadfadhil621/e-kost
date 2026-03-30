@@ -1,14 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Payment } from "@/domain/schemas/payment";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { format } from "date-fns";
 
 interface PaymentListProps {
   payments: Payment[];
   isLoading?: boolean;
-  onSelectPayment?: (payment: Payment) => void;
+  onDeletePayment?: (paymentId: string) => void;
+  isDeletingPayment?: boolean;
 }
 
 function formatCurrency(amount: number, locale: string, currencyCode: string) {
@@ -23,11 +34,13 @@ function formatCurrency(amount: number, locale: string, currencyCode: string) {
 export function PaymentList({
   payments,
   isLoading = false,
-  onSelectPayment,
+  onDeletePayment,
+  isDeletingPayment = false,
 }: PaymentListProps) {
   const { t } = useTranslation();
   const currencyCode = t("currency.code");
   const currencyLocale = t("currency.locale");
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -46,47 +59,93 @@ export function PaymentList({
   }
 
   return (
-    <ul className="flex flex-col gap-3 list-none p-0 m-0">
-      {payments.map((payment) => (
-        <li key={payment.id}>
-          <Card
-            className="w-full"
-            role={onSelectPayment ? "button" : undefined}
-            onClick={() => onSelectPayment?.(payment)}
-          >
-            <CardHeader className="pb-2">
-              <span className="text-sm font-medium">{payment.tenantName}</span>
-            </CardHeader>
-            <CardContent className="space-y-1">
-              <p className="text-lg font-semibold">
-                {formatCurrency(
-                  payment.amount,
-                  currencyLocale,
-                  currencyCode
+    <>
+      <ul className="flex flex-col gap-3 list-none p-0 m-0">
+        {payments.map((payment) => (
+          <li key={payment.id} data-payment-id={payment.id}>
+            <Card className="w-full">
+              <CardHeader className="pb-2">
+                <span className="text-sm font-medium">{payment.tenantName}</span>
+              </CardHeader>
+              <CardContent className="space-y-1">
+                <p className="text-lg font-semibold tabular-nums">
+                  {formatCurrency(payment.amount, currencyLocale, currencyCode)}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {t("payment.list.date")}:{" "}
+                  {format(
+                    payment.paymentDate instanceof Date
+                      ? payment.paymentDate
+                      : new Date(payment.paymentDate),
+                    "PPP"
+                  )}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t("payment.list.recorded")}:{" "}
+                  {format(
+                    payment.createdAt instanceof Date
+                      ? payment.createdAt
+                      : new Date(payment.createdAt),
+                    "PPp"
+                  )}
+                </p>
+                {onDeletePayment && (
+                  <div className="pt-2">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="min-h-[44px] min-w-[44px] w-full"
+                      onClick={() => setPendingDeleteId(payment.id)}
+                    >
+                      {t("payment.delete.button")}
+                    </Button>
+                  </div>
                 )}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {t("payment.list.date")}:{" "}
-                {format(
-                  payment.paymentDate instanceof Date
-                    ? payment.paymentDate
-                    : new Date(payment.paymentDate),
-                  "PPP"
-                )}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t("payment.list.recorded")}:{" "}
-                {format(
-                  payment.createdAt instanceof Date
-                    ? payment.createdAt
-                    : new Date(payment.createdAt),
-                  "PPp"
-                )}
-              </p>
-            </CardContent>
-          </Card>
-        </li>
-      ))}
-    </ul>
+              </CardContent>
+            </Card>
+          </li>
+        ))}
+      </ul>
+
+      {onDeletePayment && (
+        <Dialog
+          open={pendingDeleteId !== null}
+          onOpenChange={(open) => {
+            if (!open) { setPendingDeleteId(null); }
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("payment.delete.title")}</DialogTitle>
+              <DialogDescription>
+                {t("payment.delete.description")}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                className="min-h-[44px]"
+                onClick={() => setPendingDeleteId(null)}
+              >
+                {t("common.cancel")}
+              </Button>
+              <Button
+                variant="destructive"
+                className="min-h-[44px]"
+                disabled={isDeletingPayment}
+                onClick={() => {
+                  if (pendingDeleteId) {
+                    onDeletePayment(pendingDeleteId);
+                    setPendingDeleteId(null);
+                  }
+                }}
+              >
+                {t("payment.delete.confirm")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 }

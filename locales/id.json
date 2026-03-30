@@ -349,6 +349,12 @@
       "dateRequired": "Tanggal pembayaran wajib diisi",
       "dateFuture": "Tanggal pembayaran tidak boleh di masa depan"
     },
+    "delete": {
+      "button": "Hapus Pembayaran",
+      "title": "Hapus Pembayaran?",
+      "description": "Tindakan ini tidak dapat dibatalkan. Catatan pembayaran akan dihapus permanen.",
+      "confirm": "Hapus"
+    },
     "errors": {
       "noRoom": "Tidak dapat mencatat pembayaran: penyewa tidak memiliki kamar",
       "movedOut": "Tidak dapat mencatat pembayaran: penyewa sudah pindah",
