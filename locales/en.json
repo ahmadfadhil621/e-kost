@@ -451,7 +451,7 @@
     "quickStats": {
       "rooms": "Rooms",
       "tenants": "Tenants",
-      "netProfit": "Net Profit"
+      "netProfit": "Net Income"
     },
     "loading": "Loading dashboard...",
     "error": "Unable to load dashboard",
