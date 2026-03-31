@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
+import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -15,6 +16,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
 import type { Expense } from "@/domain/schemas/expense";
 
@@ -120,10 +127,37 @@ export default function ExpenseListPage() {
           {expenses.map((expense) => (
             <li key={expense.id}>
               <Card className="w-full">
-                <CardHeader className="pb-2">
+                <CardHeader className="pb-2 flex flex-row items-center justify-between">
                   <span className="text-sm font-medium">
                     {t(`expense.category.${expense.category}`)}
                   </span>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="min-h-[44px] min-w-[44px]"
+                        aria-label={t("payment.delete.moreOptions")}
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href={`/properties/${propertyId}/finance/expenses/${expense.id}/edit`}
+                        >
+                          {t("common.edit")}
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onClick={() => setPendingDeleteId(expense.id)}
+                      >
+                        {t("expense.delete.title")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </CardHeader>
                 <CardContent className="space-y-1">
                   <p className="text-lg font-semibold tabular-nums">
@@ -146,28 +180,6 @@ export default function ExpenseListPage() {
                       {expense.description}
                     </p>
                   )}
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      asChild
-                      variant="outline"
-                      size="sm"
-                      className="min-h-[44px] min-w-[44px] flex-1"
-                    >
-                      <Link
-                        href={`/properties/${propertyId}/finance/expenses/${expense.id}/edit`}
-                      >
-                        {t("common.edit")}
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="min-h-[44px] min-w-[44px] flex-1"
-                      onClick={() => setPendingDeleteId(expense.id)}
-                    >
-                      {t("expense.delete.title")}
-                    </Button>
-                  </div>
                 </CardContent>
               </Card>
             </li>

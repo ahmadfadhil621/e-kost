@@ -38,11 +38,16 @@ test.describe("delete expense", () => {
 
       await goToExpenseList(page);
 
-      // Find the specific expense card and click its Delete button
+      // Find the specific expense card and open its overflow menu
       const expenseCard = page.locator("li").filter({ hasText: uniqueDesc });
       await expenseCard
-        .getByRole("button", { name: /delete expense|hapus pengeluaran/i })
+        .getByRole("button", { name: /more|options|lainnya/i })
         .click({ timeout: 10000 });
+
+      // Click delete in the dropdown menu
+      await page
+        .getByRole("menuitem", { name: /delete|hapus/i })
+        .click({ timeout: 5000 });
 
       // Confirmation dialog should appear — click the confirm button
       await page
@@ -87,11 +92,16 @@ test.describe("delete expense", () => {
 
       await goToExpenseList(page);
 
-      // Click Delete on a card
+      // Open overflow menu on a card
       await page
-        .getByRole("button", { name: /delete expense|hapus pengeluaran/i })
+        .getByRole("button", { name: /more|options|lainnya/i })
         .first()
         .click({ timeout: 10000 });
+
+      // Click delete in the dropdown menu
+      await page
+        .getByRole("menuitem", { name: /delete|hapus/i })
+        .click({ timeout: 5000 });
 
       // Click Cancel in the dialog
       await page
@@ -127,13 +137,13 @@ test.describe("delete expense", () => {
 
       await goToExpenseList(page);
 
-      const deleteButton = page
-        .getByRole("button", { name: /delete expense|hapus pengeluaran/i })
+      const moreButton = page
+        .getByRole("button", { name: /more|options|lainnya/i })
         .first();
 
-      await expect(deleteButton).toBeVisible({ timeout: 10000 });
+      await expect(moreButton).toBeVisible({ timeout: 10000 });
 
-      const box = await deleteButton.boundingBox();
+      const box = await moreButton.boundingBox();
       if (box) {
         expect(box.height).toBeGreaterThanOrEqual(44);
         expect(box.width).toBeGreaterThanOrEqual(44);
