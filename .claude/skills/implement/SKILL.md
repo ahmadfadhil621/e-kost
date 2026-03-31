@@ -22,6 +22,25 @@ Full issue-driven TDD pipeline. Argument: GitHub issue number (e.g. `/implement 
 1. Run `gh issue view <number>` to read the issue
 2. Identify: type (bug, enhancement, ux, cleanup), scope, constraints, definition of done
 3. Check if specs already exist: `ls specs/` for a matching feature directory
+
+**Mandatory Clarification Step — do this before anything else:**
+
+Scan the issue for gaps and hidden assumptions. For each one, write it out explicitly using this format:
+
+> **Unclear:** [what is not specified]
+> **My assumption:** [what I would assume if forced to proceed]
+> **Question:** [what I need from you to proceed correctly]
+
+Categories to check:
+- Scope boundaries (what's in vs. out of this issue)
+- Edge cases not addressed (empty states, error states, permission boundaries)
+- UI/UX details not specified (exact copy, layout, interaction behavior)
+- Data model ambiguities (field types, required vs optional, defaults)
+- Business rules that could go multiple ways
+- Dependencies on other issues or features
+
+Present all gaps to the user and **stop**. Do not proceed until the user has responded to each open question. If everything is clear, say so explicitly and continue.
+
 4. Summarize the issue to the user in 2-3 sentences and confirm the approach before proceeding
 
 ## Phase 1: Derive Specs
