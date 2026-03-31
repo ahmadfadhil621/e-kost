@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
@@ -58,6 +59,12 @@ export function PaymentForm({
       paymentDate: defaultPaymentDate(),
     },
   });
+
+  useEffect(() => {
+    if (defaultTenantId) {
+      setValue("tenantId", defaultTenantId, { shouldValidate: false });
+    }
+  }, [defaultTenantId, setValue]);
 
   const tenantId = watch("tenantId");
 
