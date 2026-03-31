@@ -593,10 +593,44 @@
         "revokeFailed": "Failed to revoke invite"
       }
     },
+    "currency": {
+      "label": "Currency",
+      "description": "Choose how monetary values are displayed",
+      "selector": { "placeholder": "Select currency" }
+    },
+    "currencyManagement": {
+      "title": "Currency Management",
+      "description": "Manage available currencies for all users",
+      "add": "Add Currency",
+      "form": {
+        "code": "Currency Code",
+        "codePlaceholder": "e.g. USD",
+        "locale": "Locale",
+        "localePlaceholder": "e.g. en-US",
+        "label": "Label",
+        "labelPlaceholder": "e.g. US Dollar",
+        "submit": "Add",
+        "cancel": "Cancel"
+      },
+      "list": {
+        "empty": "No currencies configured",
+        "delete": "Delete",
+        "deleteConfirm": "Delete this currency?"
+      },
+      "error": {
+        "inUse": "This currency is used by one or more users and cannot be deleted",
+        "lastCurrency": "Cannot delete the last remaining currency",
+        "alreadyExists": "A currency with this code already exists",
+        "createFailed": "Failed to add currency",
+        "deleteFailed": "Failed to delete currency"
+      }
+    },
     "developer": {
       "title": "Developer",
       "inviteManagement": "Invite Management",
-      "inviteManagementDesc": "Create and manage owner registration links"
+      "inviteManagementDesc": "Create and manage owner registration links",
+      "currencyManagement": "Currency Management",
+      "currencyManagementDesc": "Add or remove available currencies"
     }
   }
 }

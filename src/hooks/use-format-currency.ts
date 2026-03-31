@@ -1,18 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
+import { useCurrency } from "@/contexts/currency-context";
 
 export function useFormatCurrency(): (value: number) => string {
-  const { t } = useTranslation();
-  const code = t("currency.code") || "EUR";
-  const locale = t("currency.locale") || "en-IE";
+  const { code, locale } = useCurrency();
   const formatter = useMemo(
-    () =>
-      new Intl.NumberFormat(locale, {
-        style: "currency",
-        currency: code,
-      }),
+    () => new Intl.NumberFormat(locale, { style: "currency", currency: code }),
     [locale, code],
   );
 

@@ -18,4 +18,22 @@ export const userService = {
     });
     return user.language;
   },
+
+  async getCurrency(userId: string): Promise<string> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { currency: true },
+    });
+    if (!user) { throw new Error(`User not found: ${userId}`); }
+    return user.currency;
+  },
+
+  async updateCurrency(userId: string, currency: string): Promise<string> {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { currency },
+      select: { currency: true },
+    });
+    return user.currency;
+  },
 };

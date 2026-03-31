@@ -62,6 +62,15 @@ export default defineConfig({
       dependencies: ["setup"],
     },
     {
+      name: "setup-dev-user",
+      testMatch: /auth-dev-user\.setup\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 375, height: 667 },
+      },
+      dependencies: ["setup"],
+    },
+    {
       name: "chromium-no-props",
       testMatch: /switch-property\.spec\.ts/,
       use: {
@@ -109,7 +118,7 @@ export default defineConfig({
         viewport: { width: 375, height: 667 },
         storageState: "e2e/.auth/user-with-property.json"
       },
-      dependencies: ["chromium-no-props", "setup-with-property", "setup-single-property", "setup-with-moved-out-tenant"],
+      dependencies: ["chromium-no-props", "setup-with-property", "setup-single-property", "setup-with-moved-out-tenant", "setup-dev-user"],
     },
     {
       name: "chromium-moved-out-notes",

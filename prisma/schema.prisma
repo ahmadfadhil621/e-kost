@@ -19,6 +19,7 @@ model User {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   language        String          @default("en")
+  currency        String          @default("EUR")
   accounts        Account[]
   createdInvites  InviteToken[]   @relation("CreatedInvites")
   ownedProperties Property[]      @relation("PropertyOwner")
@@ -197,6 +198,16 @@ model InviteToken {
   @@index([createdBy])
   @@index([token])
   @@map("invite_token")
+}
+
+model Currency {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  code      String   @unique
+  locale    String
+  label     String
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("currency")
 }
 
 enum RoomStatus {

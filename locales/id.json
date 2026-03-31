@@ -593,10 +593,44 @@
         "revokeFailed": "Gagal membatalkan undangan"
       }
     },
+    "currency": {
+      "label": "Mata Uang",
+      "description": "Pilih cara tampilan nilai uang",
+      "selector": { "placeholder": "Pilih mata uang" }
+    },
+    "currencyManagement": {
+      "title": "Manajemen Mata Uang",
+      "description": "Kelola mata uang yang tersedia untuk semua pengguna",
+      "add": "Tambah Mata Uang",
+      "form": {
+        "code": "Kode Mata Uang",
+        "codePlaceholder": "mis. USD",
+        "locale": "Lokal",
+        "localePlaceholder": "mis. en-US",
+        "label": "Label",
+        "labelPlaceholder": "mis. US Dollar",
+        "submit": "Tambah",
+        "cancel": "Batal"
+      },
+      "list": {
+        "empty": "Belum ada mata uang yang dikonfigurasi",
+        "delete": "Hapus",
+        "deleteConfirm": "Hapus mata uang ini?"
+      },
+      "error": {
+        "inUse": "Mata uang ini digunakan oleh satu atau lebih pengguna dan tidak dapat dihapus",
+        "lastCurrency": "Tidak dapat menghapus mata uang terakhir",
+        "alreadyExists": "Mata uang dengan kode ini sudah ada",
+        "createFailed": "Gagal menambah mata uang",
+        "deleteFailed": "Gagal menghapus mata uang"
+      }
+    },
     "developer": {
       "title": "Developer",
       "inviteManagement": "Manajemen Undangan",
-      "inviteManagementDesc": "Buat dan kelola tautan registrasi pemilik"
+      "inviteManagementDesc": "Buat dan kelola tautan registrasi pemilik",
+      "currencyManagement": "Manajemen Mata Uang",
+      "currencyManagementDesc": "Tambah atau hapus mata uang yang tersedia"
     }
   }
 }

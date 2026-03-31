@@ -6,6 +6,7 @@ import { AppHeader } from "@/components/layout/app-header";
 import { AppNav } from "@/components/layout/app-nav";
 import { DemoBanner } from "@/components/demo-banner";
 import { PropertyProvider } from "@/contexts/property-context";
+import { CurrencyProvider } from "@/contexts/currency-context";
 import { Providers } from "@/components/providers";
 import { useLanguageSync } from "@/hooks/use-language-sync";
 
@@ -36,9 +37,11 @@ export default function AppLayout({
   return (
     <ProtectedRoute>
       <Providers>
-        <PropertyProvider>
-          <AppLayoutContent>{children}</AppLayoutContent>
-        </PropertyProvider>
+        <CurrencyProvider>
+          <PropertyProvider>
+            <AppLayoutContent>{children}</AppLayoutContent>
+          </PropertyProvider>
+        </CurrencyProvider>
       </Providers>
     </ProtectedRoute>
   );

@@ -8,6 +8,7 @@ import { useProperty } from "@/contexts/property-context";
 import { useDevStatus } from "@/hooks/use-dev-status";
 import { AVAILABLE_LOCALES } from "@/lib/i18n";
 import { LanguageSelector } from "./LanguageSelector";
+import { CurrencySelector } from "./CurrencySelector";
 import { AccountSection } from "./AccountSection";
 import { Separator } from "@/components/ui/separator";
 
@@ -49,6 +50,8 @@ export function SettingsPage() {
       <section className="space-y-6">
         <LanguageSelector availableLocales={[...AVAILABLE_LOCALES]} />
         <Separator />
+        <CurrencySelector />
+        <Separator />
         <AccountSection
           user={user!}
           onUserUpdated={(u) => setUpdatedUser(u)}
@@ -69,6 +72,17 @@ export function SettingsPage() {
                 </Link>
                 <p className="text-xs text-muted-foreground">
                   {t("settings.developer.inviteManagementDesc")}
+                </p>
+              </div>
+              <div className="mt-3">
+                <Link
+                  href="/settings/currencies"
+                  className="flex min-h-[44px] items-center text-sm text-primary underline-offset-4 hover:underline"
+                >
+                  {t("settings.developer.currencyManagement")}
+                </Link>
+                <p className="text-xs text-muted-foreground">
+                  {t("settings.developer.currencyManagementDesc")}
                 </p>
               </div>
             </section>
