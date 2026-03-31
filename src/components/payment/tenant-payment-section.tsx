@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import type { Payment } from "@/domain/schemas/payment";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 
 interface TenantPaymentSectionProps {
@@ -12,6 +13,7 @@ interface TenantPaymentSectionProps {
   payments: Payment[];
   count: number;
   isLoading?: boolean;
+  isMovedOut?: boolean;
 }
 
 function formatCurrency(amount: number, locale: string, currencyCode: string) {
@@ -29,6 +31,7 @@ export function TenantPaymentSection({
   payments,
   count,
   isLoading = false,
+  isMovedOut = false,
 }: TenantPaymentSectionProps) {
   const { t } = useTranslation();
   const currencyCode = t("currency.code");
@@ -49,9 +52,23 @@ export function TenantPaymentSection({
 
   return (
     <section aria-labelledby="tenant-payments-heading">
-      <h2 id="tenant-payments-heading" className="text-lg font-semibold mb-2">
-        {t("payment.tenantSection.title")}
-      </h2>
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <h2 id="tenant-payments-heading" className="text-lg font-semibold">
+          {t("payment.tenantSection.title")}
+        </h2>
+        {!isMovedOut && (
+          <Button
+            asChild
+            size="sm"
+            variant="outline"
+            className="min-h-[44px] min-w-[44px] shrink-0"
+          >
+            <Link href={`/properties/${propertyId}/payments/new?tenantId=${tenantId}`}>
+              {t("payment.list.recordPayment")}
+            </Link>
+          </Button>
+        )}
+      </div>
       <p className="text-sm text-muted-foreground mb-3">
         {t("payment.tenantSection.count", { count })}
       </p>

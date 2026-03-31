@@ -107,3 +107,91 @@ describe("PaymentForm", () => {
     });
   });
 });
+
+describe("PaymentForm — defaultTenantId", () => {
+  const singleTenant = [{ id: "tenant-1", name: "Alice" }];
+
+  describe("good cases", () => {
+    it("pre-selects the tenant matching defaultTenantId", () => {
+      render(
+        <PaymentForm tenants={singleTenant} defaultTenantId="tenant-1" />
+      );
+
+      // The SelectTrigger (combobox) shows the selected value — "Alice" in its text
+      expect(screen.getByRole("combobox")).toHaveTextContent("Alice");
+    });
+
+    it("pre-selects the correct tenant by name when roomNumber is absent", () => {
+      const tenantWithoutRoom = [{ id: "tenant-1", name: "Alice" }];
+      render(
+        <PaymentForm
+          tenants={tenantWithoutRoom}
+          defaultTenantId="tenant-1"
+        />
+      );
+
+      expect(screen.getByRole("combobox")).toHaveTextContent("Alice");
+    });
+
+    it("pre-selects the correct tenant and shows room when roomNumber is present", () => {
+      const tenantWithRoom = [
+        { id: "tenant-1", name: "Alice", roomNumber: "A101" },
+      ];
+      render(
+        <PaymentForm
+          tenants={tenantWithRoom}
+          defaultTenantId="tenant-1"
+        />
+      );
+
+      expect(screen.getByRole("combobox")).toHaveTextContent("Alice - A101");
+    });
+  });
+
+  describe("bad cases", () => {
+    it("does not pre-select any tenant when defaultTenantId does not match any tenant", () => {
+      render(
+        <PaymentForm
+          tenants={singleTenant}
+          defaultTenantId="unknown-id"
+        />
+      );
+
+      // Trigger should not show any tenant name when no match
+      expect(screen.getByRole("combobox")).not.toHaveTextContent("Alice");
+    });
+
+    it("does not pre-select any tenant when defaultTenantId is not provided", () => {
+      render(<PaymentForm tenants={singleTenant} />);
+
+      expect(screen.getByRole("combobox")).not.toHaveTextContent("Alice");
+    });
+  });
+
+  describe("edge cases", () => {
+    it("pre-selects tenant when defaultTenantId matches one of multiple tenants", () => {
+      const multipleTenants = [
+        { id: "tenant-1", name: "Alice" },
+        { id: "tenant-2", name: "Bob" },
+      ];
+      render(
+        <PaymentForm
+          tenants={multipleTenants}
+          defaultTenantId="tenant-2"
+        />
+      );
+
+      // Bob should be shown as selected in the trigger
+      expect(screen.getByRole("combobox")).toHaveTextContent("Bob");
+      expect(screen.getByRole("combobox")).not.toHaveTextContent("Alice");
+    });
+
+    it("does not pre-select when defaultTenantId is an empty string", () => {
+      render(
+        <PaymentForm tenants={singleTenant} defaultTenantId="" />
+      );
+
+      expect(screen.getByRole("combobox")).not.toHaveTextContent("Alice");
+    });
+  });
+});

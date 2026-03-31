@@ -270,6 +270,7 @@ export default function TenantDetailPage() {
         payments={paymentsData?.payments ?? []}
         count={paymentsData?.count ?? 0}
         isLoading={paymentsLoading}
+        isMovedOut={!!tenant.movedOutAt}
       />
 
       <NotesSection propertyId={propertyId} tenantId={tenantId} />

@@ -109,7 +109,7 @@ export default defineConfig({
         viewport: { width: 375, height: 667 },
         storageState: "e2e/.auth/user-with-property.json"
       },
-      dependencies: ["chromium-no-props", "setup-with-property", "setup-single-property"],
+      dependencies: ["chromium-no-props", "setup-with-property", "setup-single-property", "setup-with-moved-out-tenant"],
     },
     {
       name: "chromium-moved-out-notes",

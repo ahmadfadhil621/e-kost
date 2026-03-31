@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -63,9 +63,11 @@ async function fetchRooms(propertyId: string): Promise<RoomRow[]> {
 export default function NewPaymentPage() {
   const { t } = useTranslation();
   const params = useParams();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const propertyId = params.propertyId as string;
+  const defaultTenantId = searchParams.get("tenantId") ?? "";
 
   const tenantsQuery = useQuery({
     queryKey: ["tenants", propertyId],
@@ -167,6 +169,7 @@ export default function NewPaymentPage() {
         onSubmit={handleSubmit}
         onSuccess={() => {}}
         isLoading={createMutation.isPending}
+        defaultTenantId={defaultTenantId}
       />
     </div>
   );

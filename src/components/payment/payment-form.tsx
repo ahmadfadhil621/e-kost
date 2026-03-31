@@ -29,6 +29,7 @@ interface PaymentFormProps {
   onSubmit?: (data: CreatePaymentInput) => void | Promise<void>;
   onSuccess?: () => void;
   isLoading?: boolean;
+  defaultTenantId?: string;
 }
 
 const defaultPaymentDate = () =>
@@ -39,6 +40,7 @@ export function PaymentForm({
   onSubmit,
   onSuccess,
   isLoading = false,
+  defaultTenantId = "",
 }: PaymentFormProps) {
   const { t } = useTranslation();
   const {
@@ -51,7 +53,7 @@ export function PaymentForm({
   } = useForm<CreatePaymentInput>({
     resolver: zodResolver(createPaymentSchema),
     defaultValues: {
-      tenantId: "",
+      tenantId: defaultTenantId,
       amount: undefined as unknown as number,
       paymentDate: defaultPaymentDate(),
     },
