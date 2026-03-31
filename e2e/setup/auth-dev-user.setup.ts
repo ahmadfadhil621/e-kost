@@ -46,6 +46,21 @@ setup("create dev user with property", async ({ page, baseURL }) => {
     );
   }
 
+  // Seed default currencies (EUR, IDR) required by currency E2E tests.
+  // 409 = already exists from a previous run — safe to ignore.
+  const defaultCurrencies = [
+    { code: "EUR", locale: "en-IE", label: "Euro" },
+    { code: "IDR", locale: "id-ID", label: "Indonesian Rupiah" },
+  ];
+  for (const currency of defaultCurrencies) {
+    const seedRes = await page.request.post(`${base}/api/currencies`, {
+      data: currency,
+    });
+    if (!seedRes.ok() && seedRes.status() !== 409) {
+      console.warn(`[setup] Currency seed for ${currency.code} returned ${seedRes.status()} — continuing`);
+    }
+  }
+
   await page.context().storageState({ path: authDevFile });
 
   const authDir = path.dirname(authDevFile);
