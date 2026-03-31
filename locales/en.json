@@ -340,7 +340,17 @@
     "tenantSection": {
       "title": "Payment History",
       "count": "{{count}} payment(s) recorded",
-      "empty": "No payments recorded for this tenant"
+      "empty": "No payments recorded for this tenant",
+      "viewAll": "View all payments"
+    },
+    "fullHistory": {
+      "title": "Payment History",
+      "backToTenant": "Back to tenant"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "pageOf": "Page {{page}} of {{total}}"
     },
     "validation": {
       "tenantRequired": "Tenant is required",
@@ -351,6 +361,7 @@
     },
     "delete": {
       "button": "Delete Payment",
+      "moreOptions": "More options",
       "title": "Delete Payment?",
       "description": "This action cannot be undone. The payment record will be permanently removed.",
       "confirm": "Delete"

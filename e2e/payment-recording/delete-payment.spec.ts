@@ -1,7 +1,7 @@
 // Traceability: finance-inline-cards (issue #86)
 // AC-PL-3 -> test('delete payment from list card with confirmation removes it from the list')
 // AC-PL-4 -> test('cancelling payment delete keeps payment in list')
-// AC-PL-6 -> test('delete button meets 44px touch target requirement')
+// AC-PL-6 -> test('overflow menu button meets 44px touch target requirement')
 
 import { test, expect } from "@playwright/test";
 import { getPropertyId, goToPaymentsList } from "../helpers/payment-recording";
@@ -64,10 +64,15 @@ test.describe("delete payment", () => {
       const paymentCard = page.locator(`[data-payment-id="${paymentId}"]`);
       await expect(paymentCard).toBeVisible({ timeout: 15000 });
 
-      // Click the Delete button within our specific payment card
+      // Open overflow menu on the card
       await paymentCard
-        .getByRole("button", { name: /delete payment|hapus pembayaran/i })
+        .getByRole("button", { name: /more|options|lainnya/i })
         .click({ timeout: 10000 });
+
+      // Click delete in the dropdown menu
+      await page
+        .getByRole("menuitem", { name: /delete|hapus/i })
+        .click({ timeout: 5000 });
 
       // Confirmation dialog — click confirm
       await page
@@ -110,10 +115,15 @@ test.describe("delete payment", () => {
       const cancelPaymentCard = page.locator(`[data-payment-id="${cancelPaymentId}"]`);
       await expect(cancelPaymentCard).toBeVisible({ timeout: 15000 });
 
-      // Click Delete button within that specific card
+      // Open overflow menu on the card
       await cancelPaymentCard
-        .getByRole("button", { name: /delete payment|hapus pembayaran/i })
+        .getByRole("button", { name: /more|options|lainnya/i })
         .click({ timeout: 10000 });
+
+      // Click delete in the dropdown menu
+      await page
+        .getByRole("menuitem", { name: /delete|hapus/i })
+        .click({ timeout: 5000 });
 
       // Click Cancel in the dialog
       await page
@@ -127,7 +137,7 @@ test.describe("delete payment", () => {
   });
 
   test.describe("edge cases", () => {
-    test("delete button meets 44px touch target requirement", async ({
+    test("overflow menu button meets 44px touch target requirement", async ({
       page,
       baseURL,
     }) => {
@@ -144,20 +154,20 @@ test.describe("delete payment", () => {
 
       await goToPaymentsList(page);
 
-      const deleteButton = page
-        .getByRole("button", { name: /delete payment|hapus pembayaran/i })
+      const moreButton = page
+        .getByRole("button", { name: /more|options|lainnya/i })
         .first();
 
       // Only assert touch target if payments exist
-      const isVisible = await deleteButton.isVisible().catch(() => false);
+      const isVisible = await moreButton.isVisible().catch(() => false);
       if (!isVisible) {
-        test.skip(true, "No payments available to check delete button touch target");
+        test.skip(true, "No payments available to check overflow menu touch target");
         return;
       }
 
-      await expect(deleteButton).toBeVisible({ timeout: 10000 });
+      await expect(moreButton).toBeVisible({ timeout: 10000 });
 
-      const box = await deleteButton.boundingBox();
+      const box = await moreButton.boundingBox();
       if (box) {
         expect(box.height).toBeGreaterThanOrEqual(44);
         expect(box.width).toBeGreaterThanOrEqual(44);

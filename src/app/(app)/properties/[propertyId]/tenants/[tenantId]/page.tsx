@@ -266,6 +266,7 @@ export default function TenantDetailPage() {
 
       <TenantPaymentSection
         tenantId={tenantId}
+        propertyId={propertyId}
         payments={paymentsData?.payments ?? []}
         count={paymentsData?.count ?? 0}
         isLoading={paymentsLoading}

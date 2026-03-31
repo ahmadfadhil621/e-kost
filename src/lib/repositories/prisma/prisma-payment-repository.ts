@@ -1,4 +1,4 @@
-import type { Payment, PaymentWithCount } from "@/domain/schemas/payment";
+import type { Payment, PaymentPaginationOptions, PaymentWithCount } from "@/domain/schemas/payment";
 import type { IPaymentRepository } from "@/domain/interfaces/payment-repository";
 import { prisma } from "@/lib/prisma";
 
@@ -72,16 +72,30 @@ export class PrismaPaymentRepository implements IPaymentRepository {
     return list.map(toPayment);
   }
 
-  async findByTenant(tenantId: string): Promise<PaymentWithCount> {
+  async findByTenant(tenantId: string, options?: PaymentPaginationOptions): Promise<PaymentWithCount> {
+    const totalCount = await prisma.payment.count({ where: { tenantId } });
+
+    if (!options?.limit) {
+      const list = await prisma.payment.findMany({
+        where: { tenantId },
+        include: { tenant: true },
+        orderBy: [{ paymentDate: "desc" }, { createdAt: "desc" }],
+      });
+      return { payments: list.map(toPayment), count: totalCount };
+    }
+
+    const { limit, page = 1 } = options;
+    const totalPages = Math.ceil(totalCount / limit);
+    const skip = (page - 1) * limit;
+
     const list = await prisma.payment.findMany({
       where: { tenantId },
       include: { tenant: true },
       orderBy: [{ paymentDate: "desc" }, { createdAt: "desc" }],
+      take: limit,
+      skip,
     });
-    return {
-      payments: list.map(toPayment),
-      count: list.length,
-    };
+    return { payments: list.map(toPayment), count: totalCount, totalPages };
   }
 
   async sumByPropertyAndMonth(

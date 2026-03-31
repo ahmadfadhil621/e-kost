@@ -340,7 +340,17 @@
     "tenantSection": {
       "title": "Riwayat Pembayaran",
       "count": "{{count}} pembayaran tercatat",
-      "empty": "Belum ada pembayaran untuk penyewa ini"
+      "empty": "Belum ada pembayaran untuk penyewa ini",
+      "viewAll": "Lihat semua pembayaran"
+    },
+    "fullHistory": {
+      "title": "Riwayat Pembayaran",
+      "backToTenant": "Kembali ke penyewa"
+    },
+    "pagination": {
+      "previous": "Sebelumnya",
+      "next": "Berikutnya",
+      "pageOf": "Halaman {{page}} dari {{total}}"
     },
     "validation": {
       "tenantRequired": "Penyewa wajib dipilih",
@@ -351,6 +361,7 @@
     },
     "delete": {
       "button": "Hapus Pembayaran",
+      "moreOptions": "Opsi lainnya",
       "title": "Hapus Pembayaran?",
       "description": "Tindakan ini tidak dapat dibatalkan. Catatan pembayaran akan dihapus permanen.",
       "confirm": "Hapus"

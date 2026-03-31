@@ -734,6 +734,90 @@ describe("PaymentService", () => {
         expect(result.count).toBe(0);
       });
     });
+
+    describe("with pagination options", () => {
+      it("passes no options to repo when none given (backward compat)", async () => {
+        const propertyId = crypto.randomUUID();
+        const tenantId = crypto.randomUUID();
+        const tenant = createTenant({ propertyId, id: tenantId });
+        const mockFindByTenant = vi.fn().mockResolvedValue({ payments: [], count: 0 });
+        const paymentRepo = createMockPaymentRepo({ findByTenant: mockFindByTenant });
+        const tenantRepo = createMockTenantRepo({ findById: vi.fn().mockResolvedValue(tenant) });
+        const service = new PaymentService(paymentRepo, tenantRepo, createMockPropertyAccess());
+
+        const result = await service.listTenantPayments("user-1", propertyId, tenantId);
+
+        expect(mockFindByTenant).toHaveBeenCalledWith(tenantId, undefined);
+        expect(result).not.toHaveProperty("totalPages");
+      });
+
+      it("forwards limit option to repo and returns totalPages", async () => {
+        const propertyId = crypto.randomUUID();
+        const tenantId = crypto.randomUUID();
+        const tenant = createTenant({ propertyId, id: tenantId });
+        const payments = Array.from({ length: 3 }, () => createPayment({ tenantId }));
+        const mockFindByTenant = vi.fn().mockResolvedValue({ payments, count: 10, totalPages: 4 });
+        const paymentRepo = createMockPaymentRepo({ findByTenant: mockFindByTenant });
+        const tenantRepo = createMockTenantRepo({ findById: vi.fn().mockResolvedValue(tenant) });
+        const service = new PaymentService(paymentRepo, tenantRepo, createMockPropertyAccess());
+
+        const result = await service.listTenantPayments("user-1", propertyId, tenantId, { limit: 3 });
+
+        expect(mockFindByTenant).toHaveBeenCalledWith(tenantId, { limit: 3 });
+        expect(result.payments).toHaveLength(3);
+        expect(result.count).toBe(10);
+        expect(result.totalPages).toBe(4);
+      });
+
+      it("forwards limit + page options to repo", async () => {
+        const propertyId = crypto.randomUUID();
+        const tenantId = crypto.randomUUID();
+        const tenant = createTenant({ propertyId, id: tenantId });
+        const payments = Array.from({ length: 20 }, () => createPayment({ tenantId }));
+        const mockFindByTenant = vi.fn().mockResolvedValue({ payments, count: 50, totalPages: 3 });
+        const paymentRepo = createMockPaymentRepo({ findByTenant: mockFindByTenant });
+        const tenantRepo = createMockTenantRepo({ findById: vi.fn().mockResolvedValue(tenant) });
+        const service = new PaymentService(paymentRepo, tenantRepo, createMockPropertyAccess());
+
+        const result = await service.listTenantPayments("user-1", propertyId, tenantId, { limit: 20, page: 2 });
+
+        expect(mockFindByTenant).toHaveBeenCalledWith(tenantId, { limit: 20, page: 2 });
+        expect(result.count).toBe(50);
+        expect(result.totalPages).toBe(3);
+      });
+
+      it("returns empty list when page is beyond last page", async () => {
+        const propertyId = crypto.randomUUID();
+        const tenantId = crypto.randomUUID();
+        const tenant = createTenant({ propertyId, id: tenantId });
+        const mockFindByTenant = vi.fn().mockResolvedValue({ payments: [], count: 10, totalPages: 2 });
+        const paymentRepo = createMockPaymentRepo({ findByTenant: mockFindByTenant });
+        const tenantRepo = createMockTenantRepo({ findById: vi.fn().mockResolvedValue(tenant) });
+        const service = new PaymentService(paymentRepo, tenantRepo, createMockPropertyAccess());
+
+        const result = await service.listTenantPayments("user-1", propertyId, tenantId, { limit: 5, page: 99 });
+
+        expect(result.payments).toHaveLength(0);
+        expect(result.count).toBe(10);
+        expect(result.totalPages).toBe(2);
+      });
+
+      it("returns totalPages=1 when limit exceeds total count", async () => {
+        const propertyId = crypto.randomUUID();
+        const tenantId = crypto.randomUUID();
+        const tenant = createTenant({ propertyId, id: tenantId });
+        const payments = Array.from({ length: 3 }, () => createPayment({ tenantId }));
+        const mockFindByTenant = vi.fn().mockResolvedValue({ payments, count: 3, totalPages: 1 });
+        const paymentRepo = createMockPaymentRepo({ findByTenant: mockFindByTenant });
+        const tenantRepo = createMockTenantRepo({ findById: vi.fn().mockResolvedValue(tenant) });
+        const service = new PaymentService(paymentRepo, tenantRepo, createMockPropertyAccess());
+
+        const result = await service.listTenantPayments("user-1", propertyId, tenantId, { limit: 100 });
+
+        expect(result.totalPages).toBe(1);
+        expect(result.payments).toHaveLength(3);
+      });
+    });
   });
 
   describe("deletePayment", () => {

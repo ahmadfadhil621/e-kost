@@ -30,19 +30,46 @@ export async function GET(
     return access.errorResponse;
   }
 
+  const url = new URL(request.url);
+  const rawLimit = url.searchParams.get("limit");
+  const rawPage = url.searchParams.get("page");
+
+  let options: { limit?: number; page?: number } | undefined;
+
+  if (rawLimit !== null) {
+    const limit = Number(rawLimit);
+    if (!Number.isInteger(limit) || limit < 1) {
+      return NextResponse.json({ error: "Invalid limit parameter" }, { status: 400 });
+    }
+    options = { ...options, limit };
+  }
+  if (rawPage !== null) {
+    const page = Number(rawPage);
+    if (!Number.isInteger(page) || page < 1) {
+      return NextResponse.json({ error: "Invalid page parameter" }, { status: 400 });
+    }
+    options = { ...options, page };
+  }
+
   try {
     const result = await paymentService.listTenantPayments(
       access.userId!,
       propertyId,
-      tenantId
+      tenantId,
+      options
     );
-    return NextResponse.json(
-      {
-        payments: result.payments.map(paymentToJson),
-        count: result.count,
-      },
-      { status: 200 }
-    );
+    const response: {
+      payments: ReturnType<typeof paymentToJson>[];
+      count: number;
+      totalPages?: number;
+    } = {
+      payments: result.payments.map(paymentToJson),
+      count: result.count,
+    };
+    if (result.totalPages !== undefined) {
+      response.totalPages = result.totalPages;
+    }
+    return NextResponse.json(response, { status: 200 });
   } catch (err) {
     if (err instanceof Error) {
       if (err.message.includes("Forbidden")) {

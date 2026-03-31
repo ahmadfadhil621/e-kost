@@ -3,6 +3,7 @@ import type { ITenantRepository } from "@/domain/interfaces/tenant-repository";
 import type {
   CreatePaymentInput,
   Payment,
+  PaymentPaginationOptions,
   PaymentWithCount,
 } from "@/domain/schemas/payment";
 import { createPaymentSchema } from "@/domain/schemas/payment";
@@ -70,14 +71,15 @@ export class PaymentService {
   async listTenantPayments(
     userId: string,
     propertyId: string,
-    tenantId: string
+    tenantId: string,
+    options?: PaymentPaginationOptions
   ): Promise<PaymentWithCount> {
     await this.propertyAccess.validateAccess(userId, propertyId);
     const tenant = await this.tenantRepo.findById(tenantId);
     if (!tenant || tenant.propertyId !== propertyId) {
       throw new Error("Tenant not found");
     }
-    return this.paymentRepo.findByTenant(tenantId);
+    return this.paymentRepo.findByTenant(tenantId, options);
   }
 
   async getMonthlyIncome(

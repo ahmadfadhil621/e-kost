@@ -34,4 +34,10 @@ export interface Payment {
 export interface PaymentWithCount {
   payments: Payment[];
   count: number;
+  totalPages?: number;
+}
+
+export interface PaymentPaginationOptions {
+  limit?: number;
+  page?: number;
 }

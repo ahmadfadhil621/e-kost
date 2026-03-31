@@ -2,9 +2,16 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { MoreVertical } from "lucide-react";
 import type { Payment } from "@/domain/schemas/payment";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -64,8 +71,30 @@ export function PaymentList({
         {payments.map((payment) => (
           <li key={payment.id} data-payment-id={payment.id}>
             <Card className="w-full">
-              <CardHeader className="pb-2">
+              <CardHeader className="pb-2 flex-row items-center justify-between">
                 <span className="text-sm font-medium">{payment.tenantName}</span>
+                {onDeletePayment && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="min-h-[44px] min-w-[44px] -mr-2"
+                        aria-label={t("payment.delete.moreOptions")}
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onClick={() => setPendingDeleteId(payment.id)}
+                      >
+                        {t("payment.delete.button")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </CardHeader>
               <CardContent className="space-y-1">
                 <p className="text-lg font-semibold tabular-nums">
@@ -89,18 +118,6 @@ export function PaymentList({
                     "PPp"
                   )}
                 </p>
-                {onDeletePayment && (
-                  <div className="pt-2">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="min-h-[44px] min-w-[44px] w-full"
-                      onClick={() => setPendingDeleteId(payment.id)}
-                    >
-                      {t("payment.delete.button")}
-                    </Button>
-                  </div>
-                )}
               </CardContent>
             </Card>
           </li>

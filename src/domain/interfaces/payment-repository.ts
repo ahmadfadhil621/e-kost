@@ -1,4 +1,4 @@
-import type { Payment, PaymentWithCount } from "@/domain/schemas/payment";
+import type { Payment, PaymentPaginationOptions, PaymentWithCount } from "@/domain/schemas/payment";
 
 export interface IPaymentRepository {
   create(data: {
@@ -8,7 +8,7 @@ export interface IPaymentRepository {
   }): Promise<Payment>;
   findById(id: string): Promise<Payment | null>;
   findByProperty(propertyId: string): Promise<Payment[]>;
-  findByTenant(tenantId: string): Promise<PaymentWithCount>;
+  findByTenant(tenantId: string, options?: PaymentPaginationOptions): Promise<PaymentWithCount>;
   sumByPropertyAndMonth(
     propertyId: string,
     year: number,
