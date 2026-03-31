@@ -81,6 +81,12 @@ test.describe("user selects currency", () => {
       // Currency selector should still show IDR
       const currencySelector = page.getByRole("combobox", { name: /currency|mata uang/i });
       await expect(currencySelector).toHaveValue("IDR", { timeout: 5000 });
+
+      // Restore language to English — this preference is stored server-side and shared
+      // across all tests using the same user. Leaving it as Indonesian would cause
+      // downstream specs to see Indonesian UI, breaking locators like /generate link/i.
+      await page.getByRole("main").getByRole("button", { name: /english/i }).click();
+      await page.waitForTimeout(500); // allow PATCH /api/user/language to reach server
     });
   });
 });
