@@ -98,7 +98,7 @@ export default function EditExpensePage() {
       : new Date(expense.date).toISOString().split("T")[0];
 
   return (
-    <div className="flex flex-col gap-4 w-full max-w-md mx-auto">
+    <div className="flex flex-col gap-4 w-full">
       <h2 className="text-lg font-semibold">{t("expense.edit.title")}</h2>
       <ExpenseForm
         initialData={{

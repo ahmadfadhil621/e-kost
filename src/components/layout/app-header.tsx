@@ -33,8 +33,8 @@ export function AppHeader() {
 
   return (
     <header role="banner" className="sticky top-0 z-50 border-b border-border bg-card">
-      {/* Shared max-width scale: max-w-[480px] md:max-w-2xl lg:max-w-3xl — keep in sync with layout.tsx and app-nav.tsx */}
-      <div className="mx-auto w-full max-w-[480px] md:max-w-2xl lg:max-w-3xl px-4">
+      {/* Shared max-width scale: max-w-[480px] md:max-w-2xl lg:max-w-3xl xl:max-w-5xl — keep in sync with layout.tsx and app-nav.tsx */}
+      <div className="mx-auto w-full max-w-[480px] md:max-w-2xl lg:max-w-3xl xl:max-w-5xl px-4">
         <div className="flex h-14 items-center justify-between gap-2">
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <PropertySwitcher />

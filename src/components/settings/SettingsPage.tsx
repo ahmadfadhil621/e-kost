@@ -42,7 +42,7 @@ export function SettingsPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-md space-y-6">
+    <main className="w-full space-y-6">
       <h1 className="text-xl font-semibold text-foreground">
         {t("settings.title")}
       </h1>

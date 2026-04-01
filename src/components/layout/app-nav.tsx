@@ -34,8 +34,8 @@ export function AppNav() {
         aria-label={t("nav.overview")}
         className="fixed bottom-0 left-0 right-0 z-50 flex h-14 items-center justify-center border-t border-border bg-card"
       >
-        {/* Shared max-width scale: max-w-[480px] md:max-w-2xl lg:max-w-3xl — keep in sync with layout.tsx and app-header.tsx */}
-        <div className="flex w-full max-w-[480px] md:max-w-2xl lg:max-w-3xl items-center justify-center gap-2 px-2">
+        {/* Shared max-width scale: max-w-[480px] md:max-w-2xl lg:max-w-3xl xl:max-w-5xl — keep in sync with layout.tsx and app-header.tsx */}
+        <div className="flex w-full max-w-[480px] md:max-w-2xl lg:max-w-3xl xl:max-w-5xl items-center justify-center gap-2 px-2">
           {navItems.map(({ hrefSegment, pathMatch, icon: Icon, key, requiresProperty }) => {
             const isDisabled = requiresProperty && !activeId;
             const href =

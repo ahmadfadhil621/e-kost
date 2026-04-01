@@ -16,7 +16,7 @@ export default async function CurrenciesPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-md space-y-6">
+    <main className="w-full space-y-6">
       <CurrencySection />
     </main>
   );

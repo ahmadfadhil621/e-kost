@@ -20,8 +20,8 @@ function AppLayoutContent({
     <div className="flex min-h-screen flex-col">
       <DemoBanner />
       <AppHeader />
-      {/* Shared max-width scale: max-w-[480px] md:max-w-2xl lg:max-w-3xl — keep in sync with app-header.tsx and app-nav.tsx */}
-      <main className="flex-1 px-4 py-4 pb-20 max-w-[480px] md:max-w-2xl lg:max-w-3xl mx-auto w-full">
+      {/* Shared max-width scale: max-w-[480px] md:max-w-2xl lg:max-w-3xl xl:max-w-5xl — keep in sync with app-header.tsx and app-nav.tsx */}
+      <main className="flex-1 px-4 py-4 pb-20 max-w-[480px] md:max-w-2xl lg:max-w-3xl xl:max-w-5xl mx-auto w-full">
         {children}
       </main>
       <AppNav />
