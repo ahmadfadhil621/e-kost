@@ -6,6 +6,8 @@ async function globalTeardown() {
     await client.connect();
     const result = await client.query(`DELETE FROM "user" WHERE email LIKE '%@test.com'`);
     console.log(`[teardown] Deleted ${result.rowCount} E2E test user(s).`);
+    const currencyResult = await client.query(`DELETE FROM "Currency" WHERE label LIKE 'Test Currency %'`);
+    console.log(`[teardown] Deleted ${currencyResult.rowCount} E2E test currency(s).`);
   } catch (err) {
     console.error("[teardown] Failed to delete E2E users:", err);
   } finally {
