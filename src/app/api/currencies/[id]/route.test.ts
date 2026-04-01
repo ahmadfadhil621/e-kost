@@ -1,8 +1,8 @@
-// Traceability: settings-currency-management
+// Traceability: settings-currency-management (updated for Issue #93: property-level currency)
 // AC-1 -> it('DELETE returns 200 when dev account deletes an unused currency')
 // AC-1 -> it('DELETE returns 403 when non-dev tries to delete')
 // AC-1 -> it('DELETE returns 401 when unauthenticated')
-// AC-5 -> it('DELETE returns 409 when currency is in use by a user')
+// AC-5 -> it('DELETE returns 409 when currency is in use by a property')
 // AC-5 -> it('DELETE returns 409 when it is the last currency')
 // AC-1 -> it('DELETE returns 404 when currency not found')
 
@@ -32,7 +32,7 @@ vi.mock("@/lib/currency-service-instance", () => ({
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    user: {
+    property: {
       count: vi.fn().mockResolvedValue(0),
     },
   },
@@ -101,7 +101,7 @@ describe("DELETE /api/currencies/[id]", () => {
       expect(currencyService.remove).not.toHaveBeenCalled();
     });
 
-    it("returns 409 when currency is in use by a user", async () => {
+    it("returns 409 when currency is in use by a property", async () => {
       vi.mocked(currencyService.remove).mockRejectedValueOnce(new CurrencyInUseError());
       const { DELETE } = await import("./route");
 

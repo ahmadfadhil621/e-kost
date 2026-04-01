@@ -6,6 +6,7 @@ function toProperty(p: {
   id: string;
   name: string;
   address: string | null;
+  currency: string;
   ownerId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -16,6 +17,7 @@ function toProperty(p: {
     id: p.id,
     name: p.name,
     address: p.address ?? "",
+    currency: p.currency,
     ownerId: p.ownerId,
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,
@@ -44,12 +46,14 @@ export class PrismaPropertyRepository implements IPropertyRepository {
   async create(data: {
     name: string;
     address: string;
+    currency: string;
     ownerId: string;
   }): Promise<Property> {
     const created = await prisma.property.create({
       data: {
         name: data.name,
         address: data.address || null,
+        currency: data.currency,
         ownerId: data.ownerId,
       },
     });

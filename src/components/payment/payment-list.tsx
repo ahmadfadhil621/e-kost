@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useFormatCurrency } from "@/hooks/use-format-currency";
 import { MoreVertical } from "lucide-react";
 import type { Payment } from "@/domain/schemas/payment";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -29,14 +30,6 @@ interface PaymentListProps {
   isDeletingPayment?: boolean;
 }
 
-function formatCurrency(amount: number, locale: string, currencyCode: string) {
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: currencyCode,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
-}
 
 export function PaymentList({
   payments,
@@ -45,8 +38,7 @@ export function PaymentList({
   isDeletingPayment = false,
 }: PaymentListProps) {
   const { t } = useTranslation();
-  const currencyCode = t("currency.code");
-  const currencyLocale = t("currency.locale");
+  const formatCurrency = useFormatCurrency();
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   if (isLoading) {
@@ -98,7 +90,7 @@ export function PaymentList({
               </CardHeader>
               <CardContent className="space-y-1">
                 <p className="text-lg font-semibold tabular-nums">
-                  {formatCurrency(payment.amount, currencyLocale, currencyCode)}
+                  {formatCurrency(payment.amount)}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {t("payment.list.date")}:{" "}

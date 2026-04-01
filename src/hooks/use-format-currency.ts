@@ -5,10 +5,10 @@ import { useCurrency } from "@/contexts/currency-context";
 
 export function useFormatCurrency(): (value: number) => string {
   const { code, locale } = useCurrency();
-  const formatter = useMemo(
-    () => new Intl.NumberFormat(locale, { style: "currency", currency: code }),
-    [locale, code],
-  );
+  const formatter = useMemo(() => {
+    if (!code || !locale) {return null;}
+    return new Intl.NumberFormat(locale, { style: "currency", currency: code });
+  }, [locale, code]);
 
-  return (value: number) => formatter.format(value);
+  return (value: number) => (formatter ? formatter.format(value) : String(value));
 }

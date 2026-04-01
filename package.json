@@ -18,7 +18,8 @@
     "db:studio": "prisma studio",
     "db:cleanse": "tsx scripts/cleanse-database.ts",
     "db:seed-owner": "tsx scripts/seed-owner.ts",
-    "db:cleanse-keep-demo": "tsx scripts/cleanse-keep-demo.ts"
+    "db:cleanse-keep-demo": "tsx scripts/cleanse-keep-demo.ts",
+    "db:seed-demo": "tsx scripts/seed-demo.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

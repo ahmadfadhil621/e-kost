@@ -5,7 +5,7 @@ export function createPayment(overrides: Partial<Payment> = {}): Payment {
     id: crypto.randomUUID(),
     tenantId: crypto.randomUUID(),
     tenantName: "John Doe",
-    amount: 1500000,
+    amount: 650,
     paymentDate: new Date(),
     createdAt: new Date(),
     ...overrides,

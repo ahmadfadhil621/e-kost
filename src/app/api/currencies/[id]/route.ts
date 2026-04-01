@@ -17,8 +17,8 @@ export async function DELETE(
 
   try {
     const { id } = await params;
-    const getUserCount = (code: string) => prisma.user.count({ where: { currency: code } });
-    await currencyService.remove(id, getUserCount);
+    const getPropertyCount = (code: string) => prisma.property.count({ where: { currency: code } });
+    await currencyService.remove(id, getPropertyCount);
     return NextResponse.json({ data: { success: true } });
   } catch (err) {
     if (err instanceof Error && err.name === "CurrencyInUseError") {

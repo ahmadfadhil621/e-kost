@@ -26,7 +26,7 @@ export interface BalanceRow {
 export function createBalanceResult(
   overrides: Partial<BalanceResult> = {}
 ): BalanceResult {
-  const monthlyRent = overrides.monthlyRent ?? 1500000;
+  const monthlyRent = overrides.monthlyRent ?? 650;
   const totalPayments = overrides.totalPayments ?? 0;
   const outstandingBalance = Math.max(0, monthlyRent - totalPayments);
   const status: BalanceStatus =
@@ -50,7 +50,7 @@ export function createBalanceRow(
     tenantId: overrides.tenantId ?? crypto.randomUUID(),
     tenantName: overrides.tenantName ?? "John Doe",
     roomNumber: overrides.roomNumber ?? "A101",
-    monthlyRent: overrides.monthlyRent ?? 1500000,
+    monthlyRent: overrides.monthlyRent ?? 650,
     totalPayments: overrides.totalPayments ?? 0,
     ...overrides,
   };

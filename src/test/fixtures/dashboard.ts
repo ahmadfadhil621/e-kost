@@ -29,8 +29,8 @@ export function createOccupancyStats(
 export function createFinanceSummarySnapshot(
   overrides: Partial<FinanceSummarySnapshot> = {}
 ): FinanceSummarySnapshot {
-  const income = overrides.income ?? 5000000;
-  const expenses = overrides.expenses ?? 1000000;
+  const income = overrides.income ?? 3250;
+  const expenses = overrides.expenses ?? 250;
   return {
     month: overrides.month ?? 3,
     year: overrides.year ?? 2026,
@@ -49,7 +49,7 @@ export function createOutstandingBalance(
     tenantId: overrides.tenantId ?? crypto.randomUUID(),
     tenantName: overrides.tenantName ?? "Jane Doe",
     roomNumber: overrides.roomNumber ?? "B202",
-    balance: overrides.balance ?? 500000,
+    balance: overrides.balance ?? 650,
     ...overrides,
   };
 }
@@ -60,7 +60,7 @@ export function createRecentPayment(
   return {
     paymentId: overrides.paymentId ?? crypto.randomUUID(),
     tenantName: overrides.tenantName ?? "John Doe",
-    amount: overrides.amount ?? 1500000,
+    amount: overrides.amount ?? 800,
     date: overrides.date ?? new Date(),
     ...overrides,
   };

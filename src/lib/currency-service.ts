@@ -44,10 +44,10 @@ export class CurrencyService {
     return this.repo.create(parsed);
   }
 
-  async remove(id: string, getUserCount: (code: string) => Promise<number>): Promise<void> {
+  async remove(id: string, getPropertyCount: (code: string) => Promise<number>): Promise<void> {
     const currency = await this.repo.findById(id);
     if (!currency) { throw new CurrencyNotFoundError(); }
-    const count = await getUserCount(currency.code);
+    const count = await getPropertyCount(currency.code);
     if (count > 0) { throw new CurrencyInUseError(); }
     const all = await this.repo.list();
     if (all.length <= 1) { throw new LastCurrencyError(); }

@@ -37,11 +37,11 @@ export default function AppLayout({
   return (
     <ProtectedRoute>
       <Providers>
-        <CurrencyProvider>
-          <PropertyProvider>
+        <PropertyProvider>
+          <CurrencyProvider>
             <AppLayoutContent>{children}</AppLayoutContent>
-          </PropertyProvider>
-        </CurrencyProvider>
+          </CurrencyProvider>
+        </PropertyProvider>
       </Providers>
     </ProtectedRoute>
   );

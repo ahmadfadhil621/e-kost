@@ -36,6 +36,7 @@ export class PropertyService {
     return this.repo.create({
       name: parsed.name,
       address: parsed.address,
+      currency: parsed.currency,
       ownerId: userId,
     });
   }

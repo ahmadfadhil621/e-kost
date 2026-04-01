@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "react-i18next";
+import { useFormatCurrency } from "@/hooks/use-format-currency";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 
@@ -17,14 +18,6 @@ type BalanceResult = {
   status: "paid" | "unpaid";
 };
 
-function formatCurrency(amount: number, locale: string, currencyCode: string) {
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: currencyCode,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
-}
 
 async function fetchBalance(
   propertyId: string,
@@ -44,8 +37,7 @@ export function RentMissingBanner({
   tenantId,
 }: RentMissingBannerProps) {
   const { t } = useTranslation();
-  const currencyCode = t("currency.code");
-  const currencyLocale = t("currency.locale");
+  const formatCurrency = useFormatCurrency();
 
   const { data, isLoading } = useQuery({
     queryKey: ["balance", propertyId, tenantId],
@@ -55,11 +47,7 @@ export function RentMissingBanner({
 
   if (isLoading || !data || data.status === "paid") {return null;}
 
-  const amount = formatCurrency(
-    data.outstandingBalance,
-    currencyLocale,
-    currencyCode
-  );
+  const amount = formatCurrency(data.outstandingBalance);
 
   return (
     <div

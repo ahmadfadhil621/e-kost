@@ -1,8 +1,4 @@
 {
-  "currency": {
-    "code": "EUR",
-    "locale": "en-IE"
-  },
   "app": {
     "name": "E-Kost",
     "tagline": "Property Management Made Simple"
@@ -138,6 +134,11 @@
       "error": {
         "unavailable": "Property unavailable"
       }
+    },
+    "currency": {
+      "label": "Currency",
+      "description": "Set once at creation and cannot be changed later",
+      "placeholder": "Select a currency"
     }
   },
   "auth": {
@@ -593,11 +594,6 @@
         "revokeFailed": "Failed to revoke invite"
       }
     },
-    "currency": {
-      "label": "Currency",
-      "description": "Choose how monetary values are displayed",
-      "selector": { "placeholder": "Select currency" }
-    },
     "currencyManagement": {
       "title": "Currency Management",
       "description": "Manage available currencies for all users",
@@ -618,7 +614,7 @@
         "deleteConfirm": "Delete this currency?"
       },
       "error": {
-        "inUse": "This currency is used by one or more users and cannot be deleted",
+        "inUse": "This currency is used by one or more properties and cannot be deleted",
         "lastCurrency": "Cannot delete the last remaining currency",
         "alreadyExists": "A currency with this code already exists",
         "createFailed": "Failed to add currency",

@@ -19,6 +19,7 @@ type PropertySummary = {
   id: string;
   name: string;
   address: string;
+  currency: string;
   ownerId: string;
 };
 

@@ -24,6 +24,7 @@ vi.mock("@/lib/property-service-instance", () => ({
       id: "prop-1",
       name: "My Property",
       address: "123 Main St",
+      currency: "EUR",
       ownerId: "test-user-id",
       createdAt: new Date("2025-01-01"),
       updatedAt: new Date("2025-01-01"),
@@ -50,6 +51,7 @@ describe("POST /api/properties", () => {
         body: JSON.stringify({
           name: "My Property",
           address: "123 Main St",
+          currency: "EUR",
         }),
       });
 
@@ -60,6 +62,7 @@ describe("POST /api/properties", () => {
       expect(data).toHaveProperty("id");
       expect(data.name).toBe("My Property");
       expect(data.address).toBe("123 Main St");
+      expect(data.currency).toBe("EUR");
       expect(data).toHaveProperty("ownerId");
       expect(data).toHaveProperty("createdAt");
       expect(data).toHaveProperty("updatedAt");
@@ -71,7 +74,7 @@ describe("POST /api/properties", () => {
       const request = new Request("http://localhost:3000/api/properties", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address: "123 Main St" }),
+        body: JSON.stringify({ address: "123 Main St", currency: "EUR" }),
       });
 
       const response = await POST(request);
@@ -83,7 +86,19 @@ describe("POST /api/properties", () => {
       const request = new Request("http://localhost:3000/api/properties", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "My Property" }),
+        body: JSON.stringify({ name: "My Property", currency: "EUR" }),
+      });
+
+      const response = await POST(request);
+
+      expect(response.status).toBe(400);
+    });
+
+    it("POST returns 400 when currency is missing", async () => {
+      const request = new Request("http://localhost:3000/api/properties", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "My Property", address: "123 Main St" }),
       });
 
       const response = await POST(request);
@@ -99,7 +114,7 @@ describe("POST /api/properties", () => {
       const request = new Request("http://localhost:3000/api/properties", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "P", address: "A" }),
+        body: JSON.stringify({ name: "P", address: "A", currency: "EUR" }),
       });
 
       const response = await POST(request);
@@ -116,6 +131,7 @@ describe("POST /api/properties", () => {
         body: JSON.stringify({
           name: "a".repeat(201),
           address: "Valid",
+          currency: "EUR",
         }),
       });
 

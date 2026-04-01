@@ -6,7 +6,7 @@ export function createRoom(overrides: Partial<Room> = {}): Room {
     propertyId: crypto.randomUUID(),
     roomNumber: "A101",
     roomType: "single",
-    monthlyRent: 1500000,
+    monthlyRent: 650,
     status: "available",
     archivedAt: null,
     createdAt: new Date(),

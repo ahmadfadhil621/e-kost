@@ -5,6 +5,7 @@ export function createProperty(overrides: Partial<Property> = {}): Property {
     id: crypto.randomUUID(),
     name: "Test Property",
     address: "123 Test Street",
+    currency: "EUR",
     ownerId: crypto.randomUUID(),
     createdAt: new Date(),
     updatedAt: new Date(),

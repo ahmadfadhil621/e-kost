@@ -16,6 +16,4 @@ export const createCurrencySchema = z.object({
 
 export type CreateCurrencyInput = z.infer<typeof createCurrencySchema>;
 
-export const updateUserCurrencySchema = z.object({
-  currency: z.string().min(3).max(3),
-});
+

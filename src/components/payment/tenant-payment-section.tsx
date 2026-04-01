@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import { useFormatCurrency } from "@/hooks/use-format-currency";
 import type { Payment } from "@/domain/schemas/payment";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,14 +17,6 @@ interface TenantPaymentSectionProps {
   isMovedOut?: boolean;
 }
 
-function formatCurrency(amount: number, locale: string, currencyCode: string) {
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: currencyCode,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
-}
 
 export function TenantPaymentSection({
   tenantId,
@@ -34,8 +27,7 @@ export function TenantPaymentSection({
   isMovedOut = false,
 }: TenantPaymentSectionProps) {
   const { t } = useTranslation();
-  const currencyCode = t("currency.code");
-  const currencyLocale = t("currency.locale");
+  const formatCurrency = useFormatCurrency();
 
   const displayedPayments = payments.slice(0, 3);
 
@@ -84,11 +76,7 @@ export function TenantPaymentSection({
                 <Card className="w-full">
                   <CardContent className="pt-4 space-y-1">
                     <p className="text-lg font-semibold">
-                      {formatCurrency(
-                        payment.amount,
-                        currencyLocale,
-                        currencyCode
-                      )}
+                      {formatCurrency(payment.amount)}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {t("payment.list.date")}:{" "}

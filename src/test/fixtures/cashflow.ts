@@ -8,7 +8,7 @@ export function createCashflowEntry(
     date: "2026-03-15",
     type: "income",
     description: "John Doe",
-    amount: 1500000,
+    amount: 650,
     ...overrides,
   };
 }

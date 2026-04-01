@@ -8,7 +8,6 @@ import { useProperty } from "@/contexts/property-context";
 import { useDevStatus } from "@/hooks/use-dev-status";
 import { AVAILABLE_LOCALES } from "@/lib/i18n";
 import { LanguageSelector } from "./LanguageSelector";
-import { CurrencySelector } from "./CurrencySelector";
 import { AccountSection } from "./AccountSection";
 import { Separator } from "@/components/ui/separator";
 
@@ -49,8 +48,6 @@ export function SettingsPage() {
 
       <section className="space-y-6">
         <LanguageSelector availableLocales={[...AVAILABLE_LOCALES]} />
-        <Separator />
-        <CurrencySelector />
         <Separator />
         <AccountSection
           user={user!}

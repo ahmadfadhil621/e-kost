@@ -11,6 +11,11 @@ export const createPropertySchema = z.object({
     .min(1, "Address is required")
     .max(500)
     .trim(),
+  currency: z
+    .string()
+    .min(3, "Currency is required")
+    .max(3)
+    .transform((s) => s.toUpperCase()),
 });
 
 export const updatePropertySchema = z
@@ -34,6 +39,7 @@ export interface Property {
   id: string;
   name: string;
   address: string;
+  currency: string;
   ownerId: string;
   createdAt: Date;
   updatedAt: Date;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslation } from "react-i18next";
+import { useFormatCurrency } from "@/hooks/use-format-currency";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { BalanceStatusIndicator } from "./balance-status-indicator";
@@ -18,14 +19,6 @@ type BalanceResult = {
   status: "paid" | "unpaid";
 };
 
-function formatCurrency(amount: number, locale: string, currencyCode: string) {
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: currencyCode,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
-}
 
 async function fetchBalance(
   propertyId: string,
@@ -46,8 +39,7 @@ async function fetchBalance(
 
 export function BalanceSection({ propertyId, tenantId }: BalanceSectionProps) {
   const { t } = useTranslation();
-  const currencyCode = t("currency.code");
-  const currencyLocale = t("currency.locale");
+  const formatCurrency = useFormatCurrency();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["balance", propertyId, tenantId],
@@ -95,11 +87,7 @@ export function BalanceSection({ propertyId, tenantId }: BalanceSectionProps) {
                 {t("balance.monthlyRent")}
               </dt>
               <dd className="font-medium">
-                {formatCurrency(
-                  data.monthlyRent,
-                  currencyLocale,
-                  currencyCode
-                )}
+                {formatCurrency(data.monthlyRent)}
               </dd>
             </div>
             <div className="flex justify-between gap-2">
@@ -107,11 +95,7 @@ export function BalanceSection({ propertyId, tenantId }: BalanceSectionProps) {
                 {t("balance.totalPayments")}
               </dt>
               <dd className="font-medium">
-                {formatCurrency(
-                  data.totalPayments,
-                  currencyLocale,
-                  currencyCode
-                )}
+                {formatCurrency(data.totalPayments)}
               </dd>
             </div>
           </dl>

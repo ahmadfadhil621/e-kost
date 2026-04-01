@@ -4,6 +4,7 @@ export interface IPropertyRepository {
   create(data: {
     name: string;
     address: string;
+    currency: string;
     ownerId: string;
   }): Promise<Property>;
   findById(id: string): Promise<Property | null>;

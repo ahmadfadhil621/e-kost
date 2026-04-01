@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import { useFormatCurrency } from "@/hooks/use-format-currency";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -38,12 +39,10 @@ async function fetchBalances(propertyId: string): Promise<{ balances: BalanceIte
   return res.json();
 }
 
-function formatCurrency(amount: number, locale: string, currencyCode: string) {
-  return new Intl.NumberFormat(locale, { style: "currency", currency: currencyCode, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
-}
 
 export default function TenantListPage() {
   const { t } = useTranslation();
+  const formatCurrency = useFormatCurrency();
   const params = useParams();
   const propertyId = params.propertyId as string;
   const [search, setSearch] = useState("");
@@ -65,8 +64,6 @@ export default function TenantListPage() {
 
   const tenants = data?.tenants ?? [];
   const balancesMap = new Map((balancesData?.balances ?? []).map((b) => [b.tenantId, b]));
-  const currencyCode = t("currency.code");
-  const currencyLocale = t("currency.locale");
 
   const filteredTenants = useMemo(() => {
     let result = tenants;
@@ -133,7 +130,7 @@ export default function TenantListPage() {
                     {balancesMap.has(tenant.id) && (
                       <div className="flex flex-wrap items-center gap-2 mt-2">
                         <span className="text-sm font-medium">
-                          {formatCurrency(balancesMap.get(tenant.id)!.outstandingBalance, currencyLocale, currencyCode)}
+                          {formatCurrency(balancesMap.get(tenant.id)!.outstandingBalance)}
                         </span>
                         <BalanceStatusIndicator status={balancesMap.get(tenant.id)!.status} size="small" />
                       </div>

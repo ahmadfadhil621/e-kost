@@ -180,17 +180,17 @@ describe("CurrencyService.remove", () => {
         delete: vi.fn().mockResolvedValue(undefined),
       });
       const service = new CurrencyService(repo);
-      const getUserCount = vi.fn().mockResolvedValue(0);
+      const getPropertyCount = vi.fn().mockResolvedValue(0);
 
-      await service.remove(currency.id, getUserCount);
+      await service.remove(currency.id, getPropertyCount);
 
       expect(repo.delete).toHaveBeenCalledWith(currency.id);
-      expect(getUserCount).toHaveBeenCalledWith(currency.code);
+      expect(getPropertyCount).toHaveBeenCalledWith(currency.code);
     });
   });
 
   describe("bad cases", () => {
-    it("throws CurrencyInUseError when at least one user has this currency selected", async () => {
+    it("throws CurrencyInUseError when at least one property uses this currency", async () => {
       const currency = createCurrency({ code: "IDR" });
       const repo = createMockRepo({
         list: vi.fn().mockResolvedValue([createCurrency({ code: "EUR" }), currency]),
@@ -198,9 +198,9 @@ describe("CurrencyService.remove", () => {
         delete: vi.fn(),
       });
       const service = new CurrencyService(repo);
-      const getUserCount = vi.fn().mockResolvedValue(3);
+      const getPropertyCount = vi.fn().mockResolvedValue(3);
 
-      await expect(service.remove(currency.id, getUserCount)).rejects.toThrow(CurrencyInUseError);
+      await expect(service.remove(currency.id, getPropertyCount)).rejects.toThrow(CurrencyInUseError);
       expect(repo.delete).not.toHaveBeenCalled();
     });
 
@@ -212,9 +212,9 @@ describe("CurrencyService.remove", () => {
         delete: vi.fn(),
       });
       const service = new CurrencyService(repo);
-      const getUserCount = vi.fn().mockResolvedValue(0);
+      const getPropertyCount = vi.fn().mockResolvedValue(0);
 
-      await expect(service.remove(currency.id, getUserCount)).rejects.toThrow(LastCurrencyError);
+      await expect(service.remove(currency.id, getPropertyCount)).rejects.toThrow(LastCurrencyError);
       expect(repo.delete).not.toHaveBeenCalled();
     });
 
@@ -224,16 +224,16 @@ describe("CurrencyService.remove", () => {
         delete: vi.fn(),
       });
       const service = new CurrencyService(repo);
-      const getUserCount = vi.fn().mockResolvedValue(0);
+      const getPropertyCount = vi.fn().mockResolvedValue(0);
 
-      await expect(service.remove("nonexistent-id", getUserCount)).rejects.toThrow(CurrencyNotFoundError);
+      await expect(service.remove("nonexistent-id", getPropertyCount)).rejects.toThrow(CurrencyNotFoundError);
       expect(repo.delete).not.toHaveBeenCalled();
-      expect(getUserCount).not.toHaveBeenCalled();
+      expect(getPropertyCount).not.toHaveBeenCalled();
     });
   });
 
   describe("edge cases", () => {
-    it("checks user count before checking last-currency constraint", async () => {
+    it("checks property count before checking last-currency constraint", async () => {
       const currency = createCurrency({ code: "EUR" });
       const repo = createMockRepo({
         list: vi.fn().mockResolvedValue([currency]),
@@ -241,22 +241,22 @@ describe("CurrencyService.remove", () => {
         delete: vi.fn(),
       });
       const service = new CurrencyService(repo);
-      // 1 user AND last currency — should throw CurrencyInUseError (user check wins)
-      const getUserCount = vi.fn().mockResolvedValue(1);
+      // 1 property AND last currency — should throw CurrencyInUseError (property check wins)
+      const getPropertyCount = vi.fn().mockResolvedValue(1);
 
-      await expect(service.remove(currency.id, getUserCount)).rejects.toThrow(CurrencyInUseError);
+      await expect(service.remove(currency.id, getPropertyCount)).rejects.toThrow(CurrencyInUseError);
       expect(repo.delete).not.toHaveBeenCalled();
     });
 
-    it("does not call getUserCount when currency is not found", async () => {
+    it("does not call getPropertyCount when currency is not found", async () => {
       const repo = createMockRepo({
         findById: vi.fn().mockResolvedValue(null),
       });
       const service = new CurrencyService(repo);
-      const getUserCount = vi.fn();
+      const getPropertyCount = vi.fn();
 
-      await expect(service.remove("bad-id", getUserCount)).rejects.toThrow(CurrencyNotFoundError);
-      expect(getUserCount).not.toHaveBeenCalled();
+      await expect(service.remove("bad-id", getPropertyCount)).rejects.toThrow(CurrencyNotFoundError);
+      expect(getPropertyCount).not.toHaveBeenCalled();
     });
   });
 });

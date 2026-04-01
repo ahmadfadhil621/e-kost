@@ -17,7 +17,6 @@ model User {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   language        String          @default("en")
-  currency        String          @default("EUR")
   accounts        Account[]
   createdInvites  InviteToken[]   @relation("CreatedInvites")
   ownedProperties Property[]      @relation("PropertyOwner")
@@ -80,6 +79,7 @@ model Property {
   updatedAt    DateTime        @updatedAt
   deletedAt    DateTime?
   archivedAt   DateTime?       @db.Timestamptz(6)
+  currency     String          @default("IDR")
   expenses     Expense[]
   inviteTokens InviteToken[]
   owner        User            @relation("PropertyOwner", fields: [ownerId], references: [id], onDelete: Cascade)

@@ -1,6 +1,6 @@
-// Traceability: settings-currency-management (Issue #90)
+// Traceability: settings-currency-management (Issue #90), property-currency (Issue #93)
 // AC-1 -> test('dev user deletes an unused currency and it disappears from the list')
-// AC-5 -> test('deleting a currency selected by a user shows an error and keeps it in the list')
+// AC-5 -> test('deleting a currency used by a property shows an error and keeps it in the list')
 // AC-5 -> test('cannot delete the last remaining currency')
 
 import { test, expect } from "@playwright/test";
@@ -51,35 +51,38 @@ test.describe("dev deletes currency", () => {
   });
 
   test.describe("bad cases", () => {
-    test("deleting a currency selected by a user shows an error and keeps it in the list", async ({ page }) => {
+    test("deleting a currency used by a property shows an error and keeps it in the list", async ({ page }) => {
       test.info().setTimeout(90000);
 
-      // First: change the user's currency preference to IDR via Settings
-      await page.goto("/settings");
-      const selector = page.getByRole("combobox", { name: /currency|mata uang/i });
-      await expect(selector).toBeVisible({ timeout: 10000 });
-      await selector.click();
-      await page.getByRole("option", { name: /Indonesian Rupiah/i }).click();
-      await page.waitForTimeout(1000);  // allow PATCH to reach server
+      // Add a fresh currency so we can use it for a property
+      const suffix = Date.now().toString().slice(-4);
+      const code = `P${suffix.slice(0, 2)}`.toUpperCase(); // e.g. P42 — always 3 chars
 
-      // Now: navigate to currency management and try to delete IDR
       await page.goto("/settings/currencies");
       await expect(
         page.getByRole("heading", { name: /currency management/i })
       ).toBeVisible({ timeout: 10000 });
+      await addCurrency(page, code, "en-US", `Test ${code}`);
 
-      const idrItem = page.getByRole("listitem").filter({ hasText: "IDR" });
-      await expect(idrItem).toBeVisible({ timeout: 5000 });
-      await idrItem.getByRole("button", { name: /delete/i }).click();
+      // Create a property that uses this currency via API
+      const propRes = await page.request.post("/api/properties", {
+        data: { name: `InUse Test ${code}`, address: "123 Test St", currency: code },
+      });
+      expect(propRes.ok(), `Property creation failed: ${await propRes.text()}`).toBe(true);
+
+      // Try to delete the currency that the property uses
+      const item = page.getByRole("listitem").filter({ hasText: code });
+      await expect(item).toBeVisible({ timeout: 5000 });
+      await item.getByRole("button", { name: /delete/i }).click();
 
       // Error message is shown
       await expect(
         page.getByText(/in use|cannot delete|used by/i)
       ).toBeVisible({ timeout: 5000 });
 
-      // IDR is still in the list
+      // Currency is still in the list
       await expect(
-        page.getByRole("listitem").filter({ hasText: "IDR" })
+        page.getByRole("listitem").filter({ hasText: code })
       ).toBeVisible({ timeout: 3000 });
     });
   });

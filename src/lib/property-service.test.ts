@@ -88,6 +88,7 @@ describe("PropertyService", () => {
         const result = await service.createProperty(userId, {
           name: "My Kost",
           address: "Jl. Example 1",
+          currency: "EUR",
         });
 
         expect(result.id).toBe(created.id);
@@ -99,6 +100,7 @@ describe("PropertyService", () => {
         expect(repo.create).toHaveBeenCalledWith({
           name: "My Kost",
           address: "Jl. Example 1",
+          currency: "EUR",
           ownerId: userId,
         });
       });
@@ -112,6 +114,7 @@ describe("PropertyService", () => {
         const result = await service.createProperty(userId, {
           name: "P",
           address: "A",
+          currency: "EUR",
         });
 
         expect(result.ownerId).toBe(userId);
@@ -175,11 +178,13 @@ describe("PropertyService", () => {
         await service.createProperty(userId, {
           name: "  Trimmed  ",
           address: "  Trimmed Addr  ",
+          currency: "EUR",
         });
 
         expect(repo.create).toHaveBeenCalledWith({
           name: "Trimmed",
           address: "Trimmed Addr",
+          currency: "EUR",
           ownerId: userId,
         });
       });
@@ -640,6 +645,7 @@ describe("property-based tests", () => {
         fc.record({
           name: fc.string({ minLength: 1, maxLength: 200 }).filter((s) => s.trim().length > 0),
           address: fc.string({ minLength: 1, maxLength: 500 }).filter((s) => s.trim().length > 0),
+          currency: fc.constantFrom("EUR", "IDR", "USD"),
         }, { noNullPrototype: true }),
         async (data) => {
           const userId = crypto.randomUUID();

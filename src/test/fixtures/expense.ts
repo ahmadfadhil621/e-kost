@@ -5,7 +5,7 @@ export function createExpense(overrides: Partial<Expense> = {}): Expense {
     id: crypto.randomUUID(),
     propertyId: crypto.randomUUID(),
     category: "electricity",
-    amount: 150000,
+    amount: 80,
     date: new Date("2026-03-01"),
     description: null,
     createdAt: new Date(),

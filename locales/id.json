@@ -1,8 +1,4 @@
 {
-  "currency": {
-    "code": "IDR",
-    "locale": "id-ID"
-  },
   "app": {
     "name": "E-Kost",
     "tagline": "Manajemen Properti Jadi Mudah"
@@ -138,6 +134,11 @@
       "error": {
         "unavailable": "Properti tidak tersedia"
       }
+    },
+    "currency": {
+      "label": "Mata Uang",
+      "description": "Ditetapkan saat pembuatan dan tidak dapat diubah setelahnya",
+      "placeholder": "Pilih mata uang"
     }
   },
   "auth": {
@@ -593,11 +594,6 @@
         "revokeFailed": "Gagal membatalkan undangan"
       }
     },
-    "currency": {
-      "label": "Mata Uang",
-      "description": "Pilih cara tampilan nilai uang",
-      "selector": { "placeholder": "Pilih mata uang" }
-    },
     "currencyManagement": {
       "title": "Manajemen Mata Uang",
       "description": "Kelola mata uang yang tersedia untuk semua pengguna",
@@ -618,7 +614,7 @@
         "deleteConfirm": "Hapus mata uang ini?"
       },
       "error": {
-        "inUse": "Mata uang ini digunakan oleh satu atau lebih pengguna dan tidak dapat dihapus",
+        "inUse": "Mata uang ini digunakan oleh satu atau lebih properti dan tidak dapat dihapus",
         "lastCurrency": "Tidak dapat menghapus mata uang terakhir",
         "alreadyExists": "Mata uang dengan kode ini sudah ada",
         "createFailed": "Gagal menambah mata uang",
