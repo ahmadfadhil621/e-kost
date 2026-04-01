@@ -46,13 +46,13 @@ export function RoomCard({
   const typeRent = `${room.roomType} · ${formatCurrency(room.monthlyRent)}${t("room.card.perMonth")}`;
 
   const baseCardClasses =
-    "rounded-lg border border-border bg-card shadow-sm min-h-[44px] transition-colors hover:bg-muted/50";
+    "rounded-lg border border-border bg-card shadow-xs min-h-[44px] transition-colors hover:bg-muted/50";
 
   if (room.status === "available") {
     return (
       <Link
         href={roomHref}
-        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
+        className="block focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
         data-testid="room-card"
       >
         <Card
@@ -78,7 +78,7 @@ export function RoomCard({
               {onAssignTenant ? (
                 <button
                   type="button"
-                  className="flex min-h-[44px] min-w-[44px] items-center gap-2 text-primary text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
+                  className="flex min-h-[44px] min-w-[44px] items-center gap-2 text-primary text-sm font-medium focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-md"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -99,7 +99,7 @@ export function RoomCard({
               {onChangeStatus ? (
                 <button
                   type="button"
-                  className="flex min-h-[44px] min-w-[44px] items-center gap-2 text-muted-foreground text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
+                  className="flex min-h-[44px] min-w-[44px] items-center gap-2 text-muted-foreground text-sm focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-md"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -127,7 +127,7 @@ export function RoomCard({
     return (
       <Link
         href={roomHref}
-        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
+        className="block focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
         data-testid="room-card"
       >
         <Card
@@ -161,7 +161,7 @@ export function RoomCard({
   return (
     <Link
       href={roomHref}
-      className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
+      className="block focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
       data-testid="room-card"
     >
       <Card

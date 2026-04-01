@@ -27,7 +27,7 @@ All components target 320px-480px viewports. Design for the smallest screen firs
 <div className="flex flex-col gap-4 p-4 w-full max-w-md mx-auto">
 
 {/* Full-width card */}
-<div className="flex flex-col gap-3 p-4 bg-white rounded-lg shadow-sm w-full">
+<div className="flex flex-col gap-3 p-4 bg-white rounded-lg shadow-xs w-full">
 
 {/* Touch-safe button */}
 <Button className="w-full min-h-[44px]">

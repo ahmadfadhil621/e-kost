@@ -104,7 +104,7 @@ export function NoteCard({
     <>
       <Card className="w-full">
         <CardContent className="pt-4 space-y-2">
-          <p className="text-sm whitespace-pre-wrap break-words">{note.content}</p>
+          <p className="text-sm whitespace-pre-wrap wrap-break-word">{note.content}</p>
           <p className="text-xs text-muted-foreground">
             {t("notes.form.date")}: {format(noteDate, "PPP")}
           </p>

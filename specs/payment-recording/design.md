@@ -725,7 +725,7 @@ module.exports = {
 **Component Styling Example**:
 ```tsx
 // PaymentCard component
-<div className="flex flex-col gap-3 p-4 bg-white rounded-lg shadow-sm w-full">
+<div className="flex flex-col gap-3 p-4 bg-white rounded-lg shadow-xs w-full">
   <div className="flex justify-between items-start">
     <span className="text-sm text-gray-600">{tenantName}</span>
     <span className="text-lg font-bold text-green-600">

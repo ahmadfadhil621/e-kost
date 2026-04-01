@@ -416,7 +416,7 @@ Add the following finance tokens to `globals.css`:
 #### Room Cards
 | Element                 | Color                                          |
 |-------------------------|------------------------------------------------|
-| Card base               | `bg-card border border-border rounded-lg shadow-sm` |
+| Card base               | `bg-card border border-border rounded-lg shadow-xs` |
 | Available left border   | `border-l-4 border-status-available`           |
 | Occupied left border    | `border-l-4 border-status-occupied`            |
 | Renovation left border  | `border-l-4 border-status-renovation`          |

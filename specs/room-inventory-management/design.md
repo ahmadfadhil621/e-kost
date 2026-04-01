@@ -794,7 +794,7 @@ module.exports = {
 **Component Styling Example**:
 ```tsx
 // RoomCard component
-<div className="flex flex-col gap-3 p-4 bg-white rounded-lg shadow-sm w-full min-h-[44px]">
+<div className="flex flex-col gap-3 p-4 bg-white rounded-lg shadow-xs w-full min-h-[44px]">
   <div className="flex justify-between items-start">
     <h3 className="text-lg font-semibold">{room.roomNumber}</h3>
     <StatusIndicator status={room.status} />

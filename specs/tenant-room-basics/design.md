@@ -762,7 +762,7 @@ module.exports = {
 **Component Styling Example**:
 ```tsx
 // TenantListItem component
-<div className="flex flex-col gap-4 p-4 bg-white rounded-lg shadow-sm w-full">
+<div className="flex flex-col gap-4 p-4 bg-white rounded-lg shadow-xs w-full">
   <h3 className="text-lg font-semibold">{tenant.name}</h3>
   <p className="text-sm text-gray-600">
     {tenant.roomId ? `Room ${room.roomNumber}` : 'No room assigned'}
