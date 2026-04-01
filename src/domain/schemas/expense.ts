@@ -15,7 +15,9 @@ export const expenseCategories = [
 export type ExpenseCategory = (typeof expenseCategories)[number];
 
 export const createExpenseSchema = z.object({
-  category: z.enum(expenseCategories),
+  category: z.enum(expenseCategories, {
+    error: "Please select a category",
+  }),
   amount: z.number().positive("Amount must be positive"),
   date: z
     .string()

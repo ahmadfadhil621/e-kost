@@ -90,7 +90,7 @@ export async function PUT(
     });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      const msg = err.errors[0]?.message ?? "Validation failed";
+      const msg = err.issues[0]?.message ?? "Validation failed";
       return NextResponse.json({ error: msg }, { status: 400 });
     }
     if (err instanceof Error && err.message === "Room not found") {

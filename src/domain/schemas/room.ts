@@ -19,7 +19,7 @@ export const createRoomSchema = z.object({
     .max(100)
     .trim(),
   monthlyRent: z
-    .number({ required_error: "Monthly rent is required" })
+    .number({ error: "Monthly rent is required" })
     .positive("Monthly rent must be a positive number"),
 });
 
@@ -38,9 +38,7 @@ export const updateRoomSchema = z
 
 export const updateRoomStatusSchema = z.object({
   status: z.enum(roomStatusValues, {
-    errorMap: () => ({
-      message: "Status must be one of: available, occupied, under_renovation",
-    }),
+    error: "Status must be one of: available, occupied, under_renovation",
   }),
 });
 

@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ data: { success: true, role: invite.role, propertyId: invite.propertyId } });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: err.errors[0]?.message ?? "Validation failed" }, { status: 400 });
+      return NextResponse.json({ error: err.issues[0]?.message ?? "Validation failed" }, { status: 400 });
     }
     if (
       err instanceof InviteNotFoundError ||

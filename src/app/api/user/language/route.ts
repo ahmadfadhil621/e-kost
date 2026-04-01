@@ -27,7 +27,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ data: { language: updated } });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      const msg = err.errors[0]?.message ?? "Validation failed";
+      const msg = err.issues[0]?.message ?? "Validation failed";
       return NextResponse.json({ error: msg }, { status: 400 });
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
