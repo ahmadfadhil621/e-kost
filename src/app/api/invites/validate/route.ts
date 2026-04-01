@@ -20,7 +20,6 @@ export async function GET(request: Request) {
       data: {
         email: invite.email,
         role: invite.role,
-        propertyId: invite.propertyId,
         expiresAt: invite.expiresAt,
       },
     });
