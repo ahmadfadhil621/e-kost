@@ -2,6 +2,13 @@
 
 import { useTranslation } from "react-i18next";
 import { useCurrency } from "@/contexts/currency-context";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function CurrencySelector() {
   const { t } = useTranslation();
@@ -23,22 +30,22 @@ export function CurrencySelector() {
         {t("settings.currency.description")}
       </p>
       <div className="mt-2">
-        <label htmlFor="currency-selector" className="sr-only">
-          {t("settings.currency.label")}
-        </label>
-        <select
-          id="currency-selector"
-          role="combobox"
-          value={code}
-          onChange={(e) => setCurrency(e.target.value)}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[44px]"
-        >
-          {availableCurrencies.map((currency) => (
-            <option key={currency.code} value={currency.code}>
-              {currency.label}
-            </option>
-          ))}
-        </select>
+        <Select value={code} onValueChange={setCurrency}>
+          <SelectTrigger
+            id="currency-selector"
+            aria-labelledby="currency-heading"
+            className="w-full min-h-[44px]"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {availableCurrencies.map((currency) => (
+              <SelectItem key={currency.code} value={currency.code}>
+                {currency.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </section>
   );
