@@ -7,7 +7,6 @@ function toInviteToken(row: {
   token: string;
   email: string;
   role: string;
-  propertyId: string | null;
   expiresAt: Date;
   usedAt: Date | null;
   createdBy: string;
@@ -17,8 +16,7 @@ function toInviteToken(row: {
     id: row.id,
     token: row.token,
     email: row.email,
-    role: row.role as InviteToken["role"],
-    propertyId: row.propertyId,
+    role: "owner",
     expiresAt: row.expiresAt,
     usedAt: row.usedAt,
     createdBy: row.createdBy,
@@ -31,7 +29,6 @@ export class PrismaInviteRepository implements IInviteRepository {
     token: string;
     email: string;
     role: string;
-    propertyId: string | null;
     expiresAt: Date;
     createdBy: string;
   }): Promise<InviteToken> {
@@ -39,8 +36,7 @@ export class PrismaInviteRepository implements IInviteRepository {
       data: {
         token: data.token,
         email: data.email,
-        role: data.role as "owner" | "staff",
-        propertyId: data.propertyId ?? null,
+        role: "owner",
         expiresAt: data.expiresAt,
         createdBy: data.createdBy,
       },

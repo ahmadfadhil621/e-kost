@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 
 const createInviteFormSchema = z.object({
   email: z.string().email(),
-  role: z.enum(["owner", "staff"]),
   expiresInDays: z.number().int().min(1).max(30),
 });
 type CreateInviteFormInput = z.infer<typeof createInviteFormSchema>;
@@ -52,7 +51,7 @@ export function InviteSection({ userRole }: InviteSectionProps) {
       const res = await fetch("/api/invites", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, role: "owner" }),
       });
       if (!res.ok) {
         const json = await res.json();
@@ -82,7 +81,7 @@ export function InviteSection({ userRole }: InviteSectionProps) {
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<CreateInviteFormInput>({
     resolver: zodResolver(createInviteFormSchema),
-    defaultValues: { role: "staff", expiresInDays: 7 },
+    defaultValues: { expiresInDays: 7 },
   });
 
   const onSubmit = (data: CreateInviteFormInput) => {
@@ -122,18 +121,6 @@ export function InviteSection({ userRole }: InviteSectionProps) {
             <Label htmlFor="invite-email">{t("settings.invites.form.email")}</Label>
             <Input id="invite-email" type="email" className="min-h-[44px]" {...register("email")} />
             {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
-          </div>
-
-          <div className="space-y-1">
-            <Label htmlFor="invite-role">{t("settings.invites.form.role")}</Label>
-            <select
-              id="invite-role"
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[44px]"
-              {...register("role")}
-            >
-              <option value="owner">{t("settings.invites.form.roleOwner")}</option>
-              <option value="staff">{t("settings.invites.form.roleStaff")}</option>
-            </select>
           </div>
 
           <div className="space-y-1">

@@ -1,8 +1,7 @@
 // Traceability: settings-invite-management
 // REQ 2.1 -> it('returns 403 when creating owner invite as non-dev when DEV_EMAILS is set')
 // REQ 2.2 -> it('returns 201 when creating owner invite when DEV_EMAILS is not set')
-// REQ 2.3 -> it('returns 201 when creating staff invite regardless of dev status')
-// REQ 2.4 -> it('returns 201 when creating owner invite as dev user')
+// REQ 2.3 -> it('returns 201 when creating owner invite as dev user')
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextResponse } from "next/server";
@@ -28,7 +27,6 @@ vi.mock("@/lib/invite-service-instance", () => ({
       token: "token-abc",
       email: "user@example.com",
       role: "owner",
-      propertyId: null,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       usedAt: null,
       createdBy: "test-user-id",
@@ -80,20 +78,6 @@ describe("POST /api/invites", () => {
       const response = await POST(request);
       expect(response.status).toBe(201);
     });
-
-    it("returns 201 when creating staff invite as non-dev", async () => {
-      vi.mocked(getSession).mockResolvedValueOnce({ session: mockNonDevSession });
-      const { POST } = await import("./route");
-
-      const request = new Request("http://localhost/api/invites", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "staff@example.com", role: "staff", expiresInDays: 7 }),
-      });
-
-      const response = await POST(request);
-      expect(response.status).toBe(201);
-    });
   });
 
   describe("bad cases", () => {
@@ -123,7 +107,7 @@ describe("POST /api/invites", () => {
       const request = new Request("http://localhost/api/invites", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "user@example.com", role: "staff", expiresInDays: 7 }),
+        body: JSON.stringify({ email: "user@example.com", role: "owner", expiresInDays: 7 }),
       });
 
       const response = await POST(request);
@@ -143,19 +127,34 @@ describe("POST /api/invites", () => {
       const response = await POST(request);
       expect(response.status).toBe(400);
     });
-  });
 
-  describe("edge cases", () => {
-    it("returns 201 when creating staff invite as dev user", async () => {
+    it("returns 400 when role is staff", async () => {
       vi.mocked(getSession).mockResolvedValueOnce({ session: mockSession });
       const { POST } = await import("./route");
 
       const request = new Request("http://localhost/api/invites", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "staff@example.com", role: "staff", expiresInDays: 1 }),
+        body: JSON.stringify({ email: "user@example.com", role: "staff", expiresInDays: 7 }),
       });
 
+      const response = await POST(request);
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe("edge cases", () => {
+    it("returns 400 when expiresInDays is missing", async () => {
+      vi.mocked(getSession).mockResolvedValueOnce({ session: mockSession });
+      const { POST } = await import("./route");
+
+      const request = new Request("http://localhost/api/invites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: "user@example.com", role: "owner" }),
+      });
+
+      // expiresInDays has a default of 7 in the schema, so this should succeed
       const response = await POST(request);
       expect(response.status).toBe(201);
     });

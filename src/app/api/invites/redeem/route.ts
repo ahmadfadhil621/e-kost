@@ -6,7 +6,6 @@ import {
   InviteExpiredError,
   InviteAlreadyUsedError,
 } from "@/lib/invite-service";
-import { prisma } from "@/lib/prisma";
 
 const redeemSchema = z.object({
   token: z.string().min(1),
@@ -16,21 +15,11 @@ const redeemSchema = z.object({
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { token, userId } = redeemSchema.parse(body);
+    const { token } = redeemSchema.parse(body);
 
-    const invite = await inviteService.redeemToken(token);
+    await inviteService.redeemToken(token);
 
-    // Associate user with property if role is staff and propertyId is set
-    if (invite.role === "staff" && invite.propertyId) {
-      await prisma.propertyStaff.create({
-        data: {
-          userId,
-          propertyId: invite.propertyId,
-        },
-      });
-    }
-
-    return NextResponse.json({ data: { success: true, role: invite.role, propertyId: invite.propertyId } });
+    return NextResponse.json({ data: { success: true } });
   } catch (err) {
     if (err instanceof z.ZodError) {
       return NextResponse.json({ error: err.issues[0]?.message ?? "Validation failed" }, { status: 400 });

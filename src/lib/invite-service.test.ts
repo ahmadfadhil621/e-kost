@@ -41,13 +41,13 @@ describe("InviteService", () => {
     describe("good cases", () => {
       it("creates invite with correct fields", async () => {
         const ownerId = crypto.randomUUID();
-        const created = createInviteToken({ createdBy: ownerId, email: "user@example.com", role: "staff" });
+        const created = createInviteToken({ createdBy: ownerId, email: "user@example.com", role: "owner" });
         const repo = createMockRepo({ create: vi.fn().mockResolvedValue(created) });
         const service = new InviteService(repo);
 
         const result = await service.createInvite(ownerId, {
           email: "user@example.com",
-          role: "staff",
+          role: "owner",
           expiresInDays: 7,
         });
 
@@ -56,7 +56,7 @@ describe("InviteService", () => {
         expect(repo.create).toHaveBeenCalledWith(
           expect.objectContaining({
             email: "user@example.com",
-            role: "staff",
+            role: "owner",
             createdBy: ownerId,
           })
         );
@@ -126,7 +126,7 @@ describe("InviteService", () => {
         const repo = createMockRepo();
         const service = new InviteService(repo);
         await expect(
-          service.createInvite("owner-id", { email: "x@example.com", role: "invalid" as "owner", expiresInDays: 7 })
+          service.createInvite("owner-id", { email: "x@example.com", role: "staff" as "owner", expiresInDays: 7 })
         ).rejects.toThrow();
         expect(repo.create).not.toHaveBeenCalled();
       });

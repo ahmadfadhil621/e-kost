@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const data = createInviteSchema.parse(body);
 
-    if (data.role === "owner" && !isDevEmail(session!.user.email)) {
+    if (!isDevEmail(session!.user.email)) {
       return NextResponse.json(
         { error: "Only dev accounts can create owner invites" },
         { status: 403 }

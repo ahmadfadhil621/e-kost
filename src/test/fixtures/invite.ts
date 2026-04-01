@@ -6,7 +6,6 @@ export function createInviteToken(overrides: Partial<InviteToken> = {}): InviteT
     token: crypto.randomUUID(),
     email: "invited@example.com",
     role: "owner",
-    propertyId: null,
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     usedAt: null,
     createdBy: crypto.randomUUID(),

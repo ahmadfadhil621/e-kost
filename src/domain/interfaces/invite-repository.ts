@@ -5,7 +5,6 @@ export interface IInviteRepository {
     token: string;
     email: string;
     role: string;
-    propertyId: string | null;
     expiresAt: Date;
     createdBy: string;
   }): Promise<InviteToken>;

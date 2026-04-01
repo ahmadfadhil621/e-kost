@@ -41,7 +41,6 @@ export class InviteService {
       token,
       email: parsed.email,
       role: parsed.role,
-      propertyId: parsed.propertyId ?? null,
       expiresAt,
       createdBy: ownerId,
     });
