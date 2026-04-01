@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import type { ExpenseCategory } from "@/generated/prisma/enums";
 
 function monthStart(monthsBack: number): Date {
   const d = new Date();
@@ -11,7 +12,7 @@ function monthStart(monthsBack: number): Date {
 function paymentDate(monthsBack: number): Date {
   const d = new Date();
   d.setMonth(d.getMonth() - monthsBack);
-  d.setDate(5);
+  d.setDate(monthsBack === 0 ? 2 : 5);
   d.setHours(0, 0, 0, 0);
   return d;
 }
@@ -50,14 +51,14 @@ export async function seedDemoData(ownerId: string): Promise<void> {
   const roomMap = Object.fromEntries(rooms.map((r) => [r.roomNumber, r]));
 
   const tenantData = [
-    { name: "Budi Santoso", roomNumber: "101", movedInMonthsAgo: 6 },
-    { name: "Siti Rahayu", roomNumber: "102", movedInMonthsAgo: 5 },
-    { name: "Ahmad Fauzi", roomNumber: "103", movedInMonthsAgo: 8 },
-    { name: "Dewi Lestari", roomNumber: "201", movedInMonthsAgo: 3 },
+    { name: "Budi Santoso", roomNumber: "101", movedInMonthsAgo: 6, paidThisMonth: true },
+    { name: "Siti Rahayu", roomNumber: "102", movedInMonthsAgo: 5, paidThisMonth: true },
+    { name: "Ahmad Fauzi", roomNumber: "103", movedInMonthsAgo: 8, paidThisMonth: false },
+    { name: "Dewi Lestari", roomNumber: "201", movedInMonthsAgo: 3, paidThisMonth: false },
   ];
 
   await Promise.all(
-    tenantData.map(async ({ name, roomNumber, movedInMonthsAgo }) => {
+    tenantData.map(async ({ name, roomNumber, movedInMonthsAgo, paidThisMonth }) => {
       const room = roomMap[roomNumber];
       const tenant = await prisma.tenant.create({
         data: {
@@ -68,8 +69,9 @@ export async function seedDemoData(ownerId: string): Promise<void> {
         },
       });
 
+      const paymentMonths = paidThisMonth ? [3, 2, 1, 0] : [3, 2, 1];
       await Promise.all(
-        [3, 2, 1].map((monthsBack) =>
+        paymentMonths.map((monthsBack) =>
           prisma.payment.create({
             data: {
               tenantId: tenant.id,
@@ -80,5 +82,30 @@ export async function seedDemoData(ownerId: string): Promise<void> {
         )
       );
     })
+  );
+
+  const expenseData: { monthsBack: number; category: ExpenseCategory; amount: number }[] = [
+    { monthsBack: 0, category: "ELECTRICITY", amount: 450000 },
+    { monthsBack: 0, category: "WATER", amount: 120000 },
+    { monthsBack: 1, category: "ELECTRICITY", amount: 430000 },
+    { monthsBack: 1, category: "WATER", amount: 115000 },
+    { monthsBack: 1, category: "MAINTENANCE", amount: 200000 },
+    { monthsBack: 2, category: "ELECTRICITY", amount: 460000 },
+    { monthsBack: 2, category: "WATER", amount: 110000 },
+    { monthsBack: 3, category: "ELECTRICITY", amount: 420000 },
+    { monthsBack: 3, category: "MAINTENANCE", amount: 350000 },
+  ];
+
+  await Promise.all(
+    expenseData.map(({ monthsBack, category, amount }) =>
+      prisma.expense.create({
+        data: {
+          propertyId: property.id,
+          category,
+          amount,
+          date: monthStart(monthsBack),
+        },
+      })
+    )
   );
 }
