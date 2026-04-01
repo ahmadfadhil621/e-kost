@@ -85,6 +85,7 @@ Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
 - Never modify `prisma/schema.prisma` directly. If a feature requires schema changes, describe the needed changes and let the user apply them manually in Supabase. After they confirm the changes are applied, run `npx prisma db pull` then `npx prisma generate` to sync the client.
 - When diagnosing issues, go directly to the most likely source files first. Do not do broad codebase exploration — be surgical. If the user says "just go to the code", stop exploring and act immediately.
 - Do not rely on training data for project-specific facts (directory structures, configurations, feature existence). Always verify against actual files or official docs. When unsure, say so.
+- When Bash output is unavoidable, limit result size for predictable commands (test runs, lint, build): pipe through `tail -50` or `grep -E "error|fail"`. Never use `cat` on large files — use `Read` with `offset`/`limit` instead. Exception: during open-ended diagnosis where the error location is unknown, read full output.
 
 ## Dependency Management
 
