@@ -58,7 +58,8 @@ test.describe("dev deletes currency", () => {
       await page.goto("/settings");
       const selector = page.getByRole("combobox", { name: /currency|mata uang/i });
       await expect(selector).toBeVisible({ timeout: 10000 });
-      await selector.selectOption({ value: "IDR" });
+      await selector.click();
+      await page.getByRole("option", { name: /Indonesian Rupiah/i }).click();
       await page.waitForTimeout(1000);  // allow PATCH to reach server
 
       // Now: navigate to currency management and try to delete IDR

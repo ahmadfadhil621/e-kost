@@ -33,7 +33,8 @@ test.describe("user selects currency", () => {
       await expect(selector).toBeVisible({ timeout: 10000 });
 
       // Select IDR
-      await selector.selectOption({ value: "IDR" });
+      await selector.click();
+      await page.getByRole("option", { name: /Indonesian Rupiah/i }).click();
 
       // Allow the PATCH to reach the server
       await page.waitForTimeout(1000);
@@ -42,7 +43,7 @@ test.describe("user selects currency", () => {
       await page.reload();
       await expect(
         page.getByRole("combobox", { name: /currency|mata uang/i })
-      ).toHaveValue("IDR", { timeout: 10000 });
+      ).toContainText("Indonesian Rupiah", { timeout: 10000 });
     });
   });
 
@@ -64,7 +65,8 @@ test.describe("user selects currency", () => {
       // First set currency to IDR
       const selector = page.getByRole("combobox", { name: /currency|mata uang/i });
       await expect(selector).toBeVisible({ timeout: 10000 });
-      await selector.selectOption({ value: "IDR" });
+      await selector.click();
+      await page.getByRole("option", { name: /Indonesian Rupiah/i }).click();
       await page.waitForTimeout(500);
 
       // Now switch language to Indonesian
@@ -80,7 +82,7 @@ test.describe("user selects currency", () => {
 
       // Currency selector should still show IDR
       const currencySelector = page.getByRole("combobox", { name: /currency|mata uang/i });
-      await expect(currencySelector).toHaveValue("IDR", { timeout: 5000 });
+      await expect(currencySelector).toContainText("Indonesian Rupiah", { timeout: 5000 });
 
       // Restore language to English — this preference is stored server-side and shared
       // across all tests using the same user. Leaving it as Indonesian would cause
