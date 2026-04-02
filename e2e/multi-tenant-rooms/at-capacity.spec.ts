@@ -160,11 +160,9 @@ test.describe("room at full capacity", () => {
         .first()
         .click();
 
-      // May show "no rooms with available capacity" or "no available rooms"
-      // (depends on whether other rooms exist with capacity — we can't guarantee isolation,
-      // so just check the dialog opened without error)
+      // The dialog should open (may show empty state or available rooms)
       await expect(
-        page.getByRole("dialog").or(page.getByText(/slot|rooms|kamar/i).first())
+        page.getByRole("dialog", { name: /assign room/i })
       ).toBeVisible({ timeout: 12000 });
     });
   });
