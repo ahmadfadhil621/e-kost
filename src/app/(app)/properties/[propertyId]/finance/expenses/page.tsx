@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -22,12 +22,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MonthSelector } from "@/components/finance/month-selector";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
 import type { Expense } from "@/domain/schemas/expense";
 
-async function fetchExpenses(propertyId: string): Promise<Expense[]> {
+async function fetchExpenses(propertyId: string, year: number, month: number): Promise<Expense[]> {
   const res = await fetch(
-    `/api/properties/${propertyId}/expenses`,
+    `/api/properties/${propertyId}/expenses?year=${year}&month=${month}`,
     { credentials: "include" }
   );
   if (!res.ok) {
@@ -69,29 +70,58 @@ export default function ExpenseListPage() {
   const propertyId = params.propertyId as string;
   const formatCurrency = useFormatCurrency();
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
+  const now = useMemo(() => new Date(), []);
+  const [year, setYear] = useState(() => {
+    const y = Number(searchParams.get("year"));
+    return y >= 2000 && y <= 2100 ? y : now.getFullYear();
+  });
+  const [month, setMonth] = useState(() => {
+    const m = Number(searchParams.get("month"));
+    return m >= 1 && m <= 12 ? m : now.getMonth() + 1;
+  });
+
+  const goPrevious = useCallback(() => {
+    if (month === 1) {
+      setYear((y) => y - 1);
+      setMonth(12);
+    } else {
+      setMonth((m) => m - 1);
+    }
+  }, [month]);
+
+  const goNext = useCallback(() => {
+    if (month === 12) {
+      setYear((y) => y + 1);
+      setMonth(1);
+    } else {
+      setMonth((m) => m + 1);
+    }
+  }, [month]);
+
   const { data: expenses = [], isLoading } = useQuery({
-    queryKey: ["expenses", propertyId],
-    queryFn: () => fetchExpenses(propertyId),
+    queryKey: ["expenses", propertyId, year, month],
+    queryFn: () => fetchExpenses(propertyId, year, month),
     enabled: !!propertyId,
   });
 
   const deleteMutation = useMutation({
     mutationFn: (expenseId: string) => deleteExpense(propertyId, expenseId),
     onMutate: async (expenseId) => {
-      await queryClient.cancelQueries({ queryKey: ["expenses", propertyId] });
-      const previousExpenses = queryClient.getQueryData<Expense[]>(["expenses", propertyId]);
-      queryClient.setQueryData<Expense[]>(["expenses", propertyId], (old) =>
+      await queryClient.cancelQueries({ queryKey: ["expenses", propertyId, year, month] });
+      const previousExpenses = queryClient.getQueryData<Expense[]>(["expenses", propertyId, year, month]);
+      queryClient.setQueryData<Expense[]>(["expenses", propertyId, year, month], (old) =>
         (old ?? []).filter((e) => e.id !== expenseId)
       );
       return { previousExpenses };
     },
     onError: (_err, _expenseId, context) => {
-      queryClient.setQueryData(["expenses", propertyId], context?.previousExpenses);
+      queryClient.setQueryData(["expenses", propertyId, year, month], context?.previousExpenses);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expenses", propertyId] });
+      queryClient.invalidateQueries({ queryKey: ["expenses", propertyId, year, month] });
     },
   });
 
@@ -113,6 +143,13 @@ export default function ExpenseListPage() {
           </Link>
         </Button>
       </div>
+
+      <MonthSelector
+        year={year}
+        month={month}
+        onPrevious={goPrevious}
+        onNext={goNext}
+      />
 
       {isLoading && (
         <p className="text-muted-foreground">{t("common.loading")}</p>

@@ -105,14 +105,14 @@ export default function FinanceOverviewPage() {
               amount={data.expenses}
               variant="expense"
               formatCurrency={formatCurrency}
-              href={`/properties/${propertyId}/finance/expenses`}
+              href={`/properties/${propertyId}/finance/expenses?year=${year}&month=${month}`}
             />
             <SummaryCard
               label={t("finance.netIncome")}
               amount={data.netIncome}
               variant="net"
               formatCurrency={formatCurrency}
-              href={`/properties/${propertyId}/finance/cashflow`}
+              href={`/properties/${propertyId}/finance/cashflow?year=${year}&month=${month}`}
             />
           </div>
         </>
