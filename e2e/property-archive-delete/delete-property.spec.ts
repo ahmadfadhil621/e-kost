@@ -16,7 +16,7 @@ type PageFixture = Page;
 
 async function createProperty(request: RequestFixture, name: string): Promise<string> {
   const res = await request.post(`${BASE}/api/properties`, {
-    data: { name, address: "123 E2E Street" },
+    data: { name, address: "123 E2E Street", currency: "IDR" },
   });
   if (!res.ok()) {
     throw new Error(`Failed to create property: ${res.status()} ${await res.text()}`);

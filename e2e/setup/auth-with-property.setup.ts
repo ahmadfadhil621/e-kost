@@ -10,7 +10,7 @@ setup("create user with one property", async ({ page, baseURL }) => {
   setup.setTimeout(60000);
   await page.goto("/");
   const res = await page.request.post(`${baseURL}/api/properties`, {
-    data: { name: "E2E Property", address: "123 E2E Street" },
+    data: { name: "E2E Property", address: "123 E2E Street", currency: "IDR" },
   });
   expect(res.ok(), `Create property failed: ${await res.text()}`).toBe(true);
   const body = await res.json();

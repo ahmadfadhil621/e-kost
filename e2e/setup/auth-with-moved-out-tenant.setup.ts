@@ -14,7 +14,7 @@ setup("create user with property and moved-out tenant with note", async ({
   await page.goto("/");
 
   const createPropertyRes = await page.request.post(`${baseURL}/api/properties`, {
-    data: { name: "E2E Moved-Out Property", address: "456 E2E Moved-Out St" },
+    data: { name: "E2E Moved-Out Property", address: "456 E2E Moved-Out St", currency: "IDR" },
   });
   expect(
     createPropertyRes.ok(),

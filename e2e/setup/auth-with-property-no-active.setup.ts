@@ -16,12 +16,12 @@ setup("create user with two properties but no active selection", async ({
   await page.goto("/");
 
   const res1 = await page.request.post(`${baseURL}/api/properties`, {
-    data: { name: "E2E Selector Property", address: "456 Selector St" },
+    data: { name: "E2E Selector Property", address: "456 Selector St", currency: "IDR" },
   });
   expect(res1.ok(), `Create property 1 failed: ${await res1.text()}`).toBe(true);
 
   const res2 = await page.request.post(`${baseURL}/api/properties`, {
-    data: { name: "E2E Selector Property 2", address: "789 Selector Ave" },
+    data: { name: "E2E Selector Property 2", address: "789 Selector Ave", currency: "IDR" },
   });
   expect(res2.ok(), `Create property 2 failed: ${await res2.text()}`).toBe(true);
 

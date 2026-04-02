@@ -34,7 +34,7 @@ setup("create dev user with property", async ({ page, baseURL }) => {
   await page.waitForURL((url) => url.pathname === "/", { timeout: 30000 });
 
   const res = await page.request.post(`${base}/api/properties`, {
-    data: { name: "Dev E2E Property", address: "1 Dev Street" },
+    data: { name: "Dev E2E Property", address: "1 Dev Street", currency: "IDR" },
   });
   const body = res.ok() ? await res.json() : null;
   const propertyId = body?.id;

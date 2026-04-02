@@ -32,7 +32,7 @@ setup("create fresh user with single property", async ({ page, baseURL }) => {
   });
 
   const res = await page.request.post(`${base}/api/properties`, {
-    data: { name: "E2E Single Property", address: "1 Solo St" },
+    data: { name: "E2E Single Property", address: "1 Solo St", currency: "IDR" },
   });
   expect(res.ok(), `Create property failed: ${await res.text()}`).toBe(true);
 

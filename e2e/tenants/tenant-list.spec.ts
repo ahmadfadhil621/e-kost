@@ -108,7 +108,7 @@ test.describe("tenant list view", () => {
 
       // Create a fresh property with no tenants
       const propertyRes = await request.post("/api/properties", {
-        data: { name: `Empty Property ${Date.now()}`, address: "Test Address" },
+        data: { name: `Empty Property ${Date.now()}`, address: "Test Address", currency: "IDR" },
       });
       if (!propertyRes.ok()) { test.skip(); return; }
       const { id: newPropertyId } = await propertyRes.json();
