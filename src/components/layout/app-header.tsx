@@ -1,10 +1,18 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { ProfileDropdown } from "@/components/auth/profile-dropdown";
 import { PropertySwitcher } from "@/components/property/property-switcher";
 import { usePropertyContext } from "@/contexts/property-context";
+
+const ProfileDropdown = dynamic(
+  () =>
+    import("@/components/auth/profile-dropdown").then(
+      (m) => m.ProfileDropdown
+    ),
+  { ssr: false }
+);
 
 async function fetchDashboard(propertyId: string) {
   const res = await fetch(`/api/properties/${propertyId}/dashboard`, {

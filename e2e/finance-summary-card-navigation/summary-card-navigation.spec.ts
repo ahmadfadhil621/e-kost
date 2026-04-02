@@ -108,7 +108,9 @@ test.describe("summary card navigation", () => {
       await expect(netIncomeLink).toBeVisible({ timeout: 5000 });
       await expect(netIncomeLink).toHaveAttribute(
         "href",
-        `/properties/${propertyId}/finance/cashflow`
+        new RegExp(
+          `^/properties/${propertyId}/finance/cashflow\\?year=\\d{4}&month=\\d{1,2}$`
+        )
       );
     });
   });
