@@ -33,7 +33,7 @@ test.describe("assign second tenant to shared room", () => {
   let createdRoomId: string | null = null;
 
   test.afterEach(async ({ request }) => {
-    if (!createdRoomId) return;
+    if (!createdRoomId) { return; }
     await cleanupRoom(request, getPropertyId(), createdRoomId);
     createdRoomId = null;
   });

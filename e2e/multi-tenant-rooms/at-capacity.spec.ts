@@ -28,7 +28,7 @@ test.describe("room at full capacity", () => {
   let createdRoomId: string | null = null;
 
   test.afterEach(async ({ request }) => {
-    if (!createdRoomId) return;
+    if (!createdRoomId) { return; }
     await cleanupRoom(request, getPropertyId(), createdRoomId);
     createdRoomId = null;
   });
