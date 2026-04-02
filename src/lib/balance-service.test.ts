@@ -15,10 +15,12 @@
 // PROP 9 -> it('returns balance when row exists (moved-out preserved by repository) (PROP 9)')
 // PROP 10 -> it('currency formatting covered by component/i18n tests')
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import fc from "fast-check";
 import { BalanceService } from "./balance-service";
 import type { IBalanceRepository } from "./balance-service";
+import type { IBillingCycleRepository } from "@/domain/interfaces/billing-cycle-repository";
+import type { BillingCycle } from "@/domain/schemas/billing-cycle";
 import { createBalanceRow } from "@/test/fixtures/balance";
 
 function createMockBalanceRepo(
@@ -477,6 +479,331 @@ describe("BalanceService", () => {
         ),
         { numRuns: 100 }
       );
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // calculateCycleBreakdown
+  // Traceability: billing-cycle-tracking
+  // REQ BC-1 -> it('returns only unpaid and partial cycles, sorted oldest first')
+  // REQ BC-2 -> it('returns allPaid: true when all months from move-in are paid')
+  // REQ BC-3 -> it('correctly computes amountOwed per cycle')
+  // REQ BC-4 -> it('handles partial payment (totalPaid > 0 but < monthlyRent)')
+  // REQ BC-5 -> it('throws when tenant not found')
+  // REQ BC-6 -> it('throws Forbidden when property access denied')
+  // ---------------------------------------------------------------------------
+  describe("calculateCycleBreakdown", () => {
+    // Pin current date to April 2, 2026 so "current month" = year 2026, month 4
+    beforeAll(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-04-02T00:00:00.000Z"));
+    });
+
+    afterAll(() => {
+      vi.useRealTimers();
+    });
+
+    function createMockBillingCycleRepo(
+      overrides: Partial<IBillingCycleRepository> = {}
+    ): IBillingCycleRepository {
+      return {
+        findOrCreate: vi.fn().mockResolvedValue({
+          id: crypto.randomUUID(),
+          tenantId: crypto.randomUUID(),
+          year: 2026,
+          month: 4,
+          createdAt: new Date(),
+        } satisfies BillingCycle),
+        findWithPaymentSums: vi.fn().mockResolvedValue([]),
+        ...overrides,
+      };
+    }
+
+    // Extended balance repo that also carries getTenantInfo (new method)
+    type ExtendedBalanceRepo = IBalanceRepository & {
+      getTenantInfo: (
+        propertyId: string,
+        tenantId: string
+      ) => Promise<{ monthlyRent: number; movedInAt: Date } | null>;
+    };
+
+    function createExtendedBalanceRepo(
+      tenantInfo: { monthlyRent: number; movedInAt: Date } | null = {
+        monthlyRent: 1_500_000,
+        movedInAt: new Date("2026-02-01"),
+      }
+    ): ExtendedBalanceRepo {
+      return {
+        getBalanceRow: vi.fn(),
+        getBalanceRows: vi.fn(),
+        getTenantInfo: vi.fn().mockResolvedValue(tenantInfo),
+      };
+    }
+
+    describe("good cases", () => {
+      it("returns only unpaid and partial cycles, sorted oldest first", async () => {
+        // Timeline (current = Apr 2026):
+        //   Feb 2026 → paid  (totalPaid = 1_500_000)
+        //   Mar 2026 → partial (totalPaid = 750_000)
+        //   Apr 2026 → unpaid  (no entry)
+        const tenantId = crypto.randomUUID();
+        const balanceRepo = createExtendedBalanceRepo({
+          monthlyRent: 1_500_000,
+          movedInAt: new Date("2026-02-01"),
+        });
+        const billingCycleRepo = createMockBillingCycleRepo({
+          findWithPaymentSums: vi.fn().mockResolvedValue([
+            { id: "c1", year: 2026, month: 2, totalPaid: 1_500_000 },
+            { id: "c2", year: 2026, month: 3, totalPaid: 750_000 },
+            // Apr 2026 absent → unpaid
+          ]),
+        });
+        const service = new BalanceService(
+          balanceRepo,
+          createMockPropertyAccess(),
+          billingCycleRepo
+        );
+
+        const result = await service.calculateCycleBreakdown(
+          crypto.randomUUID(),
+          crypto.randomUUID(),
+          tenantId
+        );
+
+        expect(result.tenantId).toBe(tenantId);
+        expect(result.allPaid).toBe(false);
+        expect(result.unpaidCycles).toHaveLength(2);
+        // Oldest first
+        expect(result.unpaidCycles[0]).toMatchObject({
+          year: 2026,
+          month: 3,
+          status: "partial",
+        });
+        expect(result.unpaidCycles[1]).toMatchObject({
+          year: 2026,
+          month: 4,
+          status: "unpaid",
+        });
+      });
+
+      it("returns allPaid: true when all months from move-in are paid", async () => {
+        // Timeline: Mar 2026 (paid), Apr 2026 (paid)
+        const tenantId = crypto.randomUUID();
+        const balanceRepo = createExtendedBalanceRepo({
+          monthlyRent: 1_000_000,
+          movedInAt: new Date("2026-03-01"),
+        });
+        const billingCycleRepo = createMockBillingCycleRepo({
+          findWithPaymentSums: vi.fn().mockResolvedValue([
+            { id: "c1", year: 2026, month: 3, totalPaid: 1_000_000 },
+            { id: "c2", year: 2026, month: 4, totalPaid: 1_000_000 },
+          ]),
+        });
+        const service = new BalanceService(
+          balanceRepo,
+          createMockPropertyAccess(),
+          billingCycleRepo
+        );
+
+        const result = await service.calculateCycleBreakdown(
+          crypto.randomUUID(),
+          crypto.randomUUID(),
+          tenantId
+        );
+
+        expect(result.allPaid).toBe(true);
+        expect(result.unpaidCycles).toHaveLength(0);
+      });
+
+      it("correctly computes amountOwed per cycle", async () => {
+        // Partial Apr 2026: totalPaid = 500_000, monthlyRent = 1_500_000 → owed = 1_000_000
+        const tenantId = crypto.randomUUID();
+        const balanceRepo = createExtendedBalanceRepo({
+          monthlyRent: 1_500_000,
+          movedInAt: new Date("2026-04-01"),
+        });
+        const billingCycleRepo = createMockBillingCycleRepo({
+          findWithPaymentSums: vi.fn().mockResolvedValue([
+            { id: "c1", year: 2026, month: 4, totalPaid: 500_000 },
+          ]),
+        });
+        const service = new BalanceService(
+          balanceRepo,
+          createMockPropertyAccess(),
+          billingCycleRepo
+        );
+
+        const result = await service.calculateCycleBreakdown(
+          crypto.randomUUID(),
+          crypto.randomUUID(),
+          tenantId
+        );
+
+        expect(result.unpaidCycles).toHaveLength(1);
+        expect(result.unpaidCycles[0]).toMatchObject({
+          year: 2026,
+          month: 4,
+          totalPaid: 500_000,
+          monthlyRent: 1_500_000,
+          amountOwed: 1_000_000,
+          status: "partial",
+        });
+      });
+
+      it("handles partial payment (totalPaid > 0 but < monthlyRent)", async () => {
+        const tenantId = crypto.randomUUID();
+        const balanceRepo = createExtendedBalanceRepo({
+          monthlyRent: 2_000_000,
+          movedInAt: new Date("2026-04-01"),
+        });
+        const billingCycleRepo = createMockBillingCycleRepo({
+          findWithPaymentSums: vi.fn().mockResolvedValue([
+            { id: "c1", year: 2026, month: 4, totalPaid: 1_000_000 },
+          ]),
+        });
+        const service = new BalanceService(
+          balanceRepo,
+          createMockPropertyAccess(),
+          billingCycleRepo
+        );
+
+        const result = await service.calculateCycleBreakdown(
+          crypto.randomUUID(),
+          crypto.randomUUID(),
+          tenantId
+        );
+
+        expect(result.unpaidCycles[0].status).toBe("partial");
+        expect(result.unpaidCycles[0].amountOwed).toBe(1_000_000);
+        expect(result.unpaidCycles[0].totalPaid).toBe(1_000_000);
+      });
+    });
+
+    describe("bad cases", () => {
+      it("throws 'Cannot calculate balance' when tenant not found (getTenantInfo returns null)", async () => {
+        const balanceRepo = createExtendedBalanceRepo(null);
+        const billingCycleRepo = createMockBillingCycleRepo();
+        const service = new BalanceService(
+          balanceRepo,
+          createMockPropertyAccess(),
+          billingCycleRepo
+        );
+
+        await expect(
+          service.calculateCycleBreakdown(
+            crypto.randomUUID(),
+            crypto.randomUUID(),
+            crypto.randomUUID()
+          )
+        ).rejects.toThrow(/cannot calculate balance|not found/i);
+      });
+
+      it("throws 'Forbidden' when property access denied", async () => {
+        const balanceRepo = createExtendedBalanceRepo();
+        const billingCycleRepo = createMockBillingCycleRepo();
+        const propertyAccess = {
+          validateAccess: vi.fn().mockRejectedValue(new Error("Forbidden")),
+        };
+        const service = new BalanceService(
+          balanceRepo,
+          propertyAccess,
+          billingCycleRepo
+        );
+
+        await expect(
+          service.calculateCycleBreakdown("user-1", "prop-1", "tenant-1")
+        ).rejects.toThrow(/Forbidden/i);
+      });
+    });
+
+    describe("edge cases", () => {
+      it("tenant moved in this month (April 2026) with no payments → 1 unpaid cycle", async () => {
+        const tenantId = crypto.randomUUID();
+        const balanceRepo = createExtendedBalanceRepo({
+          monthlyRent: 1_200_000,
+          movedInAt: new Date("2026-04-01"),
+        });
+        const billingCycleRepo = createMockBillingCycleRepo({
+          findWithPaymentSums: vi.fn().mockResolvedValue([]),
+        });
+        const service = new BalanceService(
+          balanceRepo,
+          createMockPropertyAccess(),
+          billingCycleRepo
+        );
+
+        const result = await service.calculateCycleBreakdown(
+          crypto.randomUUID(),
+          crypto.randomUUID(),
+          tenantId
+        );
+
+        expect(result.unpaidCycles).toHaveLength(1);
+        expect(result.unpaidCycles[0]).toMatchObject({
+          year: 2026,
+          month: 4,
+          status: "unpaid",
+          amountOwed: 1_200_000,
+          totalPaid: 0,
+        });
+        expect(result.allPaid).toBe(false);
+      });
+
+      it("tenant with no payments at all — all months since move-in are unpaid", async () => {
+        // movedInAt Feb 2026 → Feb, Mar, Apr = 3 unpaid months
+        const tenantId = crypto.randomUUID();
+        const balanceRepo = createExtendedBalanceRepo({
+          monthlyRent: 1_000_000,
+          movedInAt: new Date("2026-02-01"),
+        });
+        const billingCycleRepo = createMockBillingCycleRepo({
+          findWithPaymentSums: vi.fn().mockResolvedValue([]),
+        });
+        const service = new BalanceService(
+          balanceRepo,
+          createMockPropertyAccess(),
+          billingCycleRepo
+        );
+
+        const result = await service.calculateCycleBreakdown(
+          crypto.randomUUID(),
+          crypto.randomUUID(),
+          tenantId
+        );
+
+        expect(result.unpaidCycles).toHaveLength(3);
+        expect(result.unpaidCycles[0]).toMatchObject({ year: 2026, month: 2, status: "unpaid" });
+        expect(result.unpaidCycles[1]).toMatchObject({ year: 2026, month: 3, status: "unpaid" });
+        expect(result.unpaidCycles[2]).toMatchObject({ year: 2026, month: 4, status: "unpaid" });
+        expect(result.allPaid).toBe(false);
+      });
+
+      it("single cycle where totalPaid exactly equals monthlyRent → allPaid: true", async () => {
+        const tenantId = crypto.randomUUID();
+        const balanceRepo = createExtendedBalanceRepo({
+          monthlyRent: 750_000,
+          movedInAt: new Date("2026-04-01"),
+        });
+        const billingCycleRepo = createMockBillingCycleRepo({
+          findWithPaymentSums: vi.fn().mockResolvedValue([
+            { id: "c1", year: 2026, month: 4, totalPaid: 750_000 },
+          ]),
+        });
+        const service = new BalanceService(
+          balanceRepo,
+          createMockPropertyAccess(),
+          billingCycleRepo
+        );
+
+        const result = await service.calculateCycleBreakdown(
+          crypto.randomUUID(),
+          crypto.randomUUID(),
+          tenantId
+        );
+
+        expect(result.allPaid).toBe(true);
+        expect(result.unpaidCycles).toHaveLength(0);
+      });
     });
   });
 });

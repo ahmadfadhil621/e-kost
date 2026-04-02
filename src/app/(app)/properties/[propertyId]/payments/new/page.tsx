@@ -6,7 +6,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { PaymentForm } from "@/components/payment/payment-form";
 import type { CreatePaymentInput } from "@/domain/schemas/payment";
-import type { TenantOption } from "@/components/payment/payment-form";
+import type { TenantOption, CycleOption } from "@/components/payment/payment-form";
+import type { BillingCycleBreakdown } from "@/domain/schemas/billing-cycle";
 
 type TenantRow = {
   id: string;
@@ -17,35 +18,17 @@ type TenantRow = {
 
 type RoomRow = { id: string; roomNumber: string };
 
+const MONTH_NAMES = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
 async function fetchTenants(propertyId: string): Promise<TenantRow[]> {
   const res = await fetch(`/api/properties/${propertyId}/tenants`, {
     credentials: "include",
   });
-  if (!res.ok) {
-    throw new Error("Failed to fetch tenants");
-  }
+  if (!res.ok) { throw new Error("Failed to fetch tenants"); }
   const data = await res.json();
-  // #region agent log
-  const _rawTenants = data.tenants;
-  fetch("http://127.0.0.1:7266/ingest/aaf93920-0ed8-4918-8ed8-89e8713375fa", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "c14ddc" },
-    body: JSON.stringify({
-      sessionId: "c14ddc",
-      location: "payments/new/page.tsx:fetchTenants",
-      message: "API response data.tenants",
-      data: {
-        hasTenants: "tenants" in data,
-        typeOfTenants: typeof _rawTenants,
-        isArray: Array.isArray(_rawTenants),
-        constructorName: _rawTenants !== null && _rawTenants !== undefined && typeof _rawTenants === "object" ? ( _rawTenants as object).constructor?.name : String(_rawTenants),
-        topLevelKeys: typeof data === "object" && data !== null ? Object.keys(data) : [],
-      },
-      timestamp: Date.now(),
-      hypothesisId: "D",
-    }),
-  }).catch(() => {});
-  // #endregion
   return data.tenants ?? [];
 }
 
@@ -53,11 +36,21 @@ async function fetchRooms(propertyId: string): Promise<RoomRow[]> {
   const res = await fetch(`/api/properties/${propertyId}/rooms`, {
     credentials: "include",
   });
-  if (!res.ok) {
-    throw new Error("Failed to fetch rooms");
-  }
+  if (!res.ok) { throw new Error("Failed to fetch rooms"); }
   const data = await res.json();
   return data.rooms ?? [];
+}
+
+async function fetchBillingCycles(
+  propertyId: string,
+  tenantId: string
+): Promise<BillingCycleBreakdown | null> {
+  const res = await fetch(
+    `/api/properties/${propertyId}/tenants/${tenantId}/billing-cycles`,
+    { credentials: "include" }
+  );
+  if (!res.ok) { return null; }
+  return res.json();
 }
 
 export default function NewPaymentPage() {
@@ -69,37 +62,11 @@ export default function NewPaymentPage() {
   const propertyId = params.propertyId as string;
   const defaultTenantId = searchParams.get("tenantId") ?? "";
 
-  const tenantsQuery = useQuery({
+  const { data: tenantsData = [] } = useQuery({
     queryKey: ["tenants", propertyId],
     queryFn: () => fetchTenants(propertyId),
     enabled: !!propertyId,
   });
-  const tenantsData = tenantsQuery.data;
-  const tenants = tenantsData ?? [];
-
-  // #region agent log
-  const _tenantsType = typeof tenants;
-  const _tenantsIsArray = Array.isArray(tenants);
-  const _tenantsConstructor = tenants !== null && tenants !== undefined ? (tenants as object).constructor?.name : "null/undefined";
-  fetch("http://127.0.0.1:7266/ingest/aaf93920-0ed8-4918-8ed8-89e8713375fa", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "c14ddc" },
-    body: JSON.stringify({
-      sessionId: "c14ddc",
-      location: "payments/new/page.tsx:tenants",
-      message: "tenants value before filter",
-      data: {
-        typeof: _tenantsType,
-        isArray: _tenantsIsArray,
-        constructorName: _tenantsConstructor,
-        hasFilter: typeof (tenants as unknown as { filter?: unknown })?.filter,
-        sampleKeys: tenants !== null && tenants !== undefined && typeof tenants === "object" && !Array.isArray(tenants) ? Object.keys(tenants as object).slice(0, 10) : undefined,
-      },
-      timestamp: Date.now(),
-      hypothesisId: "A",
-    }),
-  }).catch(() => {});
-  // #endregion
 
   const { data: rooms = [] } = useQuery({
     queryKey: ["rooms", propertyId],
@@ -107,14 +74,29 @@ export default function NewPaymentPage() {
     enabled: !!propertyId,
   });
 
-  const tenantsList: TenantRow[] = Array.isArray(tenants) ? tenants : [];
-  const activeTenants: TenantOption[] = tenantsList
+  const { data: cycleBreakdown } = useQuery({
+    queryKey: ["billing-cycles", propertyId, defaultTenantId],
+    queryFn: () => fetchBillingCycles(propertyId, defaultTenantId),
+    enabled: !!propertyId && !!defaultTenantId,
+  });
+
+  const activeTenants: TenantOption[] = tenantsData
     .filter((t: TenantRow) => t.roomId && !t.movedOutAt)
     .map((t: TenantRow) => ({
       id: t.id,
       name: t.name,
       roomNumber: rooms.find((r: RoomRow) => r.id === t.roomId)?.roomNumber,
     }));
+
+  const availableCycles: CycleOption[] | undefined = cycleBreakdown
+    ? cycleBreakdown.unpaidCycles.map((c) => ({
+        year: c.year,
+        month: c.month,
+        label: `${MONTH_NAMES[c.month - 1]} ${c.year}`,
+      }))
+    : undefined;
+
+  const defaultCycle = availableCycles?.[0];
 
   const createMutation = useMutation({
     mutationFn: async (data: CreatePaymentInput) => {
@@ -138,8 +120,10 @@ export default function NewPaymentPage() {
         queryKey: ["balance", propertyId, variables.tenantId],
       });
       queryClient.invalidateQueries({ queryKey: ["balances", propertyId] });
+      queryClient.invalidateQueries({
+        queryKey: ["billing-cycles", propertyId, variables.tenantId],
+      });
       toast({ title: t("payment.create.success") });
-      // Stay on form so success toast is visible (form clears for next entry)
     },
     onError: (err: Error) => {
       toast({
@@ -149,10 +133,6 @@ export default function NewPaymentPage() {
       });
     },
   });
-
-  const handleSubmit = (data: CreatePaymentInput) => {
-    createMutation.mutate(data);
-  };
 
   if (!propertyId) {
     return (
@@ -166,10 +146,13 @@ export default function NewPaymentPage() {
     <div className="space-y-4">
       <PaymentForm
         tenants={activeTenants}
-        onSubmit={handleSubmit}
+        onSubmit={(data) => createMutation.mutate(data)}
         onSuccess={() => {}}
         isLoading={createMutation.isPending}
         defaultTenantId={defaultTenantId}
+        availableCycles={availableCycles}
+        defaultCycleYear={defaultCycle?.year}
+        defaultCycleMonth={defaultCycle?.month}
       />
     </div>
   );

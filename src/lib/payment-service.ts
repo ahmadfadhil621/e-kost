@@ -1,11 +1,13 @@
 import type { IPaymentRepository } from "@/domain/interfaces/payment-repository";
 import type { ITenantRepository } from "@/domain/interfaces/tenant-repository";
+import type { IBillingCycleRepository } from "@/domain/interfaces/billing-cycle-repository";
 import type {
   CreatePaymentInput,
   Payment,
   PaymentPaginationOptions,
   PaymentWithCount,
 } from "@/domain/schemas/payment";
+import type { BillingCycleBreakdown } from "@/domain/schemas/billing-cycle";
 import { createPaymentSchema } from "@/domain/schemas/payment";
 import type { PropertyRole } from "@/domain/schemas/property";
 import type { RecentPayment } from "@/domain/schemas/dashboard";
@@ -14,11 +16,21 @@ export interface IPropertyAccessValidator {
   validateAccess(userId: string, propertyId: string): Promise<PropertyRole>;
 }
 
+interface ICycleBreakdownProvider {
+  calculateCycleBreakdown(
+    userId: string,
+    propertyId: string,
+    tenantId: string
+  ): Promise<BillingCycleBreakdown>;
+}
+
 export class PaymentService {
   constructor(
     private readonly paymentRepo: IPaymentRepository,
     private readonly tenantRepo: ITenantRepository,
-    private readonly propertyAccess: IPropertyAccessValidator
+    private readonly propertyAccess: IPropertyAccessValidator,
+    private readonly billingCycleRepo?: IBillingCycleRepository,
+    private readonly cycleBreakdownProvider?: ICycleBreakdownProvider
   ) {}
 
   async createPayment(
@@ -38,11 +50,52 @@ export class PaymentService {
     if (tenant.movedOutAt) {
       throw new Error("Cannot record payment: tenant has moved out");
     }
+
+    let billingCycleId: string | undefined;
+    if (this.billingCycleRepo) {
+      let targetYear: number;
+      let targetMonth: number;
+
+      if (
+        parsed.billingCycleYear !== undefined &&
+        parsed.billingCycleMonth !== undefined
+      ) {
+        targetYear = parsed.billingCycleYear;
+        targetMonth = parsed.billingCycleMonth;
+      } else if (this.cycleBreakdownProvider) {
+        const breakdown = await this.cycleBreakdownProvider.calculateCycleBreakdown(
+          userId,
+          propertyId,
+          parsed.tenantId
+        );
+        if (breakdown.unpaidCycles.length > 0) {
+          targetYear = breakdown.unpaidCycles[0].year;
+          targetMonth = breakdown.unpaidCycles[0].month;
+        } else {
+          const now = new Date();
+          targetYear = now.getFullYear();
+          targetMonth = now.getMonth() + 1;
+        }
+      } else {
+        const now = new Date();
+        targetYear = now.getFullYear();
+        targetMonth = now.getMonth() + 1;
+      }
+
+      const cycle = await this.billingCycleRepo.findOrCreate(
+        parsed.tenantId,
+        targetYear,
+        targetMonth
+      );
+      billingCycleId = cycle.id;
+    }
+
     const paymentDate = new Date(parsed.paymentDate);
     return this.paymentRepo.create({
       tenantId: parsed.tenantId,
       amount: parsed.amount,
       paymentDate,
+      billingCycleId,
     });
   }
 

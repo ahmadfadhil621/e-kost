@@ -14,12 +14,18 @@
 // PROP 5 -> it('listPayments returns payments with tenant names sorted by paymentDate desc (PROP 5, 6)')
 // PROP 6 -> it('listPayments returns payments with tenant names sorted by paymentDate desc (PROP 5, 6)')
 // PROP 10 -> it('createPayment sets createdAt in UTC (PROP 10)')
+// REQ BC-7 -> it('FIFO: assigns to oldest unpaid cycle when no billingCycleYear/Month provided')
+// REQ BC-8 -> it('explicit override: assigns to specified billingCycleYear/Month')
+// REQ BC-9 -> it('creates billing cycle record via billingCycleRepo.findOrCreate')
+// REQ BC-10 -> it('passes billingCycleId to paymentRepo.create')
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import fc from "fast-check";
 import { PaymentService } from "./payment-service";
 import type { IPaymentRepository } from "@/domain/interfaces/payment-repository";
 import type { ITenantRepository } from "@/domain/interfaces/tenant-repository";
+import type { IBillingCycleRepository } from "@/domain/interfaces/billing-cycle-repository";
+import type { BillingCycleBreakdown } from "@/domain/schemas/billing-cycle";
 import { createPayment } from "@/test/fixtures/payment";
 import { createTenant } from "@/test/fixtures/tenant";
 
@@ -976,6 +982,433 @@ describe("PaymentService", () => {
         ),
         { numRuns: 100 }
       );
+    });
+  });
+});
+
+// =============================================================================
+// createPayment — billing cycle assignment
+// Traceability: billing-cycle-tracking
+// =============================================================================
+describe("createPayment - billing cycle assignment", () => {
+  // Pin current date to April 2, 2026 so "current month" = year 2026, month 4
+  beforeAll(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-04-02T00:00:00.000Z"));
+  });
+
+  afterAll(() => {
+    vi.useRealTimers();
+  });
+
+  // ── helpers ─────────────────────────────────────────────────────────────────
+
+  function createMockPaymentRepo(
+    overrides: Partial<IPaymentRepository> = {}
+  ): IPaymentRepository {
+    return {
+      create: vi.fn(),
+      findById: vi.fn(),
+      findByProperty: vi.fn(),
+      findByTenant: vi.fn(),
+      sumByPropertyAndMonth: vi.fn(),
+      delete: vi.fn(),
+      findRecentByProperty: vi.fn(),
+      ...overrides,
+    };
+  }
+
+  function createMockTenantRepo(
+    overrides: Partial<ITenantRepository> = {}
+  ): ITenantRepository {
+    return {
+      create: vi.fn(),
+      findById: vi.fn(),
+      findByProperty: vi.fn(),
+      update: vi.fn(),
+      assignRoom: vi.fn(),
+      removeRoomAssignment: vi.fn(),
+      softDelete: vi.fn(),
+      ...overrides,
+    };
+  }
+
+  function createMockBillingCycleRepo(
+    overrides: Partial<IBillingCycleRepository> = {}
+  ): IBillingCycleRepository {
+    return {
+      findOrCreate: vi.fn().mockResolvedValue({
+        id: "generated-cycle-id",
+        tenantId: "t1",
+        year: 2026,
+        month: 2,
+        createdAt: new Date(),
+      }),
+      findWithPaymentSums: vi.fn().mockResolvedValue([]),
+      ...overrides,
+    };
+  }
+
+  function createMockCycleBreakdownProvider(
+    breakdown: BillingCycleBreakdown = {
+      tenantId: "t1",
+      unpaidCycles: [
+        {
+          year: 2026,
+          month: 2,
+          cycleId: null,
+          totalPaid: 0,
+          monthlyRent: 1_500_000,
+          status: "unpaid",
+          amountOwed: 1_500_000,
+        },
+      ],
+      allPaid: false,
+    }
+  ) {
+    return {
+      calculateCycleBreakdown: vi.fn().mockResolvedValue(breakdown),
+    };
+  }
+
+  const createMockPropertyAccess = (role: "owner" | "staff" = "owner") => ({
+    validateAccess: vi.fn().mockResolvedValue(role),
+  });
+
+  /** Build a PaymentService wired for cycle-assignment tests. */
+  function makeService({
+    paymentRepo = createMockPaymentRepo(),
+    tenantRepo = createMockTenantRepo(),
+    propertyAccess = createMockPropertyAccess(),
+    billingCycleRepo = createMockBillingCycleRepo(),
+    cycleBreakdownProvider = createMockCycleBreakdownProvider(),
+  }: {
+    paymentRepo?: IPaymentRepository;
+    tenantRepo?: ITenantRepository;
+    propertyAccess?: { validateAccess: ReturnType<typeof vi.fn> };
+    billingCycleRepo?: IBillingCycleRepository;
+    cycleBreakdownProvider?: { calculateCycleBreakdown: ReturnType<typeof vi.fn> };
+  } = {}) {
+    return new PaymentService(
+      paymentRepo,
+      tenantRepo,
+      propertyAccess,
+      billingCycleRepo,
+      cycleBreakdownProvider
+    );
+  }
+
+  describe("good cases", () => {
+    it("FIFO default: assigns to oldest unpaid cycle when no billingCycleYear/Month given", async () => {
+      const propertyId = crypto.randomUUID();
+      const tenantId = crypto.randomUUID();
+      const tenant = createTenant({
+        propertyId,
+        id: tenantId,
+        roomId: crypto.randomUUID(),
+        movedOutAt: null,
+      });
+      const created = createPayment({
+        tenantId,
+        amount: 500_000,
+        paymentDate: new Date("2026-04-01"),
+        billingCycleId: "generated-cycle-id",
+      });
+      const billingCycleRepo = createMockBillingCycleRepo({
+        findOrCreate: vi.fn().mockResolvedValue({
+          id: "generated-cycle-id",
+          tenantId,
+          year: 2026,
+          month: 2,
+          createdAt: new Date(),
+        }),
+      });
+      const cycleBreakdownProvider = createMockCycleBreakdownProvider({
+        tenantId,
+        unpaidCycles: [
+          {
+            year: 2026,
+            month: 2,
+            cycleId: null,
+            totalPaid: 0,
+            monthlyRent: 1_500_000,
+            status: "unpaid",
+            amountOwed: 1_500_000,
+          },
+          {
+            year: 2026,
+            month: 3,
+            cycleId: null,
+            totalPaid: 0,
+            monthlyRent: 1_500_000,
+            status: "unpaid",
+            amountOwed: 1_500_000,
+          },
+        ],
+        allPaid: false,
+      });
+      const paymentRepo = createMockPaymentRepo({
+        create: vi.fn().mockResolvedValue(created),
+      });
+      const service = makeService({
+        paymentRepo,
+        tenantRepo: createMockTenantRepo({ findById: vi.fn().mockResolvedValue(tenant) }),
+        billingCycleRepo,
+        cycleBreakdownProvider,
+      });
+
+      await service.createPayment(crypto.randomUUID(), propertyId, {
+        tenantId,
+        amount: 500_000,
+        paymentDate: "2026-04-01",
+        // no billingCycleYear / billingCycleMonth
+      });
+
+      // Must have called findOrCreate with the OLDEST unpaid cycle (Feb 2026)
+      expect(billingCycleRepo.findOrCreate).toHaveBeenCalledWith(tenantId, 2026, 2);
+    });
+
+    it("explicit override: assigns to specified billingCycleYear/Month", async () => {
+      const propertyId = crypto.randomUUID();
+      const tenantId = crypto.randomUUID();
+      const tenant = createTenant({
+        propertyId,
+        id: tenantId,
+        roomId: crypto.randomUUID(),
+        movedOutAt: null,
+      });
+      const created = createPayment({ tenantId, billingCycleId: "override-cycle-id" });
+      const billingCycleRepo = createMockBillingCycleRepo({
+        findOrCreate: vi.fn().mockResolvedValue({
+          id: "override-cycle-id",
+          tenantId,
+          year: 2026,
+          month: 3,
+          createdAt: new Date(),
+        }),
+      });
+      const cycleBreakdownProvider = createMockCycleBreakdownProvider();
+      const paymentRepo = createMockPaymentRepo({
+        create: vi.fn().mockResolvedValue(created),
+      });
+      const service = makeService({
+        paymentRepo,
+        tenantRepo: createMockTenantRepo({ findById: vi.fn().mockResolvedValue(tenant) }),
+        billingCycleRepo,
+        cycleBreakdownProvider,
+      });
+
+      await service.createPayment(crypto.randomUUID(), propertyId, {
+        tenantId,
+        amount: 1_000_000,
+        paymentDate: "2026-04-01",
+        billingCycleYear: 2026,
+        billingCycleMonth: 3, // explicit override → March
+      });
+
+      // Must use the explicitly provided year/month — NOT call calculateCycleBreakdown
+      expect(billingCycleRepo.findOrCreate).toHaveBeenCalledWith(tenantId, 2026, 3);
+      expect(cycleBreakdownProvider.calculateCycleBreakdown).not.toHaveBeenCalled();
+    });
+
+    it("creates billing cycle record via billingCycleRepo.findOrCreate", async () => {
+      const propertyId = crypto.randomUUID();
+      const tenantId = crypto.randomUUID();
+      const tenant = createTenant({
+        propertyId,
+        id: tenantId,
+        roomId: crypto.randomUUID(),
+        movedOutAt: null,
+      });
+      const cycleId = "my-cycle-id";
+      const billingCycleRepo = createMockBillingCycleRepo({
+        findOrCreate: vi.fn().mockResolvedValue({
+          id: cycleId,
+          tenantId,
+          year: 2026,
+          month: 4,
+          createdAt: new Date(),
+        }),
+      });
+      const paymentRepo = createMockPaymentRepo({
+        create: vi.fn().mockResolvedValue(
+          createPayment({ tenantId, billingCycleId: cycleId })
+        ),
+      });
+      const service = makeService({
+        paymentRepo,
+        tenantRepo: createMockTenantRepo({ findById: vi.fn().mockResolvedValue(tenant) }),
+        billingCycleRepo,
+        cycleBreakdownProvider: createMockCycleBreakdownProvider({
+          tenantId,
+          unpaidCycles: [
+            { year: 2026, month: 4, cycleId: null, totalPaid: 0, monthlyRent: 1_000_000, status: "unpaid", amountOwed: 1_000_000 },
+          ],
+          allPaid: false,
+        }),
+      });
+
+      await service.createPayment(crypto.randomUUID(), propertyId, {
+        tenantId,
+        amount: 500_000,
+        paymentDate: "2026-04-01",
+      });
+
+      expect(billingCycleRepo.findOrCreate).toHaveBeenCalledTimes(1);
+    });
+
+    it("passes billingCycleId to paymentRepo.create", async () => {
+      const propertyId = crypto.randomUUID();
+      const tenantId = crypto.randomUUID();
+      const tenant = createTenant({
+        propertyId,
+        id: tenantId,
+        roomId: crypto.randomUUID(),
+        movedOutAt: null,
+      });
+      const cycleId = "cycle-id-for-payment";
+      const billingCycleRepo = createMockBillingCycleRepo({
+        findOrCreate: vi.fn().mockResolvedValue({
+          id: cycleId,
+          tenantId,
+          year: 2026,
+          month: 2,
+          createdAt: new Date(),
+        }),
+      });
+      const mockCreate = vi.fn().mockResolvedValue(
+        createPayment({ tenantId, billingCycleId: cycleId })
+      );
+      const paymentRepo = createMockPaymentRepo({ create: mockCreate });
+      const service = makeService({
+        paymentRepo,
+        tenantRepo: createMockTenantRepo({ findById: vi.fn().mockResolvedValue(tenant) }),
+        billingCycleRepo,
+        cycleBreakdownProvider: createMockCycleBreakdownProvider({
+          tenantId,
+          unpaidCycles: [
+            { year: 2026, month: 2, cycleId: null, totalPaid: 0, monthlyRent: 1_000_000, status: "unpaid", amountOwed: 1_000_000 },
+          ],
+          allPaid: false,
+        }),
+      });
+
+      await service.createPayment(crypto.randomUUID(), propertyId, {
+        tenantId,
+        amount: 300_000,
+        paymentDate: "2026-04-01",
+      });
+
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ billingCycleId: cycleId })
+      );
+    });
+  });
+
+  describe("bad cases", () => {
+    it("all cycles paid with no explicit override → assigns to current month (April 2026) as fallback", async () => {
+      const propertyId = crypto.randomUUID();
+      const tenantId = crypto.randomUUID();
+      const tenant = createTenant({
+        propertyId,
+        id: tenantId,
+        roomId: crypto.randomUUID(),
+        movedOutAt: null,
+      });
+      const billingCycleRepo = createMockBillingCycleRepo({
+        findOrCreate: vi.fn().mockResolvedValue({
+          id: "fallback-cycle-id",
+          tenantId,
+          year: 2026,
+          month: 4,
+          createdAt: new Date(),
+        }),
+      });
+      // calculateCycleBreakdown says allPaid: true — no unpaid cycles
+      const cycleBreakdownProvider = createMockCycleBreakdownProvider({
+        tenantId,
+        unpaidCycles: [],
+        allPaid: true,
+      });
+      const paymentRepo = createMockPaymentRepo({
+        create: vi.fn().mockResolvedValue(
+          createPayment({ tenantId, billingCycleId: "fallback-cycle-id" })
+        ),
+      });
+      const service = makeService({
+        paymentRepo,
+        tenantRepo: createMockTenantRepo({ findById: vi.fn().mockResolvedValue(tenant) }),
+        billingCycleRepo,
+        cycleBreakdownProvider,
+      });
+
+      await service.createPayment(crypto.randomUUID(), propertyId, {
+        tenantId,
+        amount: 500_000,
+        paymentDate: "2026-04-01",
+        // no billingCycleYear/Month — FIFO but all paid → fallback to current month
+      });
+
+      // Fallback: current month = April 2026
+      expect(billingCycleRepo.findOrCreate).toHaveBeenCalledWith(tenantId, 2026, 4);
+    });
+  });
+
+  describe("edge cases", () => {
+    it("first ever payment for tenant (no prior cycles) → assigns to first unpaid cycle from breakdown", async () => {
+      const propertyId = crypto.randomUUID();
+      const tenantId = crypto.randomUUID();
+      const tenant = createTenant({
+        propertyId,
+        id: tenantId,
+        roomId: crypto.randomUUID(),
+        movedOutAt: null,
+      });
+      const billingCycleRepo = createMockBillingCycleRepo({
+        findOrCreate: vi.fn().mockResolvedValue({
+          id: "first-cycle-id",
+          tenantId,
+          year: 2026,
+          month: 4,
+          createdAt: new Date(),
+        }),
+      });
+      // No prior cycles: calculateCycleBreakdown returns current month as sole unpaid
+      const cycleBreakdownProvider = createMockCycleBreakdownProvider({
+        tenantId,
+        unpaidCycles: [
+          {
+            year: 2026,
+            month: 4,
+            cycleId: null,
+            totalPaid: 0,
+            monthlyRent: 1_000_000,
+            status: "unpaid",
+            amountOwed: 1_000_000,
+          },
+        ],
+        allPaid: false,
+      });
+      const paymentRepo = createMockPaymentRepo({
+        create: vi.fn().mockResolvedValue(
+          createPayment({ tenantId, billingCycleId: "first-cycle-id" })
+        ),
+      });
+      const service = makeService({
+        paymentRepo,
+        tenantRepo: createMockTenantRepo({ findById: vi.fn().mockResolvedValue(tenant) }),
+        billingCycleRepo,
+        cycleBreakdownProvider,
+      });
+
+      const result = await service.createPayment(crypto.randomUUID(), propertyId, {
+        tenantId,
+        amount: 1_000_000,
+        paymentDate: "2026-04-01",
+      });
+
+      expect(billingCycleRepo.findOrCreate).toHaveBeenCalledWith(tenantId, 2026, 4);
+      expect(result.billingCycleId).toBe("first-cycle-id");
     });
   });
 });

@@ -645,5 +645,19 @@
       "currencyManagement": "Currency Management",
       "currencyManagementDesc": "Add or remove available currencies"
     }
+  },
+  "billing": {
+    "cycles": {
+      "title": "Billing Cycles",
+      "allPaid": "All months paid",
+      "status": {
+        "paid": "Paid",
+        "partial": "Partial",
+        "unpaid": "Unpaid"
+      },
+      "amountOwed": "Amount owed"
+    },
+    "period": "Billing period",
+    "selectPeriod": "Select billing period"
   }
 }

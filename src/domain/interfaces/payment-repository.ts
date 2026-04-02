@@ -5,6 +5,7 @@ export interface IPaymentRepository {
     tenantId: string;
     amount: number;
     paymentDate: Date;
+    billingCycleId?: string;
   }): Promise<Payment>;
   findById(id: string): Promise<Payment | null>;
   findByProperty(propertyId: string): Promise<Payment[]>;

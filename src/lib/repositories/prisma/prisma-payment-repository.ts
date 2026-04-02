@@ -26,6 +26,7 @@ function toPayment(p: {
   amount: unknown;
   paymentDate: Date;
   createdAt: Date;
+  billingCycleId?: string | null;
   tenant: { name: string };
 }): Payment {
   return {
@@ -35,6 +36,7 @@ function toPayment(p: {
     amount: toNumber(p.amount),
     paymentDate: p.paymentDate,
     createdAt: p.createdAt,
+    billingCycleId: p.billingCycleId,
   };
 }
 
@@ -43,12 +45,14 @@ export class PrismaPaymentRepository implements IPaymentRepository {
     tenantId: string;
     amount: number;
     paymentDate: Date;
+    billingCycleId?: string;
   }): Promise<Payment> {
     const created = await prisma.payment.create({
       data: {
         tenantId: data.tenantId,
         amount: data.amount,
         paymentDate: data.paymentDate,
+        billingCycleId: data.billingCycleId,
       },
       include: { tenant: true },
     });

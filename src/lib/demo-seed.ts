@@ -9,12 +9,40 @@ function monthStart(monthsBack: number): Date {
   return d;
 }
 
-function paymentDate(monthsBack: number): Date {
+function paymentDate(monthsBack: number, day = 5): Date {
   const d = new Date();
   d.setMonth(d.getMonth() - monthsBack);
-  d.setDate(monthsBack === 0 ? 2 : 5);
+  d.setDate(day);
   d.setHours(0, 0, 0, 0);
   return d;
+}
+
+function yearMonth(monthsBack: number): { year: number; month: number } {
+  const d = new Date();
+  d.setMonth(d.getMonth() - monthsBack);
+  return { year: d.getFullYear(), month: d.getMonth() + 1 };
+}
+
+async function recordPayment(
+  tenantId: string,
+  amount: number,
+  monthsBack: number,
+  day = 5
+) {
+  const { year, month } = yearMonth(monthsBack);
+  const cycle = await prisma.billing_cycle.upsert({
+    where: { tenantId_year_month: { tenantId, year, month } },
+    create: { tenantId, year, month },
+    update: {},
+  });
+  await prisma.payment.create({
+    data: {
+      tenantId,
+      amount,
+      paymentDate: paymentDate(monthsBack, day),
+      billingCycleId: cycle.id,
+    },
+  });
 }
 
 export async function seedDemoData(ownerId: string): Promise<void> {
@@ -50,39 +78,59 @@ export async function seedDemoData(ownerId: string): Promise<void> {
 
   const roomMap = Object.fromEntries(rooms.map((r) => [r.roomNumber, r]));
 
-  const tenantData = [
-    { name: "Budi Santoso", roomNumber: "101", movedInMonthsAgo: 6, paidThisMonth: true },
-    { name: "Siti Rahayu", roomNumber: "102", movedInMonthsAgo: 5, paidThisMonth: true },
-    { name: "Ahmad Fauzi", roomNumber: "103", movedInMonthsAgo: 8, paidThisMonth: false },
-    { name: "Dewi Lestari", roomNumber: "201", movedInMonthsAgo: 3, paidThisMonth: false },
-  ];
+  // Scenario 1 — Budi Santoso: fully paid up (all cycles paid)
+  const budi = await prisma.tenant.create({
+    data: {
+      propertyId: property.id,
+      roomId: roomMap["101"].id,
+      name: "Budi Santoso",
+      movedInAt: monthStart(4),
+    },
+  });
+  for (const m of [4, 3, 2, 1, 0]) {
+    await recordPayment(budi.id, 1200000, m);
+  }
 
-  await Promise.all(
-    tenantData.map(async ({ name, roomNumber, movedInMonthsAgo, paidThisMonth }) => {
-      const room = roomMap[roomNumber];
-      const tenant = await prisma.tenant.create({
-        data: {
-          propertyId: property.id,
-          roomId: room.id,
-          name,
-          movedInAt: monthStart(movedInMonthsAgo),
-        },
-      });
+  // Scenario 2 — Siti Rahayu: 2 consecutive unpaid months (current + prev)
+  const siti = await prisma.tenant.create({
+    data: {
+      propertyId: property.id,
+      roomId: roomMap["102"].id,
+      name: "Siti Rahayu",
+      movedInAt: monthStart(4),
+    },
+  });
+  // Paid months 4 and 3 months ago, NOT the last 2
+  for (const m of [4, 3]) {
+    await recordPayment(siti.id, 1200000, m);
+  }
 
-      const paymentMonths = paidThisMonth ? [3, 2, 1, 0] : [3, 2, 1];
-      await Promise.all(
-        paymentMonths.map((monthsBack) =>
-          prisma.payment.create({
-            data: {
-              tenantId: tenant.id,
-              amount: room.monthlyRent,
-              paymentDate: paymentDate(monthsBack),
-            },
-          })
-        )
-      );
-    })
-  );
+  // Scenario 3 — Ahmad Fauzi: partial payment on most recent month
+  const ahmad = await prisma.tenant.create({
+    data: {
+      propertyId: property.id,
+      roomId: roomMap["103"].id,
+      name: "Ahmad Fauzi",
+      movedInAt: monthStart(3),
+    },
+  });
+  await recordPayment(ahmad.id, 1500000, 3); // paid in full
+  await recordPayment(ahmad.id, 1500000, 2); // paid in full
+  await recordPayment(ahmad.id, 750000, 1);  // partial for last month
+  // current month = unpaid
+
+  // Scenario 4 — Dewi Lestari: skipped month 2 (paid 1st and 3rd, not 2nd)
+  const dewi = await prisma.tenant.create({
+    data: {
+      propertyId: property.id,
+      roomId: roomMap["201"].id,
+      name: "Dewi Lestari",
+      movedInAt: monthStart(3),
+    },
+  });
+  await recordPayment(dewi.id, 1800000, 3); // oldest: paid
+  // monthsBack=2 is intentionally skipped
+  await recordPayment(dewi.id, 1800000, 1); // paid — but skipped m=2
 
   const expenseData: { monthsBack: number; category: ExpenseCategory; amount: number }[] = [
     { monthsBack: 0, category: "ELECTRICITY", amount: 450000 },

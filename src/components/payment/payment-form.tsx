@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
@@ -25,12 +25,21 @@ export interface TenantOption {
   roomNumber?: string;
 }
 
+export interface CycleOption {
+  year: number;
+  month: number;
+  label: string;
+}
+
 interface PaymentFormProps {
   tenants?: TenantOption[];
   onSubmit?: (data: CreatePaymentInput) => void | Promise<void>;
   onSuccess?: () => void;
   isLoading?: boolean;
   defaultTenantId?: string;
+  availableCycles?: CycleOption[];
+  defaultCycleYear?: number;
+  defaultCycleMonth?: number;
 }
 
 const defaultPaymentDate = () =>
@@ -42,8 +51,19 @@ export function PaymentForm({
   onSuccess,
   isLoading = false,
   defaultTenantId = "",
+  availableCycles,
+  defaultCycleYear,
+  defaultCycleMonth,
 }: PaymentFormProps) {
   const { t } = useTranslation();
+
+  const defaultCycleValue =
+    defaultCycleYear !== undefined && defaultCycleMonth !== undefined
+      ? `${defaultCycleYear}-${defaultCycleMonth}`
+      : availableCycles && availableCycles.length > 0
+      ? `${availableCycles[0].year}-${availableCycles[0].month}`
+      : "";
+
   const {
     register,
     handleSubmit,
@@ -57,6 +77,8 @@ export function PaymentForm({
       tenantId: defaultTenantId,
       amount: undefined as unknown as number,
       paymentDate: defaultPaymentDate(),
+      billingCycleYear: defaultCycleYear,
+      billingCycleMonth: defaultCycleMonth,
     },
   });
 
@@ -67,6 +89,14 @@ export function PaymentForm({
   }, [defaultTenantId, setValue]);
 
   const tenantId = watch("tenantId");
+  const [cycleValue, setCycleValue] = useState(defaultCycleValue);
+
+  const handleCycleChange = (v: string) => {
+    setCycleValue(v);
+    const [year, month] = v.split("-").map(Number);
+    setValue("billingCycleYear", year, { shouldValidate: false });
+    setValue("billingCycleMonth", month, { shouldValidate: false });
+  };
 
   const handleFormSubmit = async (data: CreatePaymentInput) => {
     await onSubmit?.(data);
@@ -149,6 +179,30 @@ export function PaymentForm({
           </p>
         )}
       </div>
+      {availableCycles && availableCycles.length > 0 && (
+        <div className="space-y-2">
+          <Label htmlFor="billing-period">{t("billing.period")}</Label>
+          <Select
+            value={cycleValue}
+            onValueChange={handleCycleChange}
+          >
+            <SelectTrigger
+              id="billing-period"
+              aria-label={t("billing.period")}
+              className="min-h-[44px]"
+            >
+              <SelectValue placeholder={t("billing.selectPeriod")} />
+            </SelectTrigger>
+            <SelectContent>
+              {availableCycles.map((c) => (
+                <SelectItem key={`${c.year}-${c.month}`} value={`${c.year}-${c.month}`}>
+                  {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
       <Button
         type="submit"
         className="min-h-[44px] min-w-[44px]"

@@ -7,7 +7,7 @@ export const createPaymentSchema = z
       .number()
       .positive("Amount must be positive")
       .multipleOf(0.01, "Amount must have at most 2 decimal places")
-      .max(999999.99, "Amount exceeds maximum"),
+      .max(9_999_999_999.99, "Amount exceeds maximum"),
     paymentDate: z
       .string()
       .min(1, "Payment date is required")
@@ -18,7 +18,18 @@ export const createPaymentSchema = z
         },
         "Payment date must be a valid date and cannot be in the future"
       ),
-  });
+    billingCycleYear: z.number().int().min(2000).max(2100).optional(),
+    billingCycleMonth: z.number().int().min(1).max(12).optional(),
+  })
+  .refine(
+    (data) =>
+      (data.billingCycleYear === undefined) ===
+      (data.billingCycleMonth === undefined),
+    {
+      message: "billingCycleYear and billingCycleMonth must both be set or both be absent",
+      path: ["billingCycleYear"],
+    }
+  );
 
 export type CreatePaymentInput = z.infer<typeof createPaymentSchema>;
 
@@ -29,6 +40,7 @@ export interface Payment {
   amount: number;
   paymentDate: Date;
   createdAt: Date;
+  billingCycleId?: string | null;
 }
 
 export interface PaymentWithCount {

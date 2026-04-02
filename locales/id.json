@@ -645,5 +645,19 @@
       "currencyManagement": "Manajemen Mata Uang",
       "currencyManagementDesc": "Tambah atau hapus mata uang yang tersedia"
     }
+  },
+  "billing": {
+    "cycles": {
+      "title": "Siklus Tagihan",
+      "allPaid": "Semua bulan terbayar",
+      "status": {
+        "paid": "Terbayar",
+        "partial": "Sebagian",
+        "unpaid": "Belum bayar"
+      },
+      "amountOwed": "Jumlah terutang"
+    },
+    "period": "Periode tagihan",
+    "selectPeriod": "Pilih periode tagihan"
   }
 }
