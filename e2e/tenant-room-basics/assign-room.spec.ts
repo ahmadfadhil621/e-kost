@@ -144,8 +144,7 @@ test.describe("assign room", () => {
         .click();
       await expect(
         page
-          .getByText(/no available rooms|no rooms/i)
-          .or(page.getByText(/available rooms/i))
+          .getByText(/rooms with available capacity|no available rooms|no rooms/i)
           .first()
       ).toBeVisible({ timeout: 12000 });
     });

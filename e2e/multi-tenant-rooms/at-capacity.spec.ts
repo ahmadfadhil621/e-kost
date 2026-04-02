@@ -5,6 +5,7 @@
 // REQ 3.3 -> test('manual status change blocked when active tenants present')
 
 import { test, expect } from "@playwright/test";
+import type { APIRequestContext } from "@playwright/test";
 import {
   getPropertyId,
 } from "../helpers/room-inventory";
@@ -12,7 +13,26 @@ import { goToTenantDetail } from "../helpers/tenant-room-basics";
 
 test.use({ storageState: "e2e/.auth/user-with-property.json" });
 
+async function cleanupRoom(request: APIRequestContext, propertyId: string, roomId: string) {
+  const roomRes = await request.get(`/api/properties/${propertyId}/rooms/${roomId}`).catch(() => null);
+  if (roomRes?.ok()) {
+    const room = await roomRes.json().catch(() => ({}));
+    for (const tenant of room?.tenants ?? []) {
+      await request.post(`/api/properties/${propertyId}/tenants/${tenant.id}/move-out`).catch(() => {});
+    }
+  }
+  await request.delete(`/api/properties/${propertyId}/rooms/${roomId}`).catch(() => {});
+}
+
 test.describe("room at full capacity", () => {
+  let createdRoomId: string | null = null;
+
+  test.afterEach(async ({ request }) => {
+    if (!createdRoomId) return;
+    await cleanupRoom(request, getPropertyId(), createdRoomId);
+    createdRoomId = null;
+  });
+
   test.describe("good cases", () => {
     test("full room does not appear in assign dialog", async ({
       page,
@@ -38,6 +58,7 @@ test.describe("room at full capacity", () => {
       const roomBody = await roomRes.json();
       const roomId = roomBody?.id;
       if (!roomId) { test.skip(); return; }
+      createdRoomId = roomId;
 
       // Assign occupant via API to fill the room
       const occupantRes = await request.post(`/api/properties/${propertyId}/tenants`, {
@@ -89,6 +110,7 @@ test.describe("room at full capacity", () => {
       if (!roomRes.ok()) { test.skip(); return; }
       const roomId = (await roomRes.json())?.id;
       if (!roomId) { test.skip(); return; }
+      createdRoomId = roomId;
 
       // Fill the room
       const t1Res = await request.post(`/api/properties/${propertyId}/tenants`, {
@@ -135,6 +157,7 @@ test.describe("room at full capacity", () => {
       if (!roomRes.ok()) { test.skip(); return; }
       const roomId = (await roomRes.json())?.id;
       if (!roomId) { test.skip(); return; }
+      createdRoomId = roomId;
 
       // Fill it
       const occupantRes = await request.post(`/api/properties/${propertyId}/tenants`, {
@@ -183,6 +206,7 @@ test.describe("room at full capacity", () => {
       if (!roomRes.ok()) { test.skip(); return; }
       const roomId = (await roomRes.json())?.id;
       if (!roomId) { test.skip(); return; }
+      createdRoomId = roomId;
 
       // Assign a tenant
       const tRes = await request.post(`/api/properties/${propertyId}/tenants`, {

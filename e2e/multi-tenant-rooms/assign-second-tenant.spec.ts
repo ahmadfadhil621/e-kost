@@ -9,6 +9,7 @@
 // REQ 6.3 -> test('room detail shows capacity and occupancy count')
 
 import { test, expect } from "@playwright/test";
+import type { APIRequestContext } from "@playwright/test";
 import {
   getPropertyId,
   goToRoomDetail,
@@ -17,7 +18,26 @@ import { goToTenantDetail } from "../helpers/tenant-room-basics";
 
 test.use({ storageState: "e2e/.auth/user-with-property.json" });
 
+async function cleanupRoom(request: APIRequestContext, propertyId: string, roomId: string) {
+  const roomRes = await request.get(`/api/properties/${propertyId}/rooms/${roomId}`).catch(() => null);
+  if (roomRes?.ok()) {
+    const room = await roomRes.json().catch(() => ({}));
+    for (const tenant of room?.tenants ?? []) {
+      await request.post(`/api/properties/${propertyId}/tenants/${tenant.id}/move-out`).catch(() => {});
+    }
+  }
+  await request.delete(`/api/properties/${propertyId}/rooms/${roomId}`).catch(() => {});
+}
+
 test.describe("assign second tenant to shared room", () => {
+  let createdRoomId: string | null = null;
+
+  test.afterEach(async ({ request }) => {
+    if (!createdRoomId) return;
+    await cleanupRoom(request, getPropertyId(), createdRoomId);
+    createdRoomId = null;
+  });
+
   test.describe("good cases", () => {
     test("assigns a second tenant to a room with capacity 2", async ({
       page,
@@ -42,6 +62,7 @@ test.describe("assign second tenant to shared room", () => {
       const roomBody = await roomRes.json();
       const roomId = roomBody?.id;
       if (!roomId) { test.skip(); return; }
+      createdRoomId = roomId;
 
       // Create tenant 1
       const t1Res = await request.post(`/api/properties/${propertyId}/tenants`, {
@@ -134,6 +155,7 @@ test.describe("assign second tenant to shared room", () => {
       const roomBody = await roomRes.json();
       const roomId = roomBody?.id;
       if (!roomId) { test.skip(); return; }
+      createdRoomId = roomId;
 
       // Assign one tenant via API
       const tRes = await request.post(`/api/properties/${propertyId}/tenants`, {
@@ -184,6 +206,7 @@ test.describe("assign second tenant to shared room", () => {
       const roomBody = await roomRes.json();
       const roomId = roomBody?.id;
       if (!roomId) { test.skip(); return; }
+      createdRoomId = roomId;
 
       // Assign first tenant to make room "occupied"
       const t1Res = await request.post(`/api/properties/${propertyId}/tenants`, {

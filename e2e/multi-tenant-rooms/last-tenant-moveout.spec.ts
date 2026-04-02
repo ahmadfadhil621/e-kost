@@ -6,6 +6,7 @@
 // REQ 3.2 -> test('last tenant move-out transitions room to available')
 
 import { test, expect } from "@playwright/test";
+import type { APIRequestContext } from "@playwright/test";
 import {
   getPropertyId,
   goToRoomDetail,
@@ -14,7 +15,26 @@ import { goToTenantDetail } from "../helpers/tenant-room-basics";
 
 test.use({ storageState: "e2e/.auth/user-with-property.json" });
 
+async function cleanupRoom(request: APIRequestContext, propertyId: string, roomId: string) {
+  const roomRes = await request.get(`/api/properties/${propertyId}/rooms/${roomId}`).catch(() => null);
+  if (roomRes?.ok()) {
+    const room = await roomRes.json().catch(() => ({}));
+    for (const tenant of room?.tenants ?? []) {
+      await request.post(`/api/properties/${propertyId}/tenants/${tenant.id}/move-out`).catch(() => {});
+    }
+  }
+  await request.delete(`/api/properties/${propertyId}/rooms/${roomId}`).catch(() => {});
+}
+
 test.describe("tenant move-out in shared room", () => {
+  let createdRoomId: string | null = null;
+
+  test.afterEach(async ({ request }) => {
+    if (!createdRoomId) return;
+    await cleanupRoom(request, getPropertyId(), createdRoomId);
+    createdRoomId = null;
+  });
+
   test.describe("good cases", () => {
     test("last tenant move-out transitions room to available", async ({
       page,
@@ -33,6 +53,7 @@ test.describe("tenant move-out in shared room", () => {
       const roomBody = await roomRes.json();
       const roomId = roomBody?.id;
       if (!roomId) { test.skip(); return; }
+      createdRoomId = roomId;
 
       // Create and assign tenant
       const tRes = await request.post(`/api/properties/${propertyId}/tenants`, {
@@ -97,6 +118,7 @@ test.describe("tenant move-out in shared room", () => {
       const roomBody = await roomRes.json();
       const roomId = roomBody?.id;
       if (!roomId) { test.skip(); return; }
+      createdRoomId = roomId;
 
       // Create two tenants and assign both
       const ta1Res = await request.post(`/api/properties/${propertyId}/tenants`, {
@@ -169,6 +191,7 @@ test.describe("tenant move-out in shared room", () => {
       if (!roomRes.ok()) { test.skip(); return; }
       const roomId = (await roomRes.json())?.id;
       if (!roomId) { test.skip(); return; }
+      createdRoomId = roomId;
 
       const tRes = await request.post(`/api/properties/${propertyId}/tenants`, {
         data: { name: "AssignRM T " + suffix, phone: "09000000001", email: `assignrm-${suffix}@test.com` },
