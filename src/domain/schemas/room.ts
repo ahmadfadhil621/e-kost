@@ -21,6 +21,13 @@ export const createRoomSchema = z.object({
   monthlyRent: z
     .number({ error: "Monthly rent is required" })
     .positive("Monthly rent must be a positive number"),
+  capacity: z
+    .number()
+    .int("Capacity must be a whole number")
+    .min(1, "Capacity must be at least 1")
+    .max(20, "Capacity cannot exceed 20")
+    .optional()
+    .default(1),
 });
 
 export const updateRoomSchema = z
@@ -30,6 +37,12 @@ export const updateRoomSchema = z
     monthlyRent: z
       .number()
       .positive("Monthly rent must be a positive number")
+      .optional(),
+    capacity: z
+      .number()
+      .int("Capacity must be a whole number")
+      .min(1, "Capacity must be at least 1")
+      .max(20, "Capacity cannot exceed 20")
       .optional(),
   })
   .refine((data) => data && Object.keys(data).length > 0, {
@@ -49,6 +62,7 @@ export type UpdateRoomStatusInput = z.infer<typeof updateRoomStatusSchema>;
 export interface RoomFilters {
   status?: RoomStatus;
   includeArchived?: boolean;
+  hasCapacity?: boolean;
 }
 
 export interface Room {
@@ -57,6 +71,7 @@ export interface Room {
   roomNumber: string;
   roomType: string;
   monthlyRent: number;
+  capacity: number;
   status: RoomStatus;
   archivedAt: Date | null;
   createdAt: Date;

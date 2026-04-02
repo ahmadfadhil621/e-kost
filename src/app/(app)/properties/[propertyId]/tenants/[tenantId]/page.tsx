@@ -37,6 +37,10 @@ type TenantDetail = {
 type RoomSummary = {
   id: string;
   roomNumber: string;
+  roomType: string;
+  monthlyRent: number;
+  capacity: number;
+  activeTenantCount: number;
   status: string;
 };
 
@@ -61,7 +65,7 @@ async function fetchAvailableRooms(
   propertyId: string
 ): Promise<{ rooms: RoomSummary[] }> {
   const res = await fetch(
-    `/api/properties/${propertyId}/rooms?status=available`,
+    `/api/properties/${propertyId}/rooms?hasCapacity=true`,
     { credentials: "include" }
   );
   if (!res.ok) {
@@ -301,25 +305,31 @@ export default function TenantDetailPage() {
           <div className="space-y-2 flex-1 overflow-y-auto min-h-0">
             {availableRooms.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                {t("tenant.assignRoom.noAvailableRooms")}
+                {t("tenant.assignRoom.noRoomsWithCapacity")}
               </p>
             ) : (
               <>
                 <p className="text-sm font-medium">
-                  {t("tenant.assignRoom.availableRooms")}
+                  {t("tenant.assignRoom.roomsWithCapacity")}
                 </p>
                 <div className="flex flex-col gap-2">
-                  {availableRooms.map((room) => (
-                    <Button
-                      key={room.id}
-                      variant="outline"
-                      className="min-h-[44px] min-w-[44px] justify-start"
-                      onClick={() => assignMutation.mutate(room.id)}
-                      disabled={assignMutation.isPending}
-                    >
-                      {room.roomNumber}
-                    </Button>
-                  ))}
+                  {availableRooms.map((room) => {
+                    const slotsLeft = room.capacity - room.activeTenantCount;
+                    return (
+                      <Button
+                        key={room.id}
+                        variant="outline"
+                        className="min-h-[44px] min-w-[44px] justify-between"
+                        onClick={() => assignMutation.mutate(room.id)}
+                        disabled={assignMutation.isPending}
+                      >
+                        <span>{room.roomNumber}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {t("tenant.assignRoom.slotsRemaining", { count: slotsLeft })}
+                        </span>
+                      </Button>
+                    );
+                  })}
                 </div>
               </>
             )}

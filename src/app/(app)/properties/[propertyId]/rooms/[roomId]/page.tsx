@@ -32,12 +32,13 @@ type RoomDetail = {
   roomNumber: string;
   roomType: string;
   monthlyRent: number;
+  capacity: number;
+  activeTenantCount: number;
   status: RoomStatus;
+  tenants: { id: string; name: string }[];
   archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
-  tenantId?: string;
-  tenantName?: string;
 };
 
 async function fetchRoom(
@@ -236,7 +237,7 @@ export default function RoomDetailPage() {
   }
 
   const isArchived = !!room.archivedAt;
-  const isOccupied = room.status === "occupied" && !!room.tenantId;
+  const isOccupied = room.activeTenantCount > 0;
 
   const createdAt = room.createdAt
     ? new Date(room.createdAt).toLocaleDateString(undefined, {
@@ -277,6 +278,9 @@ export default function RoomDetailPage() {
         <p className="text-sm text-muted-foreground">
           {room.roomType} · {formatCurrency(room.monthlyRent)}
         </p>
+        <p className="text-sm text-muted-foreground">
+          {t("room.detail.capacity")}: {room.capacity} · {t("room.detail.occupancy", { count: room.activeTenantCount, total: room.capacity })}
+        </p>
         {!isArchived && (
           <div className="flex items-center gap-2">
             <StatusIndicator status={room.status} size="large" />
@@ -287,19 +291,23 @@ export default function RoomDetailPage() {
         </p>
       </div>
 
-      {!isArchived && room.status === "occupied" && room.tenantId && (
+      {!isArchived && room.activeTenantCount > 0 && (
         <div className="space-y-1">
           <span className="text-sm font-medium text-muted-foreground">
-            {t("room.detail.currentTenant")}
+            {t("room.detail.currentTenants")}
           </span>
-          <p>
-            <Link
-              href={`/properties/${propertyId}/tenants/${room.tenantId}`}
-              className="text-primary underline underline-offset-2 font-medium"
-            >
-              {room.tenantName}
-            </Link>
-          </p>
+          <ul className="space-y-1">
+            {room.tenants.map((tenant) => (
+              <li key={tenant.id}>
+                <Link
+                  href={`/properties/${propertyId}/tenants/${tenant.id}`}
+                  className="text-primary underline underline-offset-2 font-medium"
+                >
+                  {tenant.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 

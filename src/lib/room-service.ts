@@ -45,6 +45,7 @@ export class RoomService {
       roomNumber: parsed.roomNumber.trim(),
       roomType: parsed.roomType.trim(),
       monthlyRent: parsed.monthlyRent,
+      capacity: parsed.capacity,
     });
   }
 
@@ -85,10 +86,22 @@ export class RoomService {
       );
       if (duplicate) {throw new Error("Room number already exists");}
     }
+    if (parsed.capacity !== undefined) {
+      const tenants = await this.tenantRepo.findByProperty(propertyId);
+      const activeInRoom = tenants.filter(
+        (t) => t.roomId === id && !t.movedOutAt
+      );
+      if (parsed.capacity < activeInRoom.length) {
+        throw new Error(
+          "Cannot reduce capacity below current active tenant count"
+        );
+      }
+    }
     return this.repo.update(id, {
       roomNumber: parsed.roomNumber?.trim(),
       roomType: parsed.roomType?.trim(),
       monthlyRent: parsed.monthlyRent,
+      capacity: parsed.capacity,
     });
   }
 
@@ -104,6 +117,15 @@ export class RoomService {
       throw new Error("Room not found");
     }
     updateRoomStatusSchema.parse({ status });
+    const tenants = await this.tenantRepo.findByProperty(propertyId);
+    const activeInRoom = tenants.filter(
+      (t) => t.roomId === id && !t.movedOutAt
+    );
+    if (activeInRoom.length > 0) {
+      throw new Error(
+        "Cannot change room status: move all active tenants out first"
+      );
+    }
     return this.repo.updateStatus(id, status);
   }
 

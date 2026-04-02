@@ -12,6 +12,7 @@ type RoomDetail = {
   roomNumber: string;
   roomType: string;
   monthlyRent: number;
+  capacity: number;
   status: string;
 };
 
@@ -90,6 +91,7 @@ export default function EditRoomPage() {
           roomNumber: room.roomNumber,
           roomType: room.roomType,
           monthlyRent: room.monthlyRent,
+          capacity: room.capacity ?? 1,
         }}
         onSubmit={handleSubmit}
         onCancel={() => router.push(`/properties/${propertyId}/rooms/${roomId}`)}

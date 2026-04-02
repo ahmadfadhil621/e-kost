@@ -6,6 +6,7 @@ export interface IRoomRepository {
     roomNumber: string;
     roomType: string;
     monthlyRent: number;
+    capacity?: number;
   }): Promise<Room>;
   findById(id: string): Promise<Room | null>;
   findByProperty(
@@ -14,7 +15,7 @@ export interface IRoomRepository {
   ): Promise<Room[]>;
   update(
     id: string,
-    data: Partial<{ roomNumber: string; roomType: string; monthlyRent: number }>
+    data: Partial<{ roomNumber: string; roomType: string; monthlyRent: number; capacity: number }>
   ): Promise<Room>;
   updateStatus(id: string, status: RoomStatus): Promise<Room>;
   delete(id: string): Promise<void>;

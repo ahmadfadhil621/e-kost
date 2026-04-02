@@ -33,10 +33,12 @@ export function RoomForm({
     formState: { errors },
   } = useForm<CreateRoomInput>({
     resolver: zodResolver(createRoomSchema),
-    defaultValues: defaultValues ?? {
+    defaultValues: {
       roomNumber: "",
       roomType: "",
       monthlyRent: undefined,
+      capacity: 1,
+      ...defaultValues,
     },
   });
 
@@ -101,6 +103,26 @@ export function RoomForm({
         {errors.monthlyRent && (
           <p id="monthlyRent-error" className="text-sm text-destructive">
             {errors.monthlyRent.message}
+          </p>
+        )}
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="capacity">
+          {mode === "create" ? t("room.create.capacity") : t("room.edit.capacity")}
+        </Label>
+        <Input
+          id="capacity"
+          type="number"
+          min={1}
+          max={20}
+          {...register("capacity", { valueAsNumber: true })}
+          aria-invalid={!!errors.capacity}
+          aria-describedby={errors.capacity ? "capacity-error" : undefined}
+          className="min-h-[44px]"
+        />
+        {errors.capacity && (
+          <p id="capacity-error" className="text-sm text-destructive">
+            {errors.capacity.message}
           </p>
         )}
       </div>

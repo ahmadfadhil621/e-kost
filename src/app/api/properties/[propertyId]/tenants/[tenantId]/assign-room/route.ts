@@ -46,8 +46,8 @@ export async function POST(
     }
     if (
       err instanceof Error &&
-      (err.message.includes("already occupied") ||
-        err.message.includes("already assigned"))
+      (err.message.includes("already assigned") ||
+        err.message.includes("at full capacity"))
     ) {
       return NextResponse.json(
         { error: err.message },

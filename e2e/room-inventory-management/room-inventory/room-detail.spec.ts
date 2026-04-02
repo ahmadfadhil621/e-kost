@@ -144,7 +144,7 @@ test.describe("room detail navigation", () => {
         await expect(page.getByText(roomNumber)).toBeVisible({ timeout: 5000 });
         await expect(page.getByText(/single\s*·/).first()).toBeVisible({ timeout: 5000 });
         await expect(page.getByRole("status", { name: /occupied/i })).toBeVisible({ timeout: 5000 });
-        await expect(page.getByText("Current Tenant", { exact: true })).toBeVisible({ timeout: 5000 });
+        await expect(page.getByText("Current Tenants", { exact: true })).toBeVisible({ timeout: 5000 });
         await expect(page.getByRole("link", { name: tenantName })).toBeVisible({ timeout: 5000 });
       } finally {
         await moveOutTenant(request, baseURL, tenantId);
@@ -207,7 +207,7 @@ test.describe("room detail navigation", () => {
 
         await expect(page.getByText(roomNumber)).toBeVisible({ timeout: 5000 });
         await expect(page.getByText(/single\s*·/).first()).toBeVisible({ timeout: 5000 });
-        await expect(page.getByText("Current Tenant", { exact: true })).not.toBeVisible({ timeout: 5000 });
+        await expect(page.getByText("Current Tenants", { exact: true })).not.toBeVisible({ timeout: 5000 });
         await expect(page.getByRole("status", { name: /available/i })).toBeVisible({ timeout: 5000 });
       } finally {
         await deleteRoom(request, baseURL, roomId);

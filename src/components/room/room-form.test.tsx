@@ -49,6 +49,7 @@ describe("RoomForm", () => {
         roomNumber: "A101",
         roomType: "single",
         monthlyRent: 1500000,
+        capacity: 1,
       });
     });
 

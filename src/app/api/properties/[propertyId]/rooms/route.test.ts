@@ -6,6 +6,10 @@
 // REQ 5.1, 5.5 -> it('GET returns 200 with rooms and count'), it('GET with status filter returns filtered rooms')
 // REQ 5.2, 5.3, 5.4 -> it('GET with status filter returns filtered rooms')
 // PROP 12 -> it('GET returns count equal to rooms array length (PROP 12)')
+//
+// Traceability: multi-tenant-rooms
+// REQ 5 (UI) -> it('GET returns occupied room with tenants array, capacity, activeTenantCount')
+// REQ 5.1 -> it('GET with hasCapacity=true returns only rooms with open slots')
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextResponse } from "next/server";
@@ -274,11 +278,12 @@ describe("GET /api/properties/[propertyId]/rooms", () => {
       );
     });
 
-    it("GET returns occupied room with tenantId, tenantName, outstandingBalance when tenant and balance exist", async () => {
+    // REQ 5 (UI) — occupied room response includes tenants array, capacity, activeTenantCount
+    it("GET returns occupied room with tenants array, capacity, and activeTenantCount", async () => {
       const roomId = "room-1";
       const tenantId = "tenant-1";
       const rooms = [
-        createRoom({ id: roomId, propertyId, status: "occupied" }),
+        createRoom({ id: roomId, propertyId, status: "occupied", capacity: 2 }),
       ];
       vi.mocked(roomService.listRooms).mockResolvedValue(rooms);
       vi.mocked(tenantService.listTenants).mockResolvedValue([
@@ -317,9 +322,66 @@ describe("GET /api/properties/[propertyId]/rooms", () => {
 
       expect(response.status).toBe(200);
       expect(data.rooms).toHaveLength(1);
-      expect(data.rooms[0].tenantId).toBe(tenantId);
-      expect(data.rooms[0].tenantName).toBe("Budi Santoso");
-      expect(data.rooms[0].outstandingBalance).toBe(200);
+      const room = data.rooms[0];
+      expect(room.capacity).toBe(2);
+      expect(room.activeTenantCount).toBe(1);
+      expect(room.tenants).toHaveLength(1);
+      expect(room.tenants[0].id).toBe(tenantId);
+      expect(room.tenants[0].name).toBe("Budi Santoso");
+      // Legacy flat fields should not be present
+      expect(room.tenantId).toBeUndefined();
+      expect(room.tenantName).toBeUndefined();
+    });
+
+    // REQ 5.1 — ?hasCapacity=true returns only rooms that have open slots
+    it("GET with hasCapacity=true returns only rooms with open slots", async () => {
+      const roomWithCapacity = createRoom({ id: "r1", propertyId, status: "available", capacity: 2 });
+      const roomAtCapacity = createRoom({ id: "r2", propertyId, status: "occupied", capacity: 1 });
+      const tenantInFullRoom = {
+        id: "t1",
+        propertyId,
+        name: "Alice",
+        phone: "",
+        email: "",
+        roomId: "r2",
+        assignedAt: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        movedOutAt: null as Date | null,
+      };
+      vi.mocked(roomService.listRooms).mockResolvedValue([roomWithCapacity, roomAtCapacity]);
+      vi.mocked(tenantService.listTenants).mockResolvedValue([tenantInFullRoom]);
+      vi.mocked(balanceService.calculateBalances).mockResolvedValue([]);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms?hasCapacity=true`
+      );
+      const response = await GET(request, {
+        params: Promise.resolve({ propertyId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.rooms).toHaveLength(1);
+      expect(data.rooms[0].id).toBe("r1");
+    });
+
+    // Available room always includes capacity field even without tenants
+    it("GET returns capacity on available room with no tenants", async () => {
+      const rooms = [createRoom({ propertyId, status: "available", capacity: 3 })];
+      vi.mocked(roomService.listRooms).mockResolvedValue(rooms);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms`
+      );
+      const response = await GET(request, {
+        params: Promise.resolve({ propertyId }),
+      });
+      const data = await response.json();
+
+      expect(data.rooms[0].capacity).toBe(3);
+      expect(data.rooms[0].activeTenantCount).toBe(0);
+      expect(data.rooms[0].tenants).toEqual([]);
     });
   });
 

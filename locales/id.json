@@ -197,12 +197,14 @@
       "monthlyRent": "Sewa Bulanan",
       "submit": "Buat Kamar",
       "cancel": "Batal",
-      "success": "Kamar berhasil dibuat"
+      "success": "Kamar berhasil dibuat",
+      "capacity": "Kapasitas (maks. penyewa)"
     },
     "edit": {
       "title": "Ubah Kamar",
       "submit": "Simpan Perubahan",
-      "success": "Kamar berhasil diperbarui"
+      "success": "Kamar berhasil diperbarui",
+      "capacity": "Kapasitas (maks. penyewa)"
     },
     "list": {
       "title": "Kamar",
@@ -217,13 +219,18 @@
       "roomLabel": "Kamar",
       "assignTenant": "Tugaskan Penyewa",
       "changeStatus": "Ubah status kamar",
-      "perMonth": "/bulan"
+      "perMonth": "/bulan",
+      "slotsLeft_one": "{{count}} slot tersisa",
+      "slotsLeft_other": "{{count}} slot tersisa"
     },
     "detail": {
       "title": "Detail Kamar",
       "edit": "Ubah",
       "changeStatus": "Ubah Status",
-      "currentTenant": "Penyewa Saat Ini"
+      "currentTenant": "Penyewa Saat Ini",
+      "currentTenants": "Penyewa Saat Ini",
+      "capacity": "Kapasitas",
+      "occupancy": "{{count}} dari {{total}} terisi"
     },
     "status": {
       "available": "Tersedia",
@@ -236,7 +243,10 @@
       "roomNumberRequired": "Nomor kamar wajib diisi",
       "roomTypeRequired": "Tipe kamar wajib diisi",
       "monthlyRentRequired": "Sewa bulanan wajib diisi",
-      "monthlyRentPositive": "Sewa bulanan harus angka positif"
+      "monthlyRentPositive": "Sewa bulanan harus angka positif",
+      "capacityMin": "Kapasitas minimal 1",
+      "capacityMax": "Kapasitas tidak boleh melebihi 20",
+      "capacityInteger": "Kapasitas harus bilangan bulat"
     },
     "archive": {
       "title": "Arsipkan Kamar",
@@ -244,7 +254,7 @@
       "confirm": "Arsipkan",
       "cancel": "Batal",
       "success": "Kamar berhasil diarsipkan",
-      "errorActiveTenant": "Tidak dapat mengarsipkan kamar dengan penyewa aktif. Pindahkan penyewa terlebih dahulu."
+      "errorActiveTenant": "Tidak dapat mengarsipkan kamar dengan penyewa aktif. Pindahkan semua penyewa terlebih dahulu."
     },
     "unarchive": {
       "title": "Pulihkan Kamar",
@@ -257,14 +267,17 @@
       "confirm": "Hapus",
       "cancel": "Batal",
       "success": "Kamar berhasil dihapus",
-      "errorActiveTenant": "Tidak dapat menghapus kamar dengan penyewa aktif. Pindahkan penyewa terlebih dahulu."
+      "errorActiveTenant": "Tidak dapat menghapus kamar dengan penyewa aktif. Pindahkan semua penyewa terlebih dahulu."
     },
     "dangerZone": "Zona Berbahaya",
-    "occupiedWarning": "Pindahkan penyewa saat ini terlebih dahulu sebelum mengarsipkan atau menghapus kamar ini.",
+    "occupiedWarning": "Pindahkan semua penyewa aktif terlebih dahulu sebelum mengarsipkan atau menghapus kamar ini.",
     "errors": {
       "duplicateRoomNumber": "Nomor kamar sudah ada",
       "notFound": "Kamar tidak ditemukan",
-      "loadFailed": "Gagal memuat data kamar"
+      "loadFailed": "Gagal memuat data kamar",
+      "atCapacity": "Kamar sudah penuh",
+      "capacityBelowActiveCount": "Kapasitas tidak boleh kurang dari jumlah penyewa aktif",
+      "capacityMax": "Kapasitas tidak boleh melebihi 20"
     }
   },
   "tenant": {
@@ -303,7 +316,11 @@
       "availableRooms": "Kamar tersedia",
       "noAvailableRooms": "Tidak ada kamar tersedia",
       "selectRoom": "Pilih kamar",
-      "success": "Kamar berhasil diassign"
+      "success": "Kamar berhasil diassign",
+      "noRoomsWithCapacity": "Tidak ada kamar dengan kapasitas tersedia",
+      "slotsRemaining_one": "{{count}} slot tersisa",
+      "slotsRemaining_other": "{{count}} slot tersisa",
+      "roomsWithCapacity": "Kamar dengan kapasitas tersedia"
     },
     "moveOut": {
       "title": "Pindah Keluar",

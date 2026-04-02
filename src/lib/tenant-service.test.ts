@@ -2,9 +2,9 @@
 // REQ 1.2 -> it('creates a tenant with valid data')
 // REQ 1.3 -> it('rejects when name is missing'), it('rejects when email is invalid')
 // REQ 1.4, 1.5 -> it('creates a tenant with valid data')
-// REQ 2.2 -> it('assignRoom returns only when room is available (PROP 3)')
+// REQ 2.2 -> it('assignRoom returns only when room has capacity (PROP 3)')
 // REQ 2.3, 2.4 -> it('assigns tenant to room and updates room status (PROP 4)')
-// REQ 2.5 -> it('rejects assignRoom when room is occupied (PROP 5)')
+// REQ 2.5 -> (covered by E2E)
 // REQ 3.1 -> (covered by component/E2E)
 // REQ 4.2, 4.4 -> it('updates tenant when data is valid (PROP 8)')
 // REQ 4.3 -> it('updateTenant preserves id, createdAt, roomId (PROP 9)')
@@ -13,6 +13,14 @@
 // PROP 1 -> it('tenant creation returns complete object with ID and timestamp (PROP 1)')
 // PROP 2 -> it('rejects when name is missing')
 // PROP 12 -> it('create then getTenant returns same data (PROP 12)')
+//
+// Traceability: multi-tenant-rooms
+// REQ 2.1, 2.2 -> it('assigns second tenant to occupied room with available capacity')
+// REQ 2.2 -> it('rejects when room is at full capacity (PROP 5)')
+// REQ 2.4 -> it('rejects when room is under renovation')
+// REQ 2.5, 2.6 -> it('assigns tenant to room and updates room status (PROP 4)')
+// REQ 4.1, 4.2 -> it('moveOut sets movedOutAt and frees room when last tenant (PROP 11)')
+// REQ 4.3 -> it('moveOut leaves room occupied when other active tenants remain')
 
 import { describe, it, expect, vi } from "vitest";
 import fc from "fast-check";
@@ -29,7 +37,7 @@ function createMockTenantRepo(
   return {
     create: vi.fn(),
     findById: vi.fn(),
-    findByProperty: vi.fn(),
+    findByProperty: vi.fn().mockResolvedValue([]),
     update: vi.fn(),
     assignRoom: vi.fn(),
     removeRoomAssignment: vi.fn(),
@@ -610,13 +618,46 @@ describe("TenantService", () => {
     });
 
     describe("bad cases", () => {
-      it("rejects assignRoom when room is occupied (PROP 5)", async () => {
+      it("rejects when room is at full capacity (PROP 5)", async () => {
+        const propertyId = crypto.randomUUID();
+        const tenant = createTenant({ propertyId, id: "t-1", roomId: null });
+        const existingTenant = createTenant({
+          propertyId,
+          id: "t-existing",
+          roomId: roomIdUuid,
+          movedOutAt: null,
+        });
+        const room = createRoom({
+          propertyId,
+          id: roomIdUuid,
+          status: "occupied",
+          capacity: 1,
+        });
+        const tenantRepo = createMockTenantRepo({
+          findById: vi.fn().mockResolvedValue(tenant),
+          findByProperty: vi.fn().mockResolvedValue([existingTenant]),
+        });
+        const roomRepo = createMockRoomRepo({
+          findById: vi.fn().mockResolvedValue(room),
+        });
+        const service = new TenantService(
+          tenantRepo,
+          roomRepo,
+          createMockPropertyAccess()
+        );
+
+        await expect(
+          service.assignRoom("user-1", propertyId, "t-1", roomIdUuid)
+        ).rejects.toThrow(/at full capacity/i);
+      });
+
+      it("rejects when room is under renovation", async () => {
         const propertyId = crypto.randomUUID();
         const tenant = createTenant({ propertyId, id: "t-1", roomId: null });
         const room = createRoom({
           propertyId,
           id: roomIdUuid,
-          status: "occupied",
+          status: "under_renovation",
         });
         const tenantRepo = createMockTenantRepo({
           findById: vi.fn().mockResolvedValue(tenant),
@@ -632,7 +673,7 @@ describe("TenantService", () => {
 
         await expect(
           service.assignRoom("user-1", propertyId, "t-1", roomIdUuid)
-        ).rejects.toThrow(/already occupied|occupied/i);
+        ).rejects.toThrow(/renovation/i);
       });
 
       it("rejects when tenant already has a room", async () => {
@@ -706,12 +747,62 @@ describe("TenantService", () => {
           service.assignRoom("user-1", propertyId, "t-1", otherRoomId)
         ).rejects.toThrow(/room not found/i);
       });
+
+      // REQ 2.1, 2.6 — occupied room with spare capacity accepts a second tenant
+      it("assigns second tenant to occupied room with available capacity", async () => {
+        const propertyId = crypto.randomUUID();
+        const tenant = createTenant({ propertyId, id: "t-2", roomId: null });
+        const existingTenant = createTenant({
+          propertyId,
+          id: "t-1",
+          roomId: roomIdUuid,
+          movedOutAt: null,
+        });
+        const room = createRoom({
+          propertyId,
+          id: roomIdUuid,
+          status: "occupied",
+          capacity: 2,
+        });
+        const assigned = createTenant({
+          ...tenant,
+          roomId: roomIdUuid,
+          assignedAt: new Date(),
+        });
+        const tenantRepo = createMockTenantRepo({
+          findById: vi.fn().mockResolvedValue(tenant),
+          findByProperty: vi.fn().mockResolvedValue([existingTenant]),
+          assignRoom: vi.fn().mockResolvedValue(assigned),
+        });
+        const roomRepo = createMockRoomRepo({
+          findById: vi.fn().mockResolvedValue(room),
+          updateStatus: vi.fn(),
+        });
+        const service = new TenantService(
+          tenantRepo,
+          roomRepo,
+          createMockPropertyAccess()
+        );
+
+        const result = await service.assignRoom(
+          "user-1",
+          propertyId,
+          "t-2",
+          roomIdUuid
+        );
+
+        expect(result.roomId).toBe(roomIdUuid);
+        expect(tenantRepo.assignRoom).toHaveBeenCalledWith("t-2", roomIdUuid);
+        // Room was already occupied — status must NOT be updated again
+        expect(roomRepo.updateStatus).not.toHaveBeenCalled();
+      });
     });
   });
 
   describe("moveOut", () => {
     describe("good cases", () => {
-      it("moveOut sets movedOutAt and frees room (PROP 11)", async () => {
+      // REQ 4.1, 4.2 — last tenant leaves: room status set to available
+      it("moveOut sets movedOutAt and frees room when last tenant leaves (PROP 11)", async () => {
         const propertyId = crypto.randomUUID();
         const tenant = createTenant({
           propertyId,
@@ -727,6 +818,8 @@ describe("TenantService", () => {
         const tenantRepo = createMockTenantRepo({
           findById: vi.fn().mockResolvedValue(tenant),
           removeRoomAssignment: vi.fn().mockResolvedValue({ ...tenant, roomId: null }),
+          // No remaining tenants after this one moves out
+          findByProperty: vi.fn().mockResolvedValue([]),
           softDelete: vi.fn().mockResolvedValue(afterSoftDelete),
         });
         const roomRepo = createMockRoomRepo({
@@ -743,6 +836,52 @@ describe("TenantService", () => {
         expect(result.movedOutAt).toBeDefined();
         expect(tenantRepo.removeRoomAssignment).toHaveBeenCalledWith("t-1");
         expect(roomRepo.updateStatus).toHaveBeenCalledWith("room-1", "available");
+        expect(tenantRepo.softDelete).toHaveBeenCalledWith("t-1");
+      });
+
+      // REQ 4.3 — other tenants remain: room status stays occupied
+      it("moveOut leaves room occupied when other active tenants remain", async () => {
+        const propertyId = crypto.randomUUID();
+        const roomId = "room-shared";
+        const tenant = createTenant({
+          propertyId,
+          id: "t-1",
+          roomId,
+          movedOutAt: null,
+        });
+        const remainingTenant = createTenant({
+          propertyId,
+          id: "t-2",
+          roomId,
+          movedOutAt: null,
+        });
+        const afterSoftDelete = createTenant({
+          ...tenant,
+          movedOutAt: new Date(),
+          roomId: null,
+        });
+        const tenantRepo = createMockTenantRepo({
+          findById: vi.fn().mockResolvedValue(tenant),
+          removeRoomAssignment: vi.fn().mockResolvedValue({ ...tenant, roomId: null }),
+          // Remaining tenant still in the room after t-1 leaves
+          findByProperty: vi.fn().mockResolvedValue([remainingTenant]),
+          softDelete: vi.fn().mockResolvedValue(afterSoftDelete),
+        });
+        const roomRepo = createMockRoomRepo({
+          updateStatus: vi.fn(),
+        });
+        const service = new TenantService(
+          tenantRepo,
+          roomRepo,
+          createMockPropertyAccess()
+        );
+
+        const result = await service.moveOut("user-1", propertyId, "t-1");
+
+        expect(result.movedOutAt).toBeDefined();
+        expect(tenantRepo.removeRoomAssignment).toHaveBeenCalledWith("t-1");
+        // Room still has another active tenant — must NOT be freed
+        expect(roomRepo.updateStatus).not.toHaveBeenCalled();
         expect(tenantRepo.softDelete).toHaveBeenCalledWith("t-1");
       });
 

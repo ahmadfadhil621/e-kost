@@ -106,12 +106,22 @@ export class TenantService {
     if (!room || room.propertyId !== propertyId) {
       throw new Error("Room not found");
     }
-    if (room.status !== "available") {
-      throw new Error("Room is already occupied by another tenant");
+    if (room.status === "under_renovation") {
+      throw new Error("Room is under renovation");
+    }
+
+    const allTenants = await this.tenantRepo.findByProperty(propertyId);
+    const activeInRoom = allTenants.filter(
+      (t) => t.roomId === roomId && !t.movedOutAt
+    );
+    if (activeInRoom.length >= room.capacity) {
+      throw new Error("Room is at full capacity");
     }
 
     const updated = await this.tenantRepo.assignRoom(tenantId, roomId);
-    await this.roomRepo.updateStatus(roomId, "occupied");
+    if (room.status === "available") {
+      await this.roomRepo.updateStatus(roomId, "occupied");
+    }
     return updated;
   }
 
@@ -132,7 +142,13 @@ export class TenantService {
 
     if (tenant.roomId) {
       await this.tenantRepo.removeRoomAssignment(tenantId);
-      await this.roomRepo.updateStatus(tenant.roomId, "available");
+      const remaining = await this.tenantRepo.findByProperty(propertyId);
+      const stillInRoom = remaining.filter(
+        (t) => t.roomId === tenant.roomId && !t.movedOutAt && t.id !== tenantId
+      );
+      if (stillInRoom.length === 0) {
+        await this.roomRepo.updateStatus(tenant.roomId, "available");
+      }
     }
     return this.tenantRepo.softDelete(tenantId);
   }

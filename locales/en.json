@@ -197,12 +197,14 @@
       "monthlyRent": "Monthly Rent",
       "submit": "Create Room",
       "cancel": "Cancel",
-      "success": "Room created successfully"
+      "success": "Room created successfully",
+      "capacity": "Capacity (max. tenants)"
     },
     "edit": {
       "title": "Edit Room",
       "submit": "Save Changes",
-      "success": "Room updated successfully"
+      "success": "Room updated successfully",
+      "capacity": "Capacity (max. tenants)"
     },
     "list": {
       "title": "Rooms",
@@ -217,13 +219,18 @@
       "roomLabel": "Room",
       "assignTenant": "Assign Tenant",
       "changeStatus": "Change room status",
-      "perMonth": "/mo"
+      "perMonth": "/mo",
+      "slotsLeft_one": "{{count}} slot left",
+      "slotsLeft_other": "{{count}} slots left"
     },
     "detail": {
       "title": "Room Details",
       "edit": "Edit",
       "changeStatus": "Change Status",
-      "currentTenant": "Current Tenant"
+      "currentTenant": "Current Tenant",
+      "currentTenants": "Current Tenants",
+      "capacity": "Capacity",
+      "occupancy": "{{count}} of {{total}} occupied"
     },
     "status": {
       "available": "Available",
@@ -236,7 +243,10 @@
       "roomNumberRequired": "Room number is required",
       "roomTypeRequired": "Room type is required",
       "monthlyRentRequired": "Monthly rent is required",
-      "monthlyRentPositive": "Monthly rent must be a positive number"
+      "monthlyRentPositive": "Monthly rent must be a positive number",
+      "capacityMin": "Capacity must be at least 1",
+      "capacityMax": "Capacity cannot exceed 20",
+      "capacityInteger": "Capacity must be a whole number"
     },
     "archive": {
       "title": "Archive Room",
@@ -244,7 +254,7 @@
       "confirm": "Archive",
       "cancel": "Cancel",
       "success": "Room archived successfully",
-      "errorActiveTenant": "Cannot archive room with an active tenant. Move the tenant out first."
+      "errorActiveTenant": "Cannot archive room with active tenants. Move all tenants out first."
     },
     "unarchive": {
       "title": "Restore Room",
@@ -257,14 +267,17 @@
       "confirm": "Delete",
       "cancel": "Cancel",
       "success": "Room deleted successfully",
-      "errorActiveTenant": "Cannot delete room with an active tenant. Move the tenant out first."
+      "errorActiveTenant": "Cannot delete room with active tenants. Move all tenants out first."
     },
     "dangerZone": "Danger Zone",
-    "occupiedWarning": "Move the current tenant out before archiving or deleting this room.",
+    "occupiedWarning": "Move all active tenants out before archiving or deleting this room.",
     "errors": {
       "duplicateRoomNumber": "Room number already exists",
       "notFound": "Room not found",
-      "loadFailed": "Failed to load room data"
+      "loadFailed": "Failed to load room data",
+      "atCapacity": "Room is at full capacity",
+      "capacityBelowActiveCount": "Cannot reduce capacity below current tenant count",
+      "capacityMax": "Capacity cannot exceed 20"
     }
   },
   "tenant": {
@@ -303,7 +316,11 @@
       "availableRooms": "Available rooms",
       "noAvailableRooms": "No available rooms",
       "selectRoom": "Select a room",
-      "success": "Room assigned successfully"
+      "success": "Room assigned successfully",
+      "noRoomsWithCapacity": "No rooms with available capacity",
+      "slotsRemaining_one": "{{count}} slot remaining",
+      "slotsRemaining_other": "{{count}} slots remaining",
+      "roomsWithCapacity": "Rooms with available capacity"
     },
     "moveOut": {
       "title": "Move Out",

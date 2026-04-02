@@ -67,6 +67,8 @@ export async function GET(
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
+    const hasCapacity = searchParams.get("hasCapacity") === "true";
+
     const filters =
       status && ["available", "occupied", "under_renovation"].includes(status)
         ? { status: status as "available" | "occupied" | "under_renovation" }
@@ -77,46 +79,48 @@ export async function GET(
       tenantService.listTenants(access.userId!, propertyId),
       balanceService.calculateBalances(access.userId!, propertyId),
     ]);
-    const tenantByRoomId = new Map<string, { id: string; name: string }>();
+
+    // Build a map of roomId → active tenants array
+    const tenantsByRoomId = new Map<string, { id: string; name: string }[]>();
     for (const t of tenants) {
       if (t.roomId && !t.movedOutAt) {
-        tenantByRoomId.set(t.roomId, { id: t.id, name: t.name });
+        const list = tenantsByRoomId.get(t.roomId) ?? [];
+        list.push({ id: t.id, name: t.name });
+        tenantsByRoomId.set(t.roomId, list);
       }
     }
     const balanceByTenantId = new Map(
       balances.map((b) => [b.tenantId, b.outstandingBalance])
     );
 
-    const roomsWithTenantInfo = rooms.map((room) => {
-      const base = {
-        id: room.id,
-        propertyId: room.propertyId,
-        roomNumber: room.roomNumber,
-        roomType: room.roomType,
-        monthlyRent: room.monthlyRent,
-        status: room.status,
-        createdAt: room.createdAt,
-        updatedAt: room.updatedAt,
-      };
-      if (room.status !== "occupied") {
-        return base;
-      }
-      const tenant = tenantByRoomId.get(room.id);
-      if (!tenant) {
-        return base;
-      }
-      const outstandingBalance = balanceByTenantId.get(tenant.id) ?? 0;
-      return {
-        ...base,
-        tenantId: tenant.id,
-        tenantName: tenant.name,
-        outstandingBalance,
-      };
-    });
+    const roomsWithInfo = rooms
+      .map((room) => {
+        const roomTenants = tenantsByRoomId.get(room.id) ?? [];
+        const activeTenantCount = roomTenants.length;
+        const outstandingBalance = roomTenants.reduce(
+          (sum, t) => sum + (balanceByTenantId.get(t.id) ?? 0),
+          0
+        );
+        return {
+          id: room.id,
+          propertyId: room.propertyId,
+          roomNumber: room.roomNumber,
+          roomType: room.roomType,
+          monthlyRent: room.monthlyRent,
+          capacity: room.capacity,
+          activeTenantCount,
+          status: room.status,
+          tenants: roomTenants,
+          ...(activeTenantCount > 0 && { outstandingBalance }),
+          createdAt: room.createdAt,
+          updatedAt: room.updatedAt,
+        };
+      })
+      .filter((room) => !hasCapacity || room.activeTenantCount < room.capacity);
 
     return NextResponse.json({
-      rooms: roomsWithTenantInfo,
-      count: roomsWithTenantInfo.length,
+      rooms: roomsWithInfo,
+      count: roomsWithInfo.length,
     });
   } catch (err) {
     if (err instanceof Error && err.message.includes("Forbidden")) {

@@ -22,34 +22,24 @@ export async function GET(
     if (!room) {
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
-    const base = {
+    const allTenants = await tenantService.listTenants(access.userId!, propertyId);
+    const activeInRoom = allTenants.filter(
+      (t) => t.roomId === room.id && !t.movedOutAt
+    );
+    return NextResponse.json({
       id: room.id,
       propertyId: room.propertyId,
       roomNumber: room.roomNumber,
       roomType: room.roomType,
       monthlyRent: room.monthlyRent,
+      capacity: room.capacity,
+      activeTenantCount: activeInRoom.length,
       status: room.status,
+      tenants: activeInRoom.map((t) => ({ id: t.id, name: t.name })),
       archivedAt: room.archivedAt,
       createdAt: room.createdAt,
       updatedAt: room.updatedAt,
-    };
-    if (room.status === "occupied") {
-      const tenants = await tenantService.listTenants(
-        access.userId!,
-        propertyId
-      );
-      const tenant = tenants.find(
-        (t) => t.roomId === room.id && !t.movedOutAt
-      );
-      if (tenant) {
-        return NextResponse.json({
-          ...base,
-          tenantId: tenant.id,
-          tenantName: tenant.name,
-        });
-      }
-    }
-    return NextResponse.json(base);
+    });
   } catch (err) {
     if (err instanceof Error && err.message.includes("Forbidden")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -84,6 +74,7 @@ export async function PUT(
       roomNumber: room.roomNumber,
       roomType: room.roomType,
       monthlyRent: room.monthlyRent,
+      capacity: room.capacity,
       status: room.status,
       createdAt: room.createdAt,
       updatedAt: room.updatedAt,
@@ -99,6 +90,12 @@ export async function PUT(
     if (err instanceof Error && err.message === "Room number already exists") {
       return NextResponse.json(
         { error: "Room number already exists" },
+        { status: 409 }
+      );
+    }
+    if (err instanceof Error && err.message.startsWith("Cannot reduce capacity")) {
+      return NextResponse.json(
+        { error: err.message },
         { status: 409 }
       );
     }

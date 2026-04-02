@@ -5,10 +5,9 @@
 // REQ 4.5 -> it('PUT returns 400 when monthly rent is negative')
 // REQ 4.4 -> it('PUT returns 200 and updated room when body is valid')
 //
-// Traceability: room-detail-navigation
-// REQ 3.1 -> it('GET returns tenantId and tenantName for occupied room with tenant')
-// REQ 3.2 -> it('GET returns base fields without tenant data for available room')
-// REQ 3.3 -> it('GET returns base fields without tenant data for occupied room with no tenant')
+// Traceability: multi-tenant-rooms
+// REQ 6.1–6.3 -> it('GET returns tenants array, capacity, and activeTenantCount for occupied room')
+// REQ 1.3, 1.4 -> it('PUT returns 409 when capacity reduction blocked by active tenants')
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextResponse } from "next/server";
@@ -137,71 +136,76 @@ describe("GET /api/properties/[propertyId]/rooms/[roomId]", () => {
       expect(response.status).toBe(200);
     });
 
-    // REQ 3.1 — occupied room with assigned tenant includes tenantId and tenantName
-    it("GET returns tenantId and tenantName for occupied room with tenant", async () => {
-      const room = createRoom({ id: roomId, propertyId, status: "occupied" });
-      const tenant = createTenant({
-        id: "tenant-789",
-        propertyId,
-        name: "Jane Doe",
-        roomId: roomId,
-        movedOutAt: null,
-      });
+    // REQ 6.1–6.3 — occupied room response includes tenants array, capacity, activeTenantCount
+    it("GET returns tenants array, capacity, and activeTenantCount for occupied room", async () => {
+      const room = createRoom({ id: roomId, propertyId, status: "occupied", capacity: 2 });
+      const tenant1 = createTenant({ id: "tenant-789", propertyId, name: "Jane Doe", roomId, movedOutAt: null });
+      const tenant2 = createTenant({ id: "tenant-790", propertyId, name: "Bob Lee", roomId, movedOutAt: null });
       vi.mocked(roomService.getRoom).mockResolvedValue(room);
-      vi.mocked(tenantService.listTenants).mockResolvedValue([tenant]);
+      vi.mocked(tenantService.listTenants).mockResolvedValue([tenant1, tenant2]);
 
       const request = new Request(
         `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`
       );
-
       const response = await GET(request, {
         params: Promise.resolve({ propertyId, roomId }),
       });
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.tenantId).toBe("tenant-789");
-      expect(data.tenantName).toBe("Jane Doe");
+      expect(data.capacity).toBe(2);
+      expect(data.activeTenantCount).toBe(2);
+      expect(data.tenants).toHaveLength(2);
+      expect(data.tenants).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: "tenant-789", name: "Jane Doe" }),
+          expect.objectContaining({ id: "tenant-790", name: "Bob Lee" }),
+        ])
+      );
+      // Legacy flat fields must not be present
+      expect(data.tenantId).toBeUndefined();
+      expect(data.tenantName).toBeUndefined();
     });
 
-    // REQ 3.2 — non-occupied room does not include tenant fields
-    it("GET returns base fields without tenant data for available room", async () => {
-      const room = createRoom({ id: roomId, propertyId, status: "available" });
+    // Available room returns capacity and empty tenants array
+    it("GET returns capacity and empty tenants array for available room", async () => {
+      const room = createRoom({ id: roomId, propertyId, status: "available", capacity: 3 });
       vi.mocked(roomService.getRoom).mockResolvedValue(room);
       vi.mocked(tenantService.listTenants).mockResolvedValue([]);
 
       const request = new Request(
         `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`
       );
-
       const response = await GET(request, {
         params: Promise.resolve({ propertyId, roomId }),
       });
       const data = await response.json();
 
       expect(response.status).toBe(200);
+      expect(data.capacity).toBe(3);
+      expect(data.activeTenantCount).toBe(0);
+      expect(data.tenants).toEqual([]);
       expect(data.tenantId).toBeUndefined();
       expect(data.tenantName).toBeUndefined();
     });
 
-    // REQ 3.3 — occupied room with no matching tenant returns base fields only
-    it("GET returns base fields without tenant data for occupied room with no tenant", async () => {
-      const room = createRoom({ id: roomId, propertyId, status: "occupied" });
+    // Occupied room with no matching tenants in repo still returns empty array safely
+    it("GET returns empty tenants array for occupied room with no active tenants in repo", async () => {
+      const room = createRoom({ id: roomId, propertyId, status: "occupied", capacity: 1 });
       vi.mocked(roomService.getRoom).mockResolvedValue(room);
       vi.mocked(tenantService.listTenants).mockResolvedValue([]);
 
       const request = new Request(
         `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`
       );
-
       const response = await GET(request, {
         params: Promise.resolve({ propertyId, roomId }),
       });
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.tenantId).toBeUndefined();
-      expect(data.tenantName).toBeUndefined();
+      expect(data.activeTenantCount).toBe(0);
+      expect(data.tenants).toEqual([]);
     });
   });
 });
@@ -300,6 +304,30 @@ describe("PUT /api/properties/[propertyId]/rooms/[roomId]", () => {
       });
 
       expect(response.status).toBe(409);
+    });
+
+    // REQ 1.4 — capacity reduction blocked by active tenants returns 409
+    it("PUT returns 409 when capacity reduction is blocked by active tenants", async () => {
+      vi.mocked(roomService.updateRoom).mockRejectedValue(
+        new Error("Cannot reduce capacity below current active tenant count")
+      );
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ capacity: 1 }),
+        }
+      );
+
+      const response = await PUT(request, {
+        params: Promise.resolve({ propertyId, roomId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(409);
+      expect(data.error).toMatch(/cannot reduce capacity/i);
     });
   });
 

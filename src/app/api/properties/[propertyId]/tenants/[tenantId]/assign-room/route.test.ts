@@ -1,6 +1,10 @@
 // Traceability: tenant-room-basics
 // REQ 2.3, 2.4 -> it('POST returns 200 and tenant with roomId when room is available')
-// REQ 2.5 -> it('POST returns 409 when room is already occupied')
+//
+// Traceability: multi-tenant-rooms
+// REQ 2.1, 2.6 -> it('POST returns 200 when room is occupied but has remaining capacity')
+// REQ 2.2 -> it('POST returns 409 when room is at full capacity')
+// REQ 2.3 -> it('POST returns 409 when tenant already has a room')
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "./route";
@@ -67,12 +71,41 @@ describe("POST /api/properties/[propertyId]/tenants/[tenantId]/assign-room", () 
         roomIdUuid
       );
     });
+
+    // REQ 2.1, 2.6 — occupied room with spare capacity accepts another tenant
+    it("POST returns 200 when room is occupied but has remaining capacity", async () => {
+      const assigned = createTenant({
+        propertyId,
+        id: tenantId,
+        roomId: roomIdUuid,
+        assignedAt: new Date(),
+      });
+      vi.mocked(tenantService.assignRoom).mockResolvedValue(assigned);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/tenants/${tenantId}/assign-room`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ roomId: roomIdUuid }),
+        }
+      );
+
+      const response = await POST(request, {
+        params: Promise.resolve({ propertyId, tenantId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.roomId).toBe(roomIdUuid);
+    });
   });
 
   describe("bad cases", () => {
-    it("POST returns 409 when room is already occupied", async () => {
+    // REQ 2.2 — room at full capacity returns 409
+    it("POST returns 409 when room is at full capacity", async () => {
       vi.mocked(tenantService.assignRoom).mockRejectedValue(
-        new Error("Room is already occupied by another tenant")
+        new Error("Room is at full capacity")
       );
 
       const request = new Request(
@@ -90,7 +123,31 @@ describe("POST /api/properties/[propertyId]/tenants/[tenantId]/assign-room", () 
       const data = await response.json();
 
       expect(response.status).toBe(409);
-      expect(data.error).toMatch(/already occupied|already assigned/i);
+      expect(data.error).toMatch(/at full capacity/i);
+    });
+
+    // REQ 2.3 — tenant already has a room returns 409
+    it("POST returns 409 when tenant already has a room", async () => {
+      vi.mocked(tenantService.assignRoom).mockRejectedValue(
+        new Error("Tenant is already assigned to a room")
+      );
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/tenants/${tenantId}/assign-room`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ roomId: roomIdUuid }),
+        }
+      );
+
+      const response = await POST(request, {
+        params: Promise.resolve({ propertyId, tenantId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(409);
+      expect(data.error).toMatch(/already assigned/i);
     });
 
     it("POST returns 400 when roomId is missing", async () => {

@@ -21,6 +21,10 @@
 // PROP 12 -> (covered by API route test GET returns count equal to rooms array length)
 // PROP 13 -> it('create then getRoom returns same data (PROP 13)')
 // PROP 14 -> it('rejects create when room number already exists'), it('rejects update with duplicate room number')
+//
+// Traceability: multi-tenant-rooms
+// REQ 1.4 -> it('rejects capacity reduction below active tenant count')
+// REQ 3.3 -> it('rejects manual status change when room has active tenants')
 
 import { describe, it, expect, vi } from "vitest";
 import fc from "fast-check";
@@ -99,6 +103,7 @@ describe("RoomService", () => {
           roomNumber: "B202",
           roomType: "double",
           monthlyRent: 2000000,
+          capacity: 1,
         });
       });
 
@@ -210,6 +215,22 @@ describe("RoomService", () => {
           })
         ).rejects.toThrow(/already exists/i);
       });
+
+      it("rejects create when capacity exceeds maximum of 20", async () => {
+        const repo = createMockRepo({
+          findByProperty: vi.fn().mockResolvedValue([]),
+        });
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
+
+        await expect(
+          service.createRoom(crypto.randomUUID(), crypto.randomUUID(), {
+            roomNumber: "A1",
+            roomType: "dorm",
+            monthlyRent: 500,
+            capacity: 21,
+          })
+        ).rejects.toThrow(/cannot exceed 20/i);
+      });
     });
 
     describe("edge cases", () => {
@@ -237,6 +258,7 @@ describe("RoomService", () => {
           roomNumber: "X1",
           roomType: "single",
           monthlyRent: 500,
+          capacity: 1,
         });
       });
 
@@ -516,6 +538,41 @@ describe("RoomService", () => {
           })
         ).rejects.toThrow(/not found/i);
       });
+
+      // REQ 1.4 — capacity cannot be reduced below active tenant count
+      it("rejects capacity reduction below current active tenant count", async () => {
+        const propertyId = crypto.randomUUID();
+        const existing = createRoom({ propertyId, id: "room-1", capacity: 3 });
+        const t1 = createTenant({ propertyId, roomId: "room-1", movedOutAt: null });
+        const t2 = createTenant({ propertyId, roomId: "room-1", movedOutAt: null });
+        const repo = createMockRepo({
+          findById: vi.fn().mockResolvedValue(existing),
+          findByProperty: vi.fn().mockResolvedValue([existing]),
+        });
+        const tenantRepo = createMockTenantRepo({
+          findByProperty: vi.fn().mockResolvedValue([t1, t2]),
+        });
+        const service = new RoomService(repo, tenantRepo, createMockPropertyAccess());
+
+        await expect(
+          service.updateRoom("user-1", propertyId, "room-1", { capacity: 1 })
+        ).rejects.toThrow(/cannot reduce capacity/i);
+      });
+
+      // REQ 1.4 — capacity max of 20 enforced at schema/service level
+      it("rejects capacity above maximum of 20", async () => {
+        const propertyId = crypto.randomUUID();
+        const existing = createRoom({ propertyId, id: "room-1", capacity: 1 });
+        const repo = createMockRepo({
+          findById: vi.fn().mockResolvedValue(existing),
+          findByProperty: vi.fn().mockResolvedValue([existing]),
+        });
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
+
+        await expect(
+          service.updateRoom("user-1", propertyId, "room-1", { capacity: 21 })
+        ).rejects.toThrow(/cannot exceed 20/i);
+      });
     });
 
     describe("edge cases", () => {
@@ -534,11 +591,31 @@ describe("RoomService", () => {
           roomType: "double",
         });
 
-        expect(repo.update).toHaveBeenCalledWith("room-1", {
-          roomNumber: undefined,
+        expect(repo.update).toHaveBeenCalledWith("room-1", expect.objectContaining({
           roomType: "double",
-          monthlyRent: undefined,
+        }));
+      });
+
+      // REQ 1.3 — capacity can be increased at any time regardless of active tenant count
+      it("allows capacity increase even when room has active tenants", async () => {
+        const propertyId = crypto.randomUUID();
+        const existing = createRoom({ propertyId, id: "room-1", capacity: 1 });
+        const activeTenant = createTenant({ propertyId, roomId: "room-1", movedOutAt: null });
+        const updated = createRoom({ ...existing, capacity: 3 });
+        const repo = createMockRepo({
+          findById: vi.fn().mockResolvedValue(existing),
+          findByProperty: vi.fn().mockResolvedValue([existing]),
+          update: vi.fn().mockResolvedValue(updated),
         });
+        const tenantRepo = createMockTenantRepo({
+          findByProperty: vi.fn().mockResolvedValue([activeTenant]),
+        });
+        const service = new RoomService(repo, tenantRepo, createMockPropertyAccess());
+
+        const result = await service.updateRoom("user-1", propertyId, "room-1", { capacity: 3 });
+
+        expect(result.capacity).toBe(3);
+        expect(repo.update).toHaveBeenCalledWith("room-1", expect.objectContaining({ capacity: 3 }));
       });
     });
   });
@@ -624,6 +701,24 @@ describe("RoomService", () => {
         await expect(
           service.updateRoomStatus("user-1", "prop-1", "missing", "available")
         ).rejects.toThrow(/not found/i);
+      });
+
+      // REQ 3.3 — manual status change blocked when active tenants exist
+      it("rejects manual status change when room has active tenants", async () => {
+        const propertyId = crypto.randomUUID();
+        const existing = createRoom({ propertyId, id: "room-1", status: "occupied" });
+        const activeTenant = createTenant({ propertyId, roomId: "room-1", movedOutAt: null });
+        const repo = createMockRepo({
+          findById: vi.fn().mockResolvedValue(existing),
+        });
+        const tenantRepo = createMockTenantRepo({
+          findByProperty: vi.fn().mockResolvedValue([activeTenant]),
+        });
+        const service = new RoomService(repo, tenantRepo, createMockPropertyAccess());
+
+        await expect(
+          service.updateRoomStatus("user-1", propertyId, "room-1", "available")
+        ).rejects.toThrow(/move.*tenant|active tenant/i);
       });
     });
 

@@ -7,6 +7,7 @@ export function createRoom(overrides: Partial<Room> = {}): Room {
     roomNumber: "A101",
     roomType: "single",
     monthlyRent: 650,
+    capacity: 1,
     status: "available",
     archivedAt: null,
     createdAt: new Date(),

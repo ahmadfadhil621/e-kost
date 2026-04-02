@@ -36,6 +36,7 @@ function toRoom(r: {
   roomNumber: string;
   roomType: string | null;
   monthlyRent: unknown;
+  capacity: number;
   status: string;
   archivedAt: Date | null;
   createdAt: Date;
@@ -47,6 +48,7 @@ function toRoom(r: {
     roomNumber: r.roomNumber,
     roomType: r.roomType ?? "",
     monthlyRent: toNumber(r.monthlyRent),
+    capacity: r.capacity,
     status: toDomainStatus(r.status),
     archivedAt: r.archivedAt,
     createdAt: r.createdAt,
@@ -60,6 +62,7 @@ export class PrismaRoomRepository implements IRoomRepository {
     roomNumber: string;
     roomType: string;
     monthlyRent: number;
+    capacity?: number;
   }): Promise<Room> {
     try {
       const created = await prisma.room.create({
@@ -68,6 +71,7 @@ export class PrismaRoomRepository implements IRoomRepository {
           roomNumber: data.roomNumber,
           roomType: data.roomType,
           monthlyRent: data.monthlyRent,
+          capacity: data.capacity ?? 1,
           status: "AVAILABLE",
         },
       });
@@ -109,6 +113,7 @@ export class PrismaRoomRepository implements IRoomRepository {
       roomNumber: string;
       roomType: string;
       monthlyRent: number;
+      capacity: number;
     }>
   ): Promise<Room> {
     try {
@@ -118,6 +123,7 @@ export class PrismaRoomRepository implements IRoomRepository {
           ...(data.roomNumber !== undefined && { roomNumber: data.roomNumber }),
           ...(data.roomType !== undefined && { roomType: data.roomType }),
           ...(data.monthlyRent !== undefined && { monthlyRent: data.monthlyRent }),
+          ...(data.capacity !== undefined && { capacity: data.capacity }),
         },
       });
       return toRoom(updated);
