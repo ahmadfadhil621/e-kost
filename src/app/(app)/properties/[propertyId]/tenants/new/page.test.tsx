@@ -1,6 +1,9 @@
-// Traceability: data-freshness
+// Traceability: data-freshness, issue-97-redirect-to-tenant-detail
 // REQ 1.2 -> it('invalidates tenants, balances, and dashboard after successful create tenant')
 // REQ 2.1 -> it('invalidates tenants, balances, and dashboard after successful create tenant')
+// REQ issue-97.1 -> it('redirects to the new tenant detail page after successful creation')
+// REQ issue-97.2 -> it('does not redirect when creation fails')
+// REQ issue-97.3 -> it('redirects to detail page using the id returned by the API')
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -53,6 +56,27 @@ describe("NewTenantPage (data freshness)", () => {
         expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["tenants", PROPERTY_ID] });
         expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["balances", PROPERTY_ID] });
         expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["dashboard", PROPERTY_ID] });
+      });
+    });
+
+    it("redirects to the new tenant detail page after successful creation", async () => {
+      render(
+        <QueryClientProvider client={queryClient}>
+          <NewTenantPage />
+        </QueryClientProvider>
+      );
+
+      await userEvent.type(screen.getByLabelText(/name|full name/i), "Jane Doe");
+      await userEvent.type(screen.getByLabelText(/phone/i), "081234567890");
+      await userEvent.type(screen.getByLabelText(/email/i), "jane@example.com");
+      await userEvent.click(
+        screen.getByRole("button", { name: /create tenant|save|submit/i })
+      );
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith(
+          `/properties/${PROPERTY_ID}/tenants/tenant-1`
+        );
       });
     });
   });
@@ -112,6 +136,36 @@ describe("NewTenantPage (data freshness)", () => {
         expect(tenantsCalls.length).toBeGreaterThanOrEqual(1);
         expect(balancesCalls.length).toBeGreaterThanOrEqual(1);
         expect(dashboardCalls.length).toBeGreaterThanOrEqual(1);
+      });
+    });
+
+    it("redirects to detail page using the id returned by the API", async () => {
+      const customTenantId = "custom-tenant-abc";
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: async () => ({ id: customTenantId }),
+        })
+      );
+
+      render(
+        <QueryClientProvider client={queryClient}>
+          <NewTenantPage />
+        </QueryClientProvider>
+      );
+
+      await userEvent.type(screen.getByLabelText(/name|full name/i), "Edge User 2");
+      await userEvent.type(screen.getByLabelText(/phone/i), "08912345678");
+      await userEvent.type(screen.getByLabelText(/email/i), "edge2@test.com");
+      await userEvent.click(
+        screen.getByRole("button", { name: /create tenant|save|submit/i })
+      );
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith(
+          `/properties/${PROPERTY_ID}/tenants/${customTenantId}`
+        );
       });
     });
   });

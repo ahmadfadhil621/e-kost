@@ -33,12 +33,13 @@ export default function NewTenantPage() {
       return;
     }
 
+    const body = await res.json();
     queryClient.invalidateQueries({ queryKey: ["tenants", propertyId] });
     queryClient.invalidateQueries({ queryKey: ["balances", propertyId] });
     queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
     await queryClient.refetchQueries({ queryKey: ["tenants", propertyId] });
     toast({ title: t("tenant.create.success") });
-    router.push(`/properties/${propertyId}/tenants`);
+    router.push(`/properties/${propertyId}/tenants/${body.id}`);
   };
 
   return (
