@@ -23,22 +23,20 @@ const MONTH_NAMES = [
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
-async function fetchTenants(propertyId: string): Promise<TenantRow[]> {
+async function fetchTenants(propertyId: string): Promise<{ tenants: TenantRow[]; count: number }> {
   const res = await fetch(`/api/properties/${propertyId}/tenants`, {
     credentials: "include",
   });
   if (!res.ok) { throw new Error("Failed to fetch tenants"); }
-  const data = await res.json();
-  return data.tenants ?? [];
+  return res.json();
 }
 
-async function fetchRooms(propertyId: string): Promise<RoomRow[]> {
+async function fetchRooms(propertyId: string): Promise<{ rooms: RoomRow[]; count: number }> {
   const res = await fetch(`/api/properties/${propertyId}/rooms`, {
     credentials: "include",
   });
   if (!res.ok) { throw new Error("Failed to fetch rooms"); }
-  const data = await res.json();
-  return data.rooms ?? [];
+  return res.json();
 }
 
 async function fetchBillingCycles(
@@ -62,13 +60,13 @@ export default function NewPaymentPage() {
   const propertyId = params.propertyId as string;
   const defaultTenantId = searchParams.get("tenantId") ?? "";
 
-  const { data: tenantsData = [] } = useQuery({
+  const { data: tenantsResult } = useQuery({
     queryKey: ["tenants", propertyId],
     queryFn: () => fetchTenants(propertyId),
     enabled: !!propertyId,
   });
 
-  const { data: rooms = [] } = useQuery({
+  const { data: roomsResult } = useQuery({
     queryKey: ["rooms", propertyId],
     queryFn: () => fetchRooms(propertyId),
     enabled: !!propertyId,
@@ -79,6 +77,9 @@ export default function NewPaymentPage() {
     queryFn: () => fetchBillingCycles(propertyId, defaultTenantId),
     enabled: !!propertyId && !!defaultTenantId,
   });
+
+  const tenantsData: TenantRow[] = tenantsResult?.tenants ?? [];
+  const rooms: RoomRow[] = roomsResult?.rooms ?? [];
 
   const activeTenants: TenantOption[] = tenantsData
     .filter((t: TenantRow) => t.roomId && !t.movedOutAt)
