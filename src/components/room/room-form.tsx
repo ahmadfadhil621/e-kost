@@ -7,10 +7,19 @@ import { z } from "zod";
 import {
   createRoomSchema,
   type CreateRoomInput,
+  type RoomStatus,
 } from "@/domain/schemas/room";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { StatusIndicator } from "@/components/room/status-indicator";
 
 interface RoomFormProps {
   mode?: "create" | "edit";
@@ -18,6 +27,9 @@ interface RoomFormProps {
   onSubmit?: (data: CreateRoomInput) => void | Promise<void>;
   onCancel?: () => void;
   isLoading?: boolean;
+  currentStatus?: RoomStatus;
+  isOccupied?: boolean;
+  onStatusChange?: (status: RoomStatus) => void;
 }
 
 export function RoomForm({
@@ -26,6 +38,9 @@ export function RoomForm({
   onSubmit,
   onCancel,
   isLoading = false,
+  currentStatus,
+  isOccupied = false,
+  onStatusChange,
 }: RoomFormProps) {
   const { t } = useTranslation();
   const {
@@ -127,6 +142,36 @@ export function RoomForm({
           </p>
         )}
       </div>
+      {currentStatus !== undefined && (
+        <div className="space-y-2">
+          <Label htmlFor="room-status">{t("room.edit.statusLabel")}</Label>
+          {isOccupied ? (
+            <div className="flex flex-col gap-2">
+              <StatusIndicator status={currentStatus} />
+              <p className="text-sm text-muted-foreground">
+                {t("room.edit.statusOccupiedNote")}
+              </p>
+            </div>
+          ) : (
+            <Select
+              value={currentStatus}
+              onValueChange={(v) => onStatusChange?.(v as RoomStatus)}
+            >
+              <SelectTrigger id="room-status" className="min-h-[44px]" aria-label={t("room.edit.statusLabel")}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="available" className="min-h-[44px]">
+                  {t("room.status.available")}
+                </SelectItem>
+                <SelectItem value="under_renovation" className="min-h-[44px]">
+                  {t("room.status.under_renovation")}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+      )}
       <div className="flex gap-2">
         <Button
           type="submit"

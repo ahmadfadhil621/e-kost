@@ -204,7 +204,9 @@
       "title": "Edit Room",
       "submit": "Save Changes",
       "success": "Room updated successfully",
-      "capacity": "Capacity (max. tenants)"
+      "capacity": "Capacity (max. tenants)",
+      "statusLabel": "Status",
+      "statusOccupiedNote": "Move out all tenants before changing status"
     },
     "list": {
       "title": "Rooms",

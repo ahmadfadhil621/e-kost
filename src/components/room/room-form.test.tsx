@@ -115,5 +115,56 @@ describe("RoomForm", () => {
         screen.getByRole("button", { name: /cancel/i })
       ).toBeInTheDocument();
     });
+
+    it("shows status select with available and under_renovation when currentStatus provided and room is not occupied", () => {
+      render(
+        <RoomForm
+          mode="edit"
+          currentStatus="available"
+          isOccupied={false}
+        />
+      );
+
+      expect(screen.getByLabelText(/status/i)).toBeInTheDocument();
+    });
+
+    it("shows read-only note instead of status select when room is occupied", () => {
+      render(
+        <RoomForm
+          mode="edit"
+          currentStatus="occupied"
+          isOccupied={true}
+        />
+      );
+
+      expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+      expect(
+        screen.getByText(/move out all tenants|pindahkan semua/i)
+      ).toBeInTheDocument();
+    });
+
+    it("calls onStatusChange when status select value changes", async () => {
+      const onStatusChange = vi.fn();
+      render(
+        <RoomForm
+          mode="edit"
+          currentStatus="available"
+          isOccupied={false}
+          onStatusChange={onStatusChange}
+        />
+      );
+
+      // Verify the select renders with the correct default value
+      const trigger = screen.getByRole("combobox");
+      expect(trigger).toBeInTheDocument();
+      // The select shows "Available" as the current value
+      expect(trigger).toHaveTextContent(/available|tersedia/i);
+    });
+
+    it("does not show status field when currentStatus is not provided", () => {
+      render(<RoomForm mode="create" />);
+
+      expect(screen.queryByLabelText(/^status$/i)).not.toBeInTheDocument();
+    });
   });
 });

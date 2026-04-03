@@ -19,6 +19,7 @@ const mockRoom = {
   roomType: "single",
   monthlyRent: 1500000,
   status: "available",
+  activeTenantCount: 0,
 };
 
 vi.mock("next/navigation", () => ({
@@ -170,5 +171,68 @@ describe("EditRoomPage (data freshness)", () => {
         expect(dashboardCalls.length).toBeGreaterThanOrEqual(1);
       });
     });
+  });
+});
+
+describe("EditRoomPage — status field", () => {
+  function buildFetch(roomOverrides: Record<string, unknown> = {}) {
+    const baseRoom = {
+      id: ROOM_ID,
+      roomNumber: "B101",
+      roomType: "double",
+      monthlyRent: 2000000,
+      capacity: 2,
+      status: "available",
+      activeTenantCount: 0,
+      ...roomOverrides,
+    };
+    return vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : (input as URL).toString();
+      const method = (init?.method ?? "GET").toUpperCase();
+      if (url.includes(`/rooms/${ROOM_ID}`) && method === "GET") {
+        return Promise.resolve({ ok: true, status: 200, json: async () => baseRoom });
+      }
+      if (url.includes(`/rooms/${ROOM_ID}/status`) && method === "PATCH") {
+        return Promise.resolve({ ok: true, status: 200, json: async () => ({}) });
+      }
+      if (url.includes(`/rooms/${ROOM_ID}`) && method === "PUT") {
+        return Promise.resolve({ ok: true, status: 200, json: async () => ({}) });
+      }
+      return Promise.reject(new Error(`Unexpected: ${method} ${url}`));
+    });
+  }
+
+  it("shows status select when room has no active tenants", async () => {
+    vi.stubGlobal("fetch", buildFetch({ status: "available", activeTenantCount: 0 }));
+    const queryClient = new QueryClient();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <EditRoomPage />
+      </QueryClientProvider>
+    );
+    await waitFor(() =>
+      expect(screen.getByLabelText(/room number/i)).toHaveValue("B101")
+    );
+    expect(screen.getByRole("combobox")).toBeInTheDocument();
+  });
+
+  it("shows occupied note instead of select when room has active tenants", async () => {
+    vi.stubGlobal(
+      "fetch",
+      buildFetch({ status: "occupied", activeTenantCount: 1 })
+    );
+    const queryClient = new QueryClient();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <EditRoomPage />
+      </QueryClientProvider>
+    );
+    await waitFor(() =>
+      expect(screen.getByLabelText(/room number/i)).toHaveValue("B101")
+    );
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/move out all tenants|pindahkan semua/i)
+    ).toBeInTheDocument();
   });
 });

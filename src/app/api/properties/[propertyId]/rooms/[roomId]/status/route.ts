@@ -39,6 +39,9 @@ export async function PATCH(
     if (err instanceof Error && err.message === "Room not found") {
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
+    if (err instanceof Error && err.message.startsWith("Cannot manually set room status")) {
+      return NextResponse.json({ error: err.message }, { status: 409 });
+    }
     if (err instanceof Error && err.message.startsWith("Cannot change room status")) {
       return NextResponse.json({ error: err.message }, { status: 409 });
     }

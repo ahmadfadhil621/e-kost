@@ -622,33 +622,25 @@ describe("RoomService", () => {
 
   describe("updateRoomStatus", () => {
     describe("good cases", () => {
-      it("updateRoomStatus accepts valid status values", async () => {
+      it("updateRoomStatus accepts available and under_renovation values", async () => {
         const propertyId = crypto.randomUUID();
-        const existing = createRoom({ propertyId, id: "room-1" });
-        const updated = createRoom({
-          ...existing,
-          status: "occupied",
-        });
-        // Provide an active tenant assigned to this room so the "occupied" guard passes
-        const activeTenant = createTenant({ propertyId, roomId: "room-1", movedOutAt: null });
+        const existing = createRoom({ propertyId, id: "room-1", status: "available" });
+        const updated = createRoom({ ...existing, status: "under_renovation" });
         const repo = createMockRepo({
           findById: vi.fn().mockResolvedValue(existing),
           updateStatus: vi.fn().mockResolvedValue(updated),
         });
-        const tenantRepo = createMockTenantRepo({
-          findByProperty: vi.fn().mockResolvedValue([activeTenant]),
-        });
-        const service = new RoomService(repo, tenantRepo, createMockPropertyAccess());
+        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
 
         const result = await service.updateRoomStatus(
           "user-1",
           propertyId,
           "room-1",
-          "occupied"
+          "under_renovation"
         );
 
-        expect(result.status).toBe("occupied");
-        expect(repo.updateStatus).toHaveBeenCalledWith("room-1", "occupied");
+        expect(result.status).toBe("under_renovation");
+        expect(repo.updateStatus).toHaveBeenCalledWith("room-1", "under_renovation");
       });
 
       it("updateRoomStatus persists status and returns updated room (PROP 4)", async () => {
@@ -726,6 +718,21 @@ describe("RoomService", () => {
         ).rejects.toThrow(/move.*tenant|active tenant/i);
       });
 
+      it("rejects manually setting status to occupied", async () => {
+        const propertyId = crypto.randomUUID();
+        const existing = createRoom({ propertyId, id: "room-1", status: "available" });
+        const activeTenant = createTenant({ propertyId, roomId: "room-1", movedOutAt: null });
+        const repo = createMockRepo({ findById: vi.fn().mockResolvedValue(existing) });
+        const tenantRepo = createMockTenantRepo({
+          findByProperty: vi.fn().mockResolvedValue([activeTenant]),
+        });
+        const service = new RoomService(repo, tenantRepo, createMockPropertyAccess());
+
+        await expect(
+          service.updateRoomStatus("user-1", propertyId, "room-1", "occupied")
+        ).rejects.toThrow(/manually set.*occupied|occupied.*automatically/i);
+      });
+
       it("rejects setting status to occupied when no active tenant is assigned", async () => {
         const propertyId = crypto.randomUUID();
         const existing = createRoom({ propertyId, id: "room-1", status: "available" });
@@ -739,7 +746,7 @@ describe("RoomService", () => {
 
         await expect(
           service.updateRoomStatus("user-1", propertyId, "room-1", "occupied")
-        ).rejects.toThrow(/no active tenant/i);
+        ).rejects.toThrow(/manually set.*occupied|occupied.*automatically/i);
       });
     });
 

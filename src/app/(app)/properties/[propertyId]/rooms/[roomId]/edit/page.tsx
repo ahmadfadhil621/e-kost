@@ -1,11 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { RoomForm } from "@/components/room/room-form";
-import type { CreateRoomInput } from "@/domain/schemas/room";
+import type { CreateRoomInput, RoomStatus } from "@/domain/schemas/room";
 
 type RoomDetail = {
   id: string;
@@ -13,7 +14,8 @@ type RoomDetail = {
   roomType: string;
   monthlyRent: number;
   capacity: number;
-  status: string;
+  status: RoomStatus;
+  activeTenantCount: number;
 };
 
 async function fetchRoom(
@@ -37,6 +39,8 @@ export default function EditRoomPage() {
   const { toast } = useToast();
   const propertyId = params.propertyId as string;
   const roomId = params.roomId as string;
+
+  const [pendingStatus, setPendingStatus] = useState<RoomStatus | undefined>(undefined);
 
   const { data: room, isLoading } = useQuery({
     queryKey: ["room", propertyId, roomId],
@@ -65,6 +69,28 @@ export default function EditRoomPage() {
       return;
     }
 
+    const currentStatus = pendingStatus ?? room?.status;
+    if (currentStatus && room && currentStatus !== room.status) {
+      const statusRes = await fetch(
+        `/api/properties/${propertyId}/rooms/${roomId}/status`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ status: currentStatus }),
+        }
+      );
+      if (!statusRes.ok) {
+        const body = await statusRes.json().catch(() => ({}));
+        toast({
+          title: t("auth.error.generic"),
+          description: body?.error ?? undefined,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     queryClient.invalidateQueries({ queryKey: ["room", propertyId, roomId] });
     queryClient.invalidateQueries({ queryKey: ["rooms", propertyId] });
     queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
@@ -84,6 +110,8 @@ export default function EditRoomPage() {
     );
   }
 
+  const effectiveStatus = pendingStatus ?? (room.status as RoomStatus);
+
   return (
     <div className="space-y-4">
       <RoomForm
@@ -94,6 +122,9 @@ export default function EditRoomPage() {
           monthlyRent: room.monthlyRent,
           capacity: room.capacity ?? 1,
         }}
+        currentStatus={effectiveStatus}
+        isOccupied={room.activeTenantCount > 0}
+        onStatusChange={setPendingStatus}
         onSubmit={handleSubmit}
         onCancel={() => router.push(`/properties/${propertyId}/rooms/${roomId}`)}
       />

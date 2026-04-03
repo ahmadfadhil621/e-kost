@@ -204,7 +204,9 @@
       "title": "Ubah Kamar",
       "submit": "Simpan Perubahan",
       "success": "Kamar berhasil diperbarui",
-      "capacity": "Kapasitas (maks. penyewa)"
+      "capacity": "Kapasitas (maks. penyewa)",
+      "statusLabel": "Status",
+      "statusOccupiedNote": "Pindahkan semua penyewa sebelum mengubah status"
     },
     "list": {
       "title": "Kamar",

@@ -117,6 +117,11 @@ export class RoomService {
       throw new Error("Room not found");
     }
     updateRoomStatusSchema.parse({ status });
+    if (status === "occupied") {
+      throw new Error(
+        "Cannot manually set room status to occupied: it is managed automatically"
+      );
+    }
     const tenants = await this.tenantRepo.findByProperty(propertyId);
     const activeInRoom = tenants.filter(
       (t) => t.roomId === id && !t.movedOutAt

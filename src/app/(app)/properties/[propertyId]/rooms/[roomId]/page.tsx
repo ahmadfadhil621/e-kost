@@ -11,13 +11,6 @@ import { StatusIndicator } from "@/components/room/status-indicator";
 import { Pencil } from "lucide-react";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -51,27 +44,6 @@ async function fetchRoom(
   );
   if (res.status === 404) {return null;}
   if (!res.ok) {throw new Error("Failed to fetch room");}
-  return res.json();
-}
-
-async function updateStatus(
-  propertyId: string,
-  roomId: string,
-  status: RoomStatus
-): Promise<RoomDetail> {
-  const res = await fetch(
-    `/api/properties/${propertyId}/rooms/${roomId}/status`,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ status }),
-    }
-  );
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body?.error ?? "Failed to update status");
-  }
   return res.json();
 }
 
@@ -152,22 +124,6 @@ export default function RoomDetailPage() {
     queryClient.invalidateQueries({ queryKey: ["rooms", propertyId] });
     queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
   };
-
-  const statusMutation = useMutation({
-    mutationFn: (status: RoomStatus) =>
-      updateStatus(propertyId, roomId, status),
-    onSuccess: () => {
-      invalidateRoomQueries();
-      toast({ title: t("room.status.updateSuccess") });
-    },
-    onError: (err: Error) => {
-      toast({
-        title: t("auth.error.generic"),
-        description: err.message,
-        variant: "destructive",
-      });
-    },
-  });
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteRoom(propertyId, roomId),
@@ -322,35 +278,7 @@ export default function RoomDetailPage() {
             {t("room.unarchive.confirm")}
           </Button>
         </div>
-      ) : (
-        <div className="flex flex-col gap-2">
-          <span className="text-sm font-medium">
-            {t("room.detail.changeStatus")}
-          </span>
-          <Select
-            value={room.status}
-            onValueChange={(value) =>
-              statusMutation.mutate(value as RoomStatus)
-            }
-            disabled={statusMutation.isPending}
-          >
-            <SelectTrigger className="min-h-[44px] min-w-[44px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="available" className="min-h-[44px]">
-                {t("room.status.available")}
-              </SelectItem>
-              <SelectItem value="occupied" className="min-h-[44px]">
-                {t("room.status.occupied")}
-              </SelectItem>
-              <SelectItem value="under_renovation" className="min-h-[44px]">
-                {t("room.status.under_renovation")}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      )}
+      ) : null}
 
       {/* G-3: Destructive actions at bottom */}
       <div className="border-t pt-6 space-y-3">

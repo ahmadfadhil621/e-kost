@@ -70,8 +70,8 @@ describe("PATCH /api/properties/[propertyId]/rooms/[roomId]/status", () => {
       );
     });
 
-    it("PATCH accepts all three status values", async () => {
-      for (const status of ["available", "occupied", "under_renovation"] as const) {
+    it("PATCH accepts available and under_renovation status values", async () => {
+      for (const status of ["available", "under_renovation"] as const) {
         const updated = createRoom({ id: roomId, propertyId, status });
         vi.mocked(roomService.updateRoomStatus).mockResolvedValue(updated);
 
@@ -94,9 +94,9 @@ describe("PATCH /api/properties/[propertyId]/rooms/[roomId]/status", () => {
   });
 
   describe("bad cases", () => {
-    it("PATCH returns 409 with user-visible error when setting occupied with no active tenant", async () => {
+    it("PATCH returns 409 when manually setting status to occupied", async () => {
       vi.mocked(roomService.updateRoomStatus).mockRejectedValue(
-        new Error("Cannot set room to occupied: no active tenant assigned")
+        new Error("Cannot manually set room status to occupied: it is managed automatically")
       );
 
       const request = new Request(
@@ -114,7 +114,30 @@ describe("PATCH /api/properties/[propertyId]/rooms/[roomId]/status", () => {
       const data = await response.json();
 
       expect(response.status).toBe(409);
-      expect(data.error).toMatch(/occupied.*no active tenant|no active tenant/i);
+      expect(data.error).toMatch(/manually set.*occupied|occupied.*automatically/i);
+    });
+
+    it("PATCH returns 409 with user-visible error when setting occupied with no active tenant", async () => {
+      vi.mocked(roomService.updateRoomStatus).mockRejectedValue(
+        new Error("Cannot manually set room status to occupied: it is managed automatically")
+      );
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}/status`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "occupied" }),
+        }
+      );
+
+      const response = await PATCH(request, {
+        params: Promise.resolve({ propertyId, roomId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(409);
+      expect(data.error).toMatch(/manually set.*occupied|occupied.*automatically/i);
     });
 
     it("PATCH returns 400 when status is invalid", async () => {
