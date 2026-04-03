@@ -142,10 +142,11 @@ test.describe("standalone text links are visually underlined", () => {
       await ensureViewAllVisible(page, baseURL, propertyId, tenant!.id);
       await goToTenantDetail(page, tenant!.id);
 
-      // The "Record Payment" button-style link must remain a button (not a standalone text link)
-      // It should be rendered as a <button> element, not a bare <a> text link
-      const recordPaymentBtn = page.getByRole("button", { name: /record payment|catat pembayaran/i });
-      await expect(recordPaymentBtn).toBeVisible({ timeout: 15000 });
+      // The "Record Payment" link is rendered via <Button asChild><Link>, which Radix Slot
+      // forwards to the <Link> child — resulting in an <a> element (role=link), not role=button.
+      // What matters here is that it is NOT a bare standalone text link (it carries button styling).
+      const recordPaymentLink = page.getByRole("link", { name: /record payment|catat pembayaran/i });
+      await expect(recordPaymentLink).toBeVisible({ timeout: 15000 });
     });
   });
 
