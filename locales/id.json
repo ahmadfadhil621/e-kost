@@ -556,6 +556,12 @@
   },
   "settings": {
     "title": "Pengaturan",
+    "appearance": {
+      "title": "Tampilan",
+      "light": "Terang",
+      "dark": "Gelap",
+      "system": "Sistem"
+    },
     "language": {
       "title": "Bahasa",
       "current": "Bahasa saat ini"

@@ -9,6 +9,7 @@ import { useDevStatus } from "@/hooks/use-dev-status";
 import { AVAILABLE_LOCALES } from "@/lib/i18n";
 import { LanguageSelector } from "./LanguageSelector";
 import { AccountSection } from "./AccountSection";
+import { AppearanceSection } from "./AppearanceSection";
 import { Separator } from "@/components/ui/separator";
 
 type User = { id: string; name: string; email: string };
@@ -47,6 +48,8 @@ export function SettingsPage() {
       </h1>
 
       <section className="space-y-6">
+        <AppearanceSection />
+        <Separator />
         <LanguageSelector availableLocales={[...AVAILABLE_LOCALES]} />
         <Separator />
         <AccountSection

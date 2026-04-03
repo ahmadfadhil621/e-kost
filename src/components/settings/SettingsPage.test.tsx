@@ -1,4 +1,4 @@
-// Traceability: settings-staff-management, settings-invite-management
+// Traceability: settings-staff-management, settings-invite-management, settings-dark-mode
 // REQ 4.1 -> it('displays single page with Language and Account sections')
 // REQ 4.2 -> it('renders sections in single-column with separators')
 // REQ 4.3 -> it('displays section headers for Language and Account')
@@ -7,12 +7,17 @@
 // REQ 5.1 -> it('shows dev section link when user is a dev')
 // REQ 5.2 -> it('hides dev section link for non-dev users')
 // REQ 5.3 -> it('dev section link navigates to /settings/invites')
+// REQ AC-2 -> it('renders Appearance section above Language section')
 // Note: Staff section moved to /properties/[propertyId] (issue #26)
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { Providers } from "@/components/providers";
 import { SettingsPage } from "./SettingsPage";
+
+vi.mock("next-themes", () => ({
+  useTheme: () => ({ theme: "system", setTheme: vi.fn(), resolvedTheme: "light" }),
+}));
 
 const mockUseDevStatus = vi.fn();
 
@@ -67,6 +72,14 @@ describe("SettingsPage", () => {
       ).toBeInTheDocument();
     });
 
+    it("renders Appearance section above Language section", () => {
+      renderSettingsPage();
+
+      expect(
+        screen.getByRole("heading", { name: /appearance|settings\.appearance/i })
+      ).toBeInTheDocument();
+    });
+
     it("renders sections in single-column with separators", () => {
       const { container } = renderSettingsPage();
 
@@ -101,6 +114,15 @@ describe("SettingsPage", () => {
   });
 
 
+  describe("bad cases", () => {
+    it("renders nothing when user is null after loading", () => {
+      mockUseAuth.mockReturnValue({ user: null, loading: false });
+      renderSettingsPage();
+
+      expect(screen.queryByRole("heading", { name: /settings|pengaturan/i, level: 1 })).not.toBeInTheDocument();
+    });
+  });
+
   describe("edge cases", () => {
     it("page has accessible title or heading", () => {
       renderSettingsPage();
@@ -118,7 +140,7 @@ describe("SettingsPage — dev section", () => {
   describe("good cases", () => {
     it("shows dev section link when user is a dev", () => {
       mockUseDevStatus.mockReturnValue({ isDev: true, isLoading: false });
-      render(<Providers><SettingsPage /></Providers>);
+      renderSettingsPage();
 
       const link = screen.queryByRole("link", { name: /invite management|manajemen undangan/i });
       expect(link).toBeInTheDocument();
@@ -126,7 +148,7 @@ describe("SettingsPage — dev section", () => {
 
     it("dev section link navigates to /settings/invites", () => {
       mockUseDevStatus.mockReturnValue({ isDev: true, isLoading: false });
-      render(<Providers><SettingsPage /></Providers>);
+      renderSettingsPage();
 
       const link = screen.getByRole("link", { name: /invite management|manajemen undangan/i });
       expect(link).toHaveAttribute("href", "/settings/invites");
@@ -136,7 +158,7 @@ describe("SettingsPage — dev section", () => {
   describe("bad cases", () => {
     it("hides dev section link for non-dev users", () => {
       mockUseDevStatus.mockReturnValue({ isDev: false, isLoading: false });
-      render(<Providers><SettingsPage /></Providers>);
+      renderSettingsPage();
 
       const link = screen.queryByRole("link", { name: /invite management|manajemen undangan/i });
       expect(link).not.toBeInTheDocument();
@@ -146,7 +168,7 @@ describe("SettingsPage — dev section", () => {
   describe("edge cases", () => {
     it("does not show dev section while dev status is loading", () => {
       mockUseDevStatus.mockReturnValue({ isDev: false, isLoading: true });
-      render(<Providers><SettingsPage /></Providers>);
+      renderSettingsPage();
 
       const link = screen.queryByRole("link", { name: /invite management|manajemen undangan/i });
       expect(link).not.toBeInTheDocument();

@@ -556,6 +556,12 @@
   },
   "settings": {
     "title": "Settings",
+    "appearance": {
+      "title": "Appearance",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
     "language": {
       "title": "Language",
       "current": "Current language"
