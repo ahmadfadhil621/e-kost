@@ -55,12 +55,14 @@ export async function seedDemoData(ownerId: string): Promise<void> {
   });
 
   const roomData = [
-    { roomNumber: "101", monthlyRent: 1200000, status: "OCCUPIED" as const },
-    { roomNumber: "102", monthlyRent: 1200000, status: "OCCUPIED" as const },
-    { roomNumber: "103", monthlyRent: 1500000, status: "OCCUPIED" as const },
-    { roomNumber: "104", monthlyRent: 1500000, status: "AVAILABLE" as const },
-    { roomNumber: "201", monthlyRent: 1800000, status: "OCCUPIED" as const },
-    { roomNumber: "202", monthlyRent: 1800000, status: "AVAILABLE" as const },
+    { roomNumber: "101", monthlyRent: 1200000, status: "OCCUPIED" as const, capacity: 1 },
+    { roomNumber: "102", monthlyRent: 1200000, status: "OCCUPIED" as const, capacity: 1 },
+    { roomNumber: "103", monthlyRent: 1500000, status: "OCCUPIED" as const, capacity: 1 },
+    { roomNumber: "104", monthlyRent: 1500000, status: "AVAILABLE" as const, capacity: 1 },
+    { roomNumber: "201", monthlyRent: 1800000, status: "OCCUPIED" as const, capacity: 1 },
+    { roomNumber: "202", monthlyRent: 1800000, status: "AVAILABLE" as const, capacity: 1 },
+    // Shared room — capacity 2, both beds occupied
+    { roomNumber: "203", monthlyRent: 900000, status: "OCCUPIED" as const, capacity: 2 },
   ];
 
   const rooms = await Promise.all(
@@ -71,6 +73,7 @@ export async function seedDemoData(ownerId: string): Promise<void> {
           roomNumber: r.roomNumber,
           monthlyRent: r.monthlyRent,
           status: r.status,
+          capacity: r.capacity,
         },
       })
     )
@@ -131,6 +134,32 @@ export async function seedDemoData(ownerId: string): Promise<void> {
   await recordPayment(dewi.id, 1800000, 3); // oldest: paid
   // monthsBack=2 is intentionally skipped
   await recordPayment(dewi.id, 1800000, 1); // paid — but skipped m=2
+
+  // Scenario 5 — Shared room 203: Rudi (paid up) + Nisa (2 months unpaid)
+  const rudi = await prisma.tenant.create({
+    data: {
+      propertyId: property.id,
+      roomId: roomMap["203"].id,
+      name: "Rudi Hartono",
+      movedInAt: monthStart(3),
+    },
+  });
+  for (const m of [3, 2, 1, 0]) {
+    await recordPayment(rudi.id, 900000, m);
+  }
+
+  const nisa = await prisma.tenant.create({
+    data: {
+      propertyId: property.id,
+      roomId: roomMap["203"].id,
+      name: "Nisa Aulia",
+      movedInAt: monthStart(3),
+    },
+  });
+  // Paid only 3 and 2 months ago — last 2 months unpaid
+  for (const m of [3, 2]) {
+    await recordPayment(nisa.id, 900000, m);
+  }
 
   const expenseData: { monthsBack: number; category: ExpenseCategory; amount: number }[] = [
     { monthsBack: 0, category: "ELECTRICITY", amount: 450000 },
