@@ -32,6 +32,9 @@ export async function POST(
     if (err instanceof Error && err.message === "Tenant not found") {
       return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
     }
+    if (err instanceof Error && err.message === "Tenant is already moved out") {
+      return NextResponse.json({ error: "Tenant is already moved out" }, { status: 409 });
+    }
     if (err instanceof Error && err.message.includes("Forbidden")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

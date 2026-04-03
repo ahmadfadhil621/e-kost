@@ -94,6 +94,29 @@ describe("PATCH /api/properties/[propertyId]/rooms/[roomId]/status", () => {
   });
 
   describe("bad cases", () => {
+    it("PATCH returns 409 with user-visible error when setting occupied with no active tenant", async () => {
+      vi.mocked(roomService.updateRoomStatus).mockRejectedValue(
+        new Error("Cannot set room to occupied: no active tenant assigned")
+      );
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}/status`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "occupied" }),
+        }
+      );
+
+      const response = await PATCH(request, {
+        params: Promise.resolve({ propertyId, roomId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(409);
+      expect(data.error).toMatch(/occupied.*no active tenant|no active tenant/i);
+    });
+
     it("PATCH returns 400 when status is invalid", async () => {
       const request = new Request(
         `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}/status`,

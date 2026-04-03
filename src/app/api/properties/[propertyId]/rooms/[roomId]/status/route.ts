@@ -42,6 +42,9 @@ export async function PATCH(
     if (err instanceof Error && err.message.startsWith("Cannot change room status")) {
       return NextResponse.json({ error: err.message }, { status: 409 });
     }
+    if (err instanceof Error && err.message.startsWith("Cannot set room to occupied")) {
+      return NextResponse.json({ error: err.message }, { status: 409 });
+    }
     if (err instanceof Error && err.message.includes("Forbidden")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

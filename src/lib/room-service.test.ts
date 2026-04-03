@@ -629,11 +629,16 @@ describe("RoomService", () => {
           ...existing,
           status: "occupied",
         });
+        // Provide an active tenant assigned to this room so the "occupied" guard passes
+        const activeTenant = createTenant({ propertyId, roomId: "room-1", movedOutAt: null });
         const repo = createMockRepo({
           findById: vi.fn().mockResolvedValue(existing),
           updateStatus: vi.fn().mockResolvedValue(updated),
         });
-        const service = new RoomService(repo, createMockTenantRepo(), createMockPropertyAccess());
+        const tenantRepo = createMockTenantRepo({
+          findByProperty: vi.fn().mockResolvedValue([activeTenant]),
+        });
+        const service = new RoomService(repo, tenantRepo, createMockPropertyAccess());
 
         const result = await service.updateRoomStatus(
           "user-1",
@@ -719,6 +724,22 @@ describe("RoomService", () => {
         await expect(
           service.updateRoomStatus("user-1", propertyId, "room-1", "available")
         ).rejects.toThrow(/move.*tenant|active tenant/i);
+      });
+
+      it("rejects setting status to occupied when no active tenant is assigned", async () => {
+        const propertyId = crypto.randomUUID();
+        const existing = createRoom({ propertyId, id: "room-1", status: "available" });
+        const repo = createMockRepo({
+          findById: vi.fn().mockResolvedValue(existing),
+        });
+        const tenantRepo = createMockTenantRepo({
+          findByProperty: vi.fn().mockResolvedValue([]),
+        });
+        const service = new RoomService(repo, tenantRepo, createMockPropertyAccess());
+
+        await expect(
+          service.updateRoomStatus("user-1", propertyId, "room-1", "occupied")
+        ).rejects.toThrow(/no active tenant/i);
       });
     });
 

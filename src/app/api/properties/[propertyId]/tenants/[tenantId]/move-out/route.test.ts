@@ -80,6 +80,25 @@ describe("POST /api/properties/[propertyId]/tenants/[tenantId]/move-out", () => 
 
       expect(response.status).toBe(404);
     });
+
+    it("POST returns 409 with user-visible error when tenant is already moved out", async () => {
+      vi.mocked(tenantService.moveOut).mockRejectedValue(
+        new Error("Tenant is already moved out")
+      );
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/tenants/${tenantId}/move-out`,
+        { method: "POST" }
+      );
+
+      const response = await POST(request, {
+        params: Promise.resolve({ propertyId, tenantId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(409);
+      expect(data.error).toBe("Tenant is already moved out");
+    });
   });
 
   describe("edge cases", () => {

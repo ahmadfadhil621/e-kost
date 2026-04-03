@@ -68,6 +68,7 @@ export default function EditRoomPage() {
     queryClient.invalidateQueries({ queryKey: ["room", propertyId, roomId] });
     queryClient.invalidateQueries({ queryKey: ["rooms", propertyId] });
     queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
+    queryClient.invalidateQueries({ queryKey: ["billing-cycles"] });
     await queryClient.refetchQueries({ queryKey: ["rooms", propertyId] });
     toast({ title: t("room.edit.success") });
     router.push(`/properties/${propertyId}/rooms/${roomId}`);

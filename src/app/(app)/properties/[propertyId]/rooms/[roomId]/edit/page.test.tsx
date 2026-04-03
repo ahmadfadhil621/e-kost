@@ -1,6 +1,7 @@
 // Traceability: data-freshness
 // REQ 1.3 -> it('invalidates room, rooms, and dashboard after successful edit room')
 // REQ 2.1 -> it('invalidates room, rooms, and dashboard after successful edit room')
+// data-integrity#AC-3 -> it('invalidates billing-cycles after successful rent edit')
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -83,6 +84,9 @@ describe("EditRoomPage (data freshness)", () => {
         });
         expect(invalidateSpy).toHaveBeenCalledWith({
           queryKey: ["dashboard", PROPERTY_ID],
+        });
+        expect(invalidateSpy).toHaveBeenCalledWith({
+          queryKey: ["billing-cycles"],
         });
       });
     });
