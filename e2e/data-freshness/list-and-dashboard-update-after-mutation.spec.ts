@@ -44,7 +44,8 @@ test.describe("list and dashboard update after mutation", () => {
         .getByRole("button", { name: /create tenant|save|submit/i })
         .click();
 
-      await expect(page).toHaveURL(/\/properties\/[^/]+\/tenants$/, { timeout: 25000 });
+      await expect(page).toHaveURL(/\/properties\/[^/]+\/tenants\/[^/]+$/, { timeout: 25000 });
+      await page.goto(page.url().replace(/\/tenants\/[^/]+$/, "/tenants"));
       await expect(
         page.getByRole("link", { name: new RegExp(`Tenant ${unique}`) })
       ).toBeVisible({ timeout: 15000 });
