@@ -345,7 +345,9 @@
       "amount": "Payment Amount",
       "date": "Payment Date",
       "submit": "Record Payment",
-      "success": "Payment recorded successfully"
+      "success": "Payment recorded successfully",
+      "note": "Note",
+      "notePlaceholder": "e.g. paid in cash"
     },
     "list": {
       "title": "Payment History",
@@ -376,7 +378,8 @@
       "amountRequired": "Amount is required",
       "amountPositive": "Amount must be positive",
       "dateRequired": "Payment date is required",
-      "dateFuture": "Payment date cannot be in the future"
+      "dateFuture": "Payment date cannot be in the future",
+      "noteTooLong": "Note cannot exceed 1000 characters"
     },
     "delete": {
       "button": "Delete Payment",

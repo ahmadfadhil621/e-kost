@@ -111,6 +111,53 @@ describe("PaymentService", () => {
         });
       });
 
+      it("passes note through to paymentRepo.create when provided", async () => {
+        const propertyId = crypto.randomUUID();
+        const userId = crypto.randomUUID();
+        const tenantId = crypto.randomUUID();
+        const tenant = createTenant({ propertyId, id: tenantId, roomId: crypto.randomUUID(), movedOutAt: null });
+        const created = createPayment({ tenantId, note: "paid in cash" });
+        const paymentRepo = createMockPaymentRepo({
+          create: vi.fn().mockResolvedValue(created),
+        });
+        const tenantRepo = createMockTenantRepo({ findById: vi.fn().mockResolvedValue(tenant) });
+        const service = new PaymentService(paymentRepo, tenantRepo, createMockPropertyAccess());
+
+        await service.createPayment(userId, propertyId, {
+          tenantId,
+          amount: 500000,
+          paymentDate: "2024-06-15",
+          note: "paid in cash",
+        });
+
+        expect(paymentRepo.create).toHaveBeenCalledWith(
+          expect.objectContaining({ note: "paid in cash" })
+        );
+      });
+
+      it("passes note as undefined to paymentRepo.create when omitted", async () => {
+        const propertyId = crypto.randomUUID();
+        const userId = crypto.randomUUID();
+        const tenantId = crypto.randomUUID();
+        const tenant = createTenant({ propertyId, id: tenantId, roomId: crypto.randomUUID(), movedOutAt: null });
+        const created = createPayment({ tenantId });
+        const paymentRepo = createMockPaymentRepo({
+          create: vi.fn().mockResolvedValue(created),
+        });
+        const tenantRepo = createMockTenantRepo({ findById: vi.fn().mockResolvedValue(tenant) });
+        const service = new PaymentService(paymentRepo, tenantRepo, createMockPropertyAccess());
+
+        await service.createPayment(userId, propertyId, {
+          tenantId,
+          amount: 500000,
+          paymentDate: "2024-06-15",
+        });
+
+        expect(paymentRepo.create).toHaveBeenCalledWith(
+          expect.objectContaining({ note: undefined })
+        );
+      });
+
       it("create then getPayment returns same data (PROP 2)", async () => {
         const propertyId = crypto.randomUUID();
         const userId = crypto.randomUUID();
@@ -351,9 +398,51 @@ describe("PaymentService", () => {
           })
         ).rejects.toThrow(/moved out/i);
       });
+
+      it("rejects when note exceeds 1000 characters", async () => {
+        const paymentRepo = createMockPaymentRepo();
+        const tenantRepo = createMockTenantRepo();
+        const service = new PaymentService(
+          paymentRepo,
+          tenantRepo,
+          createMockPropertyAccess()
+        );
+
+        await expect(
+          service.createPayment(crypto.randomUUID(), crypto.randomUUID(), {
+            tenantId: crypto.randomUUID(),
+            amount: 500000,
+            paymentDate: "2024-06-15",
+            note: "a".repeat(1001),
+          })
+        ).rejects.toThrow(/1000/i);
+      });
     });
 
     describe("edge cases", () => {
+      it("accepts note at exactly 1000 characters", async () => {
+        const propertyId = crypto.randomUUID();
+        const userId = crypto.randomUUID();
+        const tenantId = crypto.randomUUID();
+        const tenant = createTenant({ propertyId, id: tenantId, roomId: crypto.randomUUID(), movedOutAt: null });
+        const longNote = "a".repeat(1000);
+        const created = createPayment({ tenantId, note: longNote });
+        const paymentRepo = createMockPaymentRepo({
+          create: vi.fn().mockResolvedValue(created),
+        });
+        const tenantRepo = createMockTenantRepo({ findById: vi.fn().mockResolvedValue(tenant) });
+        const service = new PaymentService(paymentRepo, tenantRepo, createMockPropertyAccess());
+
+        const result = await service.createPayment(userId, propertyId, {
+          tenantId,
+          amount: 500000,
+          paymentDate: "2024-06-15",
+          note: longNote,
+        });
+
+        expect(result.note).toBe(longNote);
+      });
+
       it("createPayment only succeeds when tenant has active room (PROP 1)", async () => {
         const propertyId = crypto.randomUUID();
         const tenantId = crypto.randomUUID();

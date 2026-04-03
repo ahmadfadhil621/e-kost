@@ -11,6 +11,7 @@ function paymentToJson(p: {
   amount: number;
   paymentDate: Date;
   createdAt: Date;
+  note?: string | null;
 }) {
   return {
     id: p.id,
@@ -19,6 +20,7 @@ function paymentToJson(p: {
     amount: p.amount,
     paymentDate: p.paymentDate.toISOString().split("T")[0],
     createdAt: p.createdAt.toISOString(),
+    note: p.note ?? null,
   };
 }
 

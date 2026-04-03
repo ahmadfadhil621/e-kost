@@ -6,6 +6,7 @@ export interface IPaymentRepository {
     amount: number;
     paymentDate: Date;
     billingCycleId?: string;
+    note?: string;
   }): Promise<Payment>;
   findById(id: string): Promise<Payment | null>;
   findByProperty(propertyId: string): Promise<Payment[]>;

@@ -110,6 +110,11 @@ export function PaymentList({
                     "PPp"
                   )}
                 </p>
+                {payment.note && (
+                  <p className="text-sm text-muted-foreground mt-1 italic">
+                    {payment.note}
+                  </p>
+                )}
               </CardContent>
             </Card>
           </li>

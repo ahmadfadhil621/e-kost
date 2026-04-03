@@ -20,6 +20,7 @@ export const createPaymentSchema = z
       ),
     billingCycleYear: z.number().int().min(2000).max(2100).optional(),
     billingCycleMonth: z.number().int().min(1).max(12).optional(),
+    note: z.string().max(1000, "Note cannot exceed 1000 characters").optional(),
   })
   .refine(
     (data) =>
@@ -41,6 +42,7 @@ export interface Payment {
   paymentDate: Date;
   createdAt: Date;
   billingCycleId?: string | null;
+  note?: string | null;
 }
 
 export interface PaymentWithCount {

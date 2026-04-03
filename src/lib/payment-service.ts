@@ -96,6 +96,7 @@ export class PaymentService {
       amount: parsed.amount,
       paymentDate,
       billingCycleId,
+      note: parsed.note,
     });
   }
 

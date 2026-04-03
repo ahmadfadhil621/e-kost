@@ -149,6 +149,7 @@ model Payment {
   paymentDate    DateTime       @db.Date
   createdAt      DateTime       @default(now())
   billingCycleId String?
+  note           String?        @db.VarChar(1000)
   billing_cycle  billing_cycle? @relation(fields: [billingCycleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 

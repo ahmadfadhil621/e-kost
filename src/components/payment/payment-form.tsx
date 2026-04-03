@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
+import { format } from "date-fns";
 import {
   createPaymentSchema,
   type CreatePaymentInput,
@@ -11,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -41,6 +43,9 @@ interface PaymentFormProps {
   defaultCycleYear?: number;
   defaultCycleMonth?: number;
 }
+
+const defaultNoteValue = () =>
+  `${format(new Date(), "MMMM")}'s rent`;
 
 const defaultPaymentDate = () =>
   new Date().toISOString().split("T")[0];
@@ -79,6 +84,7 @@ export function PaymentForm({
       paymentDate: defaultPaymentDate(),
       billingCycleYear: defaultCycleYear,
       billingCycleMonth: defaultCycleMonth,
+      note: defaultNoteValue(),
     },
   });
 
@@ -104,6 +110,7 @@ export function PaymentForm({
       tenantId: "",
       amount: undefined as unknown as number,
       paymentDate: defaultPaymentDate(),
+      note: defaultNoteValue(),
     });
     onSuccess?.();
   };
@@ -203,6 +210,24 @@ export function PaymentForm({
           </Select>
         </div>
       )}
+      <div className="space-y-2">
+        <Label htmlFor="payment-note">{t("payment.create.note")}</Label>
+        <Textarea
+          id="payment-note"
+          {...register("note")}
+          maxLength={1000}
+          className="resize-none"
+          rows={3}
+          placeholder={t("payment.create.notePlaceholder")}
+          aria-invalid={!!errors.note}
+          aria-describedby={errors.note ? "note-error" : undefined}
+        />
+        {errors.note && (
+          <p id="note-error" className="text-sm text-destructive">
+            {errors.note.message}
+          </p>
+        )}
+      </div>
       <Button
         type="submit"
         className="min-h-[44px] min-w-[44px]"

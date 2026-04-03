@@ -345,7 +345,9 @@
       "amount": "Jumlah Pembayaran",
       "date": "Tanggal Pembayaran",
       "submit": "Catat Pembayaran",
-      "success": "Pembayaran berhasil dicatat"
+      "success": "Pembayaran berhasil dicatat",
+      "note": "Catatan",
+      "notePlaceholder": "mis. dibayar tunai"
     },
     "list": {
       "title": "Riwayat Pembayaran",
@@ -376,7 +378,8 @@
       "amountRequired": "Jumlah wajib diisi",
       "amountPositive": "Jumlah harus positif",
       "dateRequired": "Tanggal pembayaran wajib diisi",
-      "dateFuture": "Tanggal pembayaran tidak boleh di masa depan"
+      "dateFuture": "Tanggal pembayaran tidak boleh di masa depan",
+      "noteTooLong": "Catatan tidak boleh melebihi 1000 karakter"
     },
     "delete": {
       "button": "Hapus Pembayaran",

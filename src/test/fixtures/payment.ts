@@ -8,6 +8,7 @@ export function createPayment(overrides: Partial<Payment> = {}): Payment {
     amount: 650,
     paymentDate: new Date(),
     createdAt: new Date(),
+    note: null,
     ...overrides,
   };
 }

@@ -77,6 +77,59 @@ describe("POST /api/properties/[propertyId]/payments", () => {
       expect(data).toHaveProperty("paymentDate");
       expect(data).toHaveProperty("createdAt");
     });
+
+    it("POST returns 201 with note in response when note is provided", async () => {
+      const created = createPayment({
+        tenantId,
+        tenantName: "Jane Doe",
+        amount: 500000,
+        paymentDate: new Date("2024-06-15"),
+        note: "paid in cash",
+      });
+      vi.mocked(paymentService.createPayment).mockResolvedValue(created);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/payments`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tenantId,
+            amount: 500000,
+            paymentDate: "2024-06-15",
+            note: "paid in cash",
+          }),
+        }
+      );
+
+      const response = await POST(request, {
+        params: Promise.resolve({ propertyId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(201);
+      expect(data.note).toBe("paid in cash");
+    });
+
+    it("POST returns 201 with note null when note is omitted", async () => {
+      const created = createPayment({ tenantId, note: null });
+      vi.mocked(paymentService.createPayment).mockResolvedValue(created);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/payments`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tenantId, amount: 500000, paymentDate: "2024-06-15" }),
+        }
+      );
+
+      const response = await POST(request, { params: Promise.resolve({ propertyId }) });
+      const data = await response.json();
+
+      expect(response.status).toBe(201);
+      expect(data.note).toBeNull();
+    });
   });
 
   describe("bad cases", () => {
@@ -228,6 +281,49 @@ describe("POST /api/properties/[propertyId]/payments", () => {
       });
 
       expect(response.status).toBe(400);
+    });
+
+    it("POST returns 400 when note exceeds 1000 characters", async () => {
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/payments`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tenantId,
+            amount: 500000,
+            paymentDate: "2024-06-15",
+            note: "a".repeat(1001),
+          }),
+        }
+      );
+
+      const response = await POST(request, { params: Promise.resolve({ propertyId }) });
+
+      expect(response.status).toBe(400);
+    });
+
+    it("POST returns 201 when note is exactly 1000 characters", async () => {
+      const created = createPayment({ tenantId, note: "a".repeat(1000) });
+      vi.mocked(paymentService.createPayment).mockResolvedValue(created);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/payments`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tenantId,
+            amount: 500000,
+            paymentDate: "2024-06-15",
+            note: "a".repeat(1000),
+          }),
+        }
+      );
+
+      const response = await POST(request, { params: Promise.resolve({ propertyId }) });
+
+      expect(response.status).toBe(201);
     });
   });
 });
