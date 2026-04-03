@@ -30,7 +30,7 @@ test.describe("change language", () => {
         main.getByRole("button", { name: /indonesian|bahasa indonesia/i })
       ).toBeVisible();
       await expect(
-        page.getByRole("button", { pressed: true })
+        main.getByRole("button", { pressed: true, name: /english|bahasa indonesia/i })
       ).toBeVisible();
     });
 
