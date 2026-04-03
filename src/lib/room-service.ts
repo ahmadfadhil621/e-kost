@@ -126,14 +126,9 @@ export class RoomService {
     const activeInRoom = tenants.filter(
       (t) => t.roomId === id && !t.movedOutAt
     );
-    if (status !== "occupied" && activeInRoom.length > 0) {
+    if (activeInRoom.length > 0) {
       throw new Error(
         "Cannot change room status: move all active tenants out first"
-      );
-    }
-    if (status === "occupied" && activeInRoom.length === 0) {
-      throw new Error(
-        "Cannot set room to occupied: no active tenant assigned"
       );
     }
     return this.repo.updateStatus(id, status);
