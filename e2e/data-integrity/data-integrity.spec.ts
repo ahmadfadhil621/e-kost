@@ -180,16 +180,14 @@ test.describe("room status 'occupied' blocked without active tenant (AC-2)", () 
 
       await goToRoomDetail(page, room.id);
 
-      const changeStatusBtn = page
-        .getByRole("button", { name: /change status/i })
-        .first();
-      await expect(changeStatusBtn).toBeVisible({ timeout: 10000 });
-      await changeStatusBtn.click();
+      // The status control is a <Select> (shadcn/ui), rendered as role="combobox"
+      const statusSelect = page.getByRole("combobox").first();
+      await expect(statusSelect).toBeVisible({ timeout: 10000 });
+      await statusSelect.click();
 
-      // Select "occupied" from the dropdown
+      // Select "occupied" from the dropdown listbox
       await page
         .getByRole("option", { name: /^occupied$/i })
-        .or(page.getByRole("menuitem", { name: /^occupied$/i }))
         .first()
         .click();
 
