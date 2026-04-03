@@ -30,7 +30,7 @@ async function createRoom(
       ...overrides,
     },
   });
-  if (!res.ok()) return null;
+  if (!res.ok()) {return null;}
   return (await res.json()) as { id: string; roomNumber: string };
 }
 
@@ -46,7 +46,7 @@ async function createTenant(
       email: `di-tenant-${suffix}@test.com`,
     },
   });
-  if (!res.ok()) return null;
+  if (!res.ok()) {return null;}
   return (await res.json()) as { id: string };
 }
 
@@ -141,7 +141,7 @@ test.describe("room status 'occupied' blocked without active tenant (AC-2)", () 
   let createdRoomId: string | null = null;
 
   test.afterEach(async ({ request }) => {
-    if (!createdRoomId) return;
+    if (!createdRoomId) {return;}
     await cleanupRoom(request, getPropertyId(), createdRoomId);
     createdRoomId = null;
   });
@@ -231,7 +231,7 @@ test.describe("balance reflects updated monthly rent (AC-3)", () => {
   let createdRoomId: string | null = null;
 
   test.afterEach(async ({ request }) => {
-    if (!createdRoomId) return;
+    if (!createdRoomId) {return;}
     await cleanupRoom(request, getPropertyId(), createdRoomId);
     createdRoomId = null;
   });
