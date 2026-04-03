@@ -8,6 +8,11 @@
 // REQ-5  -> it('no tenants at all shows tenant.list.empty')
 // REQ-1  -> it('search is case-insensitive')
 // REQ-1  -> it('clearing search restores full list')
+//
+// Traceability: tenant-list-room-info
+// REQ-4 -> it('shows room number when tenant has a room assigned')
+// REQ-5 -> it('shows move-in date when tenant has a room assigned')
+// REQ-6 -> it('does not show room info when tenant has no room assigned')
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
@@ -182,6 +187,77 @@ describe("TenantListPage — filtering and search", () => {
       expect(await screen.findByText("Alice Tan")).toBeInTheDocument();
       expect(await screen.findByText("Bob Lee")).toBeInTheDocument();
       expect(await screen.findByText("Carol Wu")).toBeInTheDocument();
+    });
+  });
+});
+
+describe("TenantListPage — room info in card (issue #98)", () => {
+  beforeEach(() => {
+    mockTenantsData = { tenants: TENANTS, count: TENANTS.length };
+    mockBalancesData = { balances: BALANCES };
+  });
+
+  const TENANT_WITH_ROOM = {
+    id: "tenant-dana",
+    propertyId: "prop-1",
+    name: "Dana Kim",
+    phone: "08444",
+    email: "dana@test.com",
+    roomId: "room-1",
+    roomNumber: "3A",
+    assignedAt: "2024-01-15T00:00:00.000Z",
+  };
+
+  const TENANT_WITHOUT_ROOM = {
+    id: "tenant-eve",
+    propertyId: "prop-1",
+    name: "Eve Park",
+    phone: "08555",
+    email: "eve@test.com",
+    roomId: null,
+    roomNumber: null,
+    assignedAt: null,
+  };
+
+  describe("good cases", () => {
+    it("shows room number when tenant has a room assigned", () => {
+      mockTenantsData = { tenants: [TENANT_WITH_ROOM], count: 1 };
+      mockBalancesData = { balances: [] };
+      renderPage();
+
+      expect(screen.getByText(/3A/)).toBeInTheDocument();
+    });
+
+    it("shows move-in date (since) when tenant has a room assigned", () => {
+      mockTenantsData = { tenants: [TENANT_WITH_ROOM], count: 1 };
+      mockBalancesData = { balances: [] };
+      renderPage();
+
+      expect(screen.getByText(/since/i)).toBeInTheDocument();
+    });
+  });
+
+  describe("edge cases", () => {
+    it("does not show room info when tenant has no room assigned", () => {
+      mockTenantsData = { tenants: [TENANT_WITHOUT_ROOM], count: 1 };
+      mockBalancesData = { balances: [] };
+      renderPage();
+
+      expect(screen.queryByText(/since/i)).not.toBeInTheDocument();
+    });
+
+    it("shows room info for assigned tenant and hides it for unassigned tenant in same list", () => {
+      mockTenantsData = {
+        tenants: [TENANT_WITH_ROOM, TENANT_WITHOUT_ROOM],
+        count: 2,
+      };
+      mockBalancesData = { balances: [] };
+      renderPage();
+
+      expect(screen.getByText(/3A/)).toBeInTheDocument();
+      expect(screen.getByText(/since/i)).toBeInTheDocument();
+      expect(screen.getByText("Dana Kim")).toBeInTheDocument();
+      expect(screen.getByText("Eve Park")).toBeInTheDocument();
     });
   });
 });

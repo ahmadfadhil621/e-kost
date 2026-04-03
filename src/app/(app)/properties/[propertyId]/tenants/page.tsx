@@ -19,6 +19,8 @@ type TenantSummary = {
   phone: string;
   email: string;
   roomId: string | null;
+  roomNumber: string | null;
+  assignedAt: string | null;
 };
 
 type BalanceItem = {
@@ -41,7 +43,7 @@ async function fetchBalances(propertyId: string): Promise<{ balances: BalanceIte
 
 
 export default function TenantListPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const formatCurrency = useFormatCurrency();
   const params = useParams();
   const propertyId = params.propertyId as string;
@@ -130,6 +132,19 @@ export default function TenantListPage() {
                   <CardContent className="pt-0 space-y-2">
                     <p className="text-sm text-muted-foreground">{tenant.phone}</p>
                     <p className="text-sm text-muted-foreground">{tenant.email}</p>
+                    {tenant.roomId && tenant.roomNumber && (
+                      <p className="text-sm text-muted-foreground">
+                        {t("tenant.detail.room")} {tenant.roomNumber}
+                        {tenant.assignedAt && (
+                          <> &middot; {t("tenant.detail.since", {
+                            date: new Intl.DateTimeFormat(i18n.language, {
+                              month: "long",
+                              year: "numeric",
+                            }).format(new Date(tenant.assignedAt)),
+                          })}</>
+                        )}
+                      </p>
+                    )}
                     {balancesMap.has(tenant.id) && (
                       <div className="flex flex-wrap items-center gap-2 mt-2">
                         <span className="text-sm font-medium">

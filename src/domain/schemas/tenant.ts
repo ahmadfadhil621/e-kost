@@ -55,6 +55,7 @@ export interface Tenant {
   phone: string;
   email: string;
   roomId: string | null;
+  roomNumber: string | null;
   assignedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;

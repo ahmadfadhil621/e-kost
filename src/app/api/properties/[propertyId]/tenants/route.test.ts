@@ -5,6 +5,10 @@
 // REQ 3.1 -> (covered by E2E/component)
 // PROP 1 -> it('POST returns 201 and tenant when body is valid')
 // PROP 12 -> it('GET returns count equal to tenants array length')
+//
+// Traceability: tenant-list-room-info
+// REQ-3 -> it('GET returns roomNumber in tenant list response when tenant has a room')
+// REQ-3 -> it('GET returns roomNumber null for tenant without room')
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextResponse } from "next/server";
@@ -261,6 +265,57 @@ describe("GET /api/properties/[propertyId]/tenants", () => {
       expect(response.status).toBe(200);
       expect(data.tenants).toEqual([]);
       expect(data.count).toBe(0);
+    });
+  });
+});
+
+describe("GET /api/properties/[propertyId]/tenants — room info (issue #98)", () => {
+  describe("good cases", () => {
+    it("GET returns roomNumber in tenant list response when tenant has a room", async () => {
+      const tenantWithRoom = createTenant({
+        propertyId,
+        roomId: "room-abc",
+        roomNumber: "3A",
+        assignedAt: new Date("2024-01-15"),
+      });
+      vi.mocked(tenantService.listTenants).mockResolvedValue([tenantWithRoom]);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/tenants`
+      );
+      const response = await GET(request, {
+        params: Promise.resolve({ propertyId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.tenants[0].roomNumber).toBe("3A");
+      expect(data.tenants[0].roomId).toBe("room-abc");
+      expect(data.tenants[0].assignedAt).toBeDefined();
+    });
+  });
+
+  describe("edge cases", () => {
+    it("GET returns roomNumber null for tenant without room", async () => {
+      const tenantNoRoom = createTenant({
+        propertyId,
+        roomId: null,
+        roomNumber: null,
+        assignedAt: null,
+      });
+      vi.mocked(tenantService.listTenants).mockResolvedValue([tenantNoRoom]);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/tenants`
+      );
+      const response = await GET(request, {
+        params: Promise.resolve({ propertyId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.tenants[0].roomNumber).toBeNull();
+      expect(data.tenants[0].roomId).toBeNull();
     });
   });
 });

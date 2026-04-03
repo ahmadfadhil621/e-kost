@@ -13,6 +13,7 @@ function toTenant(t: {
   movedOutAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  room?: { roomNumber: string } | null;
 }): Tenant {
   return {
     id: t.id,
@@ -21,6 +22,7 @@ function toTenant(t: {
     phone: t.phone ?? "",
     email: t.email ?? "",
     roomId: t.roomId,
+    roomNumber: t.room?.roomNumber ?? null,
     assignedAt: t.roomId ? t.movedInAt : null,
     createdAt: t.createdAt,
     updatedAt: t.updatedAt,
@@ -42,12 +44,16 @@ export class PrismaTenantRepository implements ITenantRepository {
         phone: data.phone,
         email: data.email,
       },
+      include: { room: { select: { roomNumber: true } } },
     });
     return toTenant(created);
   }
 
   async findById(id: string): Promise<Tenant | null> {
-    const t = await prisma.tenant.findUnique({ where: { id } });
+    const t = await prisma.tenant.findUnique({
+      where: { id },
+      include: { room: { select: { roomNumber: true } } },
+    });
     return t ? toTenant(t) : null;
   }
 
@@ -63,6 +69,7 @@ export class PrismaTenantRepository implements ITenantRepository {
           : { movedOutAt: null }),
       },
       orderBy: [{ name: "asc" }],
+      include: { room: { select: { roomNumber: true } } },
     });
     return list.map(toTenant);
   }
@@ -78,6 +85,7 @@ export class PrismaTenantRepository implements ITenantRepository {
         ...(data.phone !== undefined && { phone: data.phone }),
         ...(data.email !== undefined && { email: data.email }),
       },
+      include: { room: { select: { roomNumber: true } } },
     });
     return toTenant(updated);
   }
@@ -86,6 +94,7 @@ export class PrismaTenantRepository implements ITenantRepository {
     const updated = await prisma.tenant.update({
       where: { id },
       data: { roomId, movedInAt: new Date() },
+      include: { room: { select: { roomNumber: true } } },
     });
     return toTenant(updated);
   }
@@ -94,6 +103,7 @@ export class PrismaTenantRepository implements ITenantRepository {
     const updated = await prisma.tenant.update({
       where: { id },
       data: { roomId: null },
+      include: { room: { select: { roomNumber: true } } },
     });
     return toTenant(updated);
   }
@@ -102,6 +112,7 @@ export class PrismaTenantRepository implements ITenantRepository {
     const updated = await prisma.tenant.update({
       where: { id },
       data: { movedOutAt: new Date(), roomId: null },
+      include: { room: { select: { roomNumber: true } } },
     });
     return toTenant(updated);
   }
