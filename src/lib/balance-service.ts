@@ -4,7 +4,8 @@ import type { IBillingCycleRepository } from "@/domain/interfaces/billing-cycle-
 
 /**
  * BalanceService per specs/outstanding-balance/design.md.
- * Computes outstanding balance = monthlyRent - totalPayments, status = paid when balance <= 0.
+ * Computes outstanding balance = totalRentOwed - totalPayments, status = paid when balance <= 0.
+ * totalRentOwed = monthlyRent × months elapsed since move-in (inclusive).
  */
 export type BalanceStatus = "paid" | "unpaid";
 
@@ -13,6 +14,7 @@ export interface BalanceResult {
   tenantName?: string;
   roomNumber?: string;
   monthlyRent: number;
+  totalRentOwed: number;
   totalPayments: number;
   outstandingBalance: number;
   status: BalanceStatus;
@@ -23,6 +25,8 @@ export interface BalanceRow {
   tenantName: string;
   roomNumber: string;
   monthlyRent: number;
+  /** Total rent owed across all months since move-in (monthlyRent × months elapsed). */
+  totalRentOwed: number;
   totalPayments: number;
 }
 
@@ -46,7 +50,7 @@ export interface IPropertyAccessValidator {
 }
 
 function toResult(row: BalanceRow): BalanceResult {
-  const outstandingBalance = Math.max(0, row.monthlyRent - row.totalPayments);
+  const outstandingBalance = Math.max(0, row.totalRentOwed - row.totalPayments);
   const status: BalanceStatus =
     outstandingBalance <= 0 ? "paid" : "unpaid";
   return {
@@ -54,6 +58,7 @@ function toResult(row: BalanceRow): BalanceResult {
     tenantName: row.tenantName,
     roomNumber: row.roomNumber,
     monthlyRent: row.monthlyRent,
+    totalRentOwed: row.totalRentOwed,
     totalPayments: row.totalPayments,
     outstandingBalance,
     status,
@@ -101,7 +106,7 @@ export class BalanceService {
     const rows = await this.balanceRepo.getBalanceRows(propertyId, "unpaid");
     const withBalance = rows.map((r) => ({
       ...r,
-      balance: Math.max(0, r.monthlyRent - r.totalPayments),
+      balance: Math.max(0, r.totalRentOwed - r.totalPayments),
     }));
     withBalance.sort((a, b) => b.balance - a.balance);
     const totalCount = withBalance.length;

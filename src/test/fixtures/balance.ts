@@ -9,17 +9,20 @@ export interface BalanceResult {
   tenantName?: string;
   roomNumber?: string;
   monthlyRent: number;
+  totalRentOwed: number;
   totalPayments: number;
   outstandingBalance: number;
   status: BalanceStatus;
 }
 
-/** Row shape returned by balance repository (monthlyRent, totalPayments). */
+/** Row shape returned by balance repository (monthlyRent, totalRentOwed, totalPayments). */
 export interface BalanceRow {
   tenantId: string;
   tenantName: string;
   roomNumber: string;
   monthlyRent: number;
+  /** Total rent owed across all months since move-in. */
+  totalRentOwed: number;
   totalPayments: number;
 }
 
@@ -27,8 +30,9 @@ export function createBalanceResult(
   overrides: Partial<BalanceResult> = {}
 ): BalanceResult {
   const monthlyRent = overrides.monthlyRent ?? 650;
+  const totalRentOwed = overrides.totalRentOwed ?? monthlyRent;
   const totalPayments = overrides.totalPayments ?? 0;
-  const outstandingBalance = Math.max(0, monthlyRent - totalPayments);
+  const outstandingBalance = Math.max(0, totalRentOwed - totalPayments);
   const status: BalanceStatus =
     outstandingBalance <= 0 ? "paid" : "unpaid";
   return {
@@ -36,6 +40,7 @@ export function createBalanceResult(
     tenantName: overrides.tenantName ?? "John Doe",
     roomNumber: overrides.roomNumber ?? "A101",
     monthlyRent,
+    totalRentOwed,
     totalPayments,
     outstandingBalance,
     status,
@@ -46,11 +51,13 @@ export function createBalanceResult(
 export function createBalanceRow(
   overrides: Partial<BalanceRow> = {}
 ): BalanceRow {
+  const monthlyRent = overrides.monthlyRent ?? 650;
   return {
     tenantId: overrides.tenantId ?? crypto.randomUUID(),
     tenantName: overrides.tenantName ?? "John Doe",
     roomNumber: overrides.roomNumber ?? "A101",
-    monthlyRent: overrides.monthlyRent ?? 650,
+    monthlyRent,
+    totalRentOwed: overrides.totalRentOwed ?? monthlyRent,
     totalPayments: overrides.totalPayments ?? 0,
     ...overrides,
   };

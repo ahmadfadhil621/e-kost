@@ -61,6 +61,19 @@ async function fetchTenant(
   return res.json();
 }
 
+async function fetchRoom(
+  propertyId: string,
+  roomId: string
+): Promise<RoomSummary | null> {
+  const res = await fetch(
+    `/api/properties/${propertyId}/rooms/${roomId}`,
+    { credentials: "include" }
+  );
+  if (res.status === 404) { return null; }
+  if (!res.ok) { throw new Error("Failed to fetch room"); }
+  return res.json();
+}
+
 async function fetchAvailableRooms(
   propertyId: string
 ): Promise<{ rooms: RoomSummary[] }> {
@@ -97,7 +110,7 @@ async function fetchTenantPayments(
 }
 
 export default function TenantDetailPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
@@ -112,6 +125,12 @@ export default function TenantDetailPage() {
     queryKey: ["tenant", propertyId, tenantId],
     queryFn: () => fetchTenant(propertyId, tenantId),
     enabled: !!propertyId && !!tenantId,
+  });
+
+  const { data: assignedRoom } = useQuery({
+    queryKey: ["room", propertyId, tenant?.roomId],
+    queryFn: () => fetchRoom(propertyId, tenant!.roomId!),
+    enabled: !!propertyId && !!tenant?.roomId,
   });
 
   const { data: availableRoomsData } = useQuery({
@@ -251,7 +270,19 @@ export default function TenantDetailPage() {
         <p className="text-sm text-muted-foreground">{tenant.email}</p>
         <p className="text-sm text-muted-foreground">
           {tenant.roomId
-            ? `${t("tenant.detail.room")}: ${tenant.roomId}`
+            ? [
+                `${t("tenant.detail.room")}: ${assignedRoom?.roomNumber ?? tenant.roomId}`,
+                tenant.assignedAt
+                  ? t("tenant.detail.since", {
+                      date: new Intl.DateTimeFormat(i18n.language, {
+                        month: "long",
+                        year: "numeric",
+                      }).format(new Date(tenant.assignedAt)),
+                    })
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")
             : t("tenant.detail.noRoom")}
         </p>
       </div>

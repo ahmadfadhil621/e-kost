@@ -19,6 +19,16 @@ function toNumber(value: unknown): number {
   return Number.isNaN(n) ? 0 : n;
 }
 
+/** Returns number of billing months from movedInAt through current month (inclusive). */
+function monthsElapsed(movedInAt: Date): number {
+  const now = new Date();
+  const months =
+    (now.getFullYear() - movedInAt.getFullYear()) * 12 +
+    (now.getMonth() - movedInAt.getMonth()) +
+    1;
+  return Math.max(1, months);
+}
+
 export class PrismaBalanceRepository implements IBalanceRepository {
   async getBalanceRow(
     propertyId: string,
@@ -32,6 +42,7 @@ export class PrismaBalanceRepository implements IBalanceRepository {
       return null;
     }
     const monthlyRent = toNumber(tenant.room.monthlyRent);
+    const totalRentOwed = monthlyRent * monthsElapsed(tenant.movedInAt);
     const totalPayments = tenant.payments.reduce(
       (sum, p) => sum + toNumber(p.amount),
       0
@@ -41,6 +52,7 @@ export class PrismaBalanceRepository implements IBalanceRepository {
       tenantName: tenant.name,
       roomNumber: tenant.room.roomNumber,
       monthlyRent,
+      totalRentOwed,
       totalPayments,
     };
   }
@@ -59,6 +71,7 @@ export class PrismaBalanceRepository implements IBalanceRepository {
     });
     const rows: BalanceRow[] = tenants.map((t) => {
       const monthlyRent = t.room ? toNumber(t.room.monthlyRent) : 0;
+      const totalRentOwed = monthlyRent * monthsElapsed(t.movedInAt);
       const totalPayments = t.payments.reduce(
         (sum, p) => sum + toNumber(p.amount),
         0
@@ -68,14 +81,15 @@ export class PrismaBalanceRepository implements IBalanceRepository {
         tenantName: t.name,
         roomNumber: t.room?.roomNumber ?? "",
         monthlyRent,
+        totalRentOwed,
         totalPayments,
       };
     });
     if (status === "unpaid") {
-      return rows.filter((r) => r.monthlyRent - r.totalPayments > 0);
+      return rows.filter((r) => r.totalRentOwed - r.totalPayments > 0);
     }
     if (status === "paid") {
-      return rows.filter((r) => r.monthlyRent - r.totalPayments <= 0);
+      return rows.filter((r) => r.totalRentOwed - r.totalPayments <= 0);
     }
     return rows;
   }

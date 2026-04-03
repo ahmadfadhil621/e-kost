@@ -309,7 +309,8 @@
       "moveOut": "Pindah Keluar",
       "edit": "Ubah",
       "room": "Kamar",
-      "noRoom": "Belum ada kamar"
+      "noRoom": "Belum ada kamar",
+      "since": "sejak {{date}}"
     },
     "assignRoom": {
       "title": "Assign Kamar",

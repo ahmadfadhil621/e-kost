@@ -309,7 +309,8 @@
       "moveOut": "Move Out",
       "edit": "Edit",
       "room": "Room",
-      "noRoom": "No room assigned"
+      "noRoom": "No room assigned",
+      "since": "since {{date}}"
     },
     "assignRoom": {
       "title": "Assign Room",
