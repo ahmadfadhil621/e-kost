@@ -21,19 +21,6 @@ test.use({ storageState: "e2e/.auth/user-with-property.json" });
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
-async function goToCashflowPage(
-  request: APIRequestContext,
-  baseURL: string | undefined,
-  page: import("@playwright/test").Page
-) {
-  const propertyId = getPropertyId();
-  await page.goto(`/properties/${propertyId}/finance/cashflow`);
-  await page
-    .getByText(/cashflow|arus kas/i)
-    .first()
-    .waitFor({ state: "visible", timeout: 15000 });
-}
-
 async function seedPayment(
   request: APIRequestContext,
   baseURL: string | undefined,
@@ -159,7 +146,7 @@ test.describe("view cashflow", () => {
 
     test("month navigation changes the displayed month", async ({
       page,
-      baseURL,
+      baseURL: _baseURL,
     }) => {
       const propertyId = getPropertyId();
       await page.goto(`/properties/${propertyId}/finance/cashflow`);

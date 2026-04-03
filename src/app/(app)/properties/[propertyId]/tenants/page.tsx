@@ -62,8 +62,11 @@ export default function TenantListPage() {
     enabled: !!propertyId && (data?.tenants?.length ?? 0) > 0,
   });
 
-  const tenants = data?.tenants ?? [];
-  const balancesMap = new Map((balancesData?.balances ?? []).map((b) => [b.tenantId, b]));
+  const tenants = useMemo(() => data?.tenants ?? [], [data?.tenants]);
+  const balancesMap = useMemo(
+    () => new Map((balancesData?.balances ?? []).map((b) => [b.tenantId, b])),
+    [balancesData?.balances]
+  );
 
   const filteredTenants = useMemo(() => {
     let result = tenants;

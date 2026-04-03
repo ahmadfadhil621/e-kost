@@ -43,7 +43,7 @@ export default function RoomListPage() {
     return filtered;
   }, [allRoomsData?.rooms, filter, debouncedSearch]);
 
-  const allRooms = allRoomsData?.rooms ?? [];
+  const allRooms = useMemo(() => allRoomsData?.rooms ?? [], [allRoomsData?.rooms]);
   const counts = useMemo(() => ({
     all: allRooms.length,
     available: allRooms.filter((r) => r.status === "available").length,
