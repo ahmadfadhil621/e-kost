@@ -247,6 +247,29 @@ describe("PUT /api/properties/[propertyId]/rooms/[roomId]", () => {
   });
 
   describe("bad cases", () => {
+    it("PUT returns 403 when staff tries to update room", async () => {
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: null,
+        role: null,
+        errorResponse: NextResponse.json({ error: "Owner access required" }, { status: 403 }),
+      });
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ monthlyRent: 2000000 }),
+        }
+      );
+
+      const response = await PUT(request, {
+        params: Promise.resolve({ propertyId, roomId }),
+      });
+
+      expect(response.status).toBe(403);
+    });
+
     it("PUT returns 400 when monthly rent is negative", async () => {
       const request = new Request(
         `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`,
@@ -375,6 +398,25 @@ describe("DELETE /api/properties/[propertyId]/rooms/[roomId]", () => {
   });
 
   describe("bad cases", () => {
+    it("DELETE returns 403 when staff tries to delete room", async () => {
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: null,
+        role: null,
+        errorResponse: NextResponse.json({ error: "Owner access required" }, { status: 403 }),
+      });
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}`,
+        { method: "DELETE" }
+      );
+
+      const response = await DELETE(request, {
+        params: Promise.resolve({ propertyId, roomId }),
+      });
+
+      expect(response.status).toBe(403);
+    });
+
     it("DELETE returns 404 when room not found", async () => {
       vi.mocked(roomService.deleteRoom).mockRejectedValue(
         new Error("Room not found")

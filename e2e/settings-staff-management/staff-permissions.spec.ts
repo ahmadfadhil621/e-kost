@@ -6,6 +6,11 @@
 // REQ 2.1 -> test('removed staff member cannot access the property')
 // REQ 3.1 -> test('staff user does not see danger zone actions')
 // REQ 3.2 -> test('staff user does not see add staff controls')
+//
+// Traceability: owner-staff-permissions (issue #95)
+// REQ 1.1 -> test('staff cannot create a room via API')
+// REQ 1.2 -> test('staff cannot modify or delete a room via API')
+// REQ 1.3 -> test('staff cannot archive or unarchive property via API')
 
 import * as fs from "fs";
 import * as path from "path";
@@ -183,6 +188,121 @@ test.describe("staff permission boundaries", () => {
   });
 
   test.describe("bad cases", () => {
+    test("staff cannot create a room via API", async ({ page, browser, baseURL }) => {
+      test.setTimeout(90000);
+      const base = baseURL ?? "http://localhost:3000";
+      const propertyId = getPropertyId();
+      const staffEmail = `staff-create-room-${Date.now()}@test.com`;
+      const staffPassword = "StaffPass123!";
+
+      await registerStaffUser(base, staffEmail, staffPassword, "Staff Create Room User");
+      await addStaffViaUI(page, propertyId, staffEmail);
+
+      const { context: staffCtx, page: staffPage } = await createStaffContext(
+        browser, base, staffEmail, staffPassword
+      );
+      try {
+        const res = await staffPage.request.post(
+          `${base}/api/properties/${propertyId}/rooms`,
+          {
+            headers: { "Content-Type": "application/json", origin: base },
+            data: { roomNumber: "S01", roomType: "single", monthlyRent: 1000000 },
+          }
+        );
+        expect(res.status()).toBe(403);
+      } finally {
+        await staffCtx.close();
+        await removeStaffViaUI(page, propertyId, staffEmail);
+      }
+    });
+
+    test("staff cannot modify or delete a room via API", async ({ page, browser, baseURL }) => {
+      test.setTimeout(90000);
+      const base = baseURL ?? "http://localhost:3000";
+      const propertyId = getPropertyId();
+      const staffEmail = `staff-modify-room-${Date.now()}@test.com`;
+      const staffPassword = "StaffPass123!";
+
+      await registerStaffUser(base, staffEmail, staffPassword, "Staff Modify Room User");
+      await addStaffViaUI(page, propertyId, staffEmail);
+
+      // Owner creates a room for testing
+      const createRes = await page.request.post(
+        `${base}/api/properties/${propertyId}/rooms`,
+        {
+          headers: { "Content-Type": "application/json", origin: base },
+          data: { roomNumber: `PERM-${Date.now()}`, roomType: "single", monthlyRent: 500000 },
+        }
+      );
+      expect(createRes.status()).toBe(201);
+      const { id: roomId } = await createRes.json() as { id: string };
+
+      const { context: staffCtx, page: staffPage } = await createStaffContext(
+        browser, base, staffEmail, staffPassword
+      );
+      try {
+        const putRes = await staffPage.request.put(
+          `${base}/api/properties/${propertyId}/rooms/${roomId}`,
+          {
+            headers: { "Content-Type": "application/json", origin: base },
+            data: { monthlyRent: 9999999 },
+          }
+        );
+        expect(putRes.status()).toBe(403);
+
+        const archiveRes = await staffPage.request.post(
+          `${base}/api/properties/${propertyId}/rooms/${roomId}/archive`,
+          { headers: { origin: base } }
+        );
+        expect(archiveRes.status()).toBe(403);
+
+        const deleteRes = await staffPage.request.delete(
+          `${base}/api/properties/${propertyId}/rooms/${roomId}`,
+          { headers: { origin: base } }
+        );
+        expect(deleteRes.status()).toBe(403);
+      } finally {
+        await staffCtx.close();
+        // Owner cleans up the room
+        await page.request.delete(
+          `${base}/api/properties/${propertyId}/rooms/${roomId}`,
+          { headers: { origin: base } }
+        );
+        await removeStaffViaUI(page, propertyId, staffEmail);
+      }
+    });
+
+    test("staff cannot archive or unarchive property via API", async ({ page, browser, baseURL }) => {
+      test.setTimeout(90000);
+      const base = baseURL ?? "http://localhost:3000";
+      const propertyId = getPropertyId();
+      const staffEmail = `staff-archive-prop-${Date.now()}@test.com`;
+      const staffPassword = "StaffPass123!";
+
+      await registerStaffUser(base, staffEmail, staffPassword, "Staff Archive Prop User");
+      await addStaffViaUI(page, propertyId, staffEmail);
+
+      const { context: staffCtx, page: staffPage } = await createStaffContext(
+        browser, base, staffEmail, staffPassword
+      );
+      try {
+        const archiveRes = await staffPage.request.post(
+          `${base}/api/properties/${propertyId}/archive`,
+          { headers: { origin: base } }
+        );
+        expect(archiveRes.status()).toBe(403);
+
+        const unarchiveRes = await staffPage.request.post(
+          `${base}/api/properties/${propertyId}/unarchive`,
+          { headers: { origin: base } }
+        );
+        expect(unarchiveRes.status()).toBe(403);
+      } finally {
+        await staffCtx.close();
+        await removeStaffViaUI(page, propertyId, staffEmail);
+      }
+    });
+
     test("removed staff member cannot access the property", async ({
       page,
       browser,

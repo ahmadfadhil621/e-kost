@@ -98,6 +98,25 @@ describe("POST /api/properties/[propertyId]/rooms/[roomId]/unarchive", () => {
       expect(data.error).toMatch(/not archived/i);
     });
 
+    it("returns 403 when staff tries to unarchive room", async () => {
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: null,
+        role: null,
+        errorResponse: NextResponse.json({ error: "Owner access required" }, { status: 403 }),
+      });
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms/${roomId}/unarchive`,
+        { method: "POST" }
+      );
+
+      const response = await POST(request, {
+        params: Promise.resolve({ propertyId, roomId }),
+      });
+
+      expect(response.status).toBe(403);
+    });
+
     it("returns 401 when not authenticated", async () => {
       vi.mocked(withPropertyAccess).mockResolvedValueOnce({
         userId: null,

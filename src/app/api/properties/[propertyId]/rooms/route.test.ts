@@ -177,6 +177,33 @@ describe("POST /api/properties/[propertyId]/rooms", () => {
       expect(data.error).toMatch(/already exists/i);
     });
 
+    it("POST returns 403 when staff tries to create room", async () => {
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: null,
+        role: null,
+        errorResponse: NextResponse.json({ error: "Owner access required" }, { status: 403 }),
+      });
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            roomNumber: "A101",
+            roomType: "single",
+            monthlyRent: 1500000,
+          }),
+        }
+      );
+
+      const response = await POST(request, {
+        params: Promise.resolve({ propertyId }),
+      });
+
+      expect(response.status).toBe(403);
+    });
+
     it("POST returns 401 when not authenticated", async () => {
       vi.mocked(withPropertyAccess).mockResolvedValueOnce({
         userId: null,

@@ -7,7 +7,7 @@ export async function POST(
   context: { params: Promise<{ propertyId: string }> }
 ) {
   const { propertyId } = await context.params;
-  const access = await withPropertyAccess(propertyId, { request });
+  const access = await withPropertyAccess(propertyId, { request, requireOwner: true });
   if (access.errorResponse) {return access.errorResponse;}
 
   try {
