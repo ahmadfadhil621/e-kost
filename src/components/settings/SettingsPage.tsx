@@ -66,7 +66,7 @@ export function SettingsPage() {
               <div className="mt-3">
                 <Link
                   href="/settings/invites"
-                  className="flex min-h-[44px] items-center text-sm text-primary underline-offset-4 hover:underline"
+                  className="flex min-h-[44px] items-center text-sm text-primary underline underline-offset-4 hover:underline"
                 >
                   {t("settings.developer.inviteManagement")}
                 </Link>
@@ -77,7 +77,7 @@ export function SettingsPage() {
               <div className="mt-3">
                 <Link
                   href="/settings/currencies"
-                  className="flex min-h-[44px] items-center text-sm text-primary underline-offset-4 hover:underline"
+                  className="flex min-h-[44px] items-center text-sm text-primary underline underline-offset-4 hover:underline"
                 >
                   {t("settings.developer.currencyManagement")}
                 </Link>

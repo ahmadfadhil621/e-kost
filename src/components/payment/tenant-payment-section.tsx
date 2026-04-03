@@ -109,7 +109,7 @@ export function TenantPaymentSection({
           {count > 3 && (
             <Link
               href={`/properties/${propertyId}/tenants/${tenantId}/payments`}
-              className="mt-3 flex items-center text-sm text-primary hover:underline min-h-[44px]"
+              className="mt-3 flex items-center text-sm text-primary underline hover:underline min-h-[44px]"
             >
               {t("payment.tenantSection.viewAll")}
             </Link>

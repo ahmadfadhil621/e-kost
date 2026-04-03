@@ -164,7 +164,7 @@ export default function DashboardPage() {
         <h2 className="text-lg font-semibold">{property.name}</h2>
         <Link
           href={`/properties/${activeId}`}
-          className="inline-flex items-center py-1 text-xs text-primary underline-offset-2 hover:underline"
+          className="inline-flex items-center py-1 min-h-[44px] text-xs text-primary underline underline-offset-2 hover:underline"
         >
           {t("property.detail.propertyInfo")} →
         </Link>
