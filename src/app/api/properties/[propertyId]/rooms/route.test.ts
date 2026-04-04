@@ -12,6 +12,7 @@
 // REQ 5.1 -> it('GET with hasCapacity=true returns only rooms with open slots')
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import fc from "fast-check";
 import { NextResponse } from "next/server";
 import { POST, GET } from "./route";
 import { createRoom } from "@/test/fixtures/room";
@@ -473,5 +474,230 @@ describe("GET /api/properties/[propertyId]/rooms", () => {
       expect(data.count).toBe(data.rooms.length);
       expect(data.count).toBe(3);
     });
+  });
+});
+
+// Traceability: room-tenant-move-in-date
+// AC-6 -> it('GET returns assignedAt on each tenant in tenants array for occupied room')
+// AC-6 -> it('GET returns earliest assignedAt as room-level field for multi-tenant room')
+// AC-6 -> it('GET returns null room-level assignedAt when all tenants have null assignedAt')
+// AC-6 -> it('GET returns null room-level assignedAt for available room with no tenants')
+// PROP 2 -> it('PROP 2: room-level assignedAt is always ≤ every tenant assignedAt (earliest)')
+
+describe("GET /api/properties/[propertyId]/rooms — assignedAt enrichment", () => {
+  describe("good cases", () => {
+    it("GET returns assignedAt on each tenant in tenants array for occupied room", async () => {
+      const roomId = "room-1";
+      const assignedAtDate = new Date("2024-01-15T00:00:00.000Z");
+      const rooms = [
+        createRoom({ id: roomId, propertyId, status: "occupied", capacity: 1 }),
+      ];
+      vi.mocked(roomService.listRooms).mockResolvedValueOnce(rooms);
+      vi.mocked(tenantService.listTenants).mockResolvedValueOnce([
+        {
+          id: "tenant-1",
+          propertyId,
+          name: "Jane Doe",
+          phone: "",
+          email: "",
+          roomId,
+          roomNumber: null,
+          assignedAt: assignedAtDate,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          movedOutAt: null,
+        },
+      ]);
+      vi.mocked(balanceService.calculateBalances).mockResolvedValueOnce([]);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms`
+      );
+      const response = await GET(request, {
+        params: Promise.resolve({ propertyId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.rooms[0].tenants[0].assignedAt).toBe(assignedAtDate.toISOString());
+      expect(data.rooms[0].assignedAt).toBe(assignedAtDate.toISOString());
+    });
+
+    it("GET returns earliest assignedAt as room-level field for multi-tenant room", async () => {
+      const roomId = "room-1";
+      const earlierDate = new Date("2023-06-01T00:00:00.000Z");
+      const laterDate = new Date("2024-03-10T00:00:00.000Z");
+      const rooms = [
+        createRoom({ id: roomId, propertyId, status: "occupied", capacity: 2 }),
+      ];
+      vi.mocked(roomService.listRooms).mockResolvedValueOnce(rooms);
+      vi.mocked(tenantService.listTenants).mockResolvedValueOnce([
+        {
+          id: "tenant-1",
+          propertyId,
+          name: "Alice",
+          phone: "",
+          email: "",
+          roomId,
+          roomNumber: null,
+          assignedAt: earlierDate,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          movedOutAt: null,
+        },
+        {
+          id: "tenant-2",
+          propertyId,
+          name: "Bob",
+          phone: "",
+          email: "",
+          roomId,
+          roomNumber: null,
+          assignedAt: laterDate,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          movedOutAt: null,
+        },
+      ]);
+      vi.mocked(balanceService.calculateBalances).mockResolvedValueOnce([]);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms`
+      );
+      const response = await GET(request, {
+        params: Promise.resolve({ propertyId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.rooms[0].assignedAt).toBe(earlierDate.toISOString());
+    });
+  });
+
+  describe("bad cases", () => {
+    it("GET returns null room-level assignedAt when all tenants have null assignedAt", async () => {
+      const roomId = "room-1";
+      const rooms = [
+        createRoom({ id: roomId, propertyId, status: "occupied", capacity: 1 }),
+      ];
+      vi.mocked(roomService.listRooms).mockResolvedValueOnce(rooms);
+      vi.mocked(tenantService.listTenants).mockResolvedValueOnce([
+        {
+          id: "tenant-1",
+          propertyId,
+          name: "Jane Doe",
+          phone: "",
+          email: "",
+          roomId,
+          roomNumber: null,
+          assignedAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          movedOutAt: null,
+        },
+      ]);
+      vi.mocked(balanceService.calculateBalances).mockResolvedValueOnce([]);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms`
+      );
+      const response = await GET(request, {
+        params: Promise.resolve({ propertyId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.rooms[0].assignedAt).toBeNull();
+    });
+  });
+
+  describe("edge cases", () => {
+    it("GET returns null room-level assignedAt for available room with no tenants", async () => {
+      const rooms = [
+        createRoom({ propertyId, status: "available", capacity: 1 }),
+      ];
+      vi.mocked(roomService.listRooms).mockResolvedValueOnce(rooms);
+      vi.mocked(tenantService.listTenants).mockResolvedValueOnce([]);
+      vi.mocked(balanceService.calculateBalances).mockResolvedValueOnce([]);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/rooms`
+      );
+      const response = await GET(request, {
+        params: Promise.resolve({ propertyId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.rooms[0].assignedAt).toBeNull();
+    });
+  });
+});
+
+// PROP 2: room-level assignedAt is always ≤ every tenant assignedAt (earliest)
+describe("GET /api/properties/[propertyId]/rooms — PROP 2: assignedAt is earliest", () => {
+  it("PROP 2: room-level assignedAt is always ≤ every tenant assignedAt (earliest)", async () => {
+    await fc.assert(
+      fc.asyncProperty(
+        fc.array(
+          fc.option(fc.date({ min: new Date("2000-01-01"), max: new Date("2030-12-31") }), { nil: null }),
+          { minLength: 1, maxLength: 6 }
+        ),
+        async (assignedAtValues) => {
+          const roomId = "room-prop2";
+          const rooms = [
+            createRoom({ id: roomId, propertyId, status: "occupied", capacity: assignedAtValues.length }),
+          ];
+          const tenants = assignedAtValues.map((assignedAt, i) => ({
+            id: `t-${i}`,
+            propertyId,
+            name: `Tenant ${i}`,
+            phone: "",
+            email: "",
+            roomId,
+            roomNumber: null,
+            assignedAt,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            movedOutAt: null,
+          }));
+
+          // Use mockImplementation (not Once) so shrink iterations always get the current value
+          vi.mocked(roomService.listRooms).mockImplementation(async () => rooms);
+          vi.mocked(tenantService.listTenants).mockImplementation(async () => tenants);
+          vi.mocked(balanceService.calculateBalances).mockImplementation(async () => []);
+
+          const request = new Request(
+            `http://localhost:3000/api/properties/${propertyId}/rooms`
+          );
+          const response = await GET(request, {
+            params: Promise.resolve({ propertyId }),
+          });
+          const data = await response.json();
+
+          const roomAssignedAt = data.rooms[0].assignedAt;
+          const nonNullDates = assignedAtValues
+            .filter((d): d is Date => d !== null)
+            .map((d) => d.getTime());
+
+          if (nonNullDates.length === 0) {
+            expect(roomAssignedAt).toBeNull();
+          } else {
+            const expectedMin = new Date(Math.min(...nonNullDates)).toISOString();
+            expect(roomAssignedAt).toBe(expectedMin);
+            // Room-level assignedAt must be ≤ every tenant's assignedAt
+            const tenantAssignedAts = data.rooms[0].tenants
+              .map((t: { assignedAt: string | null }) => t.assignedAt)
+              .filter((d: string | null): d is string => d !== null);
+            for (const tenantDate of tenantAssignedAts) {
+              expect(new Date(roomAssignedAt).getTime()).toBeLessThanOrEqual(
+                new Date(tenantDate).getTime()
+              );
+            }
+          }
+        }
+      ),
+      { numRuns: 100 }
+    );
   });
 });

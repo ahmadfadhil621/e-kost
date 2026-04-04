@@ -223,7 +223,8 @@
       "changeStatus": "Ubah status kamar",
       "perMonth": "/bulan",
       "slotsLeft_one": "{{count}} slot tersisa",
-      "slotsLeft_other": "{{count}} slot tersisa"
+      "slotsLeft_other": "{{count}} slot tersisa",
+      "since": "sejak {{date}}"
     },
     "detail": {
       "title": "Detail Kamar",

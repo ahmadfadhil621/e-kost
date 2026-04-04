@@ -81,11 +81,11 @@ export async function GET(
     ]);
 
     // Build a map of roomId → active tenants array
-    const tenantsByRoomId = new Map<string, { id: string; name: string }[]>();
+    const tenantsByRoomId = new Map<string, { id: string; name: string; assignedAt: string | null }[]>();
     for (const t of tenants) {
       if (t.roomId && !t.movedOutAt) {
         const list = tenantsByRoomId.get(t.roomId) ?? [];
-        list.push({ id: t.id, name: t.name });
+        list.push({ id: t.id, name: t.name, assignedAt: t.assignedAt ? t.assignedAt.toISOString() : null });
         tenantsByRoomId.set(t.roomId, list);
       }
     }
@@ -101,6 +101,12 @@ export async function GET(
           (sum, t) => sum + (balanceByTenantId.get(t.id) ?? 0),
           0
         );
+        const assignedAtDates = roomTenants
+          .map((t) => t.assignedAt)
+          .filter((d): d is string => d !== null);
+        const assignedAt = assignedAtDates.length > 0
+          ? assignedAtDates.reduce((earliest, d) => d < earliest ? d : earliest)
+          : null;
         return {
           id: room.id,
           propertyId: room.propertyId,
@@ -111,6 +117,7 @@ export async function GET(
           activeTenantCount,
           status: room.status,
           tenants: roomTenants,
+          assignedAt,
           ...(activeTenantCount > 0 && { outstandingBalance }),
           createdAt: room.createdAt,
           updatedAt: room.updatedAt,

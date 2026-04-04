@@ -17,8 +17,21 @@ export type RoomForCard = Pick<
   /** Set when status is occupied and API enriched the room */
   tenantId?: string;
   tenantName?: string;
+  tenants?: { id: string; name: string; assignedAt?: string | null }[];
+  /** Earliest assignedAt across all active tenants (ISO string or null) */
+  assignedAt?: string | null;
   outstandingBalance?: number;
 };
+
+/** Abbreviates middle names: "George Washington Bush" → "George W. Bush" */
+export function abbreviateName(name: string): string {
+  const words = name.trim().split(/\s+/);
+  if (words.length <= 2) { return name; }
+  const first = words[0];
+  const last = words[words.length - 1];
+  const middles = words.slice(1, -1).map((w) => `${w[0]}.`);
+  return [first, ...middles, last].join(" ");
+}
 
 export interface RoomCardProps {
   room: RoomForCard;
@@ -40,7 +53,7 @@ export function RoomCard({
   onAssignTenant,
   onChangeStatus,
 }: RoomCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const formatCurrency = useFormatCurrency();
   const roomHref = roomDetailHref(propertyId, room.id);
   const typeRent = `${room.roomType} · ${formatCurrency(room.monthlyRent)}${t("room.card.perMonth")}`;
@@ -158,6 +171,15 @@ export function RoomCard({
   // occupied
   const isPaid =
     room.outstandingBalance === undefined || room.outstandingBalance <= 0;
+  const activeTenants = room.tenants ?? (room.tenantName ? [{ id: "", name: room.tenantName, assignedAt: null }] : []);
+  const formattedSince = room.assignedAt
+    ? t("room.card.since", {
+        date: new Intl.DateTimeFormat(i18n.language, {
+          month: "long",
+          year: "numeric",
+        }).format(new Date(room.assignedAt)),
+      })
+    : null;
   return (
     <Link
       href={roomHref}
@@ -173,9 +195,21 @@ export function RoomCard({
               <span className="font-semibold text-foreground block">
                 {t("room.card.roomLabel")} {room.roomNumber}
               </span>
-              {room.tenantName && (
-                <span className="font-semibold text-foreground block truncate">
-                  {room.tenantName}
+              {activeTenants.length > 0 && (
+                <ul className="list-disc list-inside mt-0.5 space-y-0">
+                  {activeTenants.map((tenant) => (
+                    <li
+                      key={tenant.id || tenant.name}
+                      className="font-semibold text-foreground text-sm truncate"
+                    >
+                      {abbreviateName(tenant.name)}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {formattedSince && (
+                <span className="text-xs text-muted-foreground mt-0.5 block">
+                  {formattedSince}
                 </span>
               )}
             </div>

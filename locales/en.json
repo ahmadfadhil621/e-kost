@@ -223,7 +223,8 @@
       "changeStatus": "Change room status",
       "perMonth": "/mo",
       "slotsLeft_one": "{{count}} slot left",
-      "slotsLeft_other": "{{count}} slots left"
+      "slotsLeft_other": "{{count}} slots left",
+      "since": "since {{date}}"
     },
     "detail": {
       "title": "Room Details",
