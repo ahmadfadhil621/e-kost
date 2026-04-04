@@ -8,6 +8,7 @@ import type { APIRequestContext } from "@playwright/test";
 import {
   getPropertyId,
   goToRoomDetail,
+  goToEditRoomPage,
 } from "../helpers/room-inventory";
 import { goToTenantDetail } from "../helpers/tenant-room-basics";
 
@@ -164,7 +165,7 @@ test.describe("room status 'occupied' blocked without active tenant (AC-2)", () 
       const body = await res.json();
 
       expect(res.status()).toBe(409);
-      expect(body.error).toMatch(/occupied.*no active tenant|no active tenant/i);
+      expect(body.error).toMatch(/managed automatically|Cannot.*occupied/i);
     });
 
     test("UI shows error toast when user tries to set occupied on an empty room", async ({
@@ -178,27 +179,16 @@ test.describe("room status 'occupied' blocked without active tenant (AC-2)", () 
       if (!room) { test.skip(); return; }
       createdRoomId = room.id;
 
-      await goToRoomDetail(page, room.id);
+      await goToEditRoomPage(page, room.id);
 
       // The status control is a <Select> (shadcn/ui), rendered as role="combobox"
       const statusSelect = page.getByRole("combobox").first();
       await expect(statusSelect).toBeVisible({ timeout: 10000 });
       await statusSelect.click();
 
-      // Select "occupied" from the dropdown listbox
-      await page
-        .getByRole("option", { name: /^occupied$/i })
-        .first()
-        .click();
-
-      // Expect an error message — not a success
+      // "occupied" must NOT be an available option — it is managed automatically
       await expect(
-        page.getByText(/error|failed|no active tenant|cannot set.*occupied/i).first()
-      ).toBeVisible({ timeout: 10000 });
-
-      // Success toast should NOT appear
-      await expect(
-        page.getByText(/status updated|success/i)
+        page.getByRole("option", { name: /^occupied$/i })
       ).not.toBeVisible({ timeout: 3000 });
     });
   });
