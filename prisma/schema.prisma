@@ -122,21 +122,22 @@ model Room {
 }
 
 model Tenant {
-  id            String          @id @default(uuid())
-  propertyId    String
-  roomId        String?
-  name          String
-  phone         String?
-  email         String?
-  movedInAt     DateTime        @default(now())
-  movedOutAt    DateTime?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  billing_cycle billing_cycle[]
-  payments      Payment[]
-  property      Property        @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  room          Room?           @relation(fields: [roomId], references: [id])
-  notes         TenantNote[]
+  id                String          @id @default(uuid())
+  propertyId        String
+  roomId            String?
+  name              String
+  phone             String?
+  email             String?
+  movedInAt         DateTime        @default(now())
+  movedOutAt        DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  billingDayOfMonth Int?
+  billing_cycle     billing_cycle[]
+  payments          Payment[]
+  property          Property        @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  room              Room?           @relation(fields: [roomId], references: [id])
+  notes             TenantNote[]
 
   @@index([propertyId, movedOutAt])
   @@map("tenant")

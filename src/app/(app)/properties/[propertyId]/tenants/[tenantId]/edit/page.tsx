@@ -12,6 +12,7 @@ type TenantDetail = {
   name: string;
   phone: string;
   email: string;
+  billingDayOfMonth: number | null;
 };
 
 async function fetchTenant(
@@ -47,7 +48,7 @@ export default function EditTenantPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: Partial<CreateTenantInput>) =>
+    mutationFn: (data: Partial<CreateTenantInput> & { billingDayOfMonth?: number | null }) =>
       fetch(`/api/properties/${propertyId}/tenants/${tenantId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -74,7 +75,7 @@ export default function EditTenantPage() {
     },
   });
 
-  const handleSubmit = async (data: CreateTenantInput) => {
+  const handleSubmit = async (data: CreateTenantInput & { billingDayOfMonth?: number | null }) => {
     updateMutation.mutate(data);
   };
 
@@ -95,6 +96,7 @@ export default function EditTenantPage() {
           phone: tenant.phone,
           email: tenant.email,
         }}
+        defaultBillingDay={tenant.billingDayOfMonth}
         onSubmit={handleSubmit}
         onCancel={() =>
           router.push(`/properties/${propertyId}/tenants/${tenantId}`)

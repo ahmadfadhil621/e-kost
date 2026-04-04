@@ -42,11 +42,35 @@ export interface IBalanceRepository {
   getTenantInfo(
     propertyId: string,
     tenantId: string
-  ): Promise<{ monthlyRent: number; movedInAt: Date } | null>;
+  ): Promise<{ monthlyRent: number; movedInAt: Date; billingDayOfMonth: number | null } | null>;
 }
 
 export interface IPropertyAccessValidator {
   validateAccess(userId: string, propertyId: string): Promise<"owner" | "staff">;
+}
+
+/** Returns the number of days in a given month (1-based month). */
+function daysInMonth(year: number, month: number): number {
+  return new Date(year, month, 0).getDate();
+}
+
+/**
+ * Clamps a billing day to the actual last day of the given month.
+ * E.g. clampDay(31, 2026, 2) → 28 (February 2026).
+ */
+export function clampDay(day: number, year: number, month: number): number {
+  return Math.min(day, daysInMonth(year, month));
+}
+
+/**
+ * Returns the effective billing day of month:
+ * uses billingDayOfMonth when set, otherwise falls back to the day of movedInAt.
+ */
+export function effectiveBillingDay(
+  billingDayOfMonth: number | null,
+  movedInAt: Date
+): number {
+  return billingDayOfMonth ?? movedInAt.getDate();
 }
 
 function toResult(row: BalanceRow): BalanceResult {
@@ -188,10 +212,12 @@ export class BalanceService {
     }
 
     const unpaidCycles = allCycles.filter((c) => c.status !== "paid");
+    const billingDay = effectiveBillingDay(info.billingDayOfMonth, new Date(info.movedInAt));
     return {
       tenantId,
       unpaidCycles,
       allPaid: unpaidCycles.length === 0,
+      billingDayOfMonth: billingDay,
     };
   }
 }

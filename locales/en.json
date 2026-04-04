@@ -303,7 +303,8 @@
     "edit": {
       "title": "Edit Tenant",
       "submit": "Save Changes",
-      "success": "Tenant updated successfully"
+      "success": "Tenant updated successfully",
+      "billingDay": "Billing Day"
     },
     "detail": {
       "title": "Tenant Details",
@@ -324,7 +325,9 @@
       "noRoomsWithCapacity": "No rooms with available capacity",
       "slotsRemaining_one": "{{count}} slot remaining",
       "slotsRemaining_other": "{{count}} slots remaining",
-      "roomsWithCapacity": "Rooms with available capacity"
+      "roomsWithCapacity": "Rooms with available capacity",
+      "billingDay": "Billing Day",
+      "billingDayHint": "Day of month rent is due (1–31)"
     },
     "moveOut": {
       "title": "Move Out",
@@ -668,7 +671,8 @@
         "partial": "Partial",
         "unpaid": "Unpaid"
       },
-      "amountOwed": "Amount owed"
+      "amountOwed": "Amount owed",
+      "dueDay": "Due on day {{day}} of each month"
     },
     "period": "Billing period",
     "selectPeriod": "Select billing period"

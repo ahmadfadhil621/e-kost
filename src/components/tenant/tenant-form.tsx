@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
@@ -14,7 +15,8 @@ import { Label } from "@/components/ui/label";
 interface TenantFormProps {
   mode?: "create" | "edit";
   defaultValues?: Partial<CreateTenantInput>;
-  onSubmit?: (data: CreateTenantInput) => void | Promise<void>;
+  defaultBillingDay?: number | null;
+  onSubmit?: (data: CreateTenantInput & { billingDayOfMonth?: number | null }) => void | Promise<void>;
   onCancel?: () => void;
   isLoading?: boolean;
 }
@@ -22,11 +24,15 @@ interface TenantFormProps {
 export function TenantForm({
   mode = "create",
   defaultValues,
+  defaultBillingDay,
   onSubmit,
   onCancel,
   isLoading = false,
 }: TenantFormProps) {
   const { t } = useTranslation();
+  const [billingDay, setBillingDay] = useState<number | "">(
+    defaultBillingDay ?? ""
+  );
   const {
     register,
     handleSubmit,
@@ -41,7 +47,11 @@ export function TenantForm({
   });
 
   const handleFormSubmit = async (data: CreateTenantInput) => {
-    await onSubmit?.(data);
+    const billingDayOfMonth =
+      mode === "edit" && billingDay !== ""
+        ? Number(billingDay)
+        : undefined;
+    await onSubmit?.({ ...data, billingDayOfMonth });
   };
 
   const titleKey =
@@ -103,6 +113,23 @@ export function TenantForm({
           </p>
         )}
       </div>
+      {mode === "edit" && (
+        <div className="space-y-2">
+          <Label htmlFor="tenant-billing-day">{t("tenant.edit.billingDay")}</Label>
+          <Input
+            id="tenant-billing-day"
+            type="number"
+            min={1}
+            max={31}
+            value={billingDay}
+            onChange={(e) => {
+              const v = parseInt(e.target.value, 10);
+              setBillingDay(isNaN(v) ? "" : Math.min(31, Math.max(1, v)));
+            }}
+            className="min-h-[44px] w-24"
+          />
+        </div>
+      )}
       <div className="flex gap-2">
         <Button
           type="submit"

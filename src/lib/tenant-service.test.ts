@@ -570,6 +570,73 @@ describe("TenantService", () => {
         });
       });
     });
+
+    // Traceability: billing-day-per-tenant
+    // REQ BD-9  -> can update billingDayOfMonth to a new value
+    // REQ BD-10 -> can clear billingDayOfMonth (set to null)
+    // REQ BD-11 -> rejects out-of-range billingDayOfMonth
+    describe("billingDayOfMonth", () => {
+      it("can update billingDayOfMonth to a valid day", async () => {
+        const propertyId = crypto.randomUUID();
+        const existing = createTenant({ propertyId, id: "t-1", billingDayOfMonth: 1 });
+        const updated = createTenant({ ...existing, billingDayOfMonth: 20 });
+        const tenantRepo = createMockTenantRepo({
+          findById: vi.fn().mockResolvedValue(existing),
+          update: vi.fn().mockResolvedValue(updated),
+        });
+        const service = new TenantService(tenantRepo, createMockRoomRepo(), createMockPropertyAccess());
+
+        const result = await service.updateTenant("u", propertyId, "t-1", {
+          billingDayOfMonth: 20,
+        });
+
+        expect(result.billingDayOfMonth).toBe(20);
+        expect(tenantRepo.update).toHaveBeenCalledWith(
+          "t-1",
+          expect.objectContaining({ billingDayOfMonth: 20 })
+        );
+      });
+
+      it("can clear billingDayOfMonth (set to null)", async () => {
+        const propertyId = crypto.randomUUID();
+        const existing = createTenant({ propertyId, id: "t-1", billingDayOfMonth: 15 });
+        const updated = createTenant({ ...existing, billingDayOfMonth: null });
+        const tenantRepo = createMockTenantRepo({
+          findById: vi.fn().mockResolvedValue(existing),
+          update: vi.fn().mockResolvedValue(updated),
+        });
+        const service = new TenantService(tenantRepo, createMockRoomRepo(), createMockPropertyAccess());
+
+        await service.updateTenant("u", propertyId, "t-1", { billingDayOfMonth: null });
+
+        expect(tenantRepo.update).toHaveBeenCalledWith(
+          "t-1",
+          expect.objectContaining({ billingDayOfMonth: null })
+        );
+      });
+
+      it("rejects billingDayOfMonth = 32", async () => {
+        const propertyId = crypto.randomUUID();
+        const existing = createTenant({ propertyId, id: "t-1" });
+        const tenantRepo = createMockTenantRepo({ findById: vi.fn().mockResolvedValue(existing) });
+        const service = new TenantService(tenantRepo, createMockRoomRepo(), createMockPropertyAccess());
+
+        await expect(
+          service.updateTenant("u", propertyId, "t-1", { billingDayOfMonth: 32 })
+        ).rejects.toThrow(/billingDayOfMonth|invalid|1.*31/i);
+      });
+
+      it("rejects billingDayOfMonth = 0", async () => {
+        const propertyId = crypto.randomUUID();
+        const existing = createTenant({ propertyId, id: "t-1" });
+        const tenantRepo = createMockTenantRepo({ findById: vi.fn().mockResolvedValue(existing) });
+        const service = new TenantService(tenantRepo, createMockRoomRepo(), createMockPropertyAccess());
+
+        await expect(
+          service.updateTenant("u", propertyId, "t-1", { billingDayOfMonth: 0 })
+        ).rejects.toThrow(/billingDayOfMonth|invalid|1.*31/i);
+      });
+    });
   });
 
   describe("assignRoom", () => {
@@ -612,7 +679,7 @@ describe("TenantService", () => {
         );
 
         expect(result.roomId).toBe(roomIdUuid);
-        expect(tenantRepo.assignRoom).toHaveBeenCalledWith("t-1", roomIdUuid);
+        expect(tenantRepo.assignRoom).toHaveBeenCalledWith("t-1", roomIdUuid, expect.any(Number));
         expect(roomRepo.updateStatus).toHaveBeenCalledWith(roomIdUuid, "occupied");
       });
     });
@@ -792,9 +859,93 @@ describe("TenantService", () => {
         );
 
         expect(result.roomId).toBe(roomIdUuid);
-        expect(tenantRepo.assignRoom).toHaveBeenCalledWith("t-2", roomIdUuid);
+        expect(tenantRepo.assignRoom).toHaveBeenCalledWith("t-2", roomIdUuid, expect.any(Number));
         // Room was already occupied — status must NOT be updated again
         expect(roomRepo.updateStatus).not.toHaveBeenCalled();
+      });
+    });
+
+    // billingDayOfMonth tests — Traceability: billing-day-per-tenant
+    // REQ BD-6 -> assignRoom defaults billingDayOfMonth to day of assignment
+    // REQ BD-7 -> assignRoom respects optional override
+    // REQ BD-8 -> assignRoom validates billingDayOfMonth range (1-31)
+    describe("billingDayOfMonth", () => {
+      it("passes billingDayOfMonth defaulting to today's date when not provided", async () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date("2026-04-15T10:00:00.000Z")); // day = 15
+
+        const propertyId = crypto.randomUUID();
+        const tenant = createTenant({ propertyId, id: "t-1", roomId: null });
+        const room = createRoom({ propertyId, id: roomIdUuid, status: "available" });
+        const assigned = createTenant({ ...tenant, roomId: roomIdUuid, billingDayOfMonth: 15 });
+        const tenantRepo = createMockTenantRepo({
+          findById: vi.fn().mockResolvedValue(tenant),
+          assignRoom: vi.fn().mockResolvedValue(assigned),
+        });
+        const roomRepo = createMockRoomRepo({
+          findById: vi.fn().mockResolvedValue(room),
+          updateStatus: vi.fn(),
+        });
+        const service = new TenantService(tenantRepo, roomRepo, createMockPropertyAccess());
+
+        await service.assignRoom("user-1", propertyId, "t-1", roomIdUuid);
+
+        expect(tenantRepo.assignRoom).toHaveBeenCalledWith("t-1", roomIdUuid, 15);
+        vi.useRealTimers();
+      });
+
+      it("passes explicit billingDayOfMonth override to repository", async () => {
+        const propertyId = crypto.randomUUID();
+        const tenant = createTenant({ propertyId, id: "t-1", roomId: null });
+        const room = createRoom({ propertyId, id: roomIdUuid, status: "available" });
+        const assigned = createTenant({ ...tenant, roomId: roomIdUuid, billingDayOfMonth: 1 });
+        const tenantRepo = createMockTenantRepo({
+          findById: vi.fn().mockResolvedValue(tenant),
+          assignRoom: vi.fn().mockResolvedValue(assigned),
+        });
+        const roomRepo = createMockRoomRepo({
+          findById: vi.fn().mockResolvedValue(room),
+          updateStatus: vi.fn(),
+        });
+        const service = new TenantService(tenantRepo, roomRepo, createMockPropertyAccess());
+
+        await service.assignRoom("user-1", propertyId, "t-1", roomIdUuid, 1);
+
+        expect(tenantRepo.assignRoom).toHaveBeenCalledWith("t-1", roomIdUuid, 1);
+      });
+
+      it("rejects billingDayOfMonth = 0 (below minimum)", async () => {
+        const propertyId = crypto.randomUUID();
+        const tenant = createTenant({ propertyId, id: "t-1", roomId: null });
+        const tenantRepo = createMockTenantRepo({
+          findById: vi.fn().mockResolvedValue(tenant),
+        });
+        const service = new TenantService(
+          tenantRepo,
+          createMockRoomRepo(),
+          createMockPropertyAccess()
+        );
+
+        await expect(
+          service.assignRoom("user-1", propertyId, "t-1", roomIdUuid, 0)
+        ).rejects.toThrow(/billingDayOfMonth|invalid|1.*31/i);
+      });
+
+      it("rejects billingDayOfMonth = 32 (above maximum)", async () => {
+        const propertyId = crypto.randomUUID();
+        const tenant = createTenant({ propertyId, id: "t-1", roomId: null });
+        const tenantRepo = createMockTenantRepo({
+          findById: vi.fn().mockResolvedValue(tenant),
+        });
+        const service = new TenantService(
+          tenantRepo,
+          createMockRoomRepo(),
+          createMockPropertyAccess()
+        );
+
+        await expect(
+          service.assignRoom("user-1", propertyId, "t-1", roomIdUuid, 32)
+        ).rejects.toThrow(/billingDayOfMonth|invalid|1.*31/i);
       });
     });
   });

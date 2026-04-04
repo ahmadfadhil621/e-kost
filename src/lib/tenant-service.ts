@@ -75,10 +75,11 @@ export class TenantService {
       throw new Error("Cannot update moved-out tenant");
     }
     const parsed = updateTenantSchema.parse(data);
-    const updates: Partial<{ name: string; phone: string; email: string }> = {};
+    const updates: Partial<{ name: string; phone: string; email: string; billingDayOfMonth: number | null }> = {};
     if (parsed.name !== undefined) {updates.name = parsed.name.trim();}
     if (parsed.phone !== undefined) {updates.phone = parsed.phone.trim();}
     if (parsed.email !== undefined) {updates.email = parsed.email.trim();}
+    if ("billingDayOfMonth" in parsed) {updates.billingDayOfMonth = parsed.billingDayOfMonth ?? null;}
     return this.tenantRepo.update(id, updates);
   }
 
@@ -86,10 +87,11 @@ export class TenantService {
     userId: string,
     propertyId: string,
     tenantId: string,
-    roomId: string
+    roomId: string,
+    billingDayOfMonth?: number
   ): Promise<Tenant> {
     await this.propertyAccess.validateAccess(userId, propertyId);
-    assignRoomSchema.parse({ roomId });
+    assignRoomSchema.parse({ roomId, billingDayOfMonth });
 
     const tenant = await this.tenantRepo.findById(tenantId);
     if (!tenant || tenant.propertyId !== propertyId) {
@@ -118,7 +120,8 @@ export class TenantService {
       throw new Error("Room is at full capacity");
     }
 
-    const updated = await this.tenantRepo.assignRoom(tenantId, roomId);
+    const effectiveDay = billingDayOfMonth ?? new Date().getDate();
+    const updated = await this.tenantRepo.assignRoom(tenantId, roomId, effectiveDay);
     if (room.status === "available") {
       await this.roomRepo.updateStatus(roomId, "occupied");
     }

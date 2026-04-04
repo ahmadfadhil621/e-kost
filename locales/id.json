@@ -303,7 +303,8 @@
     "edit": {
       "title": "Ubah Penyewa",
       "submit": "Simpan Perubahan",
-      "success": "Penyewa berhasil diperbarui"
+      "success": "Penyewa berhasil diperbarui",
+      "billingDay": "Tanggal Tagihan"
     },
     "detail": {
       "title": "Detail Penyewa",
@@ -324,7 +325,9 @@
       "noRoomsWithCapacity": "Tidak ada kamar dengan kapasitas tersedia",
       "slotsRemaining_one": "{{count}} slot tersisa",
       "slotsRemaining_other": "{{count}} slot tersisa",
-      "roomsWithCapacity": "Kamar dengan kapasitas tersedia"
+      "roomsWithCapacity": "Kamar dengan kapasitas tersedia",
+      "billingDay": "Tanggal Tagihan",
+      "billingDayHint": "Tanggal di setiap bulan sewa jatuh tempo (1–31)"
     },
     "moveOut": {
       "title": "Pindah Keluar",
@@ -668,7 +671,8 @@
         "partial": "Sebagian",
         "unpaid": "Belum bayar"
       },
-      "amountOwed": "Jumlah terutang"
+      "amountOwed": "Jumlah terutang",
+      "dueDay": "Jatuh tempo tanggal {{day}} setiap bulan"
     },
     "period": "Periode tagihan",
     "selectPeriod": "Pilih periode tagihan"

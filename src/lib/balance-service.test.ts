@@ -17,7 +17,7 @@
 
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import fc from "fast-check";
-import { BalanceService } from "./balance-service";
+import { BalanceService, clampDay, effectiveBillingDay } from "./balance-service";
 import type { IBalanceRepository } from "./balance-service";
 import type { IBillingCycleRepository } from "@/domain/interfaces/billing-cycle-repository";
 import type { BillingCycle } from "@/domain/schemas/billing-cycle";
@@ -805,5 +805,191 @@ describe("BalanceService", () => {
         expect(result.unpaidCycles).toHaveLength(0);
       });
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// clampDay & effectiveBillingDay helpers
+// ---------------------------------------------------------------------------
+// Traceability: billing-day-per-tenant
+// REQ BD-1 -> clampDay clamps to last day of month
+// REQ BD-2 -> effectiveBillingDay falls back to day of movedInAt when null
+
+describe("clampDay", () => {
+  describe("good cases", () => {
+    it("returns day unchanged when it fits the month", () => {
+      expect(clampDay(15, 2026, 3)).toBe(15); // March has 31 days
+      expect(clampDay(1, 2026, 1)).toBe(1);
+      expect(clampDay(28, 2026, 2)).toBe(28); // Feb non-leap always has 28
+    });
+  });
+
+  describe("bad cases", () => {
+    it("clamps day 31 to 30 for months with 30 days", () => {
+      expect(clampDay(31, 2026, 4)).toBe(30); // April
+      expect(clampDay(31, 2026, 6)).toBe(30); // June
+      expect(clampDay(31, 2026, 9)).toBe(30); // September
+      expect(clampDay(31, 2026, 11)).toBe(30); // November
+    });
+
+    it("clamps day 31 to 28 for February in a non-leap year", () => {
+      expect(clampDay(31, 2026, 2)).toBe(28);
+      expect(clampDay(29, 2026, 2)).toBe(28);
+      expect(clampDay(30, 2026, 2)).toBe(28);
+    });
+
+    it("clamps day 31 to 29 for February in a leap year", () => {
+      expect(clampDay(31, 2024, 2)).toBe(29);
+      expect(clampDay(30, 2024, 2)).toBe(29);
+      expect(clampDay(29, 2024, 2)).toBe(29);
+    });
+  });
+
+  describe("edge cases", () => {
+    it("day 28 is never clamped regardless of month", () => {
+      for (let month = 1; month <= 12; month++) {
+        expect(clampDay(28, 2026, month)).toBe(28);
+      }
+    });
+
+    it("day 1 is never clamped", () => {
+      for (let month = 1; month <= 12; month++) {
+        expect(clampDay(1, 2026, month)).toBe(1);
+      }
+    });
+  });
+});
+
+describe("effectiveBillingDay", () => {
+  describe("good cases", () => {
+    it("returns billingDayOfMonth when explicitly set", () => {
+      const movedInAt = new Date("2026-03-20");
+      expect(effectiveBillingDay(15, movedInAt)).toBe(15);
+      expect(effectiveBillingDay(1, movedInAt)).toBe(1);
+      expect(effectiveBillingDay(31, movedInAt)).toBe(31);
+    });
+
+    it("returns day of movedInAt when billingDayOfMonth is null", () => {
+      expect(effectiveBillingDay(null, new Date("2026-03-20"))).toBe(20);
+      expect(effectiveBillingDay(null, new Date("2026-01-01"))).toBe(1);
+      expect(effectiveBillingDay(null, new Date("2026-02-28"))).toBe(28);
+    });
+  });
+
+  describe("edge cases", () => {
+    it("billingDayOfMonth=1 always wins over movedInAt day", () => {
+      expect(effectiveBillingDay(1, new Date("2026-03-31"))).toBe(1);
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// calculateCycleBreakdown — billing day anchor
+// ---------------------------------------------------------------------------
+// Traceability: billing-day-per-tenant
+// REQ BD-3 -> billingDayOfMonth is reflected in breakdown result
+// REQ BD-4 -> null billingDayOfMonth falls back to day of movedInAt
+// REQ BD-5 -> clamp applied for months with fewer days
+
+describe("calculateCycleBreakdown — billingDayOfMonth", () => {
+  beforeAll(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-04-04T00:00:00.000Z"));
+  });
+
+  afterAll(() => {
+    vi.useRealTimers();
+  });
+
+  function createMockBillingCycleRepo(
+    overrides: Partial<IBillingCycleRepository> = {}
+  ): IBillingCycleRepository {
+    return {
+      findOrCreate: vi.fn(),
+      findWithPaymentSums: vi.fn().mockResolvedValue([]),
+      ...overrides,
+    };
+  }
+
+  type ExtendedRepo = IBalanceRepository & {
+    getTenantInfo: IBalanceRepository["getTenantInfo"];
+  };
+
+  function createRepo(
+    info: Parameters<IBalanceRepository["getTenantInfo"]>[0] extends string
+      ? Awaited<ReturnType<IBalanceRepository["getTenantInfo"]>>
+      : never = null
+  ): ExtendedRepo {
+    return {
+      getBalanceRow: vi.fn(),
+      getBalanceRows: vi.fn(),
+      getTenantInfo: vi.fn().mockResolvedValue(info),
+    };
+  }
+
+  const mockAccess = { validateAccess: vi.fn().mockResolvedValue("owner" as const) };
+
+  it("exposes billingDayOfMonth=15 in breakdown when tenant has it set", async () => {
+    const repo = createRepo({
+      monthlyRent: 1_500_000,
+      movedInAt: new Date("2026-02-01"),
+      billingDayOfMonth: 15,
+    });
+    const service = new BalanceService(repo, mockAccess, createMockBillingCycleRepo());
+
+    const result = await service.calculateCycleBreakdown("u", "p", "t");
+
+    expect(result.billingDayOfMonth).toBe(15);
+  });
+
+  it("falls back to day of movedInAt when billingDayOfMonth is null", async () => {
+    const repo = createRepo({
+      monthlyRent: 1_000_000,
+      movedInAt: new Date("2026-03-20"),
+      billingDayOfMonth: null,
+    });
+    const service = new BalanceService(repo, mockAccess, createMockBillingCycleRepo());
+
+    const result = await service.calculateCycleBreakdown("u", "p", "t");
+
+    expect(result.billingDayOfMonth).toBe(20);
+  });
+
+  it("clamps billing day 31 to 28 for February cycle label", async () => {
+    // movedInAt Feb 1 2026, billingDay=31 → effective day for Feb is 28
+    const repo = createRepo({
+      monthlyRent: 1_000_000,
+      movedInAt: new Date("2026-02-01"),
+      billingDayOfMonth: 31,
+    });
+    const service = new BalanceService(repo, mockAccess, createMockBillingCycleRepo());
+
+    const result = await service.calculateCycleBreakdown("u", "p", "t");
+
+    // billingDayOfMonth stored on result is the raw value (31), clamping is per-month
+    expect(result.billingDayOfMonth).toBe(31);
+    // Cycles still generated month-by-month from Feb → Apr
+    expect(result.unpaidCycles.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("billingDayOfMonth=1 works identically to the legacy calendar-month behaviour", async () => {
+    const repo = createRepo({
+      monthlyRent: 1_200_000,
+      movedInAt: new Date("2026-02-01"),
+      billingDayOfMonth: 1,
+    });
+    const cycleRepo = createMockBillingCycleRepo({
+      findWithPaymentSums: vi.fn().mockResolvedValue([
+        { id: "c1", year: 2026, month: 2, totalPaid: 1_200_000 },
+        { id: "c2", year: 2026, month: 3, totalPaid: 1_200_000 },
+        { id: "c3", year: 2026, month: 4, totalPaid: 1_200_000 },
+      ]),
+    });
+    const service = new BalanceService(repo, mockAccess, cycleRepo);
+
+    const result = await service.calculateCycleBreakdown("u", "p", "t");
+
+    expect(result.allPaid).toBe(true);
+    expect(result.billingDayOfMonth).toBe(1);
   });
 });

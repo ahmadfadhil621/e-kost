@@ -29,6 +29,7 @@ export const updateTenantSchema = z
       .max(255)
       .trim()
       .optional(),
+    billingDayOfMonth: z.number().int().min(1).max(31).nullable().optional(),
   })
   .refine((data) => data && Object.keys(data).length > 0, {
     message: "At least one field must be provided",
@@ -36,6 +37,7 @@ export const updateTenantSchema = z
 
 export const assignRoomSchema = z.object({
   roomId: z.string().uuid("Invalid room ID"),
+  billingDayOfMonth: z.number().int().min(1).max(31).optional(),
 });
 
 export type CreateTenantInput = z.infer<typeof createTenantSchema>;
@@ -57,6 +59,7 @@ export interface Tenant {
   roomId: string | null;
   roomNumber: string | null;
   assignedAt: Date | null;
+  billingDayOfMonth: number | null;
   createdAt: Date;
   updatedAt: Date;
   movedOutAt: Date | null;

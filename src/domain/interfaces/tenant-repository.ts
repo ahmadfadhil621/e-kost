@@ -14,9 +14,9 @@ export interface ITenantRepository {
   ): Promise<Tenant[]>;
   update(
     id: string,
-    data: Partial<{ name: string; phone: string; email: string }>
+    data: Partial<{ name: string; phone: string; email: string; billingDayOfMonth: number | null }>
   ): Promise<Tenant>;
-  assignRoom(id: string, roomId: string): Promise<Tenant>;
+  assignRoom(id: string, roomId: string, billingDayOfMonth: number): Promise<Tenant>;
   removeRoomAssignment(id: string): Promise<Tenant>;
   softDelete(id: string): Promise<Tenant>;
 }

@@ -11,6 +11,7 @@ function toTenant(t: {
   roomId: string | null;
   movedInAt: Date;
   movedOutAt: Date | null;
+  billingDayOfMonth: number | null;
   createdAt: Date;
   updatedAt: Date;
   room?: { roomNumber: string } | null;
@@ -24,6 +25,7 @@ function toTenant(t: {
     roomId: t.roomId,
     roomNumber: t.room?.roomNumber ?? null,
     assignedAt: t.roomId ? t.movedInAt : null,
+    billingDayOfMonth: t.billingDayOfMonth,
     createdAt: t.createdAt,
     updatedAt: t.updatedAt,
     movedOutAt: t.movedOutAt,
@@ -76,7 +78,7 @@ export class PrismaTenantRepository implements ITenantRepository {
 
   async update(
     id: string,
-    data: Partial<{ name: string; phone: string; email: string }>
+    data: Partial<{ name: string; phone: string; email: string; billingDayOfMonth: number | null }>
   ): Promise<Tenant> {
     const updated = await prisma.tenant.update({
       where: { id },
@@ -84,16 +86,17 @@ export class PrismaTenantRepository implements ITenantRepository {
         ...(data.name !== undefined && { name: data.name }),
         ...(data.phone !== undefined && { phone: data.phone }),
         ...(data.email !== undefined && { email: data.email }),
+        ...("billingDayOfMonth" in data && { billingDayOfMonth: data.billingDayOfMonth }),
       },
       include: { room: { select: { roomNumber: true } } },
     });
     return toTenant(updated);
   }
 
-  async assignRoom(id: string, roomId: string): Promise<Tenant> {
+  async assignRoom(id: string, roomId: string, billingDayOfMonth: number): Promise<Tenant> {
     const updated = await prisma.tenant.update({
       where: { id },
-      data: { roomId, movedInAt: new Date() },
+      data: { roomId, movedInAt: new Date(), billingDayOfMonth },
       include: { room: { select: { roomNumber: true } } },
     });
     return toTenant(updated);

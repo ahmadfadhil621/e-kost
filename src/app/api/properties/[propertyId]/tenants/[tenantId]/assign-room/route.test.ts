@@ -68,7 +68,8 @@ describe("POST /api/properties/[propertyId]/tenants/[tenantId]/assign-room", () 
         "test-user-id",
         propertyId,
         tenantId,
-        roomIdUuid
+        roomIdUuid,
+        undefined
       );
     });
 

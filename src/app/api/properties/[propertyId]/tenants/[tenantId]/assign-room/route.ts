@@ -14,12 +14,13 @@ export async function POST(
 
   try {
     const body = await request.json();
-    const { roomId } = assignRoomSchema.parse(body);
+    const { roomId, billingDayOfMonth } = assignRoomSchema.parse(body);
     const tenant = await tenantService.assignRoom(
       access.userId!,
       propertyId,
       tenantId,
-      roomId
+      roomId,
+      billingDayOfMonth
     );
     return NextResponse.json({
       id: tenant.id,
@@ -29,6 +30,7 @@ export async function POST(
       email: tenant.email,
       roomId: tenant.roomId,
       assignedAt: tenant.assignedAt,
+      billingDayOfMonth: tenant.billingDayOfMonth,
       createdAt: tenant.createdAt,
       updatedAt: tenant.updatedAt,
       movedOutAt: tenant.movedOutAt,

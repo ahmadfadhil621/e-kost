@@ -97,7 +97,7 @@ export class PrismaBalanceRepository implements IBalanceRepository {
   async getTenantInfo(
     propertyId: string,
     tenantId: string
-  ): Promise<{ monthlyRent: number; movedInAt: Date } | null> {
+  ): Promise<{ monthlyRent: number; movedInAt: Date; billingDayOfMonth: number | null } | null> {
     const tenant = await prisma.tenant.findFirst({
       where: { id: tenantId, propertyId, movedOutAt: null, roomId: { not: null } },
       include: { room: true },
@@ -106,6 +106,7 @@ export class PrismaBalanceRepository implements IBalanceRepository {
     return {
       monthlyRent: toNumber(tenant.room.monthlyRent),
       movedInAt: tenant.movedInAt,
+      billingDayOfMonth: tenant.billingDayOfMonth,
     };
   }
 }

@@ -10,6 +10,7 @@ export function createTenant(overrides: Partial<Tenant> = {}): Tenant {
     roomId: null,
     roomNumber: null,
     assignedAt: null,
+    billingDayOfMonth: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     movedOutAt: null,

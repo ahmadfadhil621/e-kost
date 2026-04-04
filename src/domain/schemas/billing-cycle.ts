@@ -20,4 +20,5 @@ export interface BillingCycleBreakdown {
   tenantId: string;
   unpaidCycles: CycleStatus[];
   allPaid: boolean;
+  billingDayOfMonth: number;
 }

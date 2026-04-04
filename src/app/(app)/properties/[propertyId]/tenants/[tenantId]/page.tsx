@@ -7,6 +7,8 @@ import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Pencil } from "lucide-react";
 import {
   Dialog,
@@ -120,6 +122,7 @@ export default function TenantDetailPage() {
 
   const [assignOpen, setAssignOpen] = useState(false);
   const [moveOutOpen, setMoveOutOpen] = useState(false);
+  const [billingDay, setBillingDay] = useState<number>(new Date().getDate());
 
   const { data: tenant, isLoading, error } = useQuery({
     queryKey: ["tenant", propertyId, tenantId],
@@ -151,7 +154,7 @@ export default function TenantDetailPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ roomId }),
+        body: JSON.stringify({ roomId, billingDayOfMonth: billingDay }),
       }),
     onSuccess: async (res) => {
       if (!res.ok) {
@@ -334,6 +337,22 @@ export default function TenantDetailPage() {
             <DialogTitle>{t("tenant.assignRoom.title")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 flex-1 overflow-y-auto min-h-0">
+            <div className="space-y-1 pb-2">
+              <Label htmlFor="billingDay">{t("tenant.assignRoom.billingDay")}</Label>
+              <Input
+                id="billingDay"
+                type="number"
+                min={1}
+                max={31}
+                value={billingDay}
+                onChange={(e) => {
+                  const v = parseInt(e.target.value, 10);
+                  if (!isNaN(v)) { setBillingDay(Math.min(31, Math.max(1, v))); }
+                }}
+                className="w-24"
+              />
+              <p className="text-xs text-muted-foreground">{t("tenant.assignRoom.billingDayHint")}</p>
+            </div>
             {availableRooms.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 {t("tenant.assignRoom.noRoomsWithCapacity")}

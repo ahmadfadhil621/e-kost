@@ -99,6 +99,9 @@ export function BalanceSection({ propertyId, tenantId }: BalanceSectionProps) {
       <h2 id="balance-heading" className="text-lg font-semibold mb-2">
         {t("balance.sectionTitle")}
       </h2>
+      <p className="text-xs text-muted-foreground mb-3">
+        {t("billing.cycles.dueDay", { day: data.billingDayOfMonth })}
+      </p>
       {data.allPaid ? (
         <div className="flex flex-wrap items-center gap-2">
           <BalanceStatusIndicator status="paid" size="large" />
