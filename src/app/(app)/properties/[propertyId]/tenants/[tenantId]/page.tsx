@@ -165,6 +165,7 @@ export default function TenantDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["tenants", propertyId] });
       queryClient.invalidateQueries({ queryKey: ["rooms", propertyId] });
       queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
+      queryClient.invalidateQueries({ queryKey: ["billing-cycles", propertyId, tenantId] });
       toast({ title: t("tenant.assignRoom.success") });
       setAssignOpen(false);
     },
