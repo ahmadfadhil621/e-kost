@@ -36,7 +36,7 @@ export default function NewExpensePage() {
         queryKey: ["finance-summary", propertyId],
       });
       queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
-      router.push(`/properties/${propertyId}/finance/expenses`);
+      router.back();
     },
   });
 
@@ -57,7 +57,7 @@ export default function NewExpensePage() {
       <h2 className="text-lg font-semibold">{t("expense.create.title")}</h2>
       <ExpenseForm
         onSubmit={handleSubmit}
-        onCancel={() => router.push(`/properties/${propertyId}/finance/expenses`)}
+        onCancel={() => router.back()}
         isLoading={createMutation.isPending}
       />
       {createMutation.isError && (

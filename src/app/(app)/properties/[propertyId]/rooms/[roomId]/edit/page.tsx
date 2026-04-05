@@ -97,7 +97,7 @@ export default function EditRoomPage() {
     queryClient.invalidateQueries({ queryKey: ["billing-cycles"] });
     await queryClient.refetchQueries({ queryKey: ["rooms", propertyId] });
     toast({ title: t("room.edit.success") });
-    router.push(`/properties/${propertyId}/rooms/${roomId}`);
+    router.back();
   };
 
   if (isLoading || !room) {
@@ -126,7 +126,7 @@ export default function EditRoomPage() {
         isOccupied={room.activeTenantCount > 0}
         onStatusChange={setPendingStatus}
         onSubmit={handleSubmit}
-        onCancel={() => router.push(`/properties/${propertyId}/rooms/${roomId}`)}
+        onCancel={() => router.back()}
       />
     </div>
   );

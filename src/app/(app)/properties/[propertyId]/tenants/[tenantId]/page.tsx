@@ -197,7 +197,7 @@ export default function TenantDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["payments", "tenant"] });
       toast({ title: t("tenant.moveOut.success") });
       setMoveOutOpen(false);
-      router.push(`/properties/${propertyId}/tenants`);
+      router.back();
     },
     onError: (err: Error) => {
       toast({

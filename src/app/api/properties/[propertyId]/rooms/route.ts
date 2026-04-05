@@ -85,7 +85,8 @@ export async function GET(
     for (const t of tenants) {
       if (t.roomId && !t.movedOutAt) {
         const list = tenantsByRoomId.get(t.roomId) ?? [];
-        list.push({ id: t.id, name: t.name, assignedAt: t.assignedAt ? t.assignedAt.toISOString() : null });
+        const assignedAtIso = t.assignedAt && !isNaN(t.assignedAt.getTime()) ? t.assignedAt.toISOString() : null;
+        list.push({ id: t.id, name: t.name, assignedAt: assignedAtIso });
         tenantsByRoomId.set(t.roomId, list);
       }
     }

@@ -64,7 +64,7 @@ export default function EditTenantPage() {
       queryClient.invalidateQueries({ queryKey: ["tenants", propertyId] });
       queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
       toast({ title: t("tenant.edit.success") });
-      router.push(`/properties/${propertyId}/tenants/${tenantId}`);
+      router.back();
     },
     onError: (err: Error) => {
       toast({
@@ -98,9 +98,7 @@ export default function EditTenantPage() {
         }}
         defaultBillingDay={tenant.billingDayOfMonth}
         onSubmit={handleSubmit}
-        onCancel={() =>
-          router.push(`/properties/${propertyId}/tenants/${tenantId}`)
-        }
+        onCancel={() => router.back()}
         isLoading={updateMutation.isPending}
       />
     </div>

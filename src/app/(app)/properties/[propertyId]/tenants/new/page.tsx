@@ -47,7 +47,7 @@ export default function NewTenantPage() {
       <TenantForm
         mode="create"
         onSubmit={handleSubmit}
-        onCancel={() => router.push(`/properties/${propertyId}/tenants`)}
+        onCancel={() => router.back()}
       />
     </div>
   );

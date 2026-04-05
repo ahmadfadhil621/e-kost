@@ -68,7 +68,7 @@ export default function EditExpensePage() {
         queryKey: ["finance-summary", propertyId],
       });
       queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
-      router.push(`/properties/${propertyId}/finance/expenses`);
+      router.back();
     },
   });
 
@@ -108,9 +108,7 @@ export default function EditExpensePage() {
           description: expense.description ?? undefined,
         }}
         onSubmit={handleSubmit}
-        onCancel={() =>
-          router.push(`/properties/${propertyId}/finance/expenses`)
-        }
+        onCancel={() => router.back()}
         isLoading={updateMutation.isPending}
       />
       {updateMutation.isError && (

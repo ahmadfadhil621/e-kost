@@ -33,10 +33,11 @@ export default function NewRoomPage() {
       return;
     }
 
+    const body = await res.json();
     queryClient.invalidateQueries({ queryKey: ["rooms", propertyId] });
     queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
     toast({ title: t("room.create.success") });
-    router.push(`/properties/${propertyId}/rooms`);
+    router.push(`/properties/${propertyId}/rooms/${body.id}`);
   };
 
   return (
@@ -44,7 +45,7 @@ export default function NewRoomPage() {
       <RoomForm
         mode="create"
         onSubmit={handleSubmit}
-        onCancel={() => router.push(`/properties/${propertyId}/rooms`)}
+        onCancel={() => router.back()}
       />
     </div>
   );
