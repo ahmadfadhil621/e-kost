@@ -131,7 +131,7 @@ export default function RoomDetailPage() {
       invalidateRoomQueries();
       toast({ title: t("room.delete.success") });
       setDeleteOpen(false);
-      router.back();
+      router.push(`/properties/${propertyId}/rooms`);
     },
     onError: (err: Error) => {
       toast({
@@ -148,7 +148,7 @@ export default function RoomDetailPage() {
       invalidateRoomQueries();
       toast({ title: t("room.archive.success") });
       setArchiveOpen(false);
-      router.back();
+      router.push(`/properties/${propertyId}/rooms`);
     },
     onError: (err: Error) => {
       toast({

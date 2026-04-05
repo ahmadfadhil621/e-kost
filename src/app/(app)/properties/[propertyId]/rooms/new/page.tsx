@@ -37,7 +37,7 @@ export default function NewRoomPage() {
     queryClient.invalidateQueries({ queryKey: ["rooms", propertyId] });
     queryClient.invalidateQueries({ queryKey: ["dashboard", propertyId] });
     toast({ title: t("room.create.success") });
-    router.push(`/properties/${propertyId}/rooms/${body.id}`);
+    router.push(`/properties/${propertyId}/rooms`);
   };
 
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -114,7 +114,6 @@ async function fetchTenantPayments(
 export default function TenantDetailPage() {
   const { t, i18n } = useTranslation();
   const params = useParams();
-  const router = useRouter();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const propertyId = params.propertyId as string;
@@ -197,7 +196,6 @@ export default function TenantDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["payments", "tenant"] });
       toast({ title: t("tenant.moveOut.success") });
       setMoveOutOpen(false);
-      router.back();
     },
     onError: (err: Error) => {
       toast({
