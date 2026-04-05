@@ -26,7 +26,7 @@ export async function goToTenantsList(page: Page) {
 
 export async function goToNewTenantPage(page: Page) {
   const propertyId = getPropertyId();
-  await page.goto(`/properties/${propertyId}/tenants/new`, { waitUntil: "domcontentloaded" });
+  await page.goto(`/properties/${propertyId}/tenants/new`, { waitUntil: "load" });
   await page.waitForURL(/\/properties\/[^/]+\/tenants\/new/, { timeout: 8000 }).catch(() => {});
   if (page.url().includes("/login")) {
     throw new Error(

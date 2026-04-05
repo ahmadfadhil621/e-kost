@@ -85,7 +85,9 @@ test.describe("tenant move-out in shared room", () => {
         await confirmBtn.click();
       }
 
-      // Wait for success feedback
+      // After move-out, router.back() navigates to previous page.
+      // Navigate to tenant detail to verify the moved-out state in the UI.
+      await goToTenantDetail(page, tId);
       await expect(
         page.getByText(/moved out|pindah keluar|success|berhasil/i).first()
       ).toBeVisible({ timeout: 15000 });
@@ -153,6 +155,9 @@ test.describe("tenant move-out in shared room", () => {
         await confirmBtn.click();
       }
 
+      // After move-out, router.back() navigates to previous page.
+      // Navigate to tenant detail to verify the moved-out state in the UI.
+      await goToTenantDetail(page, ta1Id);
       await expect(
         page.getByText(/moved out|pindah keluar|success|berhasil/i).first()
       ).toBeVisible({ timeout: 15000 });

@@ -39,7 +39,7 @@ export async function goToRoomsList(page: Page) {
 
 export async function goToNewRoomPage(page: Page) {
   const propertyId = getPropertyId();
-  await page.goto(`/properties/${propertyId}/rooms/new`, GOTO_OPTIONS);
+  await page.goto(`/properties/${propertyId}/rooms/new`, { waitUntil: "load" });
   await page.waitForURL(/\/properties\/[^/]+\/rooms\/new/, { timeout: 8000 }).catch(() => {});
   if (page.url().includes("/login")) {
     throw new Error(

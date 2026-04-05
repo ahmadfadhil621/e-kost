@@ -24,7 +24,14 @@ test.describe("list and dashboard update after mutation", () => {
       await stableFill(page, () => page.getByLabel(/monthly rent/i), "1500000");
       await page.getByRole("button", { name: /create room|save/i }).click();
 
-      await expect(page).toHaveURL(/\/properties\/[^/]+\/rooms$/, { timeout: 15000 });
+      // After creation, app redirects to room detail (issue #102 UX)
+      // Wait for room detail URL (excludes /rooms/new since "new" also satisfies [^/]+)
+      await page.waitForURL(
+        (url) => /\/rooms\/[^/]+$/.test(url.pathname) && !url.pathname.endsWith("/rooms/new"),
+        { timeout: 15000 }
+      );
+      // Navigate to rooms list and verify new room appears (tests cache invalidation)
+      await goToRoomsList(page);
       await expect(page.getByText(roomNumber)).toBeVisible({ timeout: 15000 });
     });
 
@@ -44,7 +51,10 @@ test.describe("list and dashboard update after mutation", () => {
         .getByRole("button", { name: /create tenant|save|submit/i })
         .click();
 
-      await expect(page).toHaveURL(/\/properties\/[^/]+\/tenants\/[^/]+$/, { timeout: 25000 });
+      await page.waitForURL(
+        (url) => /\/tenants\/[^/]+$/.test(url.pathname) && !url.pathname.endsWith("/tenants/new"),
+        { timeout: 25000 }
+      );
       await page.goto(page.url().replace(/\/tenants\/[^/]+$/, "/tenants"));
       await expect(
         page.getByRole("link", { name: new RegExp(`Tenant ${unique}`) })
@@ -115,7 +125,13 @@ test.describe("list and dashboard update after mutation", () => {
       await stableFill(page, () => page.getByLabel(/monthly rent/i), "1000000");
       await page.getByRole("button", { name: /create room|save/i }).click();
 
-      await expect(page).toHaveURL(/\/properties\/[^/]+\/rooms$/, { timeout: 15000 });
+      // After creation, app redirects to room detail (issue #102 UX)
+      await page.waitForURL(
+        (url) => /\/rooms\/[^/]+$/.test(url.pathname) && !url.pathname.endsWith("/rooms/new"),
+        { timeout: 15000 }
+      );
+      // Navigate to rooms list to verify new room appears (tests cache invalidation)
+      await goToRoomsList(page);
       await expect(page.getByText(roomNumber)).toBeVisible({ timeout: 10000 });
       // Prevent Next.js dev overlay (nextjs-portal) from intercepting clicks when running against dev server
       await page.evaluate(() => {
