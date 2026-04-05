@@ -7,7 +7,6 @@ import { test, expect } from "@playwright/test";
 import type { APIRequestContext } from "@playwright/test";
 import {
   getPropertyId,
-  goToRoomDetail,
   goToEditRoomPage,
 } from "../helpers/room-inventory";
 import { goToTenantDetail } from "../helpers/tenant-room-basics";
