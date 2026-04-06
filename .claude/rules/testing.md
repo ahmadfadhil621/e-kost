@@ -58,6 +58,17 @@ Rules:
 - **Test modification is last resort** — only when the production code is demonstrably correct and cannot be changed (e.g. framework-level behaviour outside our control)
 - **Never increase timeouts as the sole fix** — that hides the real problem; address the underlying cause
 - When a test must be modified, explain clearly why production code cannot fix it
+- **If every new API route returns 500 but Vitest passes** — check dev server freshness before diagnosing code. This pattern (unit tests green, universal 500s in E2E) means the server is running stale code, not that the code is wrong. Restart the dev server first.
+
+### Before Committing UI Changes
+
+Before committing any change to a component, page, or i18n key, grep all E2E specs for affected selectors, routes, and text content:
+
+```bash
+grep -r "the-changed-text-or-route" e2e/
+```
+
+If any spec references what you changed, verify it still passes before committing. Do not defer this check to CI.
 
 ### Regression Failure Rule
 
