@@ -46,7 +46,7 @@ test.describe("invite and remove staff", () => {
       page,
     }) => {
       const propertyId = getPropertyId();
-      await page.goto(`/properties/${propertyId}`);
+      await page.goto(`/properties/${propertyId}/settings`);
 
       await expect(
         page.getByTestId("staff-management")
@@ -55,7 +55,7 @@ test.describe("invite and remove staff", () => {
 
     test("staff section displays list of assigned staff", async ({ page }) => {
       const propertyId = getPropertyId();
-      await page.goto(`/properties/${propertyId}`);
+      await page.goto(`/properties/${propertyId}/settings`);
 
       const staffSection = page.getByTestId("staff-management");
       await expect(staffSection).toBeVisible({ timeout: 10000 });
@@ -63,7 +63,7 @@ test.describe("invite and remove staff", () => {
 
     test("Add Staff shows form to enter email", async ({ page }) => {
       const propertyId = getPropertyId();
-      await page.goto(`/properties/${propertyId}`);
+      await page.goto(`/properties/${propertyId}/settings`);
 
       const staffSection = page.getByTestId("staff-management");
       await staffSection.waitFor({ state: "visible", timeout: 10000 });
@@ -85,7 +85,7 @@ test.describe("invite and remove staff", () => {
       await registerStaffUserViaApi(staffEmail, "StaffPass123!", "Staff User");
 
       const propertyId = getPropertyId();
-      await page.goto(`/properties/${propertyId}`);
+      await page.goto(`/properties/${propertyId}/settings`);
       const staffSection = page.getByTestId("staff-management");
       await staffSection.waitFor({ state: "visible", timeout: 10000 });
       await staffSection.getByRole("button", { name: /add staff|tambah staf/i }).click();
@@ -112,7 +112,7 @@ test.describe("invite and remove staff", () => {
       await registerStaffUserViaApi(staffEmail, "RemovePass123!", "To Remove");
 
       const propertyId = getPropertyId();
-      await page.goto(`/properties/${propertyId}`);
+      await page.goto(`/properties/${propertyId}/settings`);
       const staffSection = page.getByTestId("staff-management");
       await staffSection.waitFor({ state: "visible", timeout: 10000 });
       await staffSection.getByRole("button", { name: /add staff|tambah staf/i }).click();
@@ -147,7 +147,7 @@ test.describe("invite and remove staff", () => {
 
     test("add and remove have adequate touch targets", async ({ page }) => {
       const propertyId = getPropertyId();
-      await page.goto(`/properties/${propertyId}`);
+      await page.goto(`/properties/${propertyId}/settings`);
 
       const staffSection = page.getByTestId("staff-management");
       await expect(staffSection).toBeVisible({ timeout: 15000 });
@@ -164,7 +164,7 @@ test.describe("invite and remove staff", () => {
   test.describe("bad cases", () => {
     test("unregistered email shows error", async ({ page }) => {
       const propertyId = getPropertyId();
-      await page.goto(`/properties/${propertyId}`);
+      await page.goto(`/properties/${propertyId}/settings`);
       const staffSection = page.getByTestId("staff-management");
       await staffSection.waitFor({ state: "visible", timeout: 10000 });
       await staffSection.getByRole("button", { name: /add staff|tambah staf/i }).click();
@@ -184,7 +184,7 @@ test.describe("invite and remove staff", () => {
   test.describe("edge cases", () => {
     test("staff section shows property name in header", async ({ page }) => {
       const propertyId = getPropertyId();
-      await page.goto(`/properties/${propertyId}`);
+      await page.goto(`/properties/${propertyId}/settings`);
 
       await expect(
         page.getByRole("heading", { name: /staff for/i })

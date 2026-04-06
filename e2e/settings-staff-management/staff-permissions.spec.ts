@@ -44,7 +44,7 @@ async function registerStaffUser(
 }
 
 async function addStaffViaUI(page: Page, propertyId: string, staffEmail: string): Promise<void> {
-  await page.goto(`/properties/${propertyId}`);
+  await page.goto(`/properties/${propertyId}/settings`);
   const staffSection = page.getByTestId("staff-management");
   await staffSection.waitFor({ state: "visible", timeout: 20000 });
   await staffSection.getByRole("button", { name: /add staff|tambah staf/i }).click();
@@ -56,7 +56,7 @@ async function addStaffViaUI(page: Page, propertyId: string, staffEmail: string)
 }
 
 async function removeStaffViaUI(page: Page, propertyId: string, staffEmail: string): Promise<void> {
-  await page.goto(`/properties/${propertyId}`);
+  await page.goto(`/properties/${propertyId}/settings`);
   const staffSection = page.getByTestId("staff-management");
   await staffSection.waitFor({ state: "visible", timeout: 20000 });
   const listItem = staffSection.getByRole("listitem").filter({ hasText: staffEmail });
