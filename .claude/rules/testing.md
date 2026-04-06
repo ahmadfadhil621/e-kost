@@ -20,6 +20,32 @@ Testing is part of the issue-driven workflow defined in `CLAUDE.md`. After deriv
 5. **Iterate** -- fix implementation, not tests
 6. **Regression** -- `npm run test:run`. E2E runs in CI.
 
+### E2E Form Page Helper Conventions
+
+Helpers that navigate to **form pages** (new/create pages) **must** use `waitUntil: "load"`, not `domcontentloaded`:
+
+```typescript
+// CORRECT
+await page.goto(`/properties/${propertyId}/rooms/new`, { waitUntil: "load" });
+
+// WRONG — domcontentloaded fires before JS executes; React hasn't hydrated yet
+await page.goto(`/properties/${propertyId}/rooms/new`, { waitUntil: "domcontentloaded" });
+```
+
+With `domcontentloaded`, server-rendered inputs are visible but uncontrolled. `fill()` writes to the DOM, then React hydration resets inputs to default values. The form submits empty, fails validation silently, and stays on the `/new` URL. This manifests as headless-only failures — headed mode is slower, giving hydration time to complete before `fill()` runs.
+
+URL assertions after form submission must **exclude the source page**. The pattern `[^/]+` matches any path segment including `"new"`:
+
+```typescript
+// WRONG — /rooms/new satisfies /rooms\/[^/]+$/ — passes even when creation failed
+await expect(page).toHaveURL(/\/rooms\/[^/]+$/)
+
+// RIGHT — explicit exclusion
+await page.waitForURL(
+  url => /\/rooms\/[^/]+$/.test(url.pathname) && !url.pathname.endsWith('/rooms/new')
+)
+```
+
 ### Failing E2E Test Workflow
 
 When a failing E2E test is reported, always follow this order:

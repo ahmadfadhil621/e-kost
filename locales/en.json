@@ -310,6 +310,7 @@
       "title": "Tenant Details",
       "notFound": "Tenant not found",
       "assignRoom": "Assign Room",
+      "moveToRoom": "Move to Room",
       "moveOut": "Move Out",
       "edit": "Edit",
       "room": "Room",
@@ -326,8 +327,21 @@
       "slotsRemaining_one": "{{count}} slot remaining",
       "slotsRemaining_other": "{{count}} slots remaining",
       "roomsWithCapacity": "Rooms with available capacity",
+      "moveInDate": "Move-in date",
+      "moveInDateHint": "The date the tenant moves in",
       "billingDay": "Billing Day",
       "billingDayHint": "Day of month rent is due (1–31)"
+    },
+    "moveRoom": {
+      "title": "Move to Room",
+      "moveDate": "Move date",
+      "moveDateHint": "The date the tenant moves to the new room",
+      "confirm": "Move to Room",
+      "success": "Tenant moved to new room successfully"
+    },
+    "roomHistory": {
+      "title": "Room History",
+      "present": "Present"
     },
     "moveOut": {
       "title": "Move Out",

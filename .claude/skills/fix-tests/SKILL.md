@@ -46,6 +46,34 @@ npx playwright test e2e/<path/to/spec.ts> --reporter=list
 
 If the failure does not reproduce locally, note the discrepancy and investigate environment differences (env vars, DB state, seed data) before proceeding. Do not guess at a fix without reproduction.
 
+### Headless vs headed divergence (Playwright only)
+
+If a Playwright test passes locally in headed mode but fails headless (or in CI), **stop all cache/render speculation and treat it as a timing/hydration issue**:
+
+```bash
+npx playwright test e2e/<path/to/spec.ts> --headed --reporter=list
+```
+
+Common cause: `waitUntil: "domcontentloaded"` in a navigation helper resolves before JS bundles execute. React hasn't hydrated yet — inputs are visible (server-rendered HTML) but uncontrolled. `fill()` writes to the DOM, then hydration resets inputs to React default values. The form submits empty, validation fails silently, and the URL stays on the `/new` page.
+
+Fix: change the helper's `goto` to `waitUntil: "load"` so scripts execute before any `fill()` runs.
+
+### Form-submit URL assertions (Playwright only)
+
+Before accepting any `toHaveURL` or `waitForURL` assertion after a form submission, verify the regex **cannot match the form's own URL**. A common mistake:
+
+```
+# WRONG — /rooms/new satisfies [^/]+ so this passes even when creation failed
+await expect(page).toHaveURL(/\/rooms\/[^/]+$/)
+
+# RIGHT — explicitly exclude the /new page
+await page.waitForURL(
+  url => /\/rooms\/[^/]+$/.test(url.pathname) && !url.pathname.endsWith('/rooms/new')
+)
+```
+
+If the assertion can false-pass on the source page, a silent form failure will be masked and the real error will surface much later as "element not found" in the list.
+
 ## Phase 2: Identify Root Cause
 
 Read only the files directly implicated by the stack trace. Be surgical — no broad exploration.

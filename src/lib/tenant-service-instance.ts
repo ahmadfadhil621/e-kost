@@ -2,12 +2,15 @@ import { TenantService } from "@/lib/tenant-service";
 import { propertyService } from "@/lib/property-service-instance";
 import { PrismaTenantRepository } from "@/lib/repositories/prisma/prisma-tenant-repository";
 import { PrismaRoomRepository } from "@/lib/repositories/prisma/prisma-room-repository";
+import { PrismaRoomAssignmentRepository } from "@/lib/repositories/prisma/prisma-room-assignment-repository";
 
 const tenantRepo = new PrismaTenantRepository();
 const roomRepo = new PrismaRoomRepository();
+const roomAssignmentRepo = new PrismaRoomAssignmentRepository();
 
 export const tenantService = new TenantService(
   tenantRepo,
   roomRepo,
-  propertyService
+  propertyService,
+  roomAssignmentRepo
 );

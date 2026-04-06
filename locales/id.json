@@ -310,6 +310,7 @@
       "title": "Detail Penyewa",
       "notFound": "Penyewa tidak ditemukan",
       "assignRoom": "Assign Kamar",
+      "moveToRoom": "Pindah Kamar",
       "moveOut": "Pindah Keluar",
       "edit": "Ubah",
       "room": "Kamar",
@@ -326,8 +327,21 @@
       "slotsRemaining_one": "{{count}} slot tersisa",
       "slotsRemaining_other": "{{count}} slot tersisa",
       "roomsWithCapacity": "Kamar dengan kapasitas tersedia",
+      "moveInDate": "Tanggal Masuk",
+      "moveInDateHint": "Tanggal penyewa masuk ke kamar",
       "billingDay": "Tanggal Tagihan",
       "billingDayHint": "Tanggal di setiap bulan sewa jatuh tempo (1–31)"
+    },
+    "moveRoom": {
+      "title": "Pindah Kamar",
+      "moveDate": "Tanggal Pindah",
+      "moveDateHint": "Tanggal penyewa pindah ke kamar baru",
+      "confirm": "Pindah Kamar",
+      "success": "Penyewa berhasil dipindahkan ke kamar baru"
+    },
+    "roomHistory": {
+      "title": "Riwayat Kamar",
+      "present": "Sekarang"
     },
     "moveOut": {
       "title": "Pindah Keluar",

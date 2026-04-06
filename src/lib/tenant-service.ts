@@ -1,5 +1,6 @@
 import type { ITenantRepository } from "@/domain/interfaces/tenant-repository";
 import type { IRoomRepository } from "@/domain/interfaces/room-repository";
+import type { IRoomAssignmentRepository, RoomAssignmentWithRoom } from "@/domain/interfaces/room-assignment-repository";
 import type {
   Tenant,
   CreateTenantInput,
@@ -21,7 +22,8 @@ export class TenantService {
   constructor(
     private readonly tenantRepo: ITenantRepository,
     private readonly roomRepo: IRoomRepository,
-    private readonly propertyAccess: IPropertyAccessValidator
+    private readonly propertyAccess: IPropertyAccessValidator,
+    private readonly roomAssignmentRepo?: IRoomAssignmentRepository
   ) {}
 
   async createTenant(
@@ -126,6 +128,94 @@ export class TenantService {
       await this.roomRepo.updateStatus(roomId, "occupied");
     }
     return updated;
+  }
+
+  async moveTenantToRoom(
+    userId: string,
+    propertyId: string,
+    tenantId: string,
+    input: { targetRoomId: string; moveDate: string; billingDayOfMonth?: number }
+  ): Promise<Tenant> {
+    await this.propertyAccess.validateAccess(userId, propertyId);
+
+    const tenant = await this.tenantRepo.findById(tenantId);
+    if (!tenant || tenant.propertyId !== propertyId) {
+      throw new Error("Tenant not found");
+    }
+    if (tenant.movedOutAt) {
+      throw new Error("Tenant is inactive (moved out)");
+    }
+    if (tenant.roomId && tenant.roomId === input.targetRoomId) {
+      throw new Error("Cannot move to same room");
+    }
+
+    const targetRoom = await this.roomRepo.findById(input.targetRoomId);
+    if (!targetRoom || targetRoom.propertyId !== propertyId) {
+      throw new Error("Room not found");
+    }
+
+    const allTenants = await this.tenantRepo.findByProperty(propertyId);
+    const activeInTarget = allTenants.filter(
+      (t) => t.roomId === input.targetRoomId && !t.movedOutAt
+    );
+    if (activeInTarget.length >= targetRoom.capacity) {
+      throw new Error("Room is at capacity");
+    }
+
+    const moveDate = new Date(input.moveDate);
+    const oldRoomId = tenant.roomId;
+
+    if (oldRoomId && this.roomAssignmentRepo) {
+      await this.roomAssignmentRepo.closeCurrentAssignment(tenantId, moveDate);
+    }
+
+    if (this.roomAssignmentRepo) {
+      await this.roomAssignmentRepo.create({
+        tenantId,
+        roomId: input.targetRoomId,
+        startDate: moveDate,
+      });
+    }
+
+    const moveData: { roomId: string; movedInAt: Date; billingDayOfMonth?: number } = {
+      roomId: input.targetRoomId,
+      movedInAt: moveDate,
+    };
+    if (input.billingDayOfMonth !== undefined) {
+      moveData.billingDayOfMonth = input.billingDayOfMonth;
+    }
+    const updated = await this.tenantRepo.moveRoom(tenantId, moveData);
+
+    await this.roomRepo.updateStatus(input.targetRoomId, "occupied");
+
+    if (oldRoomId) {
+      const remaining = allTenants.filter(
+        (t) => t.roomId === oldRoomId && !t.movedOutAt && t.id !== tenantId
+      );
+      if (remaining.length === 0) {
+        await this.roomRepo.updateStatus(oldRoomId, "available");
+      }
+    }
+
+    return updated;
+  }
+
+  async getRoomAssignments(
+    userId: string,
+    propertyId: string,
+    tenantId: string
+  ): Promise<RoomAssignmentWithRoom[]> {
+    await this.propertyAccess.validateAccess(userId, propertyId);
+
+    const tenant = await this.tenantRepo.findById(tenantId);
+    if (!tenant || tenant.propertyId !== propertyId) {
+      throw new Error("Tenant not found");
+    }
+
+    if (!this.roomAssignmentRepo) {
+      return [];
+    }
+    return this.roomAssignmentRepo.findByTenant(tenantId);
   }
 
   async moveOut(
