@@ -95,6 +95,62 @@ describe("RoomCard", () => {
   });
 });
 
+// Traceability: room-available-card-cleanup (issue #103)
+// AC-1 -> it('available room card does not render assign tenant action')
+// AC-2 -> it('available room card does not render change status action')
+// AC-3 -> it('available room card still links to room detail after cleanup')
+
+describe("room-available-card-cleanup", () => {
+  describe("good cases", () => {
+    it("available room card does not render assign tenant or change status actions", () => {
+      render(
+        <RoomCard room={makeRoom({ status: "available" })} propertyId={propertyId} />
+      );
+      expect(screen.queryByText(/assign.*tenant/i)).toBeNull();
+      expect(screen.queryByText(/change.*status/i)).toBeNull();
+      expect(screen.queryByText(/change room status/i)).toBeNull();
+    });
+
+    it("available room card still links to room detail", () => {
+      render(
+        <RoomCard room={makeRoom({ status: "available" })} propertyId={propertyId} />
+      );
+      const link = screen.getByTestId("room-card").closest("a");
+      expect(link).toHaveAttribute("href", "/properties/prop-123/rooms/room-456");
+    });
+
+    it("available room card shows room number, type, rent, and status badge", () => {
+      render(
+        <RoomCard room={makeRoom({ status: "available" })} propertyId={propertyId} />
+      );
+      expect(screen.getByText(/A101/)).toBeInTheDocument();
+      expect(screen.getByText(/single/i)).toBeInTheDocument();
+      expect(screen.getByRole("status")).toBeInTheDocument();
+    });
+  });
+
+  describe("bad cases", () => {
+    it("occupied card variant is not affected by available card cleanup", () => {
+      render(
+        <RoomCard
+          room={makeRoom({ status: "occupied", tenantName: "Jane Doe" })}
+          propertyId={propertyId}
+        />
+      );
+      const link = screen.getByTestId("room-card").closest("a");
+      expect(link).toHaveAttribute("href", "/properties/prop-123/rooms/room-456");
+    });
+
+    it("under_renovation card variant is not affected", () => {
+      render(
+        <RoomCard room={makeRoom({ status: "under_renovation" })} propertyId={propertyId} />
+      );
+      const link = screen.getByTestId("room-card").closest("a");
+      expect(link).toHaveAttribute("href", "/properties/prop-123/rooms/room-456");
+    });
+  });
+});
+
 // Traceability: room-tenant-move-in-date
 // AC-1 -> it('occupied room card renders all tenant names as list items')
 // AC-2 -> it('occupied room card renders all tenant names in multi-tenant room')

@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import type { Room } from "@/domain/schemas/room";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
-import { UserPlus, Wrench, Check, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 
 /** Room data for card display; accepts API shape (date strings) or domain shape (Date). */
 export type RoomForCard = Pick<
@@ -35,24 +35,14 @@ export function abbreviateName(name: string): string {
 
 export interface RoomCardProps {
   room: RoomForCard;
-  /** Used for room detail and for Available action links */
   propertyId: string;
-  /** Optional: called when user taps "Assign Tenant" (Available rooms). If not set, links to room detail. */
-  onAssignTenant?: (roomId: string) => void;
-  /** Optional: called when user taps "Change room status" (Available rooms). If not set, links to room detail. */
-  onChangeStatus?: (roomId: string) => void;
 }
 
 function roomDetailHref(propertyId: string, roomId: string): string {
   return `/properties/${propertyId}/rooms/${roomId}`;
 }
 
-export function RoomCard({
-  room,
-  propertyId,
-  onAssignTenant,
-  onChangeStatus,
-}: RoomCardProps) {
+export function RoomCard({ room, propertyId }: RoomCardProps) {
   const { t, i18n } = useTranslation();
   const formatCurrency = useFormatCurrency();
   const roomHref = roomDetailHref(propertyId, room.id);
@@ -85,51 +75,8 @@ export function RoomCard({
               </span>
             </div>
           </CardHeader>
-          <CardContent className="pt-0 space-y-3">
+          <CardContent className="pt-0">
             <p className="text-sm text-muted-foreground">{typeRent}</p>
-            <div className="flex flex-col gap-1 border-t border-border pt-3">
-              {onAssignTenant ? (
-                <button
-                  type="button"
-                  className="flex min-h-[44px] min-w-[44px] items-center gap-2 text-primary text-sm font-medium focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-md"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onAssignTenant(room.id);
-                  }}
-                  aria-label={t("room.card.assignTenant")}
-                >
-                  <UserPlus className="h-4 w-4" aria-hidden />
-                  {t("room.card.assignTenant")}
-                </button>
-              ) : (
-                <span className="flex min-h-[44px] min-w-[44px] items-center gap-2 text-primary text-sm font-medium rounded-md">
-                  <UserPlus className="h-4 w-4" aria-hidden />
-                  {t("room.card.assignTenant")}
-                </span>
-              )}
-              <div className="h-px bg-border" aria-hidden />
-              {onChangeStatus ? (
-                <button
-                  type="button"
-                  className="flex min-h-[44px] min-w-[44px] items-center gap-2 text-muted-foreground text-sm focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-md"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onChangeStatus(room.id);
-                  }}
-                  aria-label={t("room.card.changeStatus")}
-                >
-                  <Wrench className="h-4 w-4" aria-hidden />
-                  {t("room.card.changeStatus")}
-                </button>
-              ) : (
-                <span className="flex min-h-[44px] min-w-[44px] items-center gap-2 text-muted-foreground text-sm rounded-md">
-                  <Wrench className="h-4 w-4" aria-hidden />
-                  {t("room.card.changeStatus")}
-                </span>
-              )}
-            </div>
           </CardContent>
         </Card>
       </Link>
