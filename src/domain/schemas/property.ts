@@ -27,12 +27,17 @@ export const updatePropertySchema = z
     message: "At least one field must be provided",
   });
 
+export const updatePropertySettingsSchema = z.object({
+  staffOnlyFinance: z.boolean(),
+});
+
 export const addStaffSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
 export type CreatePropertyInput = z.infer<typeof createPropertySchema>;
 export type UpdatePropertyInput = z.infer<typeof updatePropertySchema>;
+export type UpdatePropertySettings = z.infer<typeof updatePropertySettingsSchema>;
 export type AddStaffInput = z.infer<typeof addStaffSchema>;
 
 export interface Property {
@@ -41,6 +46,7 @@ export interface Property {
   address: string;
   currency: string;
   ownerId: string;
+  staffOnlyFinance: boolean;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;

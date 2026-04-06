@@ -1,14 +1,20 @@
-// Traceability: finance-expense-tracking
+// Traceability: finance-expense-tracking + property-settings (issue #104)
 // REQ 2.1 -> it('GET returns 200 with expense when found')
 // REQ 3.2 -> it('PUT returns 200 with updated expense')
 // REQ 3.3 -> it('PUT returns 200 with updated expense') -- persist and display confirmation
 // REQ 3.5 -> it('PUT returns 400 when amount is negative')
 // REQ 4.3 -> it('DELETE returns 204 when expense exists')
+// --- issue #104 ---
+// AC-8  -> it('PUT returns 403 for owner when staffOnlyFinance is true')
+// AC-8  -> it('DELETE returns 403 for owner when staffOnlyFinance is true')
+// AC-11 -> it('PUT returns 200 for staff when staffOnlyFinance is true')
+// AC-11 -> it('DELETE returns 204 for staff when staffOnlyFinance is true')
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextResponse } from "next/server";
 import { GET, PUT, DELETE } from "./route";
 import { createExpense } from "@/test/fixtures/expense";
+import { createProperty } from "@/test/fixtures/property";
 
 const propertyId = "prop-123";
 const expenseId = "exp-456";
@@ -302,6 +308,199 @@ describe("DELETE /api/properties/[propertyId]/expenses/[expenseId]", () => {
         propertyId,
         expenseId
       );
+    });
+  });
+});
+
+// ─── issue #104: staff-only finance mode guards ───────────────────────────────
+
+describe("PUT /api/properties/[propertyId]/expenses/[expenseId] — staff-only finance mode", () => {
+  const validBody = JSON.stringify({ amount: 200 });
+
+  describe("good cases", () => {
+    it("returns 200 for owner when staffOnlyFinance is false", async () => {
+      const property = createProperty({ id: propertyId, staffOnlyFinance: false });
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: "owner-id",
+        role: "owner",
+        property,
+        errorResponse: null,
+      });
+      const updated = createExpense({ id: expenseId, propertyId, amount: 200 });
+      vi.mocked(expenseService.updateExpense).mockResolvedValue(updated);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/expenses/${expenseId}`,
+        { method: "PUT", headers: { "Content-Type": "application/json" }, body: validBody }
+      );
+
+      const response = await PUT(request, {
+        params: Promise.resolve({ propertyId, expenseId }),
+      });
+      expect(response.status).toBe(200);
+    });
+
+    it("returns 200 for staff when staffOnlyFinance is true", async () => {
+      const property = createProperty({ id: propertyId, staffOnlyFinance: true });
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: "staff-id",
+        role: "staff",
+        property,
+        errorResponse: null,
+      });
+      const updated = createExpense({ id: expenseId, propertyId, amount: 200 });
+      vi.mocked(expenseService.updateExpense).mockResolvedValue(updated);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/expenses/${expenseId}`,
+        { method: "PUT", headers: { "Content-Type": "application/json" }, body: validBody }
+      );
+
+      const response = await PUT(request, {
+        params: Promise.resolve({ propertyId, expenseId }),
+      });
+      expect(response.status).toBe(200);
+    });
+  });
+
+  describe("bad cases", () => {
+    it("returns 403 for owner when staffOnlyFinance is true", async () => {
+      const property = createProperty({ id: propertyId, staffOnlyFinance: true });
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: "owner-id",
+        role: "owner",
+        property,
+        errorResponse: null,
+      });
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/expenses/${expenseId}`,
+        { method: "PUT", headers: { "Content-Type": "application/json" }, body: validBody }
+      );
+
+      const response = await PUT(request, {
+        params: Promise.resolve({ propertyId, expenseId }),
+      });
+      const data = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(data.error).toBeDefined();
+    });
+  });
+
+  describe("edge cases", () => {
+    it("returns 200 for owner when property is null (guard fails safely)", async () => {
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: "owner-id",
+        role: "owner",
+        property: null,
+        errorResponse: null,
+      });
+      const updated = createExpense({ id: expenseId, propertyId, amount: 200 });
+      vi.mocked(expenseService.updateExpense).mockResolvedValue(updated);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/expenses/${expenseId}`,
+        { method: "PUT", headers: { "Content-Type": "application/json" }, body: validBody }
+      );
+
+      const response = await PUT(request, {
+        params: Promise.resolve({ propertyId, expenseId }),
+      });
+      expect(response.status).toBe(200);
+    });
+  });
+});
+
+describe("DELETE /api/properties/[propertyId]/expenses/[expenseId] — staff-only finance mode (issue #104)", () => {
+  describe("good cases", () => {
+    it("returns 204 for owner when staffOnlyFinance is false", async () => {
+      const property = createProperty({ id: propertyId, staffOnlyFinance: false });
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: "owner-id",
+        role: "owner",
+        property,
+        errorResponse: null,
+      });
+      vi.mocked(expenseService.deleteExpense).mockResolvedValue(undefined);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/expenses/${expenseId}`,
+        { method: "DELETE" }
+      );
+
+      const response = await DELETE(request, {
+        params: Promise.resolve({ propertyId, expenseId }),
+      });
+      expect(response.status).toBe(204);
+    });
+
+    it("returns 204 for staff when staffOnlyFinance is true", async () => {
+      const property = createProperty({ id: propertyId, staffOnlyFinance: true });
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: "staff-id",
+        role: "staff",
+        property,
+        errorResponse: null,
+      });
+      vi.mocked(expenseService.deleteExpense).mockResolvedValue(undefined);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/expenses/${expenseId}`,
+        { method: "DELETE" }
+      );
+
+      const response = await DELETE(request, {
+        params: Promise.resolve({ propertyId, expenseId }),
+      });
+      expect(response.status).toBe(204);
+    });
+  });
+
+  describe("bad cases", () => {
+    it("returns 403 for owner when staffOnlyFinance is true", async () => {
+      const property = createProperty({ id: propertyId, staffOnlyFinance: true });
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: "owner-id",
+        role: "owner",
+        property,
+        errorResponse: null,
+      });
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/expenses/${expenseId}`,
+        { method: "DELETE" }
+      );
+
+      const response = await DELETE(request, {
+        params: Promise.resolve({ propertyId, expenseId }),
+      });
+
+      expect(response.status).toBe(403);
+      const data = await response.json();
+      expect(data.error).toBeDefined();
+    });
+  });
+
+  describe("edge cases", () => {
+    it("returns 204 for owner when property is null (guard fails safely)", async () => {
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: "owner-id",
+        role: "owner",
+        property: null,
+        errorResponse: null,
+      });
+      vi.mocked(expenseService.deleteExpense).mockResolvedValue(undefined);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/expenses/${expenseId}`,
+        { method: "DELETE" }
+      );
+
+      const response = await DELETE(request, {
+        params: Promise.resolve({ propertyId, expenseId }),
+      });
+      expect(response.status).toBe(204);
     });
   });
 });

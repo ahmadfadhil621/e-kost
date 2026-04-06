@@ -25,6 +25,15 @@ import {
 import { MonthSelector } from "@/components/finance/month-selector";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
 import type { Expense } from "@/domain/schemas/expense";
+import type { PropertyRole } from "@/domain/schemas/property";
+
+type PropertyInfo = { role: PropertyRole; staffOnlyFinance: boolean };
+
+async function fetchProperty(propertyId: string): Promise<PropertyInfo> {
+  const res = await fetch(`/api/properties/${propertyId}`, { credentials: "include" });
+  if (!res.ok) { throw new Error("Failed to fetch property"); }
+  return res.json() as Promise<PropertyInfo>;
+}
 
 async function fetchExpenses(propertyId: string, year: number, month: number): Promise<Expense[]> {
   const res = await fetch(
@@ -101,11 +110,19 @@ export default function ExpenseListPage() {
     }
   }, [month]);
 
+  const { data: property } = useQuery({
+    queryKey: ["property", propertyId],
+    queryFn: () => fetchProperty(propertyId),
+    enabled: !!propertyId,
+  });
+
   const { data: expenses = [], isLoading } = useQuery({
     queryKey: ["expenses", propertyId, year, month],
     queryFn: () => fetchExpenses(propertyId, year, month),
     enabled: !!propertyId,
   });
+
+  const canMutateFinance = !(property?.staffOnlyFinance && property?.role === "owner");
 
   const deleteMutation = useMutation({
     mutationFn: (expenseId: string) => deleteExpense(propertyId, expenseId),
@@ -137,11 +154,13 @@ export default function ExpenseListPage() {
     <div className="flex flex-col gap-4 w-full">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-lg font-semibold">{t("expense.list.title")}</h2>
-        <Button asChild className="min-h-[44px] min-w-[44px]">
-          <Link href={`/properties/${propertyId}/finance/expenses/new`}>
-            {t("finance.addExpense")}
-          </Link>
-        </Button>
+        {canMutateFinance && (
+          <Button asChild className="min-h-[44px] min-w-[44px]">
+            <Link href={`/properties/${propertyId}/finance/expenses/new`}>
+              {t("finance.addExpense")}
+            </Link>
+          </Button>
+        )}
       </div>
 
       <MonthSelector
@@ -168,33 +187,35 @@ export default function ExpenseListPage() {
                   <span className="text-sm font-medium">
                     {t(`expense.category.${expense.category}`)}
                   </span>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="min-h-[44px] min-w-[44px]"
-                        aria-label={t("payment.delete.moreOptions")}
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link
-                          href={`/properties/${propertyId}/finance/expenses/${expense.id}/edit`}
+                  {canMutateFinance && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="min-h-[44px] min-w-[44px]"
+                          aria-label={t("payment.delete.moreOptions")}
                         >
-                          {t("common.edit")}
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-destructive focus:text-destructive"
-                        onClick={() => setPendingDeleteId(expense.id)}
-                      >
-                        {t("expense.delete.title")}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href={`/properties/${propertyId}/finance/expenses/${expense.id}/edit`}
+                          >
+                            {t("common.edit")}
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive"
+                          onClick={() => setPendingDeleteId(expense.id)}
+                        >
+                          {t("expense.delete.title")}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </CardHeader>
                 <CardContent className="space-y-1">
                   <p className="text-lg font-semibold tabular-nums">

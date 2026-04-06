@@ -6,11 +6,13 @@ import type {
   PropertyRole,
   PropertyStaff,
   UpdatePropertyInput,
+  UpdatePropertySettings,
 } from "@/domain/schemas/property";
 import {
   addStaffSchema,
   createPropertySchema,
   updatePropertySchema,
+  updatePropertySettingsSchema,
 } from "@/domain/schemas/property";
 
 export class ForbiddenError extends Error {
@@ -134,6 +136,21 @@ export class PropertyService {
   async listStaff(userId: string, propertyId: string): Promise<PropertyStaff[]> {
     await this.validateAccess(userId, propertyId);
     return this.repo.findStaff(propertyId);
+  }
+
+  async getPropertyByIdUnchecked(propertyId: string): Promise<Property | null> {
+    return this.repo.findById(propertyId);
+  }
+
+  async updatePropertySettings(
+    userId: string,
+    propertyId: string,
+    data: UpdatePropertySettings
+  ): Promise<Property> {
+    const role = await this.validateAccess(userId, propertyId);
+    if (role !== "owner") {throw new ForbiddenError("Owner access required");}
+    const parsed = updatePropertySettingsSchema.parse(data);
+    return this.repo.update(propertyId, parsed);
   }
 
   async validateAccess(userId: string, propertyId: string): Promise<PropertyRole> {

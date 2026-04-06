@@ -10,6 +10,15 @@ import { MonthSelector } from "@/components/finance/month-selector";
 import { SummaryCard } from "@/components/finance/summary-card";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
 import type { FinanceSummary } from "@/domain/schemas/expense";
+import type { PropertyRole } from "@/domain/schemas/property";
+
+type PropertyInfo = { role: PropertyRole; staffOnlyFinance: boolean };
+
+async function fetchProperty(propertyId: string): Promise<PropertyInfo> {
+  const res = await fetch(`/api/properties/${propertyId}`, { credentials: "include" });
+  if (!res.ok) { throw new Error("Failed to fetch property"); }
+  return res.json() as Promise<PropertyInfo>;
+}
 
 async function fetchFinanceSummary(
   propertyId: string,
@@ -54,12 +63,20 @@ export default function FinanceOverviewPage() {
     }
   }, [month]);
 
+  const { data: property } = useQuery({
+    queryKey: ["property", propertyId],
+    queryFn: () => fetchProperty(propertyId),
+    enabled: !!propertyId,
+  });
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["finance-summary", propertyId, year, month],
     queryFn: () => fetchFinanceSummary(propertyId, year, month),
     enabled: !!propertyId,
     staleTime: 60_000,
   });
+
+  const canMutateFinance = !(property?.staffOnlyFinance && property?.role === "owner");
 
   if (!propertyId) {
     return (
@@ -118,13 +135,15 @@ export default function FinanceOverviewPage() {
         </>
       )}
 
-      <div className="flex flex-col gap-2">
-        <Button asChild variant="outline" className="min-h-[44px] min-w-[44px]">
-          <Link href={`/properties/${propertyId}/finance/expenses/new`}>
-            {t("finance.addExpense")}
-          </Link>
-        </Button>
-      </div>
+      {canMutateFinance && (
+        <div className="flex flex-col gap-2">
+          <Button asChild variant="outline" className="min-h-[44px] min-w-[44px]">
+            <Link href={`/properties/${propertyId}/finance/expenses/new`}>
+              {t("finance.addExpense")}
+            </Link>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

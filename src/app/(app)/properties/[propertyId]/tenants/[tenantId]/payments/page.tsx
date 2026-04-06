@@ -8,6 +8,9 @@ import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PaymentList } from "@/components/payment/payment-list";
 import type { Payment } from "@/domain/schemas/payment";
+import type { PropertyRole } from "@/domain/schemas/property";
+
+type PropertyInfo = { role: PropertyRole; staffOnlyFinance: boolean };
 
 const PAGE_SIZE = 20;
 
@@ -38,6 +41,12 @@ async function fetchTenantPayments(
   };
 }
 
+async function fetchProperty(propertyId: string): Promise<PropertyInfo> {
+  const res = await fetch(`/api/properties/${propertyId}`, { credentials: "include" });
+  if (!res.ok) { throw new Error("Failed to fetch property"); }
+  return res.json() as Promise<PropertyInfo>;
+}
+
 async function deletePayment(propertyId: string, paymentId: string): Promise<void> {
   const res = await fetch(`/api/properties/${propertyId}/payments/${paymentId}`, {
     method: "DELETE",
@@ -59,11 +68,19 @@ export default function TenantPaymentHistoryPage() {
   const tenantId = params.tenantId as string;
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
 
+  const { data: property } = useQuery({
+    queryKey: ["property", propertyId],
+    queryFn: () => fetchProperty(propertyId),
+    enabled: !!propertyId,
+  });
+
   const { data, isLoading } = useQuery({
     queryKey: ["tenant-payments-history", propertyId, tenantId, page],
     queryFn: () => fetchTenantPayments(propertyId, tenantId, page),
     enabled: !!propertyId && !!tenantId,
   });
+
+  const canMutateFinance = !(property?.staffOnlyFinance && property?.role === "owner");
 
   const deleteMutation = useMutation({
     mutationFn: (paymentId: string) => deletePayment(propertyId, paymentId),
@@ -96,7 +113,7 @@ export default function TenantPaymentHistoryPage() {
       <PaymentList
         payments={data?.payments ?? []}
         isLoading={isLoading}
-        onDeletePayment={(paymentId) => deleteMutation.mutate(paymentId)}
+        onDeletePayment={canMutateFinance ? (paymentId) => deleteMutation.mutate(paymentId) : undefined}
         isDeletingPayment={deleteMutation.isPending}
       />
 

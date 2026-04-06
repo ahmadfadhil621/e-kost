@@ -19,6 +19,7 @@ export async function GET(
       name: property.name,
       address: property.address,
       ownerId: property.ownerId,
+      staffOnlyFinance: property.staffOnlyFinance,
       archivedAt: property.archivedAt,
       createdAt: property.createdAt,
       updatedAt: property.updatedAt,

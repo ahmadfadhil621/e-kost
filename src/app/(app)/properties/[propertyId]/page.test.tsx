@@ -1,9 +1,9 @@
-// Traceability: property-detail — issue #24, #26
+// Traceability: property-detail — issue #24, #26, #104
 // REQ-1.1, REQ-1.2, REQ-1.3 -> it('renders property name, address, role, and creation date')
 // REQ-1.4 -> it('renders stats: totalRooms, tenants, outstandingCount')
 // REQ-1.5 -> it('renders map placeholder')
-// REQ-1.6 (issue #26) -> it('renders staff management section for owner')
-// REQ-1.6 (issue #26) -> it('hides staff management section for non-owner')
+// REQ-1.6 (issue #26, #104) -> it('shows Settings nav link for owner') — StaffSection moved to settings page
+// REQ-1.6 (issue #26, #104) -> it('hides Settings nav link for non-owner')
 // REQ-1.7 -> it('renders quick-nav links to sub-sections')
 // REQ-4.1 -> it('shows loading state while fetching')
 // REQ-4.2 -> it('shows error state when property is not found')
@@ -49,13 +49,6 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
 
 vi.mock("@/hooks/use-toast", () => ({
   useToast: () => ({ toast: vi.fn() }),
-}));
-
-vi.mock("@/components/settings/StaffSection", () => ({
-  StaffSection: ({ userRole }: { userRole: string | null }) => {
-    if (userRole !== "owner") { return null; }
-    return <div data-testid="staff-management">Staff Management</div>;
-  },
 }));
 
 import PropertyDetailPage from "./page";
@@ -145,14 +138,17 @@ describe("PropertyDetailPage", () => {
       expect(screen.getByText(/map coming soon/i)).toBeInTheDocument();
     });
 
-    it("renders staff management section for owner", () => {
+    it("shows Settings nav link for owner", () => {
       mockBothReady(); // returns role: "owner"
       render(<PropertyDetailPage />);
 
-      expect(screen.getByTestId("staff-management")).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: /settings/i })).toHaveAttribute(
+        "href",
+        "/properties/prop-detail-1/settings"
+      );
     });
 
-    it("hides staff management section for non-owner", () => {
+    it("hides Settings nav link for non-owner", () => {
       let callCount = 0;
       mockUseQuery.mockImplementation(() => {
         callCount++;
@@ -163,7 +159,7 @@ describe("PropertyDetailPage", () => {
       });
       render(<PropertyDetailPage />);
 
-      expect(screen.queryByTestId("staff-management")).not.toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: /settings/i })).not.toBeInTheDocument();
     });
   });
 

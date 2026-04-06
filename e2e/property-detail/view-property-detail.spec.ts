@@ -61,11 +61,11 @@ test.describe("property detail page", () => {
       await expect(page.getByText(/map coming soon/i)).toBeVisible({ timeout: 10000 });
     });
 
-    test("property detail shows live staff management section for owner", async ({ page }) => {
+    test("property detail shows Settings nav link for owner", async ({ page }) => {
       const propertyId = getPropertyId();
       await page.goto(`/properties/${propertyId}`);
 
-      await expect(page.getByTestId("staff-management")).toBeVisible({ timeout: 15000 });
+      await expect(page.getByRole("link", { name: /settings/i })).toBeVisible({ timeout: 15000 });
     });
 
     test("property detail shows quick-nav links to Rooms, Tenants, Payments, Finance", async ({

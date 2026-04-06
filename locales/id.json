@@ -124,7 +124,26 @@
         "rooms": "Kamar",
         "tenants": "Penyewa",
         "payments": "Pembayaran",
-        "finance": "Keuangan"
+        "finance": "Keuangan",
+        "settings": "Pengaturan"
+      },
+      "settings": {
+        "title": "Pengaturan Properti",
+        "access": {
+          "title": "Akses"
+        },
+        "finance": {
+          "title": "Keuangan",
+          "staffOnlyFinance": {
+            "label": "Mode keuangan khusus staf",
+            "description": "Jika diaktifkan, hanya staf yang dapat mencatat pembayaran dan pengeluaran. Pemilik dibatasi hanya bisa melihat."
+          },
+          "save": "Simpan",
+          "saving": "Menyimpan...",
+          "saveSuccess": "Pengaturan disimpan",
+          "saveError": "Gagal menyimpan pengaturan"
+        },
+        "forbidden": "Anda tidak memiliki izin untuk melihat halaman ini."
       },
       "stats": {
         "totalRooms": "Total Kamar",

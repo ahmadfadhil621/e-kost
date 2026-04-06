@@ -1,15 +1,24 @@
-// Traceability: payment-recording
+// Traceability: payment-recording + property-settings (issue #104)
 // REQ 1.3 -> it('POST returns 201 and payment when body is valid')
 // REQ 1.4 -> it('POST returns 400 when required fields are missing')
 // REQ 1.5 -> it('POST returns 400 when amount is zero or negative')
 // REQ 2.2, 2.4 -> it('GET returns 200 with payments array sorted by date')
 // REQ 4.1, 4.2 -> it('POST returns 201 and payment when body is valid')
 // PROP 2 -> it('POST returns 201 and payment when body is valid')
+// --- issue #104 ---
+// AC-8  -> it('POST returns 403 for owner when staffOnlyFinance is true')
+// AC-11 -> it('POST returns 201 for staff when staffOnlyFinance is true')
+// AC-10 -> it('POST returns 201 for owner when staffOnlyFinance is false')
+// PROP-1 -> it('POST succeeds for both roles when staffOnlyFinance is false')
+// PROP-2 -> it('POST always succeeds for staff regardless of staffOnlyFinance')
+// PROP-3 -> it('POST always returns 403 for owner when staffOnlyFinance is true')
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextResponse } from "next/server";
+import fc from "fast-check";
 import { POST, GET } from "./route";
 import { createPayment } from "@/test/fixtures/payment";
+import { createProperty } from "@/test/fixtures/property";
 
 const propertyId = "prop-123";
 const tenantId = "tenant-456";
@@ -415,6 +424,183 @@ describe("GET /api/properties/[propertyId]/payments", () => {
 
       expect(response.status).toBe(200);
       expect(data).toEqual([]);
+    });
+  });
+});
+
+// ─── issue #104: staff-only finance mode guards ───────────────────────────────
+
+describe("POST /api/properties/[propertyId]/payments — staff-only finance mode", () => {
+  const validBody = JSON.stringify({
+    tenantId,
+    amount: 500000,
+    paymentDate: "2024-06-15",
+  });
+
+  describe("good cases", () => {
+    it("returns 201 for owner when staffOnlyFinance is false", async () => {
+      const property = createProperty({ id: propertyId, staffOnlyFinance: false });
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: "owner-id",
+        role: "owner",
+        property,
+        errorResponse: null,
+      });
+      const created = createPayment({ tenantId });
+      vi.mocked(paymentService.createPayment).mockResolvedValue(created);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/payments`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: validBody }
+      );
+
+      const response = await POST(request, { params: Promise.resolve({ propertyId }) });
+      expect(response.status).toBe(201);
+    });
+
+    it("returns 201 for staff when staffOnlyFinance is true", async () => {
+      const property = createProperty({ id: propertyId, staffOnlyFinance: true });
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: "staff-id",
+        role: "staff",
+        property,
+        errorResponse: null,
+      });
+      const created = createPayment({ tenantId });
+      vi.mocked(paymentService.createPayment).mockResolvedValue(created);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/payments`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: validBody }
+      );
+
+      const response = await POST(request, { params: Promise.resolve({ propertyId }) });
+      expect(response.status).toBe(201);
+    });
+  });
+
+  describe("bad cases", () => {
+    it("returns 403 for owner when staffOnlyFinance is true", async () => {
+      const property = createProperty({ id: propertyId, staffOnlyFinance: true });
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: "owner-id",
+        role: "owner",
+        property,
+        errorResponse: null,
+      });
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/payments`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: validBody }
+      );
+
+      const response = await POST(request, { params: Promise.resolve({ propertyId }) });
+      const data = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(data.error).toBeDefined();
+    });
+  });
+
+  describe("edge cases", () => {
+    it("returns 201 for owner when property is null (guard fails safely)", async () => {
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: "owner-id",
+        role: "owner",
+        property: null,
+        errorResponse: null,
+      });
+      const created = createPayment({ tenantId });
+      vi.mocked(paymentService.createPayment).mockResolvedValue(created);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/payments`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: validBody }
+      );
+
+      const response = await POST(request, { params: Promise.resolve({ propertyId }) });
+      expect(response.status).toBe(201);
+    });
+  });
+
+  describe("property-based", () => {
+    // Feature: property-settings, PROP-1: staffOnlyFinance=false → both roles can record payment
+    it("POST succeeds for both roles when staffOnlyFinance is false (PROP-1)", async () => {
+      await fc.assert(
+        fc.asyncProperty(
+          fc.constantFrom("owner" as const, "staff" as const),
+          async (role) => {
+            const property = createProperty({ id: propertyId, staffOnlyFinance: false });
+            vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+              userId: "user-id",
+              role,
+              property,
+              errorResponse: null,
+            });
+            const created = createPayment({ tenantId });
+            vi.mocked(paymentService.createPayment).mockResolvedValue(created);
+
+            const request = new Request(
+              `http://localhost:3000/api/properties/${propertyId}/payments`,
+              { method: "POST", headers: { "Content-Type": "application/json" }, body: validBody }
+            );
+
+            const response = await POST(request, { params: Promise.resolve({ propertyId }) });
+            expect(response.status).toBe(201);
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    // Feature: property-settings, PROP-2: staffOnlyFinance=true → staff always succeeds
+    it("POST always succeeds for staff regardless of staffOnlyFinance (PROP-2)", async () => {
+      await fc.assert(
+        fc.asyncProperty(fc.boolean(), async (staffOnlyFinance) => {
+          const property = createProperty({ id: propertyId, staffOnlyFinance });
+          vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+            userId: "staff-id",
+            role: "staff",
+            property,
+            errorResponse: null,
+          });
+          const created = createPayment({ tenantId });
+          vi.mocked(paymentService.createPayment).mockResolvedValue(created);
+
+          const request = new Request(
+            `http://localhost:3000/api/properties/${propertyId}/payments`,
+            { method: "POST", headers: { "Content-Type": "application/json" }, body: validBody }
+          );
+
+          const response = await POST(request, { params: Promise.resolve({ propertyId }) });
+          expect(response.status).toBe(201);
+        }),
+        { numRuns: 100 }
+      );
+    });
+
+    // Feature: property-settings, PROP-3: staffOnlyFinance=true → owner always gets 403
+    it("POST always returns 403 for owner when staffOnlyFinance is true (PROP-3)", async () => {
+      await fc.assert(
+        fc.asyncProperty(fc.constant(true), async (staffOnlyFinance) => {
+          const property = createProperty({ id: propertyId, staffOnlyFinance });
+          vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+            userId: "owner-id",
+            role: "owner",
+            property,
+            errorResponse: null,
+          });
+
+          const request = new Request(
+            `http://localhost:3000/api/properties/${propertyId}/payments`,
+            { method: "POST", headers: { "Content-Type": "application/json" }, body: validBody }
+          );
+
+          const response = await POST(request, { params: Promise.resolve({ propertyId }) });
+          expect(response.status).toBe(403);
+        }),
+        { numRuns: 100 }
+      );
     });
   });
 });

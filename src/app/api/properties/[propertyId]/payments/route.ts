@@ -29,9 +29,12 @@ export async function POST(
   context: { params: Promise<{ propertyId: string }> }
 ) {
   const { propertyId } = await context.params;
-  const access = await withPropertyAccess(propertyId, { request });
+  const access = await withPropertyAccess(propertyId, { request, includeProperty: true });
   if (access.errorResponse) {
     return access.errorResponse;
+  }
+  if (access.role === "owner" && access.property?.staffOnlyFinance) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {

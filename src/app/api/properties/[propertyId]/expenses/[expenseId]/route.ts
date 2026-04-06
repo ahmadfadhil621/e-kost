@@ -62,9 +62,12 @@ export async function PUT(
   context: { params: Promise<{ propertyId: string; expenseId: string }> }
 ) {
   const { propertyId, expenseId } = await context.params;
-  const access = await withPropertyAccess(propertyId, { request });
+  const access = await withPropertyAccess(propertyId, { request, includeProperty: true });
   if (access.errorResponse) {
     return access.errorResponse;
+  }
+  if (access.role === "owner" && access.property?.staffOnlyFinance) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
@@ -102,9 +105,12 @@ export async function DELETE(
   context: { params: Promise<{ propertyId: string; expenseId: string }> }
 ) {
   const { propertyId, expenseId } = await context.params;
-  const access = await withPropertyAccess(propertyId, { request });
+  const access = await withPropertyAccess(propertyId, { request, includeProperty: true });
   if (access.errorResponse) {
     return access.errorResponse;
+  }
+  if (access.role === "owner" && access.property?.staffOnlyFinance) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {

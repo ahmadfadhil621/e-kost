@@ -1,15 +1,20 @@
-// Traceability: finance-expense-tracking
+// Traceability: finance-expense-tracking + property-settings (issue #104)
 // REQ 1.3 -> it('POST returns 201 and expense when body is valid')
 // REQ 1.4 -> it('POST returns 400 when required fields are missing')
 // REQ 1.5 -> it('POST returns 400 when amount is zero or negative')
 // REQ 2.1, 2.3 -> it('GET returns 200 with expenses array')
 // REQ 2.5 -> it('GET accepts year, month, category query params')
 // PROP 1 -> it('POST returns 201 and expense when body is valid')
+// --- issue #104 ---
+// AC-8  -> it('POST returns 403 for owner when staffOnlyFinance is true')
+// AC-11 -> it('POST returns 201 for staff when staffOnlyFinance is true')
+// AC-10 -> it('POST returns 201 for owner when staffOnlyFinance is false')
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextResponse } from "next/server";
 import { POST, GET } from "./route";
 import { createExpense } from "@/test/fixtures/expense";
+import { createProperty } from "@/test/fixtures/property";
 
 const propertyId = "prop-123";
 
@@ -325,6 +330,102 @@ describe("GET /api/properties/[propertyId]/expenses", () => {
       expect(response.status).toBe(200);
       expect(data).toHaveLength(1);
       expect(data[0].id).toBe(one.id);
+    });
+  });
+});
+
+// ─── issue #104: staff-only finance mode guards ───────────────────────────────
+
+describe("POST /api/properties/[propertyId]/expenses — staff-only finance mode", () => {
+  const validBody = JSON.stringify({
+    category: "electricity",
+    amount: 50000,
+    date: "2026-03-15",
+  });
+
+  describe("good cases", () => {
+    it("returns 201 for owner when staffOnlyFinance is false", async () => {
+      const property = createProperty({ id: propertyId, staffOnlyFinance: false });
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: "owner-id",
+        role: "owner",
+        property,
+        errorResponse: null,
+      });
+      const created = createExpense({ propertyId, category: "electricity", amount: 50000 });
+      vi.mocked(expenseService.createExpense).mockResolvedValue(created);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/expenses`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: validBody }
+      );
+
+      const response = await POST(request, { params: Promise.resolve({ propertyId }) });
+      expect(response.status).toBe(201);
+    });
+
+    it("returns 201 for staff when staffOnlyFinance is true", async () => {
+      const property = createProperty({ id: propertyId, staffOnlyFinance: true });
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: "staff-id",
+        role: "staff",
+        property,
+        errorResponse: null,
+      });
+      const created = createExpense({ propertyId, category: "electricity", amount: 50000 });
+      vi.mocked(expenseService.createExpense).mockResolvedValue(created);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/expenses`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: validBody }
+      );
+
+      const response = await POST(request, { params: Promise.resolve({ propertyId }) });
+      expect(response.status).toBe(201);
+    });
+  });
+
+  describe("bad cases", () => {
+    it("returns 403 for owner when staffOnlyFinance is true", async () => {
+      const property = createProperty({ id: propertyId, staffOnlyFinance: true });
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: "owner-id",
+        role: "owner",
+        property,
+        errorResponse: null,
+      });
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/expenses`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: validBody }
+      );
+
+      const response = await POST(request, { params: Promise.resolve({ propertyId }) });
+      const data = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(data.error).toBeDefined();
+    });
+  });
+
+  describe("edge cases", () => {
+    it("returns 201 for owner when property is null (guard fails safely)", async () => {
+      vi.mocked(withPropertyAccess).mockResolvedValueOnce({
+        userId: "owner-id",
+        role: "owner",
+        property: null,
+        errorResponse: null,
+      });
+      const created = createExpense({ propertyId, category: "electricity", amount: 50000 });
+      vi.mocked(expenseService.createExpense).mockResolvedValue(created);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/expenses`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: validBody }
+      );
+
+      const response = await POST(request, { params: Promise.resolve({ propertyId }) });
+      expect(response.status).toBe(201);
     });
   });
 });

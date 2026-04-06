@@ -7,6 +7,15 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PaymentList } from "@/components/payment/payment-list";
 import type { Payment } from "@/domain/schemas/payment";
+import type { PropertyRole } from "@/domain/schemas/property";
+
+type PropertyInfo = { role: PropertyRole; staffOnlyFinance: boolean };
+
+async function fetchProperty(propertyId: string): Promise<PropertyInfo> {
+  const res = await fetch(`/api/properties/${propertyId}`, { credentials: "include" });
+  if (!res.ok) { throw new Error("Failed to fetch property"); }
+  return res.json() as Promise<PropertyInfo>;
+}
 
 async function fetchPayments(propertyId: string): Promise<Payment[]> {
   const res = await fetch(`/api/properties/${propertyId}/payments`, {
@@ -39,11 +48,19 @@ export default function PaymentListPage() {
   const propertyId = params.propertyId as string;
   const queryClient = useQueryClient();
 
+  const { data: property } = useQuery({
+    queryKey: ["property", propertyId],
+    queryFn: () => fetchProperty(propertyId),
+    enabled: !!propertyId,
+  });
+
   const { data: payments = [], isLoading } = useQuery({
     queryKey: ["payments", propertyId],
     queryFn: () => fetchPayments(propertyId),
     enabled: !!propertyId,
   });
+
+  const canMutateFinance = !(property?.staffOnlyFinance && property?.role === "owner");
 
   const deleteMutation = useMutation({
     mutationFn: (paymentId: string) => deletePayment(propertyId, paymentId),
@@ -64,17 +81,19 @@ export default function PaymentListPage() {
     <div className="space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-lg font-semibold">{t("payment.list.title")}</h2>
-        <Button asChild className="min-h-[44px] min-w-[44px]">
-          <Link href={`/properties/${propertyId}/payments/new`}>
-            {t("payment.list.recordPayment")}
-          </Link>
-        </Button>
+        {canMutateFinance && (
+          <Button asChild className="min-h-[44px] min-w-[44px]">
+            <Link href={`/properties/${propertyId}/payments/new`}>
+              {t("payment.list.recordPayment")}
+            </Link>
+          </Button>
+        )}
       </div>
 
       <PaymentList
         payments={payments}
         isLoading={isLoading}
-        onDeletePayment={(paymentId) => deleteMutation.mutate(paymentId)}
+        onDeletePayment={canMutateFinance ? (paymentId) => deleteMutation.mutate(paymentId) : undefined}
         isDeletingPayment={deleteMutation.isPending}
       />
     </div>

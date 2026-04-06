@@ -8,7 +8,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { StaffSection } from "@/components/settings/StaffSection";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +30,7 @@ type PropertyResponse = {
   createdAt: string;
   updatedAt: string;
   role: PropertyRole;
+  staffOnlyFinance: boolean;
 };
 
 type DashboardStats = {
@@ -266,6 +266,7 @@ export default function PropertyDetailPage() {
           { key: "tenants", label: t("property.detail.nav.tenants") },
           { key: "payments", label: t("property.detail.nav.payments") },
           { key: "finance", label: t("property.detail.nav.finance") },
+          ...(isOwner ? [{ key: "settings", label: t("property.detail.nav.settings") }] : []),
         ].map(({ key, label }) => (
           <Link
             key={key}
@@ -290,13 +291,6 @@ export default function PropertyDetailPage() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Staff management */}
-      <StaffSection
-        propertyId={property.id}
-        propertyName={property.name}
-        userRole={property.role}
-      />
 
       {/* G-3: Destructive actions at bottom (owner only) */}
       {isOwner && (

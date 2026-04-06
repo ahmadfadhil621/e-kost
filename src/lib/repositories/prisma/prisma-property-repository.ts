@@ -8,6 +8,7 @@ function toProperty(p: {
   address: string | null;
   currency: string;
   ownerId: string;
+  staffOnlyFinance: boolean;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
@@ -19,6 +20,7 @@ function toProperty(p: {
     address: p.address ?? "",
     currency: p.currency,
     ownerId: p.ownerId,
+    staffOnlyFinance: p.staffOnlyFinance,
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,
     deletedAt: p.deletedAt,
@@ -84,13 +86,14 @@ export class PrismaPropertyRepository implements IPropertyRepository {
 
   async update(
     id: string,
-    data: Partial<{ name: string; address: string }>
+    data: Partial<{ name: string; address: string; staffOnlyFinance: boolean }>
   ): Promise<Property> {
     const updated = await prisma.property.update({
       where: { id },
       data: {
         ...(data.name !== undefined && { name: data.name }),
         ...(data.address !== undefined && { address: data.address }),
+        ...(data.staffOnlyFinance !== undefined && { staffOnlyFinance: data.staffOnlyFinance }),
       },
     });
     return toProperty(updated);

@@ -124,7 +124,26 @@
         "rooms": "Rooms",
         "tenants": "Tenants",
         "payments": "Payments",
-        "finance": "Finance"
+        "finance": "Finance",
+        "settings": "Settings"
+      },
+      "settings": {
+        "title": "Property Settings",
+        "access": {
+          "title": "Access"
+        },
+        "finance": {
+          "title": "Finance",
+          "staffOnlyFinance": {
+            "label": "Staff-only finance mode",
+            "description": "When enabled, only staff can record payments and expenses. Owners are restricted to view-only."
+          },
+          "save": "Save",
+          "saving": "Saving...",
+          "saveSuccess": "Settings saved",
+          "saveError": "Failed to save settings"
+        },
+        "forbidden": "You don't have permission to view this page."
       },
       "stats": {
         "totalRooms": "Total Rooms",

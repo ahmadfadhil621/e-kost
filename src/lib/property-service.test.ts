@@ -1,4 +1,4 @@
-// Traceability: multi-property-management + property-archive-delete (issue #27)
+// Traceability: multi-property-management + property-archive-delete (issue #27) + property-settings (issue #104)
 // REQ 1.2 -> it('creates a property with valid data')
 // REQ 1.3 -> it('rejects when name is missing'), it('rejects when address is missing')
 // REQ 1.4 -> it('creates a property with valid data'), it('property creation sets owner and id and timestamps (PROP 1)')
@@ -28,6 +28,12 @@
 // PROP 2 -> it('throws when archiving property with active tenants'), it('throws when deleting property with active tenants')
 // PROP 3 -> it('archives property with no active tenants'), it('unarchives archived property'), it('hard-deletes property with no active tenants')
 // PROP 4 -> (covered by E2E delete-property.spec.ts)
+// --- issue #104 ---
+// AC-5   -> it('getPropertyByIdUnchecked returns property when found')
+// AC-5   -> it('getPropertyByIdUnchecked returns null when not found')
+// AC-6   -> it('updatePropertySettings updates staffOnlyFinance to true')
+// AC-6   -> it('updatePropertySettings updates staffOnlyFinance to false')
+// AC-12  -> it('updatePropertySettings throws ForbiddenError for staff user')
 
 import { describe, it, expect, vi } from "vitest";
 import fc from "fast-check";
@@ -667,5 +673,157 @@ describe("property-based tests", () => {
       ),
       { numRuns: 100 }
     );
+  });
+});
+
+// ─── issue #104: property-settings ───────────────────────────────────────────
+
+describe("PropertyService.getPropertyByIdUnchecked", () => {
+  describe("good cases", () => {
+    it("returns property when found", async () => {
+      const property = createProperty();
+      const repo = createMockRepo({
+        findById: vi.fn().mockResolvedValue(property),
+      });
+      const service = new PropertyService(repo);
+
+      const result = await service.getPropertyByIdUnchecked(property.id);
+
+      expect(result).not.toBeNull();
+      expect(result?.id).toBe(property.id);
+      expect(result?.name).toBe(property.name);
+      expect(repo.findById).toHaveBeenCalledWith(property.id);
+    });
+
+    it("returns property with staffOnlyFinance field", async () => {
+      const property = createProperty({ staffOnlyFinance: true });
+      const repo = createMockRepo({
+        findById: vi.fn().mockResolvedValue(property),
+      });
+      const service = new PropertyService(repo);
+
+      const result = await service.getPropertyByIdUnchecked(property.id);
+
+      expect(result?.staffOnlyFinance).toBe(true);
+    });
+  });
+
+  describe("bad cases", () => {
+    it("returns null when property not found", async () => {
+      const repo = createMockRepo({
+        findById: vi.fn().mockResolvedValue(null),
+      });
+      const service = new PropertyService(repo);
+
+      const result = await service.getPropertyByIdUnchecked("nonexistent-id");
+
+      expect(result).toBeNull();
+      expect(repo.findById).toHaveBeenCalledWith("nonexistent-id");
+    });
+  });
+
+  describe("edge cases", () => {
+    it("does not check access — calls findById directly without validateAccess", async () => {
+      const property = createProperty();
+      const mockFindById = vi.fn().mockResolvedValue(property);
+      const mockFindUserRole = vi.fn();
+      const repo = createMockRepo({
+        findById: mockFindById,
+        findUserRole: mockFindUserRole,
+      });
+      const service = new PropertyService(repo);
+
+      await service.getPropertyByIdUnchecked(property.id);
+
+      expect(mockFindById).toHaveBeenCalledOnce();
+      expect(mockFindUserRole).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe("PropertyService.updatePropertySettings", () => {
+  describe("good cases", () => {
+    it("updates staffOnlyFinance to true for owner", async () => {
+      const userId = crypto.randomUUID();
+      const property = createProperty({ ownerId: userId, staffOnlyFinance: false });
+      const updated = createProperty({ ...property, staffOnlyFinance: true });
+      const repo = createMockRepo({
+        findUserRole: vi.fn().mockResolvedValue("owner"),
+        update: vi.fn().mockResolvedValue(updated),
+      });
+      const service = new PropertyService(repo);
+
+      const result = await service.updatePropertySettings(userId, property.id, {
+        staffOnlyFinance: true,
+      });
+
+      expect(result.staffOnlyFinance).toBe(true);
+      expect(repo.update).toHaveBeenCalledWith(property.id, { staffOnlyFinance: true });
+    });
+
+    it("updates staffOnlyFinance to false for owner", async () => {
+      const userId = crypto.randomUUID();
+      const property = createProperty({ ownerId: userId, staffOnlyFinance: true });
+      const updated = createProperty({ ...property, staffOnlyFinance: false });
+      const repo = createMockRepo({
+        findUserRole: vi.fn().mockResolvedValue("owner"),
+        update: vi.fn().mockResolvedValue(updated),
+      });
+      const service = new PropertyService(repo);
+
+      const result = await service.updatePropertySettings(userId, property.id, {
+        staffOnlyFinance: false,
+      });
+
+      expect(result.staffOnlyFinance).toBe(false);
+    });
+  });
+
+  describe("bad cases", () => {
+    it("throws ForbiddenError for staff user", async () => {
+      const repo = createMockRepo({
+        findUserRole: vi.fn().mockResolvedValue("staff"),
+      });
+      const service = new PropertyService(repo);
+
+      await expect(
+        service.updatePropertySettings("staff-user", "prop-id", { staffOnlyFinance: true })
+      ).rejects.toThrow(ForbiddenError);
+    });
+
+    it("throws ForbiddenError for user with no access", async () => {
+      const repo = createMockRepo({
+        findUserRole: vi.fn().mockResolvedValue(null),
+      });
+      const service = new PropertyService(repo);
+
+      await expect(
+        service.updatePropertySettings("random-user", "prop-id", { staffOnlyFinance: true })
+      ).rejects.toThrow(ForbiddenError);
+    });
+  });
+
+  describe("edge cases", () => {
+    it("owner can toggle from true to false and back — never locked out", async () => {
+      const userId = crypto.randomUUID();
+      const property = createProperty({ ownerId: userId });
+      const repo = createMockRepo({
+        findUserRole: vi.fn().mockResolvedValue("owner"),
+        update: vi.fn().mockImplementation((_id, data) =>
+          Promise.resolve(createProperty({ ...property, ...(data as object) }))
+        ),
+      });
+      const service = new PropertyService(repo);
+
+      const enabled = await service.updatePropertySettings(userId, property.id, {
+        staffOnlyFinance: true,
+      });
+      expect(enabled.staffOnlyFinance).toBe(true);
+
+      const disabled = await service.updatePropertySettings(userId, property.id, {
+        staffOnlyFinance: false,
+      });
+      expect(disabled.staffOnlyFinance).toBe(false);
+    });
   });
 });

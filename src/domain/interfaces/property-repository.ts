@@ -11,7 +11,7 @@ export interface IPropertyRepository {
   findByUser(userId: string): Promise<Property[]>;
   update(
     id: string,
-    data: Partial<{ name: string; address: string }>
+    data: Partial<{ name: string; address: string; staffOnlyFinance: boolean }>
   ): Promise<Property>;
   softDelete(id: string): Promise<void>;
   archive(id: string): Promise<Property>;
