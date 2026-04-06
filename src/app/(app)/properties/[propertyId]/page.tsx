@@ -8,7 +8,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { StaffSection } from "@/components/settings/StaffSection";
 import {
   Dialog,
   DialogContent,
@@ -292,15 +291,6 @@ export default function PropertyDetailPage() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Staff management (owner only) */}
-      {isOwner && (
-        <StaffSection
-          propertyId={propertyId}
-          propertyName={property.name}
-          userRole={property.role}
-        />
-      )}
 
       {/* G-3: Destructive actions at bottom (owner only) */}
       {isOwner && (
