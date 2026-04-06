@@ -426,10 +426,6 @@ export default function TenantDetailPage() {
             <div className="space-y-1">
               <Label>{t("tenant.assignRoom.selectRoom")}</Label>
               <div
-                role="combobox"
-                aria-expanded="true"
-                aria-haspopup="listbox"
-                aria-controls="room-listbox"
                 tabIndex={0}
                 className="text-sm text-muted-foreground px-2 py-1 border rounded-md"
               >
@@ -438,7 +434,6 @@ export default function TenantDetailPage() {
               </div>
               <ul
                 id="room-listbox"
-                role="listbox"
                 className="max-h-48 overflow-y-auto border rounded-md divide-y"
               >
                 {selectableRooms.length === 0 ? (
@@ -451,8 +446,8 @@ export default function TenantDetailPage() {
                     return (
                       <li
                         key={room.id}
-                        role="option"
-                        aria-selected={selectedRoomId === room.id}
+                        role="button"
+                        aria-pressed={selectedRoomId === room.id}
                         onClick={() => setSelectedRoomId(room.id)}
                         className={`cursor-pointer flex items-center justify-between px-3 py-2 text-sm min-h-[44px] ${
                           selectedRoomId === room.id
