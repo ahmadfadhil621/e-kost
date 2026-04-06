@@ -51,6 +51,10 @@ vi.mock("@/hooks/use-toast", () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
 
+vi.mock("@/components/settings/StaffSection", () => ({
+  StaffSection: () => null,
+}));
+
 import PropertyDetailPage from "./page";
 
 const property = createProperty({
