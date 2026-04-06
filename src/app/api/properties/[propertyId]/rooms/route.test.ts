@@ -644,6 +644,10 @@ describe("GET /api/properties/[propertyId]/rooms — PROP 2: assignedAt is earli
           { minLength: 1, maxLength: 6 }
         ),
         async (assignedAtValues) => {
+          // Discard inputs where fast-check's shrinker produced an invalid Date
+          // (e.g. new Date(NaN)). NaN dates cannot exist in the real database.
+          fc.pre(assignedAtValues.every((d) => d === null || !isNaN(d.getTime())));
+
           const roomId = "room-prop2";
           const rooms = [
             createRoom({ id: roomId, propertyId, status: "occupied", capacity: assignedAtValues.length }),
