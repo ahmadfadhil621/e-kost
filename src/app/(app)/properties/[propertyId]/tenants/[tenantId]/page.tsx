@@ -424,7 +424,7 @@ export default function TenantDetailPage() {
           <div className="space-y-4 flex-1 overflow-y-auto min-h-0">
             {/* Room selector — inline listbox so room names are always visible */}
             <div className="space-y-1">
-              <Label>{t("tenant.assignRoom.selectRoom")}</Label>
+              <Label>{t("tenant.assignRoom.roomsWithCapacity")}</Label>
               <div
                 tabIndex={0}
                 className="text-sm text-muted-foreground px-2 py-1 border rounded-md"

@@ -188,15 +188,13 @@ test.describe("move tenant to another room", () => {
       // Dialog opens in move mode
       await expect(page.getByRole("dialog")).toBeVisible({ timeout: 12000 });
 
-      // Current room (room A) should NOT appear as an option
+      // Current room (room A) should NOT appear in the list
       await expect(
-        page.getByRole("option", { name: new RegExp(roomANumber, "i") })
+        page.getByRole("button", { name: new RegExp(roomANumber, "i") })
       ).not.toBeVisible({ timeout: 5000 });
 
-      // Room B should appear in the dropdown
-      const roomSelect = page.getByRole("combobox").first();
-      await roomSelect.click();
-      await page.getByRole("option", { name: new RegExp(roomBNumber, "i") }).click();
+      // Room B should appear in the list — click to select it
+      await page.getByRole("button", { name: new RegExp(roomBNumber, "i") }).click();
 
       // Set move date (today)
       const today = new Date().toISOString().slice(0, 10);
@@ -287,13 +285,10 @@ test.describe("move tenant to another room", () => {
       await page.getByRole("button", { name: /move to room/i }).click();
       await expect(page.getByRole("dialog")).toBeVisible({ timeout: 12000 });
 
-      const roomSelect = page.getByRole("combobox").first();
-      await roomSelect.click();
-
-      // The current room must not be an option
+      // The current room must not appear in the list
       await page.waitForTimeout(1000);
       await expect(
-        page.getByRole("option", { name: new RegExp(currentRoomNumber, "i") })
+        page.getByRole("button", { name: new RegExp(currentRoomNumber, "i") })
       ).not.toBeVisible({ timeout: 8000 });
     });
   });

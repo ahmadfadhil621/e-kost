@@ -115,11 +115,9 @@ test.describe("capacity enforcement in room selector", () => {
       await expect(page.getByRole("dialog")).toBeVisible({ timeout: 12000 });
       await page.waitForTimeout(1500);
 
-      // The full room must NOT be in the options
-      const roomSelect = page.getByRole("combobox").first();
-      await roomSelect.click();
+      // The full room must NOT be in the list
       await expect(
-        page.getByRole("option", { name: new RegExp(fullRoomNumber, "i") })
+        page.getByRole("button", { name: new RegExp(fullRoomNumber, "i") })
       ).not.toBeVisible({ timeout: 8000 });
     });
 
@@ -191,11 +189,8 @@ test.describe("capacity enforcement in room selector", () => {
       await page.getByRole("button", { name: /assign room/i }).click();
       await expect(page.getByRole("dialog")).toBeVisible({ timeout: 12000 });
 
-      const roomSelect = page.getByRole("combobox").first();
-      await roomSelect.click();
-
       // The partial room must appear with a slots indicator (e.g. "1/2")
-      const roomOption = page.getByRole("option", {
+      const roomOption = page.getByRole("button", {
         name: new RegExp(partialRoomNumber, "i"),
       });
       await expect(roomOption).toBeVisible({ timeout: 8000 });
@@ -380,13 +375,11 @@ test.describe("capacity enforcement in room selector", () => {
       await page.getByRole("button", { name: /move to room/i }).click();
       await expect(page.getByRole("dialog")).toBeVisible({ timeout: 12000 });
 
-      const roomSelect = page.getByRole("combobox").first();
-      await roomSelect.click();
       await page.waitForTimeout(1000);
 
-      // Full room must not appear in options
+      // Full room must not appear in the list
       await expect(
-        page.getByRole("option", { name: new RegExp(fullRoomNumber, "i") })
+        page.getByRole("button", { name: new RegExp(fullRoomNumber, "i") })
       ).not.toBeVisible({ timeout: 8000 });
 
       // Cleanup origin room

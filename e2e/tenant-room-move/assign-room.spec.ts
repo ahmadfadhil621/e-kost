@@ -131,10 +131,8 @@ test.describe("assign room (initial assignment)", () => {
         page.getByText(new RegExp(roomNumber, "i"))
       ).toBeVisible({ timeout: 10000 });
 
-      // Select the room from the combobox/select
-      const roomSelect = page.getByRole("combobox").first();
-      await roomSelect.click();
-      await page.getByRole("option", { name: new RegExp(roomNumber, "i") }).click();
+      // Select the room from the inline list
+      await page.getByRole("button", { name: new RegExp(roomNumber, "i") }).click();
 
       // Click confirm
       await page.getByRole("button", { name: /assign room|confirm/i }).last().click();
