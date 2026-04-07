@@ -89,9 +89,11 @@ test.describe("assign room — billing day", () => {
       ).toBeVisible({ timeout: 12000 });
       await page.getByRole("button", { name: new RegExp(roomNumber, "i") }).click();
 
-      await expect(
-        page.getByText(/room assigned|success|assigned/i).first()
-      ).toBeVisible({ timeout: 15000 });
+      // Click the Assign Room submit button inside the dialog
+      await page.getByRole("dialog").getByRole("button", { name: /^assign room$/i }).click();
+
+      // Wait for dialog to close (confirms successful assignment)
+      await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 15000 });
 
       // Balance section should show "Due on day 15 of each month"
       await expect(

@@ -106,7 +106,7 @@ test.describe("owner blocked by finance mode", () => {
         await page.goto(`/properties/${propertyId}/payments`);
         // Wait for page to load (payments list or empty state visible)
         await page
-          .getByRole("heading", { name: /payments|pembayaran/i })
+          .getByRole("heading", { name: /payment history|riwayat pembayaran/i })
           .waitFor({ state: "visible", timeout: 15000 });
         await expect(
           page.getByRole("link", { name: /record payment|catat pembayaran/i })
