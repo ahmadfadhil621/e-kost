@@ -266,6 +266,7 @@ export default function PropertyDetailPage() {
           { key: "tenants", label: t("property.detail.nav.tenants") },
           { key: "payments", label: t("property.detail.nav.payments") },
           { key: "finance", label: t("property.detail.nav.finance") },
+          { key: "activity", label: t("property.detail.nav.activity") },
           ...(isOwner ? [{ key: "settings", label: t("property.detail.nav.settings") }] : []),
         ].map(({ key, label }) => (
           <Link

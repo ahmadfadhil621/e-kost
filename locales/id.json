@@ -126,7 +126,8 @@
         "tenants": "Penyewa",
         "payments": "Pembayaran",
         "finance": "Keuangan",
-        "settings": "Pengaturan"
+        "settings": "Pengaturan",
+        "activity": "Aktivitas"
       },
       "settings": {
         "title": "Pengaturan Properti",

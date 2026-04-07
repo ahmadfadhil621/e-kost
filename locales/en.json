@@ -126,7 +126,8 @@
         "tenants": "Tenants",
         "payments": "Payments",
         "finance": "Finance",
-        "settings": "Settings"
+        "settings": "Settings",
+        "activity": "Activity"
       },
       "settings": {
         "title": "Property Settings",
