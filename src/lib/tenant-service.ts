@@ -13,6 +13,7 @@ import {
   assignRoomSchema,
 } from "@/domain/schemas/tenant";
 import type { PropertyRole } from "@/domain/schemas/property";
+import type { LogActivityFn } from "@/lib/activity-log-service";
 
 export interface IPropertyAccessValidator {
   validateAccess(userId: string, propertyId: string): Promise<PropertyRole>;
@@ -23,7 +24,8 @@ export class TenantService {
     private readonly tenantRepo: ITenantRepository,
     private readonly roomRepo: IRoomRepository,
     private readonly propertyAccess: IPropertyAccessValidator,
-    private readonly roomAssignmentRepo?: IRoomAssignmentRepository
+    private readonly roomAssignmentRepo?: IRoomAssignmentRepository,
+    private readonly logActivity?: LogActivityFn
   ) {}
 
   async createTenant(
@@ -31,14 +33,24 @@ export class TenantService {
     propertyId: string,
     data: CreateTenantInput
   ): Promise<Tenant> {
-    await this.propertyAccess.validateAccess(userId, propertyId);
+    const role = await this.propertyAccess.validateAccess(userId, propertyId);
     const parsed = createTenantSchema.parse(data);
-    return this.tenantRepo.create({
+    const tenant = await this.tenantRepo.create({
       propertyId,
       name: parsed.name.trim(),
       phone: parsed.phone.trim(),
       email: parsed.email.trim(),
     });
+    this.logActivity?.({
+      propertyId,
+      actorId: userId,
+      actorRole: role,
+      actionCode: "TENANT_UPDATED",
+      entityType: "TENANT",
+      entityId: tenant.id,
+      metadata: { tenantName: tenant.name },
+    });
+    return tenant;
   }
 
   async getTenant(
@@ -68,7 +80,7 @@ export class TenantService {
     id: string,
     data: UpdateTenantInput
   ): Promise<Tenant> {
-    await this.propertyAccess.validateAccess(userId, propertyId);
+    const role = await this.propertyAccess.validateAccess(userId, propertyId);
     const existing = await this.tenantRepo.findById(id);
     if (!existing || existing.propertyId !== propertyId) {
       throw new Error("Tenant not found");
@@ -82,7 +94,17 @@ export class TenantService {
     if (parsed.phone !== undefined) {updates.phone = parsed.phone.trim();}
     if (parsed.email !== undefined) {updates.email = parsed.email.trim();}
     if ("billingDayOfMonth" in parsed) {updates.billingDayOfMonth = parsed.billingDayOfMonth ?? null;}
-    return this.tenantRepo.update(id, updates);
+    const updated = await this.tenantRepo.update(id, updates);
+    this.logActivity?.({
+      propertyId,
+      actorId: userId,
+      actorRole: role,
+      actionCode: "TENANT_UPDATED",
+      entityType: "TENANT",
+      entityId: id,
+      metadata: { tenantName: updated.name },
+    });
+    return updated;
   }
 
   async assignRoom(
@@ -92,7 +114,7 @@ export class TenantService {
     roomId: string,
     billingDayOfMonth?: number
   ): Promise<Tenant> {
-    await this.propertyAccess.validateAccess(userId, propertyId);
+    const role = await this.propertyAccess.validateAccess(userId, propertyId);
     assignRoomSchema.parse({ roomId, billingDayOfMonth });
 
     const tenant = await this.tenantRepo.findById(tenantId);
@@ -127,6 +149,15 @@ export class TenantService {
     if (room.status === "available") {
       await this.roomRepo.updateStatus(roomId, "occupied");
     }
+    this.logActivity?.({
+      propertyId,
+      actorId: userId,
+      actorRole: role,
+      actionCode: "TENANT_ASSIGNED",
+      entityType: "TENANT",
+      entityId: tenantId,
+      metadata: { tenantName: tenant.name, roomName: room.roomNumber },
+    });
     return updated;
   }
 
@@ -136,7 +167,7 @@ export class TenantService {
     tenantId: string,
     input: { targetRoomId: string; moveDate: string; billingDayOfMonth?: number }
   ): Promise<Tenant> {
-    await this.propertyAccess.validateAccess(userId, propertyId);
+    const role = await this.propertyAccess.validateAccess(userId, propertyId);
 
     const tenant = await this.tenantRepo.findById(tenantId);
     if (!tenant || tenant.propertyId !== propertyId) {
@@ -164,6 +195,7 @@ export class TenantService {
 
     const moveDate = new Date(input.moveDate);
     const oldRoomId = tenant.roomId;
+    const oldRoom = oldRoomId ? await this.roomRepo.findById(oldRoomId) : null;
 
     if (oldRoomId && this.roomAssignmentRepo) {
       await this.roomAssignmentRepo.closeCurrentAssignment(tenantId, moveDate);
@@ -197,6 +229,20 @@ export class TenantService {
       }
     }
 
+    this.logActivity?.({
+      propertyId,
+      actorId: userId,
+      actorRole: role,
+      actionCode: "TENANT_MOVED",
+      entityType: "TENANT",
+      entityId: tenantId,
+      metadata: {
+        tenantName: tenant.name,
+        fromRoom: oldRoom?.roomNumber ?? "—",
+        toRoom: targetRoom.roomNumber,
+      },
+    });
+
     return updated;
   }
 
@@ -223,7 +269,7 @@ export class TenantService {
     propertyId: string,
     tenantId: string
   ): Promise<Tenant> {
-    await this.propertyAccess.validateAccess(userId, propertyId);
+    const role = await this.propertyAccess.validateAccess(userId, propertyId);
 
     const tenant = await this.tenantRepo.findById(tenantId);
     if (!tenant || tenant.propertyId !== propertyId) {
@@ -233,7 +279,10 @@ export class TenantService {
       throw new Error("Tenant is already moved out");
     }
 
+    let roomName: string | undefined;
     if (tenant.roomId) {
+      const room = await this.roomRepo.findById(tenant.roomId);
+      roomName = room?.roomNumber;
       await this.tenantRepo.removeRoomAssignment(tenantId);
       const remaining = await this.tenantRepo.findByProperty(propertyId);
       const stillInRoom = remaining.filter(
@@ -243,6 +292,16 @@ export class TenantService {
         await this.roomRepo.updateStatus(tenant.roomId, "available");
       }
     }
-    return this.tenantRepo.softDelete(tenantId);
+    const result = await this.tenantRepo.softDelete(tenantId);
+    this.logActivity?.({
+      propertyId,
+      actorId: userId,
+      actorRole: role,
+      actionCode: "TENANT_UNASSIGNED",
+      entityType: "TENANT",
+      entityId: tenantId,
+      metadata: { tenantName: tenant.name, roomName: roomName ?? "—" },
+    });
+    return result;
   }
 }

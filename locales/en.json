@@ -11,6 +11,7 @@
     "payments": "Payments",
     "finance": "Finance",
     "settings": "Settings",
+    "activity": "Activity",
     "noActiveProperty": {
       "tooltip": "Select a property first"
     }
@@ -709,5 +710,42 @@
     },
     "period": "Billing period",
     "selectPeriod": "Select billing period"
+  },
+  "activity": {
+    "title": "Activity",
+    "empty": "No activity yet",
+    "emptyDescription": "Actions you and your staff take will appear here.",
+    "loadMore": "Load more",
+    "loading": "Loading activity...",
+    "filters": {
+      "allAreas": "All Areas",
+      "allStaff": "All Staff",
+      "finance": "Finance",
+      "tenant": "Tenant",
+      "rooms": "Rooms",
+      "settings": "Settings"
+    },
+    "roles": {
+      "owner": "owner",
+      "staff": "staff"
+    },
+    "actions": {
+      "PAYMENT_RECORDED": "Recorded payment {{amount}} for {{tenantName}}",
+      "PAYMENT_UPDATED": "Updated payment {{amount}} for {{tenantName}}",
+      "PAYMENT_DELETED": "Deleted payment {{amount}} for {{tenantName}}",
+      "EXPENSE_CREATED": "Added expense {{category}} {{amount}}",
+      "EXPENSE_UPDATED": "Updated expense {{category}} {{amount}}",
+      "EXPENSE_DELETED": "Deleted expense {{category}} {{amount}}",
+      "TENANT_ASSIGNED": "Assigned {{tenantName}} to Room {{roomName}}",
+      "TENANT_UNASSIGNED": "Moved out {{tenantName}} from Room {{roomName}}",
+      "TENANT_MOVED": "Moved {{tenantName}} from Room {{fromRoom}} to Room {{toRoom}}",
+      "TENANT_UPDATED": "Updated tenant details for {{tenantName}}",
+      "ROOM_CREATED": "Created room {{roomName}}",
+      "ROOM_UPDATED": "Updated room {{roomName}}",
+      "ROOM_ARCHIVED": "Archived room {{roomName}}",
+      "SETTINGS_STAFF_FINANCE_TOGGLED_ON": "Enabled staff-only finance mode",
+      "SETTINGS_STAFF_FINANCE_TOGGLED_OFF": "Disabled staff-only finance mode",
+      "SETTINGS_PROPERTY_UPDATED": "Updated property settings"
+    }
   }
 }

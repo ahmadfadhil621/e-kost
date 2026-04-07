@@ -18,6 +18,7 @@ model User {
   updatedAt       DateTime        @updatedAt
   language        String          @default("en")
   accounts        Account[]
+  activity_log    activity_log[]
   createdInvites  InviteToken[]   @relation("CreatedInvites")
   ownedProperties Property[]      @relation("PropertyOwner")
   staffProperties PropertyStaff[]
@@ -81,6 +82,7 @@ model Property {
   archivedAt       DateTime?       @db.Timestamptz(6)
   currency         String          @default("IDR")
   staffOnlyFinance Boolean         @default(false)
+  activity_log     activity_log[]
   expenses         Expense[]
   inviteTokens     InviteToken[]
   owner            User            @relation("PropertyOwner", fields: [ownerId], references: [id], onDelete: Cascade)
@@ -244,6 +246,24 @@ model room_assignment {
   @@index([tenantId, endDate], map: "idx_room_assignment_tenant_end")
 }
 
+model activity_log {
+  id         String             @id @default(dbgenerated("gen_random_uuid()"))
+  propertyId String
+  actorId    String
+  actorRole  String
+  actionCode ActivityActionCode
+  entityType ActivityEntityType
+  entityId   String?
+  metadata   Json               @default("{}")
+  createdAt  DateTime           @default(now())
+  user       User               @relation(fields: [actorId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  property   Property           @relation(fields: [propertyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([propertyId, actorId])
+  @@index([propertyId, createdAt(sort: Desc)])
+  @@index([propertyId, entityType])
+}
+
 enum RoomStatus {
   AVAILABLE
   OCCUPIED
@@ -270,4 +290,30 @@ enum InviteRole {
 enum invite_role {
   owner
   staff
+}
+
+enum ActivityActionCode {
+  PAYMENT_RECORDED
+  PAYMENT_UPDATED
+  PAYMENT_DELETED
+  EXPENSE_CREATED
+  EXPENSE_UPDATED
+  EXPENSE_DELETED
+  TENANT_ASSIGNED
+  TENANT_UNASSIGNED
+  TENANT_MOVED
+  TENANT_UPDATED
+  ROOM_CREATED
+  ROOM_UPDATED
+  ROOM_ARCHIVED
+  SETTINGS_STAFF_FINANCE_TOGGLED
+  SETTINGS_PROPERTY_UPDATED
+}
+
+enum ActivityEntityType {
+  PAYMENT
+  EXPENSE
+  TENANT
+  ROOM
+  SETTINGS
 }

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { LayoutDashboard, DoorOpen, Users, Wallet, LockKeyhole } from "lucide-react";
+import { LayoutDashboard, DoorOpen, Users, Wallet, LockKeyhole, Activity } from "lucide-react";
 import { usePropertyContext } from "@/contexts/property-context";
 import { cn } from "@/lib/utils";
 import {
@@ -18,6 +18,7 @@ const navItems = [
   { hrefSegment: "/rooms", pathMatch: (p: string) => p.includes("/rooms"), icon: DoorOpen, key: "rooms", requiresProperty: true },
   { hrefSegment: "/tenants", pathMatch: (p: string) => p.includes("/tenants"), icon: Users, key: "tenants", requiresProperty: true },
   { hrefSegment: "/finance", pathMatch: (p: string) => p.includes("/finance"), icon: Wallet, key: "finance", requiresProperty: true },
+  { hrefSegment: "/activity", pathMatch: (p: string) => p.includes("/activity"), icon: Activity, key: "activity", requiresProperty: true },
 ] as const;
 
 export function AppNav() {

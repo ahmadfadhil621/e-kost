@@ -11,6 +11,7 @@ import {
   updateExpenseSchema,
 } from "@/domain/schemas/expense";
 import type { PropertyRole } from "@/domain/schemas/property";
+import type { LogActivityFn } from "@/lib/activity-log-service";
 
 export interface IPropertyAccessValidator {
   validateAccess(userId: string, propertyId: string): Promise<PropertyRole>;
@@ -19,7 +20,8 @@ export interface IPropertyAccessValidator {
 export class ExpenseService {
   constructor(
     private readonly repo: IExpenseRepository,
-    private readonly propertyAccess: IPropertyAccessValidator
+    private readonly propertyAccess: IPropertyAccessValidator,
+    private readonly logActivity?: LogActivityFn
   ) {}
 
   async createExpense(
@@ -27,16 +29,26 @@ export class ExpenseService {
     propertyId: string,
     data: CreateExpenseInput
   ): Promise<Expense> {
-    await this.propertyAccess.validateAccess(userId, propertyId);
+    const role = await this.propertyAccess.validateAccess(userId, propertyId);
     const parsed = createExpenseSchema.parse(data);
     const date = new Date(parsed.date);
-    return this.repo.create({
+    const expense = await this.repo.create({
       propertyId,
       category: parsed.category,
       amount: parsed.amount,
       date,
       description: parsed.description,
     });
+    this.logActivity?.({
+      propertyId,
+      actorId: userId,
+      actorRole: role,
+      actionCode: "EXPENSE_CREATED",
+      entityType: "EXPENSE",
+      entityId: expense.id,
+      metadata: { amount: parsed.amount, category: parsed.category },
+    });
+    return expense;
   }
 
   async listExpenses(
@@ -74,7 +86,7 @@ export class ExpenseService {
     expenseId: string,
     data: UpdateExpenseInput
   ): Promise<Expense> {
-    await this.propertyAccess.validateAccess(userId, propertyId);
+    const role = await this.propertyAccess.validateAccess(userId, propertyId);
     const existing = await this.repo.findById(expenseId);
     if (!existing || existing.propertyId !== propertyId) {
       throw new Error("Expense not found");
@@ -101,7 +113,17 @@ export class ExpenseService {
     if (Object.keys(updateData).length === 0) {
       return existing;
     }
-    return this.repo.update(expenseId, updateData);
+    const updated = await this.repo.update(expenseId, updateData);
+    this.logActivity?.({
+      propertyId,
+      actorId: userId,
+      actorRole: role,
+      actionCode: "EXPENSE_UPDATED",
+      entityType: "EXPENSE",
+      entityId: expenseId,
+      metadata: { amount: updated.amount, category: updated.category },
+    });
+    return updated;
   }
 
   async deleteExpense(
@@ -109,12 +131,21 @@ export class ExpenseService {
     propertyId: string,
     expenseId: string
   ): Promise<void> {
-    await this.propertyAccess.validateAccess(userId, propertyId);
+    const role = await this.propertyAccess.validateAccess(userId, propertyId);
     const existing = await this.repo.findById(expenseId);
     if (!existing || existing.propertyId !== propertyId) {
       throw new Error("Expense not found");
     }
     await this.repo.delete(expenseId);
+    this.logActivity?.({
+      propertyId,
+      actorId: userId,
+      actorRole: role,
+      actionCode: "EXPENSE_DELETED",
+      entityType: "EXPENSE",
+      entityId: expenseId,
+      metadata: { amount: existing.amount, category: existing.category },
+    });
   }
 
   async getMonthlyExpenseSummary(

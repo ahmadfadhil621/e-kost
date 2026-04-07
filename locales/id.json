@@ -11,6 +11,7 @@
     "payments": "Pembayaran",
     "finance": "Keuangan",
     "settings": "Pengaturan",
+    "activity": "Aktivitas",
     "noActiveProperty": {
       "tooltip": "Pilih properti terlebih dahulu"
     }
@@ -709,5 +710,42 @@
     },
     "period": "Periode tagihan",
     "selectPeriod": "Pilih periode tagihan"
+  },
+  "activity": {
+    "title": "Aktivitas",
+    "empty": "Belum ada aktivitas",
+    "emptyDescription": "Tindakan yang Anda dan staf lakukan akan muncul di sini.",
+    "loadMore": "Muat lebih banyak",
+    "loading": "Memuat aktivitas...",
+    "filters": {
+      "allAreas": "Semua Area",
+      "allStaff": "Semua Staf",
+      "finance": "Keuangan",
+      "tenant": "Penyewa",
+      "rooms": "Kamar",
+      "settings": "Pengaturan"
+    },
+    "roles": {
+      "owner": "pemilik",
+      "staff": "staf"
+    },
+    "actions": {
+      "PAYMENT_RECORDED": "Mencatat pembayaran {{amount}} untuk {{tenantName}}",
+      "PAYMENT_UPDATED": "Memperbarui pembayaran {{amount}} untuk {{tenantName}}",
+      "PAYMENT_DELETED": "Menghapus pembayaran {{amount}} untuk {{tenantName}}",
+      "EXPENSE_CREATED": "Menambahkan pengeluaran {{category}} {{amount}}",
+      "EXPENSE_UPDATED": "Memperbarui pengeluaran {{category}} {{amount}}",
+      "EXPENSE_DELETED": "Menghapus pengeluaran {{category}} {{amount}}",
+      "TENANT_ASSIGNED": "Menugaskan {{tenantName}} ke Kamar {{roomName}}",
+      "TENANT_UNASSIGNED": "Penyewa {{tenantName}} keluar dari Kamar {{roomName}}",
+      "TENANT_MOVED": "Memindahkan {{tenantName}} dari Kamar {{fromRoom}} ke Kamar {{toRoom}}",
+      "TENANT_UPDATED": "Memperbarui data penyewa {{tenantName}}",
+      "ROOM_CREATED": "Membuat kamar {{roomName}}",
+      "ROOM_UPDATED": "Memperbarui kamar {{roomName}}",
+      "ROOM_ARCHIVED": "Mengarsipkan kamar {{roomName}}",
+      "SETTINGS_STAFF_FINANCE_TOGGLED_ON": "Mengaktifkan mode keuangan khusus staf",
+      "SETTINGS_STAFF_FINANCE_TOGGLED_OFF": "Menonaktifkan mode keuangan khusus staf",
+      "SETTINGS_PROPERTY_UPDATED": "Memperbarui pengaturan properti"
+    }
   }
 }

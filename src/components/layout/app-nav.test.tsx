@@ -218,7 +218,7 @@ describe("AppNav", () => {
       const nav = container.querySelector("nav");
       const inner = nav?.firstElementChild as HTMLElement | null;
       const links = inner?.querySelectorAll("a");
-      expect(links?.length).toBe(4);
+      expect(links?.length).toBe(5);
     });
   });
 });

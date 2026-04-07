@@ -11,6 +11,7 @@ import type { BillingCycleBreakdown } from "@/domain/schemas/billing-cycle";
 import { createPaymentSchema } from "@/domain/schemas/payment";
 import type { PropertyRole } from "@/domain/schemas/property";
 import type { RecentPayment } from "@/domain/schemas/dashboard";
+import type { LogActivityFn } from "@/lib/activity-log-service";
 
 export interface IPropertyAccessValidator {
   validateAccess(userId: string, propertyId: string): Promise<PropertyRole>;
@@ -30,7 +31,8 @@ export class PaymentService {
     private readonly tenantRepo: ITenantRepository,
     private readonly propertyAccess: IPropertyAccessValidator,
     private readonly billingCycleRepo?: IBillingCycleRepository,
-    private readonly cycleBreakdownProvider?: ICycleBreakdownProvider
+    private readonly cycleBreakdownProvider?: ICycleBreakdownProvider,
+    private readonly logActivity?: LogActivityFn
   ) {}
 
   async createPayment(
@@ -38,7 +40,7 @@ export class PaymentService {
     propertyId: string,
     data: CreatePaymentInput
   ): Promise<Payment> {
-    await this.propertyAccess.validateAccess(userId, propertyId);
+    const role = await this.propertyAccess.validateAccess(userId, propertyId);
     const parsed = createPaymentSchema.parse(data);
     const tenant = await this.tenantRepo.findById(parsed.tenantId);
     if (!tenant || tenant.propertyId !== propertyId) {
@@ -91,13 +93,23 @@ export class PaymentService {
     }
 
     const paymentDate = new Date(parsed.paymentDate);
-    return this.paymentRepo.create({
+    const payment = await this.paymentRepo.create({
       tenantId: parsed.tenantId,
       amount: parsed.amount,
       paymentDate,
       billingCycleId,
       note: parsed.note,
     });
+    this.logActivity?.({
+      propertyId,
+      actorId: userId,
+      actorRole: role,
+      actionCode: "PAYMENT_RECORDED",
+      entityType: "PAYMENT",
+      entityId: payment.id,
+      metadata: { amount: parsed.amount, tenantName: tenant.name },
+    });
+    return payment;
   }
 
   async getPayment(
@@ -151,7 +163,7 @@ export class PaymentService {
     propertyId: string,
     paymentId: string
   ): Promise<void> {
-    await this.propertyAccess.validateAccess(userId, propertyId);
+    const role = await this.propertyAccess.validateAccess(userId, propertyId);
     const payment = await this.paymentRepo.findById(paymentId);
     if (!payment) {
       throw new Error("Payment not found");
@@ -161,6 +173,15 @@ export class PaymentService {
       throw new Error("Payment not found");
     }
     await this.paymentRepo.delete(paymentId);
+    this.logActivity?.({
+      propertyId,
+      actorId: userId,
+      actorRole: role,
+      actionCode: "PAYMENT_DELETED",
+      entityType: "PAYMENT",
+      entityId: paymentId,
+      metadata: { amount: payment.amount, tenantName: tenant.name },
+    });
   }
 
   async getRecentPayments(

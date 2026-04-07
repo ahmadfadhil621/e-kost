@@ -14,6 +14,7 @@ import {
   updateRoomStatusSchema,
 } from "@/domain/schemas/room";
 import type { PropertyRole } from "@/domain/schemas/property";
+import type { LogActivityFn } from "@/lib/activity-log-service";
 
 export interface IPropertyAccessValidator {
   validateAccess(userId: string, propertyId: string): Promise<PropertyRole>;
@@ -23,7 +24,8 @@ export class RoomService {
   constructor(
     private readonly repo: IRoomRepository,
     private readonly tenantRepo: ITenantRepository,
-    private readonly propertyAccess: IPropertyAccessValidator
+    private readonly propertyAccess: IPropertyAccessValidator,
+    private readonly logActivity?: LogActivityFn
   ) {}
 
   async createRoom(
@@ -31,7 +33,7 @@ export class RoomService {
     propertyId: string,
     data: CreateRoomInput
   ): Promise<Room> {
-    await this.propertyAccess.validateAccess(userId, propertyId);
+    const role = await this.propertyAccess.validateAccess(userId, propertyId);
     const parsed = createRoomSchema.parse(data);
     const existing = await this.repo.findByProperty(propertyId, { includeArchived: true });
     const duplicate = existing.some(
@@ -40,13 +42,23 @@ export class RoomService {
     if (duplicate) {
       throw new Error("Room number already exists");
     }
-    return this.repo.create({
+    const room = await this.repo.create({
       propertyId,
       roomNumber: parsed.roomNumber.trim(),
       roomType: parsed.roomType.trim(),
       monthlyRent: parsed.monthlyRent,
       capacity: parsed.capacity,
     });
+    this.logActivity?.({
+      propertyId,
+      actorId: userId,
+      actorRole: role,
+      actionCode: "ROOM_CREATED",
+      entityType: "ROOM",
+      entityId: room.id,
+      metadata: { roomName: room.roomNumber },
+    });
+    return room;
   }
 
   async getRoom(userId: string, propertyId: string, id: string): Promise<Room | null> {
@@ -71,7 +83,7 @@ export class RoomService {
     id: string,
     data: UpdateRoomInput
   ): Promise<Room> {
-    await this.propertyAccess.validateAccess(userId, propertyId);
+    const role = await this.propertyAccess.validateAccess(userId, propertyId);
     const existing = await this.repo.findById(id);
     if (!existing || existing.propertyId !== propertyId) {
       throw new Error("Room not found");
@@ -97,12 +109,22 @@ export class RoomService {
         );
       }
     }
-    return this.repo.update(id, {
+    const updated = await this.repo.update(id, {
       roomNumber: parsed.roomNumber?.trim(),
       roomType: parsed.roomType?.trim(),
       monthlyRent: parsed.monthlyRent,
       capacity: parsed.capacity,
     });
+    this.logActivity?.({
+      propertyId,
+      actorId: userId,
+      actorRole: role,
+      actionCode: "ROOM_UPDATED",
+      entityType: "ROOM",
+      entityId: id,
+      metadata: { roomName: updated.roomNumber },
+    });
+    return updated;
   }
 
   async updateRoomStatus(
@@ -188,7 +210,7 @@ export class RoomService {
     propertyId: string,
     roomId: string
   ): Promise<Room> {
-    await this.propertyAccess.validateAccess(userId, propertyId);
+    const role = await this.propertyAccess.validateAccess(userId, propertyId);
     const room = await this.repo.findById(roomId);
     if (!room || room.propertyId !== propertyId) {
       throw new Error("Room not found");
@@ -203,7 +225,17 @@ export class RoomService {
     if (activeTenant) {
       throw new Error("Cannot archive room with active tenant");
     }
-    return this.repo.archive(roomId);
+    const archived = await this.repo.archive(roomId);
+    this.logActivity?.({
+      propertyId,
+      actorId: userId,
+      actorRole: role,
+      actionCode: "ROOM_ARCHIVED",
+      entityType: "ROOM",
+      entityId: roomId,
+      metadata: { roomName: room.roomNumber },
+    });
+    return archived;
   }
 
   async unarchiveRoom(

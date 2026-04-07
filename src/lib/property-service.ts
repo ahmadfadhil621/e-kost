@@ -14,6 +14,7 @@ import {
   updatePropertySchema,
   updatePropertySettingsSchema,
 } from "@/domain/schemas/property";
+import type { LogActivityFn } from "@/lib/activity-log-service";
 
 export class ForbiddenError extends Error {
   constructor(message: string) {
@@ -30,7 +31,8 @@ export class PropertyService {
   constructor(
     private readonly repo: IPropertyRepository,
     private readonly userByEmail?: IUserByEmailFinder,
-    private readonly tenantRepo?: ITenantRepository
+    private readonly tenantRepo?: ITenantRepository,
+    private readonly logActivity?: LogActivityFn
   ) {}
 
   async createProperty(userId: string, data: CreatePropertyInput): Promise<Property> {
@@ -150,7 +152,17 @@ export class PropertyService {
     const role = await this.validateAccess(userId, propertyId);
     if (role !== "owner") {throw new ForbiddenError("Owner access required");}
     const parsed = updatePropertySettingsSchema.parse(data);
-    return this.repo.update(propertyId, parsed);
+    const updated = await this.repo.update(propertyId, parsed);
+    this.logActivity?.({
+      propertyId,
+      actorId: userId,
+      actorRole: role,
+      actionCode: "SETTINGS_STAFF_FINANCE_TOGGLED",
+      entityType: "SETTINGS",
+      entityId: null,
+      metadata: { enabled: parsed.staffOnlyFinance },
+    });
+    return updated;
   }
 
   async validateAccess(userId: string, propertyId: string): Promise<PropertyRole> {
