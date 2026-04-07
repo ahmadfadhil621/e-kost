@@ -57,8 +57,8 @@ async function createActiveTenant(
   const tenant = await tenantRes.json();
 
   const assignRes = await request.post(
-    `${BASE}/api/properties/${propertyId}/tenants/${tenant.id}/assign-room`,
-    { data: { roomId } }
+    `${BASE}/api/properties/${propertyId}/tenants/${tenant.id}/move`,
+    { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } }
   );
   if (!assignRes.ok()) { throw new Error(`Failed to assign room: ${assignRes.status()}`); }
 

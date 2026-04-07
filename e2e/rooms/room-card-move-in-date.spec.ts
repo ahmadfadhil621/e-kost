@@ -73,8 +73,8 @@ async function createTenantAndAssign(
   const tenant = await tenantRes.json();
 
   const assignRes = await request.post(
-    `/api/properties/${propertyId}/tenants/${tenant.id}/assign-room`,
-    { data: { roomId } }
+    `/api/properties/${propertyId}/tenants/${tenant.id}/move`,
+    { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } }
   );
   if (!assignRes.ok()) {
     throw new Error(

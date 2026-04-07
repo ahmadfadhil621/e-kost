@@ -64,8 +64,8 @@ test.describe("tenant move-out in shared room", () => {
       const tId = tBody?.id;
       if (!tId) { test.skip(); return; }
       const assignRes = await request.post(
-        `/api/properties/${propertyId}/tenants/${tId}/assign-room`,
-        { data: { roomId } }
+        `/api/properties/${propertyId}/tenants/${tId}/move`,
+        { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } }
       );
       if (!assignRes.ok()) { test.skip(); return; }
 
@@ -137,8 +137,8 @@ test.describe("tenant move-out in shared room", () => {
 
       if (!ta1Id || !ta2Id) { test.skip(); return; }
 
-      await request.post(`/api/properties/${propertyId}/tenants/${ta1Id}/assign-room`, { data: { roomId } });
-      await request.post(`/api/properties/${propertyId}/tenants/${ta2Id}/assign-room`, { data: { roomId } });
+      await request.post(`/api/properties/${propertyId}/tenants/${ta1Id}/move`, { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } });
+      await request.post(`/api/properties/${propertyId}/tenants/${ta2Id}/move`, { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } });
 
       // Move out tenant 1 via UI
       await goToTenantDetail(page, ta1Id);
@@ -205,7 +205,7 @@ test.describe("tenant move-out in shared room", () => {
       const tId = (await tRes.json())?.id;
       if (!tId) { test.skip(); return; }
 
-      await request.post(`/api/properties/${propertyId}/tenants/${tId}/assign-room`, { data: { roomId } });
+      await request.post(`/api/properties/${propertyId}/tenants/${tId}/move`, { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } });
 
       // Verify tenant is in room
       const tenantBefore = await request.get(

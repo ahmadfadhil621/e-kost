@@ -60,8 +60,8 @@ async function assignRoom(
   roomId: string
 ): Promise<void> {
   const res = await request.post(
-    `/api/properties/${propertyId}/tenants/${tenantId}/assign-room`,
-    { data: { roomId } }
+    `/api/properties/${propertyId}/tenants/${tenantId}/move`,
+    { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } }
   );
   if (!res.ok()) { throw new Error(`Failed to assign room: ${await res.text()}`); }
 }

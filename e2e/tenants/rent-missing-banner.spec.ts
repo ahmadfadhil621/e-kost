@@ -51,8 +51,8 @@ async function createRoomAndUnpaidTenant(
   const { id: tenantId } = await tenantRes.json();
 
   const assignRes = await request.post(
-    `/api/properties/${propertyId}/tenants/${tenantId}/assign-room`,
-    { data: { roomId } }
+    `/api/properties/${propertyId}/tenants/${tenantId}/move`,
+    { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } }
   );
   if (!assignRes.ok()) {return null;}
 
@@ -93,8 +93,8 @@ async function createRoomAndPaidTenant(
   const { id: tenantId } = await tenantRes.json();
 
   const assignRes = await request.post(
-    `/api/properties/${propertyId}/tenants/${tenantId}/assign-room`,
-    { data: { roomId } }
+    `/api/properties/${propertyId}/tenants/${tenantId}/move`,
+    { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } }
   );
   if (!assignRes.ok()) {return null;}
 

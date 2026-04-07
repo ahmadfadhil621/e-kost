@@ -122,8 +122,8 @@ test.describe("assign room — billing day", () => {
       if (!tenantId) { test.skip(); return; }
 
       const res = await request.post(
-        `/api/properties/${propertyId}/tenants/${tenantId}/assign-room`,
-        { data: { roomId: "00000000-0000-4000-a000-000000000001", billingDayOfMonth: 0 } }
+        `/api/properties/${propertyId}/tenants/${tenantId}/move`,
+        { data: { targetRoomId: "00000000-0000-4000-a000-000000000001", moveDate: new Date().toISOString().slice(0, 10), billingDayOfMonth: 0 } }
       );
       expect(res.status()).toBe(400);
       const body = await res.json();
@@ -149,8 +149,8 @@ test.describe("assign room — billing day", () => {
       if (!tenantId) { test.skip(); return; }
 
       const res = await request.post(
-        `/api/properties/${propertyId}/tenants/${tenantId}/assign-room`,
-        { data: { roomId: "00000000-0000-4000-a000-000000000001", billingDayOfMonth: 32 } }
+        `/api/properties/${propertyId}/tenants/${tenantId}/move`,
+        { data: { targetRoomId: "00000000-0000-4000-a000-000000000001", moveDate: new Date().toISOString().slice(0, 10), billingDayOfMonth: 32 } }
       );
       expect(res.status()).toBe(400);
       const body = await res.json();

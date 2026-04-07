@@ -59,8 +59,8 @@ setup("create user with property and moved-out tenant with note", async ({
   expect(tenantId, "Tenant response must include id").toBeTruthy();
 
   const assignRes = await page.request.post(
-    `${baseURL}/api/properties/${propertyId}/tenants/${tenantId}/assign-room`,
-    { data: { roomId } }
+    `${baseURL}/api/properties/${propertyId}/tenants/${tenantId}/move`,
+    { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } }
   );
   expect(assignRes.ok(), `Assign room failed: ${await assignRes.text()}`).toBe(
     true

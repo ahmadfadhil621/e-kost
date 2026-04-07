@@ -68,8 +68,8 @@ test.describe("room at full capacity", () => {
       const occupantId = (await occupantRes.json())?.id;
       if (!occupantId) { test.skip(); return; }
       const assignRes = await request.post(
-        `/api/properties/${propertyId}/tenants/${occupantId}/assign-room`,
-        { data: { roomId } }
+        `/api/properties/${propertyId}/tenants/${occupantId}/move`,
+        { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } }
       );
       if (!assignRes.ok()) { test.skip(); return; }
 
@@ -119,7 +119,7 @@ test.describe("room at full capacity", () => {
       if (!t1Res.ok()) { test.skip(); return; }
       const t1Id = (await t1Res.json())?.id;
       if (!t1Id) { test.skip(); return; }
-      await request.post(`/api/properties/${propertyId}/tenants/${t1Id}/assign-room`, { data: { roomId } });
+      await request.post(`/api/properties/${propertyId}/tenants/${t1Id}/move`, { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } });
 
       // Try to assign a second tenant — should get 409
       const t2Res = await request.post(`/api/properties/${propertyId}/tenants`, {
@@ -130,8 +130,8 @@ test.describe("room at full capacity", () => {
       if (!t2Id) { test.skip(); return; }
 
       const overAssign = await request.post(
-        `/api/properties/${propertyId}/tenants/${t2Id}/assign-room`,
-        { data: { roomId } }
+        `/api/properties/${propertyId}/tenants/${t2Id}/move`,
+        { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } }
       );
       expect(overAssign.status()).toBe(409);
       const body = await overAssign.json();
@@ -166,7 +166,7 @@ test.describe("room at full capacity", () => {
       if (!occupantRes.ok()) { test.skip(); return; }
       const occupantId = (await occupantRes.json())?.id;
       if (!occupantId) { test.skip(); return; }
-      await request.post(`/api/properties/${propertyId}/tenants/${occupantId}/assign-room`, { data: { roomId } });
+      await request.post(`/api/properties/${propertyId}/tenants/${occupantId}/move`, { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } });
 
       // New tenant
       const newRes = await request.post(`/api/properties/${propertyId}/tenants`, {
@@ -215,7 +215,7 @@ test.describe("room at full capacity", () => {
       if (!tRes.ok()) { test.skip(); return; }
       const tId = (await tRes.json())?.id;
       if (!tId) { test.skip(); return; }
-      await request.post(`/api/properties/${propertyId}/tenants/${tId}/assign-room`, { data: { roomId } });
+      await request.post(`/api/properties/${propertyId}/tenants/${tId}/move`, { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } });
 
       // Try to manually set status to "available" — should be blocked (409)
       const statusRes = await request.patch(

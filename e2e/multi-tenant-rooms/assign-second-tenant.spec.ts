@@ -82,8 +82,8 @@ test.describe("assign second tenant to shared room", () => {
 
       // Assign tenant 1 via API (fast path)
       const assign1 = await request.post(
-        `/api/properties/${propertyId}/tenants/${t1Id}/assign-room`,
-        { data: { roomId } }
+        `/api/properties/${propertyId}/tenants/${t1Id}/move`,
+        { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } }
       );
       if (!assign1.ok()) { test.skip(); return; }
 
@@ -165,8 +165,8 @@ test.describe("assign second tenant to shared room", () => {
       const tId = (await tRes.json())?.id;
       if (!tId) { test.skip(); return; }
       const assignRes = await request.post(
-        `/api/properties/${propertyId}/tenants/${tId}/assign-room`,
-        { data: { roomId } }
+        `/api/properties/${propertyId}/tenants/${tId}/move`,
+        { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } }
       );
       if (!assignRes.ok()) { test.skip(); return; }
 
@@ -215,7 +215,7 @@ test.describe("assign second tenant to shared room", () => {
       if (!t1Res.ok()) { test.skip(); return; }
       const t1Id = (await t1Res.json())?.id;
       if (!t1Id) { test.skip(); return; }
-      await request.post(`/api/properties/${propertyId}/tenants/${t1Id}/assign-room`, { data: { roomId } });
+      await request.post(`/api/properties/${propertyId}/tenants/${t1Id}/move`, { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } });
 
       // Create second tenant and open assign dialog
       const t2Res = await request.post(`/api/properties/${propertyId}/tenants`, {

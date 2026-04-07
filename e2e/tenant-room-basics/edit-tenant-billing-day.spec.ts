@@ -43,8 +43,8 @@ async function createTenantWithRoom(
 
   if (roomId) {
     await request.post(
-      `${base}/api/properties/${propertyId}/tenants/${tenantId}/assign-room`,
-      { data: { roomId, billingDayOfMonth: billingDay } }
+      `${base}/api/properties/${propertyId}/tenants/${tenantId}/move`,
+      { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10), billingDayOfMonth: billingDay } }
     );
   }
   return tenantId;

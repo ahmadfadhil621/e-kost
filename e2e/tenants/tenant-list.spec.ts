@@ -49,8 +49,8 @@ async function createRoomAndTenant(
   if (!tenant) { return null; }
 
   const assignRes = await request.post(
-    `/api/properties/${propertyId}/tenants/${tenant.tenantId}/assign-room`,
-    { data: { roomId } }
+    `/api/properties/${propertyId}/tenants/${tenant.tenantId}/move`,
+    { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } }
   );
   if (!assignRes.ok()) { return null; }
 

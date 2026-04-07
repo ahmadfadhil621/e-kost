@@ -86,8 +86,8 @@ async function createTenantInRoom(
   }
   const tenant = await tenantRes.json();
   const assignRes = await request.post(
-    `${base}/api/properties/${propertyId}/tenants/${tenant.id}/assign-room`,
-    { data: { roomId } }
+    `${base}/api/properties/${propertyId}/tenants/${tenant.id}/move`,
+    { data: { targetRoomId: roomId, moveDate: new Date().toISOString().slice(0, 10) } }
   );
   if (!assignRes.ok()) {
     throw new Error(`Failed to assign room: ${assignRes.status()} ${await assignRes.text()}`);

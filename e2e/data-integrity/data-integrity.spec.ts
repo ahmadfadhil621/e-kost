@@ -247,8 +247,8 @@ test.describe("balance reflects updated monthly rent (AC-3)", () => {
       const tenant = await createTenant(request, propertyId, suffix);
       if (!tenant) { test.skip(); return; }
       const assignRes = await request.post(
-        `/api/properties/${propertyId}/tenants/${tenant.id}/assign-room`,
-        { data: { roomId: room.id } }
+        `/api/properties/${propertyId}/tenants/${tenant.id}/move`,
+        { data: { targetRoomId: room.id, moveDate: new Date().toISOString().slice(0, 10) } }
       );
       if (!assignRes.ok()) { test.skip(); return; }
 
