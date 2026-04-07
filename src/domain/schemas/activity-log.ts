@@ -51,7 +51,7 @@ export const logActivityInputSchema = z.object({
   actionCode: ActivityActionCodeEnum,
   entityType: ActivityEntityTypeEnum,
   entityId: z.string().nullable().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type LogActivityInput = z.infer<typeof logActivityInputSchema>;
@@ -64,7 +64,7 @@ export const activityLogEntrySchema = z.object({
   actionCode: ActivityActionCodeEnum,
   entityType: ActivityEntityTypeEnum,
   entityId: z.string().nullable(),
-  metadata: z.record(z.unknown()),
+  metadata: z.record(z.string(), z.unknown()),
   createdAt: z.date(),
 });
 
