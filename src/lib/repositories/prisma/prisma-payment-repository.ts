@@ -49,6 +49,7 @@ export class PrismaPaymentRepository implements IPaymentRepository {
     paymentDate: Date;
     billingCycleId?: string;
     note?: string;
+    actorId?: string;
   }): Promise<Payment> {
     const created = await prisma.payment.create({
       data: {
@@ -57,6 +58,7 @@ export class PrismaPaymentRepository implements IPaymentRepository {
         paymentDate: data.paymentDate,
         billingCycleId: data.billingCycleId,
         note: data.note,
+        actorId: data.actorId,
       },
       include: { tenant: true },
     });

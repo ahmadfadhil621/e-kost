@@ -1,5 +1,6 @@
-// Traceability: payment-recording
+// Traceability: payment-recording + finance-staff-summary (issue #109)
 // REQ 1.2 -> it('createPayment only succeeds when tenant has active room (PROP 1)')
+// ACTOR-1 -> it('createPayment passes userId as actorId to paymentRepo.create')
 // REQ 1.3 -> it('creates payment with valid data and returns payment with id and timestamp')
 // REQ 1.4 -> it('rejects when tenantId is missing'), it('rejects when amount is missing'), it('rejects when paymentDate is missing')
 // REQ 1.5 -> it('rejects when amount is zero or negative (PROP 4)')
@@ -108,6 +109,7 @@ describe("PaymentService", () => {
           tenantId,
           amount: 500000,
           paymentDate: new Date("2024-06-15"),
+          actorId: userId,
         });
       });
 
@@ -1499,5 +1501,37 @@ describe("createPayment - billing cycle assignment", () => {
       expect(billingCycleRepo.findOrCreate).toHaveBeenCalledWith(tenantId, 2026, 4);
       expect(result.billingCycleId).toBe("first-cycle-id");
     });
+  });
+});
+
+// ACTOR-1: actorId propagation — finance-staff-summary (issue #109)
+describe("PaymentService.createPayment — actorId propagation", () => {
+  it("passes userId as actorId to paymentRepo.create", async () => {
+    const propertyId = crypto.randomUUID();
+    const userId = crypto.randomUUID();
+    const tenantId = crypto.randomUUID();
+    const tenant = createTenant({
+      id: tenantId,
+      propertyId,
+      roomId: crypto.randomUUID(),
+      movedOutAt: null,
+    });
+    const created = createPayment({ tenantId });
+    const paymentRepo = createMockPaymentRepo({
+      create: vi.fn().mockResolvedValue(created),
+    });
+    const tenantRepo = createMockTenantRepo({
+      findById: vi.fn().mockResolvedValue(tenant),
+    });
+    const service = new PaymentService(paymentRepo, tenantRepo, createMockPropertyAccess());
+
+    await service.createPayment(userId, propertyId, {
+      tenantId,
+      amount: 500_000,
+      paymentDate: "2026-04-01",
+    });
+
+    const callArgs = vi.mocked(paymentRepo.create).mock.calls[0][0];
+    expect(callArgs).toHaveProperty("actorId", userId);
   });
 });

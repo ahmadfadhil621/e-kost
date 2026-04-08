@@ -545,6 +545,13 @@
     "cashflow": {
       "title": "Arus Kas",
       "empty": "Tidak ada transaksi bulan ini"
+    },
+    "staffSummary": {
+      "title": "Ringkasan Staf",
+      "collected": "Dikumpulkan",
+      "added": "Ditambahkan",
+      "empty": "Tidak ada aktivitas yang tercatat bulan ini.",
+      "noData": "Tidak ada data tersedia."
     }
   },
   "expense": {

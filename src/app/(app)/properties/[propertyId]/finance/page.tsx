@@ -8,8 +8,10 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { MonthSelector } from "@/components/finance/month-selector";
 import { SummaryCard } from "@/components/finance/summary-card";
+import { StaffSummarySection } from "@/components/finance/staff-summary-section";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
 import type { FinanceSummary } from "@/domain/schemas/expense";
+import type { StaffSummaryEntry } from "@/domain/schemas/staff-summary";
 import type { PropertyRole } from "@/domain/schemas/property";
 
 type PropertyInfo = { role: PropertyRole; staffOnlyFinance: boolean };
@@ -33,6 +35,20 @@ async function fetchFinanceSummary(
     throw new Error("Failed to fetch finance summary");
   }
   return res.json();
+}
+
+async function fetchStaffSummary(
+  propertyId: string,
+  year: number,
+  month: number
+): Promise<StaffSummaryEntry[]> {
+  const res = await fetch(
+    `/api/properties/${propertyId}/finance/staff-summary?year=${year}&month=${month}`,
+    { credentials: "include" }
+  );
+  if (!res.ok) {return [];}
+  const json = await res.json() as { data: StaffSummaryEntry[] };
+  return json.data ?? [];
 }
 
 export default function FinanceOverviewPage() {
@@ -72,6 +88,13 @@ export default function FinanceOverviewPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["finance-summary", propertyId, year, month],
     queryFn: () => fetchFinanceSummary(propertyId, year, month),
+    enabled: !!propertyId,
+    staleTime: 60_000,
+  });
+
+  const { data: staffSummary, isLoading: isStaffLoading } = useQuery({
+    queryKey: ["staff-summary", propertyId, year, month],
+    queryFn: () => fetchStaffSummary(propertyId, year, month),
     enabled: !!propertyId,
     staleTime: 60_000,
   });
@@ -132,6 +155,11 @@ export default function FinanceOverviewPage() {
               href={`/properties/${propertyId}/finance/cashflow?year=${year}&month=${month}`}
             />
           </div>
+          <StaffSummarySection
+            entries={staffSummary ?? []}
+            isLoading={isStaffLoading}
+            formatCurrency={formatCurrency}
+          />
         </>
       )}
 

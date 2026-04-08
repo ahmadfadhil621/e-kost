@@ -38,6 +38,7 @@ export class ExpenseService {
       amount: parsed.amount,
       date,
       description: parsed.description,
+      actorId: userId,
     });
     this.logActivity?.({
       propertyId,

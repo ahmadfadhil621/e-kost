@@ -99,6 +99,7 @@ export class PaymentService {
       paymentDate,
       billingCycleId,
       note: parsed.note,
+      actorId: userId,
     });
     this.logActivity?.({
       propertyId,

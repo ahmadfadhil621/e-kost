@@ -545,6 +545,13 @@
     "cashflow": {
       "title": "Cashflow",
       "empty": "No transactions for this month"
+    },
+    "staffSummary": {
+      "title": "Staff Summary",
+      "collected": "Collected",
+      "added": "Added",
+      "empty": "No activity recorded this month.",
+      "noData": "No data available."
     }
   },
   "expense": {

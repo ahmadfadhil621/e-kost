@@ -1,8 +1,9 @@
-// Traceability: finance-expense-tracking
+// Traceability: finance-expense-tracking + finance-staff-summary (issue #109)
 // REQ 1.2 -> it('rejects when category is invalid (PROP 6)')
 // REQ 1.3 -> it('creates expense with valid data and returns expense with id and timestamp')
 // REQ 1.4 -> it('rejects when required fields are missing')
 // REQ 1.5 -> it('rejects when amount is zero or negative (PROP 7)')
+// ACTOR-1 -> it('createExpense passes userId as actorId to expenseRepo.create')
 // REQ 1.6 -> it('creates expense with valid data and returns expense with id and timestamp')
 // REQ 2.1, 2.3 -> it('listExpenses returns expenses sorted by date descending')
 // REQ 2.5 -> it('listExpenses supports year and month filters')
@@ -82,6 +83,7 @@ describe("ExpenseService", () => {
           amount: 50000,
           date: new Date("2026-03-15"),
           description: undefined,
+          actorId: userId,
         });
       });
 
@@ -909,5 +911,27 @@ describe("ExpenseService", () => {
         { numRuns: 100 }
       );
     });
+  });
+});
+
+// ACTOR-1: actorId propagation — finance-staff-summary (issue #109)
+describe("ExpenseService.createExpense — actorId propagation", () => {
+  it("createExpense passes userId as actorId to expenseRepo.create", async () => {
+    const propertyId = crypto.randomUUID();
+    const userId = crypto.randomUUID();
+    const created = createExpense({ propertyId });
+    const repo = createMockExpenseRepo({
+      create: vi.fn().mockResolvedValue(created),
+    });
+    const service = new ExpenseService(repo, createMockPropertyAccess());
+
+    await service.createExpense(userId, propertyId, {
+      category: "electricity",
+      amount: 50_000,
+      date: "2026-04-01",
+    });
+
+    const callArgs = vi.mocked(repo.create).mock.calls[0][0];
+    expect(callArgs).toHaveProperty("actorId", userId);
   });
 });

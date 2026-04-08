@@ -86,6 +86,7 @@ export class PrismaExpenseRepository implements IExpenseRepository {
     amount: number;
     date: Date;
     description?: string;
+    actorId?: string;
   }): Promise<Expense> {
     const category = DOMAIN_TO_PRISMA[data.category as ExpenseCategory];
     if (!category) {
@@ -98,6 +99,7 @@ export class PrismaExpenseRepository implements IExpenseRepository {
         amount: data.amount,
         date: data.date,
         description: data.description ?? null,
+        actorId: data.actorId,
       },
     });
     return toExpense(created);

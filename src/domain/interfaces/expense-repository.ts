@@ -10,6 +10,7 @@ export interface IExpenseRepository {
     amount: number;
     date: Date;
     description?: string;
+    actorId?: string;
   }): Promise<Expense>;
   findById(id: string): Promise<Expense | null>;
   findByProperty(
