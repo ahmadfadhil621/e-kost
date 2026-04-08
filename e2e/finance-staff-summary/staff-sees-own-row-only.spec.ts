@@ -163,7 +163,7 @@ test.describe("staff summary row isolation", () => {
           `${base}/properties/${propertyId}/finance?year=${year}&month=${month}`
         );
         await staffPage
-          .getByText(/staff summary|ringkasan staf/i)
+          .getByText(/cash accountability|akuntabilitas kas/i)
           .first()
           .waitFor({ state: "visible", timeout: 20000 });
 
@@ -285,7 +285,7 @@ test.describe("staff summary row isolation", () => {
           `${base}/properties/${propertyId}/finance?year=${year}&month=${month}`
         );
         await page
-          .getByText(/staff summary|ringkasan staf/i)
+          .getByText(/cash accountability|akuntabilitas kas/i)
           .first()
           .waitFor({ state: "visible", timeout: 20000 });
 

@@ -174,7 +174,7 @@ async function main() {
       for (let m = 1; m <= 3; m++) {
         const payDate = monthsAgo(m);
         const payment = await prisma.payment.create({
-          data: { tenantId: tenant.id, amount: monthlyRent, paymentDate: payDate },
+          data: { tenantId: tenant.id, amount: monthlyRent, paymentDate: payDate, actorId: demoUser!.id },
         });
         await logActivity(
           property.id, demoUser!.id,
@@ -198,7 +198,7 @@ async function main() {
       });
       if (!existing) {
         const expense = await prisma.expense.create({
-          data: { propertyId: property.id, ...e, date },
+          data: { propertyId: property.id, ...e, date, actorId: demoUser!.id },
         });
         await logActivity(
           property.id, demoUser!.id,
@@ -211,6 +211,25 @@ async function main() {
     }
   }
   console.log(`✅ ${expensesCreated} expenses seeded`);
+
+  // ── 7. Backfill actorId on existing demo records ──────────────────────────
+  const tenantIds = (
+    await prisma.tenant.findMany({ where: { propertyId: property.id }, select: { id: true } })
+  ).map((t) => t.id);
+
+  const backfilledPayments = await prisma.payment.updateMany({
+    where: { tenantId: { in: tenantIds }, actorId: null },
+    data: { actorId: demoUser!.id },
+  });
+  const backfilledExpenses = await prisma.expense.updateMany({
+    where: { propertyId: property.id, actorId: null },
+    data: { actorId: demoUser!.id },
+  });
+  if (backfilledPayments.count || backfilledExpenses.count) {
+    console.log(
+      `✅ Backfilled actorId on ${backfilledPayments.count} payments, ${backfilledExpenses.count} expenses`
+    );
+  }
 
   console.log(`\n🎉 Demo seeding complete!`);
   console.log(`   Login: ${DEMO_EMAIL} / ${DEMO_PASSWORD}`);

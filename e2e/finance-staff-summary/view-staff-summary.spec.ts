@@ -52,7 +52,7 @@ test.describe("view staff summary (owner)", () => {
         .waitFor({ state: "visible", timeout: 15000 });
 
       await expect(
-        page.getByText(/staff summary|ringkasan staf/i).first()
+        page.getByText(/cash accountability|akuntabilitas kas/i).first()
       ).toBeVisible({ timeout: 15000 });
     });
 
@@ -95,7 +95,7 @@ test.describe("view staff summary (owner)", () => {
         `/properties/${propertyId}/finance?year=${year}&month=${month}`
       );
       await page
-        .getByText(/staff summary|ringkasan staf/i)
+        .getByText(/cash accountability|akuntabilitas kas/i)
         .first()
         .waitFor({ state: "visible", timeout: 20000 });
 
@@ -119,7 +119,7 @@ test.describe("view staff summary (owner)", () => {
         `/properties/${propertyId}/finance?year=${year}&month=${month}`
       );
       await page
-        .getByText(/staff summary|ringkasan staf/i)
+        .getByText(/cash accountability|akuntabilitas kas/i)
         .first()
         .waitFor({ state: "visible", timeout: 20000 });
 
@@ -138,7 +138,7 @@ test.describe("view staff summary (owner)", () => {
       const propertyId = getPropertyId();
       await page.goto(`/properties/${propertyId}/finance`);
       await page
-        .getByText(/staff summary|ringkasan staf/i)
+        .getByText(/cash accountability|akuntabilitas kas/i)
         .first()
         .waitFor({ state: "visible", timeout: 20000 });
 
@@ -150,7 +150,7 @@ test.describe("view staff summary (owner)", () => {
       await page.waitForTimeout(500);
 
       await expect(
-        page.getByText(/staff summary|ringkasan staf/i).first()
+        page.getByText(/cash accountability|akuntabilitas kas/i).first()
       ).toBeVisible({ timeout: 10000 });
     });
   });
