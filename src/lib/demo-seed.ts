@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import type { ActivityActionCode, ActivityEntityType } from "@/domain/schemas/activity-log";
 import type { ExpenseCategory } from "@/generated/prisma/enums";
 
 function monthStart(monthsBack: number): Date {
@@ -23,26 +24,42 @@ function yearMonth(monthsBack: number): { year: number; month: number } {
   return { year: d.getFullYear(), month: d.getMonth() + 1 };
 }
 
+async function logActivity(
+  propertyId: string,
+  actorId: string,
+  actionCode: ActivityActionCode,
+  entityType: ActivityEntityType,
+  entityId: string | null,
+  metadata: Record<string, unknown>,
+  createdAt: Date
+) {
+  await prisma.activity_log.create({
+    data: { propertyId, actorId, actorRole: "owner", actionCode, entityType, entityId, metadata: metadata as object, createdAt },
+  });
+}
+
 async function recordPayment(
   tenantId: string,
   amount: number,
   monthsBack: number,
   day = 5
-) {
+): Promise<{ id: string; date: Date }> {
   const { year, month } = yearMonth(monthsBack);
   const cycle = await prisma.billing_cycle.upsert({
     where: { tenantId_year_month: { tenantId, year, month } },
     create: { tenantId, year, month },
     update: {},
   });
-  await prisma.payment.create({
+  const date = paymentDate(monthsBack, day);
+  const payment = await prisma.payment.create({
     data: {
       tenantId,
       amount,
-      paymentDate: paymentDate(monthsBack, day),
+      paymentDate: date,
       billingCycleId: cycle.id,
     },
   });
+  return { id: payment.id, date };
 }
 
 export async function seedDemoData(ownerId: string): Promise<void> {
@@ -81,84 +98,76 @@ export async function seedDemoData(ownerId: string): Promise<void> {
 
   const roomMap = Object.fromEntries(rooms.map((r) => [r.roomNumber, r]));
 
+  // Helper: assign tenant + log TENANT_ASSIGNED
+  async function assignTenant(
+    roomNumber: string,
+    name: string,
+    movedInAt: Date
+  ) {
+    const tenant = await prisma.tenant.create({
+      data: { propertyId: property.id, roomId: roomMap[roomNumber].id, name, movedInAt },
+    });
+    await logActivity(
+      property.id, ownerId,
+      "TENANT_ASSIGNED", "TENANT", tenant.id,
+      { tenantName: name, roomName: roomNumber },
+      movedInAt
+    );
+    return tenant;
+  }
+
+  // Helper: record payment + log PAYMENT_RECORDED
+  async function pay(
+    tenant: { id: string; name: string },
+    roomNumber: string,
+    amount: number,
+    monthsBack: number
+  ) {
+    const { id, date } = await recordPayment(tenant.id, amount, monthsBack);
+    await logActivity(
+      property.id, ownerId,
+      "PAYMENT_RECORDED", "PAYMENT", id,
+      { amount, tenantName: tenant.name, roomName: roomNumber },
+      date
+    );
+  }
+
   // Scenario 1 — Budi Santoso: fully paid up (all cycles paid)
-  const budi = await prisma.tenant.create({
-    data: {
-      propertyId: property.id,
-      roomId: roomMap["101"].id,
-      name: "Budi Santoso",
-      movedInAt: monthStart(4),
-    },
-  });
+  const budi = await assignTenant("101", "Budi Santoso", monthStart(4));
   for (const m of [4, 3, 2, 1, 0]) {
-    await recordPayment(budi.id, 1200000, m);
+    await pay(budi, "101", 1200000, m);
   }
 
   // Scenario 2 — Siti Rahayu: 2 consecutive unpaid months (current + prev)
-  const siti = await prisma.tenant.create({
-    data: {
-      propertyId: property.id,
-      roomId: roomMap["102"].id,
-      name: "Siti Rahayu",
-      movedInAt: monthStart(4),
-    },
-  });
+  const siti = await assignTenant("102", "Siti Rahayu", monthStart(4));
   // Paid months 4 and 3 months ago, NOT the last 2
   for (const m of [4, 3]) {
-    await recordPayment(siti.id, 1200000, m);
+    await pay(siti, "102", 1200000, m);
   }
 
   // Scenario 3 — Ahmad Fauzi: partial payment on most recent month
-  const ahmad = await prisma.tenant.create({
-    data: {
-      propertyId: property.id,
-      roomId: roomMap["103"].id,
-      name: "Ahmad Fauzi",
-      movedInAt: monthStart(3),
-    },
-  });
-  await recordPayment(ahmad.id, 1500000, 3); // paid in full
-  await recordPayment(ahmad.id, 1500000, 2); // paid in full
-  await recordPayment(ahmad.id, 750000, 1);  // partial for last month
+  const ahmad = await assignTenant("103", "Ahmad Fauzi", monthStart(3));
+  await pay(ahmad, "103", 1500000, 3); // paid in full
+  await pay(ahmad, "103", 1500000, 2); // paid in full
+  await pay(ahmad, "103", 750000, 1);  // partial for last month
   // current month = unpaid
 
   // Scenario 4 — Dewi Lestari: skipped month 2 (paid 1st and 3rd, not 2nd)
-  const dewi = await prisma.tenant.create({
-    data: {
-      propertyId: property.id,
-      roomId: roomMap["201"].id,
-      name: "Dewi Lestari",
-      movedInAt: monthStart(3),
-    },
-  });
-  await recordPayment(dewi.id, 1800000, 3); // oldest: paid
+  const dewi = await assignTenant("201", "Dewi Lestari", monthStart(3));
+  await pay(dewi, "201", 1800000, 3); // oldest: paid
   // monthsBack=2 is intentionally skipped
-  await recordPayment(dewi.id, 1800000, 1); // paid — but skipped m=2
+  await pay(dewi, "201", 1800000, 1); // paid — but skipped m=2
 
   // Scenario 5 — Shared room 203: Rudi (paid up) + Nisa (2 months unpaid)
-  const rudi = await prisma.tenant.create({
-    data: {
-      propertyId: property.id,
-      roomId: roomMap["203"].id,
-      name: "Rudi Hartono",
-      movedInAt: monthStart(3),
-    },
-  });
+  const rudi = await assignTenant("203", "Rudi Hartono", monthStart(3));
   for (const m of [3, 2, 1, 0]) {
-    await recordPayment(rudi.id, 900000, m);
+    await pay(rudi, "203", 900000, m);
   }
 
-  const nisa = await prisma.tenant.create({
-    data: {
-      propertyId: property.id,
-      roomId: roomMap["203"].id,
-      name: "Nisa Aulia",
-      movedInAt: monthStart(3),
-    },
-  });
+  const nisa = await assignTenant("203", "Nisa Aulia", monthStart(3));
   // Paid only 3 and 2 months ago — last 2 months unpaid
   for (const m of [3, 2]) {
-    await recordPayment(nisa.id, 900000, m);
+    await pay(nisa, "203", 900000, m);
   }
 
   const expenseData: { monthsBack: number; category: ExpenseCategory; amount: number }[] = [
@@ -174,15 +183,17 @@ export async function seedDemoData(ownerId: string): Promise<void> {
   ];
 
   await Promise.all(
-    expenseData.map(({ monthsBack, category, amount }) =>
-      prisma.expense.create({
-        data: {
-          propertyId: property.id,
-          category,
-          amount,
-          date: monthStart(monthsBack),
-        },
-      })
-    )
+    expenseData.map(async ({ monthsBack, category, amount }) => {
+      const date = monthStart(monthsBack);
+      const expense = await prisma.expense.create({
+        data: { propertyId: property.id, category, amount, date },
+      });
+      await logActivity(
+        property.id, ownerId,
+        "EXPENSE_CREATED", "EXPENSE", expense.id,
+        { amount, category },
+        date
+      );
+    })
   );
 }

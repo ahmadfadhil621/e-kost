@@ -17,6 +17,7 @@
 import "dotenv/config";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import type { ActivityActionCode, ActivityEntityType } from "@/domain/schemas/activity-log";
 
 const DEMO_EMAIL = "demo@ekost.app";
 const DEMO_PASSWORD = process.env.DEMO_PASSWORD ?? "Demo@395762@";
@@ -55,6 +56,20 @@ function monthsAgo(n: number): Date {
   d.setDate(1);
   d.setMonth(d.getMonth() - n);
   return d;
+}
+
+async function logActivity(
+  propertyId: string,
+  actorId: string,
+  actionCode: ActivityActionCode,
+  entityType: ActivityEntityType,
+  entityId: string | null,
+  metadata: Record<string, unknown>,
+  createdAt: Date
+) {
+  await prisma.activity_log.create({
+    data: { propertyId, actorId, actorRole: "owner", actionCode, entityType, entityId, metadata: metadata as object, createdAt },
+  });
 }
 
 async function main() {
@@ -127,11 +142,13 @@ async function main() {
   for (const t of TENANTS) {
     const room = rooms[t.roomIndex];
     const monthlyRent = ROOMS[t.roomIndex].monthlyRent;
+    const roomNumber = ROOMS[t.roomIndex].roomNumber;
 
     let tenant = await prisma.tenant.findFirst({
       where: { propertyId: property.id, name: t.name, movedOutAt: null },
     });
     if (!tenant) {
+      const movedInAt = monthsAgo(6);
       tenant = await prisma.tenant.create({
         data: {
           propertyId: property.id,
@@ -139,9 +156,15 @@ async function main() {
           name: t.name,
           phone: t.phone,
           email: t.email,
-          movedInAt: monthsAgo(6),
+          movedInAt,
         },
       });
+      await logActivity(
+        property.id, demoUser!.id,
+        "TENANT_ASSIGNED", "TENANT", tenant.id,
+        { tenantName: t.name, roomName: roomNumber },
+        movedInAt
+      );
       tenantsCreated++;
     }
 
@@ -149,9 +172,16 @@ async function main() {
     const existingPayments = await prisma.payment.count({ where: { tenantId: tenant.id } });
     if (existingPayments === 0) {
       for (let m = 1; m <= 3; m++) {
-        await prisma.payment.create({
-          data: { tenantId: tenant.id, amount: monthlyRent, paymentDate: monthsAgo(m) },
+        const payDate = monthsAgo(m);
+        const payment = await prisma.payment.create({
+          data: { tenantId: tenant.id, amount: monthlyRent, paymentDate: payDate },
         });
+        await logActivity(
+          property.id, demoUser!.id,
+          "PAYMENT_RECORDED", "PAYMENT", payment.id,
+          { amount: monthlyRent, tenantName: t.name, roomName: roomNumber },
+          payDate
+        );
         paymentsCreated++;
       }
     }
@@ -167,9 +197,15 @@ async function main() {
         where: { propertyId: property.id, category: e.category, date },
       });
       if (!existing) {
-        await prisma.expense.create({
+        const expense = await prisma.expense.create({
           data: { propertyId: property.id, ...e, date },
         });
+        await logActivity(
+          property.id, demoUser!.id,
+          "EXPENSE_CREATED", "EXPENSE", expense.id,
+          { amount: e.amount, category: e.category },
+          date
+        );
         expensesCreated++;
       }
     }
