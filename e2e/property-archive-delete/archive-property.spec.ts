@@ -87,8 +87,8 @@ async function goToPropertyDetail(
   page: Page,
   propertyId: string
 ): Promise<void> {
-  await page.goto(`/properties/${propertyId}`, { waitUntil: "domcontentloaded" });
-  await page.waitForURL(/\/properties\/[^/]+$/, { timeout: 8000 }).catch(() => {});
+  await page.goto(`/properties/${propertyId}/settings`, { waitUntil: "domcontentloaded" });
+  await page.waitForURL(/\/properties\/[^/]+\/settings$/, { timeout: 8000 }).catch(() => {});
   await page.getByText(/danger zone/i).waitFor({ state: "visible", timeout: 15000 });
 }
 
@@ -193,7 +193,7 @@ test.describe("archive property", () => {
         await page.getByRole("button", { name: /cancel/i }).click();
 
         await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
-        await expect(page.url()).toMatch(/\/properties\/[^/]+$/);
+        await expect(page.url()).toMatch(/\/properties\/[^/]+\/settings$/);
         await expect(page.getByText(/danger zone/i)).toBeVisible({ timeout: 5000 });
       } finally {
         await deleteProperty(request, propertyId);
