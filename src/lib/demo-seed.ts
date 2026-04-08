@@ -42,6 +42,7 @@ async function recordPayment(
   tenantId: string,
   amount: number,
   monthsBack: number,
+  actorId: string,
   day = 5
 ): Promise<{ id: string; date: Date }> {
   const { year, month } = yearMonth(monthsBack);
@@ -57,6 +58,7 @@ async function recordPayment(
       amount,
       paymentDate: date,
       billingCycleId: cycle.id,
+      actorId,
     },
   });
   return { id: payment.id, date };
@@ -123,7 +125,7 @@ export async function seedDemoData(ownerId: string): Promise<void> {
     amount: number,
     monthsBack: number
   ) {
-    const { id, date } = await recordPayment(tenant.id, amount, monthsBack);
+    const { id, date } = await recordPayment(tenant.id, amount, monthsBack, ownerId);
     await logActivity(
       property.id, ownerId,
       "PAYMENT_RECORDED", "PAYMENT", id,
@@ -186,7 +188,7 @@ export async function seedDemoData(ownerId: string): Promise<void> {
     expenseData.map(async ({ monthsBack, category, amount }) => {
       const date = monthStart(monthsBack);
       const expense = await prisma.expense.create({
-        data: { propertyId: property.id, category, amount, date },
+        data: { propertyId: property.id, category, amount, date, actorId: ownerId },
       });
       await logActivity(
         property.id, ownerId,
