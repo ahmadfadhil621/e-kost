@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
 import type { ActivityLogEntry } from "@/domain/schemas/activity-log";
@@ -43,6 +44,11 @@ export function ActivityEntry({ entry }: ActivityEntryProps) {
   const { t } = useTranslation();
   const description = useActionDescription(entry.actionCode, entry.metadata);
   const isOwner = entry.actorRole === "owner";
+  const [showExact, setShowExact] = useState(false);
+
+  const date = new Date(entry.createdAt);
+  const relativeTime = formatDistanceToNow(date, { addSuffix: true });
+  const exactTime = format(date, "MMM d, yyyy · HH:mm");
 
   return (
     <div className="flex gap-3 py-3 border-b border-border last:border-0">
@@ -56,9 +62,14 @@ export function ActivityEntry({ entry }: ActivityEntryProps) {
           >
             {t(`activity.roles.${entry.actorRole}`)}
           </Badge>
-          <span className="text-xs text-muted-foreground ml-auto">
-            {formatDistanceToNow(new Date(entry.createdAt), { addSuffix: true })}
-          </span>
+          <button
+            type="button"
+            onClick={() => setShowExact((v) => !v)}
+            className="text-xs text-muted-foreground ml-auto py-2 underline decoration-dotted underline-offset-2 cursor-pointer min-h-[44px]"
+            aria-label={showExact ? exactTime : relativeTime}
+          >
+            {showExact ? exactTime : relativeTime}
+          </button>
         </div>
         <p className="text-sm text-muted-foreground mt-0.5 break-words">{description}</p>
       </div>

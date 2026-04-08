@@ -172,7 +172,7 @@ Route: `/properties/:id/activity`
 ```
 
 - Role badge: small pill — "owner" (primary color) / "staff" (secondary color)
-- Relative timestamp via `formatDistanceToNow` (date-fns)
+- Timestamp: defaults to relative (`formatDistanceToNow`, date-fns); tapping toggles to exact (`MMM d, yyyy · HH:mm`) and back; styled with an underline dotted border to signal interactivity; toggle state is per-entry local React state
 - Action text via i18n key `activity.actions.PAYMENT_RECORDED` with interpolated metadata
 
 ### Empty State

@@ -61,7 +61,10 @@ Landlords and their staff perform many actions (recording payments, adding expen
 
 1. A dedicated "Activity" page SHALL be accessible at `/properties/:id/activity`
 2. The page SHALL be linked from the property navigation
-3. Each entry SHALL display: actor name, role badge (owner/staff), human-readable action description (i18n), and relative timestamp
+3. Each entry SHALL display: actor name, role badge (owner/staff), human-readable action description (i18n), and a tappable timestamp
+4. The timestamp SHALL default to relative format (e.g. "3 months ago")
+5. Tapping the timestamp SHALL toggle it to the exact datetime (e.g. "Jan 15, 2026 · 09:42") and back to relative; the toggle state is local to that entry
+6. The timestamp SHALL be visually styled to communicate it is interactive (e.g. underline or chevron indicator)
 4. A "Load more" button SHALL appear when `nextCursor` is non-null; clicking it appends the next page
 5. Filter controls SHALL allow filtering by area and/or actor
 6. An empty state SHALL be shown when no entries exist

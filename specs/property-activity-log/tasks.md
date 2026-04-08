@@ -40,6 +40,8 @@
 
 - [ ] `src/components/activity/ActivityFeed.tsx` — TanStack Query, infinite load
 - [ ] `src/components/activity/ActivityEntry.tsx` — single entry row
+  - Timestamp toggles between relative and exact on tap
+  - Dotted underline on timestamp to signal it is tappable
 - [ ] `src/components/activity/ActivityFilters.tsx` — area + actor filter dropdowns
 
 ## Phase 7 — Page & Navigation
