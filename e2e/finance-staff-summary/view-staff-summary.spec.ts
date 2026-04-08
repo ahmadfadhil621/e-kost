@@ -1,6 +1,6 @@
 // Traceability: finance-staff-summary (issue #109)
 // REQ 3.1 -> test('staff summary section title is visible on finance page')
-// REQ 3.5 -> test('staff summary row shows collected and added labels')
+// REQ 3.5 -> test('staff summary row shows collected and spent labels')
 // REQ 3.7 -> test('empty state is shown for a month with no staff activity')
 // REQ 3.2 -> test('staff summary section remains visible after month navigation')
 
@@ -56,7 +56,7 @@ test.describe("view staff summary (owner)", () => {
       ).toBeVisible({ timeout: 15000 });
     });
 
-    test("staff summary row shows collected and added labels after seeding activity", async ({
+    test("staff summary row shows collected and spent labels after seeding activity", async ({
       page,
       request,
       baseURL,
@@ -103,7 +103,7 @@ test.describe("view staff summary (owner)", () => {
         page.getByText(/collected|dikumpulkan/i).first()
       ).toBeVisible({ timeout: 10000 });
       await expect(
-        page.getByText(/added|ditambahkan/i).first()
+        page.getByText(/spent|dikeluarkan/i).first()
       ).toBeVisible({ timeout: 5000 });
     });
   });

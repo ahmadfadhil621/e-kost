@@ -169,7 +169,7 @@ test.describe("staff summary row isolation", () => {
 
         // Staff should see exactly 1 row (their own)
         const staffRows = staffPage.locator("ul li").filter({
-          has: staffPage.getByText(/added|ditambahkan/i),
+          has: staffPage.getByText(/spent|dikeluarkan/i),
         });
         await expect(staffRows).toHaveCount(1, { timeout: 10000 });
       } finally {
@@ -290,7 +290,7 @@ test.describe("staff summary row isolation", () => {
           .waitFor({ state: "visible", timeout: 20000 });
 
         const ownerRows = page.locator("ul li").filter({
-          has: page.getByText(/added|ditambahkan/i),
+          has: page.getByText(/spent|dikeluarkan/i),
         });
         const count = await ownerRows.count();
         expect(count).toBeGreaterThanOrEqual(2);
