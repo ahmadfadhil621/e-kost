@@ -549,7 +549,7 @@
     "staffSummary": {
       "title": "Akuntabilitas Kas",
       "collected": "Dikumpulkan",
-      "added": "Ditambahkan",
+      "added": "Dikeluarkan",
       "empty": "Tidak ada aktivitas yang tercatat bulan ini.",
       "noData": "Tidak ada data tersedia."
     }

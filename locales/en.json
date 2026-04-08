@@ -549,7 +549,7 @@
     "staffSummary": {
       "title": "Cash Accountability",
       "collected": "Collected",
-      "added": "Added",
+      "added": "Spent",
       "empty": "No activity recorded this month.",
       "noData": "No data available."
     }
