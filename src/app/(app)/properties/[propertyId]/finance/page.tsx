@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { MonthSelector } from "@/components/finance/month-selector";
 import { SummaryCard } from "@/components/finance/summary-card";
@@ -57,9 +57,16 @@ export default function FinanceOverviewPage() {
   const propertyId = params.propertyId as string;
   const formatCurrency = useFormatCurrency();
 
+  const searchParams = useSearchParams();
   const now = useMemo(() => new Date(), []);
-  const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth() + 1);
+  const [year, setYear] = useState(() => {
+    const y = searchParams?.get("year");
+    return y ? parseInt(y, 10) : now.getFullYear();
+  });
+  const [month, setMonth] = useState(() => {
+    const m = searchParams?.get("month");
+    return m ? parseInt(m, 10) : now.getMonth() + 1;
+  });
 
   const goPrevious = useCallback(() => {
     if (month === 1) {
