@@ -753,7 +753,38 @@
       "ROOM_ARCHIVED": "Mengarsipkan kamar {{roomName}}",
       "SETTINGS_STAFF_FINANCE_TOGGLED_ON": "Mengaktifkan mode keuangan khusus staf",
       "SETTINGS_STAFF_FINANCE_TOGGLED_OFF": "Menonaktifkan mode keuangan khusus staf",
-      "SETTINGS_PROPERTY_UPDATED": "Memperbarui pengaturan properti"
+      "SETTINGS_PROPERTY_UPDATED": "Memperbarui pengaturan properti",
+      "INVENTORY_ITEM_ADDED": "Menambahkan {{name}} ke inventaris Kamar {{roomName}}",
+      "INVENTORY_ITEM_UPDATED": "Memperbarui {{name}} di inventaris Kamar {{roomName}}",
+      "INVENTORY_ITEM_REMOVED": "Menghapus {{name}} dari inventaris Kamar {{roomName}}"
     }
+  },
+  "inventory": {
+    "title": "Inventaris",
+    "empty": "Belum ada barang. Tambahkan barang pertama untuk melacak isi kamar ini.",
+    "addItem": "Tambah barang",
+    "editItem": "Edit barang",
+    "deleteItem": "Hapus barang",
+    "deleteConfirm": "Hapus barang ini dari inventaris?",
+    "namePlaceholder": "mis. AC, Meja kayu, Kursi",
+    "notesPlaceholder": "mis. Samsung AR09, penyok di sisi kiri",
+    "fields": {
+      "name": "Nama barang",
+      "quantity": "Jumlah",
+      "condition": "Kondisi",
+      "notes": "Catatan (opsional)"
+    },
+    "success": {
+      "added": "Barang ditambahkan",
+      "updated": "Barang diperbarui",
+      "deleted": "Barang dihapus"
+    }
+  },
+  "condition": {
+    "NEW": "Baru",
+    "GOOD": "Baik",
+    "FAIR": "Cukup",
+    "POOR": "Buruk",
+    "DAMAGED": "Rusak"
   }
 }

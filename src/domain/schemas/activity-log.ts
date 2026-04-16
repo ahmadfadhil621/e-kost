@@ -14,6 +14,9 @@ export const ActivityActionCodeEnum = z.enum([
   "ROOM_CREATED",
   "ROOM_UPDATED",
   "ROOM_ARCHIVED",
+  "INVENTORY_ITEM_ADDED",
+  "INVENTORY_ITEM_UPDATED",
+  "INVENTORY_ITEM_REMOVED",
   "SETTINGS_STAFF_FINANCE_TOGGLED",
   "SETTINGS_PROPERTY_UPDATED",
 ]);
@@ -23,6 +26,7 @@ export const ActivityEntityTypeEnum = z.enum([
   "EXPENSE",
   "TENANT",
   "ROOM",
+  "INVENTORY_ITEM",
   "SETTINGS",
 ]);
 
@@ -34,13 +38,14 @@ export const ENTITY_TYPE_TO_AREA: Record<ActivityEntityType, string> = {
   EXPENSE: "finance",
   TENANT: "tenant",
   ROOM: "rooms",
+  INVENTORY_ITEM: "rooms",
   SETTINGS: "settings",
 };
 
 export const AREA_TO_ENTITY_TYPES: Record<string, ActivityEntityType[]> = {
   finance: ["PAYMENT", "EXPENSE"],
   tenant: ["TENANT"],
-  rooms: ["ROOM"],
+  rooms: ["ROOM", "INVENTORY_ITEM"],
   settings: ["SETTINGS"],
 };
 

@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/room/status-indicator";
+import { InventorySection } from "@/components/room/inventory-section";
 import { Pencil } from "lucide-react";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
 import {
@@ -266,6 +267,12 @@ export default function RoomDetailPage() {
           </ul>
         </div>
       )}
+
+      <InventorySection
+        propertyId={propertyId}
+        roomId={roomId}
+        isArchived={isArchived}
+      />
 
       {isArchived ? (
         <div className="flex flex-col gap-2">

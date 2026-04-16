@@ -51,6 +51,17 @@
   --color-finance-profit-positive: hsl(var(--finance-profit-positive));
   --color-finance-profit-negative: hsl(var(--finance-profit-negative));
 
+  --color-condition-new: hsl(var(--condition-new));
+  --color-condition-new-foreground: hsl(var(--condition-new-foreground));
+  --color-condition-good: hsl(var(--condition-good));
+  --color-condition-good-foreground: hsl(var(--condition-good-foreground));
+  --color-condition-fair: hsl(var(--condition-fair));
+  --color-condition-fair-foreground: hsl(var(--condition-fair-foreground));
+  --color-condition-poor: hsl(var(--condition-poor));
+  --color-condition-poor-foreground: hsl(var(--condition-poor-foreground));
+  --color-condition-damaged: hsl(var(--condition-damaged));
+  --color-condition-damaged-foreground: hsl(var(--condition-damaged-foreground));
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -137,6 +148,18 @@
     --finance-expense-foreground: 0 75% 10%;
     --finance-profit-positive: 102 30% 33%;
     --finance-profit-negative: 0 75% 48%;
+
+    /* Domain-specific: item condition */
+    --condition-new: 152 50% 35%;
+    --condition-new-foreground: 152 50% 10%;
+    --condition-good: 217 60% 40%;
+    --condition-good-foreground: 217 60% 10%;
+    --condition-fair: 38 80% 40%;
+    --condition-fair-foreground: 38 80% 10%;
+    --condition-poor: 25 85% 40%;
+    --condition-poor-foreground: 25 85% 10%;
+    --condition-damaged: 0 75% 48%;
+    --condition-damaged-foreground: 0 0% 98%;
   }
 
   .dark {
@@ -192,6 +215,18 @@
     --finance-expense-foreground: 0 60% 92%;
     --finance-profit-positive: 102 30% 58%;
     --finance-profit-negative: 0 75% 55%;
+
+    /* Domain-specific: item condition (dark mode) */
+    --condition-new: 152 50% 60%;
+    --condition-new-foreground: 152 50% 95%;
+    --condition-good: 217 60% 65%;
+    --condition-good-foreground: 217 60% 95%;
+    --condition-fair: 38 80% 60%;
+    --condition-fair-foreground: 38 80% 95%;
+    --condition-poor: 25 85% 60%;
+    --condition-poor-foreground: 25 85% 95%;
+    --condition-damaged: 0 75% 55%;
+    --condition-damaged-foreground: 0 0% 95%;
   }
 }
 

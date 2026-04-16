@@ -753,7 +753,38 @@
       "ROOM_ARCHIVED": "Archived room {{roomName}}",
       "SETTINGS_STAFF_FINANCE_TOGGLED_ON": "Enabled staff-only finance mode",
       "SETTINGS_STAFF_FINANCE_TOGGLED_OFF": "Disabled staff-only finance mode",
-      "SETTINGS_PROPERTY_UPDATED": "Updated property settings"
+      "SETTINGS_PROPERTY_UPDATED": "Updated property settings",
+      "INVENTORY_ITEM_ADDED": "Added {{name}} to Room {{roomName}} inventory",
+      "INVENTORY_ITEM_UPDATED": "Updated {{name}} in Room {{roomName}} inventory",
+      "INVENTORY_ITEM_REMOVED": "Removed {{name}} from Room {{roomName}} inventory"
     }
+  },
+  "inventory": {
+    "title": "Inventory",
+    "empty": "No items yet. Add the first item to track what's in this room.",
+    "addItem": "Add item",
+    "editItem": "Edit item",
+    "deleteItem": "Remove item",
+    "deleteConfirm": "Remove this item from the inventory?",
+    "namePlaceholder": "e.g. AC, Wooden desk, Chair",
+    "notesPlaceholder": "e.g. Samsung AR09, dent on left side",
+    "fields": {
+      "name": "Item name",
+      "quantity": "Quantity",
+      "condition": "Condition",
+      "notes": "Notes (optional)"
+    },
+    "success": {
+      "added": "Item added",
+      "updated": "Item updated",
+      "deleted": "Item removed"
+    }
+  },
+  "condition": {
+    "NEW": "New",
+    "GOOD": "Good",
+    "FAIR": "Fair",
+    "POOR": "Poor",
+    "DAMAGED": "Damaged"
   }
 }

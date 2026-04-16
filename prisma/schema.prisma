@@ -74,23 +74,24 @@ model Verification {
 }
 
 model Property {
-  id               String          @id @default(uuid())
-  name             String
-  address          String?
-  ownerId          String
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  deletedAt        DateTime?
-  archivedAt       DateTime?       @db.Timestamptz(6)
-  currency         String          @default("IDR")
-  staffOnlyFinance Boolean         @default(false)
-  activity_log     activity_log[]
-  expenses         Expense[]
-  inviteTokens     InviteToken[]
-  owner            User            @relation("PropertyOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  staff            PropertyStaff[]
-  rooms            Room[]
-  tenants          Tenant[]
+  id                  String                @id @default(uuid())
+  name                String
+  address             String?
+  ownerId             String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  deletedAt           DateTime?
+  archivedAt          DateTime?             @db.Timestamptz(6)
+  currency            String                @default("IDR")
+  staffOnlyFinance    Boolean               @default(false)
+  activity_log        activity_log[]
+  expenses            Expense[]
+  inviteTokens        InviteToken[]
+  owner               User                  @relation("PropertyOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  staff               PropertyStaff[]
+  rooms               Room[]
+  room_inventory_item room_inventory_item[]
+  tenants             Tenant[]
 
   @@map("property")
 }
@@ -108,19 +109,20 @@ model PropertyStaff {
 }
 
 model Room {
-  id              String            @id @default(uuid())
-  propertyId      String
-  roomNumber      String
-  roomType        String?
-  monthlyRent     Decimal           @db.Decimal(12, 2)
-  status          RoomStatus        @default(AVAILABLE)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  archivedAt      DateTime?
-  capacity        Int               @default(1)
-  property        Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  room_assignment room_assignment[]
-  tenants         Tenant[]
+  id                  String                @id @default(uuid())
+  propertyId          String
+  roomNumber          String
+  roomType            String?
+  monthlyRent         Decimal               @db.Decimal(12, 2)
+  status              RoomStatus            @default(AVAILABLE)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  archivedAt          DateTime?
+  capacity            Int                   @default(1)
+  property            Property              @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  room_assignment     room_assignment[]
+  room_inventory_item room_inventory_item[]
+  tenants             Tenant[]
 
   @@unique([propertyId, roomNumber])
   @@index([propertyId, status])
@@ -272,6 +274,23 @@ model activity_log {
   @@index([propertyId, entityType])
 }
 
+model room_inventory_item {
+  id         String        @id @default(dbgenerated("gen_random_uuid()"))
+  roomId     String
+  propertyId String
+  name       String
+  quantity   Int           @default(1)
+  condition  ItemCondition
+  notes      String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @default(now()) @updatedAt
+  property   Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  room       Room          @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([propertyId])
+  @@index([roomId])
+}
+
 enum RoomStatus {
   AVAILABLE
   OCCUPIED
@@ -316,6 +335,9 @@ enum ActivityActionCode {
   ROOM_ARCHIVED
   SETTINGS_STAFF_FINANCE_TOGGLED
   SETTINGS_PROPERTY_UPDATED
+  INVENTORY_ITEM_ADDED
+  INVENTORY_ITEM_UPDATED
+  INVENTORY_ITEM_REMOVED
 }
 
 enum ActivityEntityType {
@@ -324,4 +346,13 @@ enum ActivityEntityType {
   TENANT
   ROOM
   SETTINGS
+  INVENTORY_ITEM
+}
+
+enum ItemCondition {
+  NEW
+  GOOD
+  FAIR
+  POOR
+  DAMAGED
 }
