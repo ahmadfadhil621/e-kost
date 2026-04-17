@@ -97,6 +97,15 @@ export function PaymentForm({
   const tenantId = watch("tenantId");
   const [cycleValue, setCycleValue] = useState(defaultCycleValue);
 
+  // Sync FIFO default when cycles load asynchronously after mount
+  useEffect(() => {
+    if (defaultCycleYear !== undefined && defaultCycleMonth !== undefined && !cycleValue) {
+      setCycleValue(`${defaultCycleYear}-${defaultCycleMonth}`);
+      setValue("billingCycleYear", defaultCycleYear, { shouldValidate: false });
+      setValue("billingCycleMonth", defaultCycleMonth, { shouldValidate: false });
+    }
+  }, [defaultCycleYear, defaultCycleMonth, cycleValue, setValue]);
+
   const handleCycleChange = (v: string) => {
     setCycleValue(v);
     const [year, month] = v.split("-").map(Number);
