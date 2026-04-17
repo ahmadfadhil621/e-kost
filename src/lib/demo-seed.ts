@@ -172,6 +172,94 @@ export async function seedDemoData(ownerId: string): Promise<void> {
     await pay(nisa, "203", 900000, m);
   }
 
+  const inventoryData: {
+    roomNumber: string;
+    items: { name: string; quantity: number; condition: "NEW" | "GOOD" | "FAIR" | "POOR" | "DAMAGED"; notes?: string }[];
+  }[] = [
+    {
+      roomNumber: "101",
+      items: [
+        { name: "Single Bed", quantity: 1, condition: "GOOD" },
+        { name: "Wardrobe", quantity: 1, condition: "GOOD" },
+        { name: "Study Desk", quantity: 1, condition: "GOOD" },
+        { name: "Chair", quantity: 1, condition: "FAIR", notes: "Seat cushion worn" },
+        { name: "Standing Fan", quantity: 1, condition: "GOOD" },
+      ],
+    },
+    {
+      roomNumber: "102",
+      items: [
+        { name: "Single Bed", quantity: 1, condition: "FAIR", notes: "Mattress needs replacement" },
+        { name: "Wardrobe", quantity: 1, condition: "GOOD" },
+        { name: "Study Desk", quantity: 1, condition: "FAIR" },
+        { name: "Standing Fan", quantity: 1, condition: "POOR", notes: "Noisy, needs repair" },
+      ],
+    },
+    {
+      roomNumber: "103",
+      items: [
+        { name: "Single Bed", quantity: 1, condition: "GOOD" },
+        { name: "Wardrobe", quantity: 1, condition: "GOOD" },
+        { name: "Study Desk", quantity: 1, condition: "NEW" },
+        { name: "Chair", quantity: 1, condition: "NEW" },
+        { name: "Air Conditioner", quantity: 1, condition: "FAIR", notes: "Serviced 6 months ago" },
+      ],
+    },
+    {
+      roomNumber: "104",
+      items: [
+        { name: "Single Bed", quantity: 1, condition: "FAIR" },
+        { name: "Wardrobe", quantity: 1, condition: "FAIR", notes: "Door hinge loose" },
+        { name: "Study Desk", quantity: 1, condition: "POOR", notes: "Surface scratched" },
+      ],
+    },
+    {
+      roomNumber: "201",
+      items: [
+        { name: "Single Bed", quantity: 1, condition: "GOOD" },
+        { name: "Wardrobe", quantity: 1, condition: "GOOD" },
+        { name: "Study Desk", quantity: 1, condition: "GOOD" },
+        { name: "Chair", quantity: 1, condition: "GOOD" },
+        { name: "Air Conditioner", quantity: 1, condition: "GOOD" },
+        { name: "Mini Refrigerator", quantity: 1, condition: "FAIR" },
+      ],
+    },
+    {
+      roomNumber: "202",
+      items: [
+        { name: "Single Bed", quantity: 1, condition: "POOR", notes: "Frame damaged" },
+        { name: "Wardrobe", quantity: 1, condition: "DAMAGED", notes: "Door broken, needs replacement" },
+      ],
+    },
+    {
+      roomNumber: "203",
+      items: [
+        { name: "Single Bed", quantity: 2, condition: "GOOD" },
+        { name: "Wardrobe", quantity: 2, condition: "GOOD" },
+        { name: "Study Desk", quantity: 2, condition: "FAIR" },
+        { name: "Chair", quantity: 2, condition: "FAIR" },
+        { name: "Standing Fan", quantity: 1, condition: "GOOD" },
+      ],
+    },
+  ];
+
+  await Promise.all(
+    inventoryData.flatMap(({ roomNumber, items }) =>
+      items.map((item) =>
+        prisma.room_inventory_item.create({
+          data: {
+            roomId: roomMap[roomNumber].id,
+            propertyId: property.id,
+            name: item.name,
+            quantity: item.quantity,
+            condition: item.condition,
+            notes: item.notes,
+          },
+        })
+      )
+    )
+  );
+
   const expenseData: { monthsBack: number; category: ExpenseCategory; amount: number }[] = [
     { monthsBack: 0, category: "ELECTRICITY", amount: 450000 },
     { monthsBack: 0, category: "WATER", amount: 120000 },

@@ -188,7 +188,54 @@ async function main() {
   }
   console.log(`✅ ${tenantsCreated} tenants created, ${paymentsCreated} payments seeded`);
 
-  // ── 6. Create expenses ────────────────────────────────────────────────────
+  // ── 6. Create room inventory ─────────────────────────────────────────────
+  const INVENTORY: { roomIndex: number; name: string; quantity: number; condition: "NEW" | "GOOD" | "FAIR" | "POOR" | "DAMAGED"; notes?: string }[] = [
+    // A101 — single
+    { roomIndex: 0, name: "Single Bed",    quantity: 1, condition: "GOOD" },
+    { roomIndex: 0, name: "Wardrobe",      quantity: 1, condition: "GOOD" },
+    { roomIndex: 0, name: "Study Desk",    quantity: 1, condition: "FAIR", notes: "Surface scratched" },
+    { roomIndex: 0, name: "Chair",         quantity: 1, condition: "GOOD" },
+    // A102 — double
+    { roomIndex: 1, name: "Single Bed",    quantity: 2, condition: "GOOD" },
+    { roomIndex: 1, name: "Wardrobe",      quantity: 2, condition: "GOOD" },
+    { roomIndex: 1, name: "Study Desk",    quantity: 1, condition: "FAIR" },
+    { roomIndex: 1, name: "Standing Fan",  quantity: 1, condition: "POOR", notes: "Noisy, needs repair" },
+    // B101 — ensuite
+    { roomIndex: 2, name: "Double Bed",    quantity: 1, condition: "NEW" },
+    { roomIndex: 2, name: "Wardrobe",      quantity: 1, condition: "GOOD" },
+    { roomIndex: 2, name: "Study Desk",    quantity: 1, condition: "NEW" },
+    { roomIndex: 2, name: "Chair",         quantity: 1, condition: "NEW" },
+    { roomIndex: 2, name: "Air Conditioner", quantity: 1, condition: "GOOD" },
+    { roomIndex: 2, name: "Bathroom Cabinet", quantity: 1, condition: "GOOD" },
+    // B102 — single
+    { roomIndex: 3, name: "Single Bed",    quantity: 1, condition: "FAIR", notes: "Mattress worn" },
+    { roomIndex: 3, name: "Wardrobe",      quantity: 1, condition: "FAIR", notes: "Door hinge loose" },
+    { roomIndex: 3, name: "Study Desk",    quantity: 1, condition: "GOOD" },
+  ];
+
+  let inventoryCreated = 0;
+  for (const item of INVENTORY) {
+    const room = rooms[item.roomIndex];
+    const existing = await prisma.room_inventory_item.findFirst({
+      where: { roomId: room.id, name: item.name },
+    });
+    if (!existing) {
+      await prisma.room_inventory_item.create({
+        data: {
+          roomId: room.id,
+          propertyId: property.id,
+          name: item.name,
+          quantity: item.quantity,
+          condition: item.condition,
+          notes: item.notes,
+        },
+      });
+      inventoryCreated++;
+    }
+  }
+  console.log(`✅ ${inventoryCreated} inventory items seeded`);
+
+  // ── 8. Create expenses ────────────────────────────────────────────────────
   let expensesCreated = 0;
   for (let m = 1; m <= EXPENSE_MONTHS; m++) {
     for (const e of EXPENSE_TEMPLATES) {
@@ -212,7 +259,7 @@ async function main() {
   }
   console.log(`✅ ${expensesCreated} expenses seeded`);
 
-  // ── 7. Backfill actorId on existing demo records ──────────────────────────
+  // ── 9. Backfill actorId on existing demo records ──────────────────────────
   const tenantIds = (
     await prisma.tenant.findMany({ where: { propertyId: property.id }, select: { id: true } })
   ).map((t) => t.id);
