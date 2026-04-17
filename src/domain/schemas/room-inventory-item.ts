@@ -38,6 +38,7 @@ export const inventoryItemSchema = z.object({
   notes: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  conditionUpdatedAt: z.string().datetime(),
 });
 
 export type InventoryItem = z.infer<typeof inventoryItemSchema>;

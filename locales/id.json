@@ -774,6 +774,7 @@
       "condition": "Kondisi",
       "notes": "Catatan (opsional)"
     },
+    "conditionRecorded": "Kondisi dicatat",
     "success": {
       "added": "Barang ditambahkan",
       "updated": "Barang diperbarui",

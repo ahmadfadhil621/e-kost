@@ -16,6 +16,7 @@ function mapToItem(row: {
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;
+  conditionUpdatedAt: Date;
 }): InventoryItem {
   return {
     id: row.id,
@@ -27,6 +28,7 @@ function mapToItem(row: {
     notes: row.notes,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
+    conditionUpdatedAt: row.conditionUpdatedAt.toISOString(),
   };
 }
 
@@ -57,6 +59,7 @@ export class PrismaRoomInventoryItemRepository
         quantity: input.quantity,
         condition: input.condition,
         notes: input.notes ?? null,
+        conditionUpdatedAt: new Date(),
       },
     });
     return mapToItem(row);
@@ -68,7 +71,7 @@ export class PrismaRoomInventoryItemRepository
       data: {
         ...(input.name !== undefined && { name: input.name }),
         ...(input.quantity !== undefined && { quantity: input.quantity }),
-        ...(input.condition !== undefined && { condition: input.condition }),
+        ...(input.condition !== undefined && { condition: input.condition, conditionUpdatedAt: new Date() }),
         ...(input.notes !== undefined && { notes: input.notes }),
       },
     });

@@ -275,17 +275,18 @@ model activity_log {
 }
 
 model room_inventory_item {
-  id         String        @id @default(dbgenerated("gen_random_uuid()"))
-  roomId     String
-  propertyId String
-  name       String
-  quantity   Int           @default(1)
-  condition  ItemCondition
-  notes      String?
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @default(now()) @updatedAt
-  property   Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  room       Room          @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                 String        @id @default(dbgenerated("gen_random_uuid()"))
+  roomId             String
+  propertyId         String
+  name               String
+  quantity           Int           @default(1)
+  condition          ItemCondition
+  notes              String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @default(now()) @updatedAt
+  conditionUpdatedAt DateTime      @default(now()) @db.Timestamptz(6)
+  property           Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  room               Room          @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([propertyId])
   @@index([roomId])

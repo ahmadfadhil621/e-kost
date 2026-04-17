@@ -774,6 +774,7 @@
       "condition": "Condition",
       "notes": "Notes (optional)"
     },
+    "conditionRecorded": "Condition recorded",
     "success": {
       "added": "Item added",
       "updated": "Item updated",

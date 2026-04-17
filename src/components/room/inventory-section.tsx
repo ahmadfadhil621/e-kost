@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { formatDistanceToNow, format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import {
@@ -101,6 +102,75 @@ async function deleteItem(
       (body as { error?: string })?.error ?? "Failed to remove item"
     );
   }
+}
+
+interface InventoryItemRowProps {
+  item: InventoryItem;
+  isArchived: boolean;
+  onEdit: (item: InventoryItem) => void;
+  onDelete: (item: InventoryItem) => void;
+}
+
+function InventoryItemRow({ item, isArchived, onEdit, onDelete }: InventoryItemRowProps) {
+  const { t } = useTranslation();
+  const [showExact, setShowExact] = useState(false);
+
+  const date = new Date(item.conditionUpdatedAt);
+  const relativeTime = formatDistanceToNow(date, { addSuffix: true });
+  const exactTime = format(date, "MMM d, yyyy · HH:mm");
+
+  return (
+    <li className="flex items-start gap-3">
+      <div className="flex shrink-0 flex-col items-start gap-0.5">
+        <ConditionBadge condition={item.condition} />
+        <button
+          type="button"
+          onClick={() => setShowExact((v) => !v)}
+          className="text-[10px] text-muted-foreground underline decoration-dotted underline-offset-2 cursor-pointer min-h-[24px] px-0.5"
+          aria-label={showExact ? exactTime : relativeTime}
+        >
+          {t("inventory.conditionRecorded")}: {showExact ? exactTime : relativeTime}
+        </button>
+      </div>
+      <div className="flex-1 min-w-0">
+        <span className="text-sm font-medium">
+          {item.name}
+          {item.quantity > 1 && (
+            <span className="ml-1 font-normal text-muted-foreground">
+              ×{item.quantity}
+            </span>
+          )}
+        </span>
+        {item.notes && (
+          <p className="max-w-[160px] truncate text-xs text-muted-foreground">
+            {item.notes}
+          </p>
+        )}
+      </div>
+      {!isArchived && (
+        <div className="flex shrink-0 gap-1">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8"
+            aria-label={t("inventory.editItem")}
+            onClick={() => onEdit(item)}
+          >
+            <Pencil className="h-4 w-4" aria-hidden />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8 text-destructive"
+            aria-label={t("inventory.deleteItem")}
+            onClick={() => onDelete(item)}
+          >
+            <Trash2 className="h-4 w-4" aria-hidden />
+          </Button>
+        </div>
+      )}
+    </li>
+  );
 }
 
 export function InventorySection({
@@ -213,44 +283,13 @@ export function InventorySection({
       {!isLoading && !error && items && items.length > 0 && (
         <ul className="space-y-2">
           {items.map((item) => (
-            <li key={item.id} className="flex items-center gap-3">
-              <ConditionBadge condition={item.condition} />
-              <span className="flex-1 text-sm font-medium">
-                {item.name}
-                {item.quantity > 1 && (
-                  <span className="ml-1 font-normal text-muted-foreground">
-                    ×{item.quantity}
-                  </span>
-                )}
-              </span>
-              {item.notes && (
-                <span className="max-w-[120px] truncate text-xs text-muted-foreground">
-                  {item.notes}
-                </span>
-              )}
-              {!isArchived && (
-                <div className="flex shrink-0 gap-1">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8"
-                    aria-label={t("inventory.editItem")}
-                    onClick={() => setEditTarget(item)}
-                  >
-                    <Pencil className="h-4 w-4" aria-hidden />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8 text-destructive"
-                    aria-label={t("inventory.deleteItem")}
-                    onClick={() => setDeleteTarget(item)}
-                  >
-                    <Trash2 className="h-4 w-4" aria-hidden />
-                  </Button>
-                </div>
-              )}
-            </li>
+            <InventoryItemRow
+              key={item.id}
+              item={item}
+              isArchived={isArchived}
+              onEdit={setEditTarget}
+              onDelete={setDeleteTarget}
+            />
           ))}
         </ul>
       )}

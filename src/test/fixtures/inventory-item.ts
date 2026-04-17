@@ -11,6 +11,7 @@ export function createInventoryItem(overrides: Partial<InventoryItem> = {}): Inv
     notes: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    conditionUpdatedAt: new Date().toISOString(),
     ...overrides,
   };
 }
