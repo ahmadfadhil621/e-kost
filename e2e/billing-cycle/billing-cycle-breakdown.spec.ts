@@ -5,6 +5,7 @@
 // REQ-3 -> test('tenant with no room shows no room fallback in balance section')
 // REQ-1 -> test('single cycle moved in this month shows one unpaid card')
 // REQ-10 -> test('mobile viewport shows breakdown without horizontal scroll')
+// PROP-2 -> test('out-of-order payment: month 1 remains unpaid after paying month 2')
 
 import { test, expect } from "@playwright/test";
 import { getPropertyId } from "../helpers/payment-recording";
@@ -221,9 +222,11 @@ test.describe("billing cycle breakdown on tenant detail", () => {
       await expect(unpaidBadges.first()).toBeVisible({ timeout: 15000 });
       await expect(unpaidBadges).toHaveCount(1, { timeout: 10000 });
 
-      // Confirm the label matches current month
+      // Confirm the label matches current month — scope to balance section to
+      // avoid matching "since May 2026" in the room info paragraph
       await expect(
-        page.getByText(cycleLabel(currentMonth))
+        page.getByRole("region", { name: /outstanding balance|saldo/i })
+          .getByText(cycleLabel(currentMonth), { exact: true })
       ).toBeVisible({ timeout: 5000 });
     });
 
@@ -253,6 +256,45 @@ test.describe("billing cycle breakdown on tenant detail", () => {
       expect(scrollWidth, "Page must not scroll horizontally at 375px").toBeLessThanOrEqual(
         clientWidth + 2
       );
+    });
+
+    test("out-of-order payment: month 1 remains unpaid after paying month 2", async ({
+      page,
+      baseURL,
+    }) => {
+      test.info().setTimeout(60000);
+      const propertyId = getPropertyId();
+      const lastMonth = monthStart(1);
+      const currentMonth = monthStart(0);
+      const seed = await seedTenantWithRoom(page, baseURL, propertyId, {
+        moveDate: isoDate(lastMonth),
+        monthlyRent: 1000000,
+        suffix: `ooo-${Date.now()}`,
+      });
+      test.skip(!seed, "Room/tenant seed failed");
+
+      // Pay current month (month 2) while last month (month 1) is still unpaid
+      const paid = await seedPayment(page, baseURL, propertyId, seed!.tenantId, {
+        amount: 1000000,
+        billingCycleYear: currentMonth.getFullYear(),
+        billingCycleMonth: currentMonth.getMonth() + 1,
+      });
+      test.skip(!paid, "Payment seed failed");
+
+      await goToTenantDetail(page, seed!.tenantId);
+      await expect(
+        page.getByRole("heading", { name: /outstanding balance|saldo/i })
+      ).toBeVisible({ timeout: 15000 });
+
+      // Month 1 (last month) must still show as unpaid — scope to balance section
+      // to avoid matching "since Apr 2026" in the room info paragraph
+      await expect(
+        page.getByRole("region", { name: /outstanding balance|saldo/i })
+          .getByText(cycleLabel(lastMonth), { exact: true })
+      ).toBeVisible({ timeout: 10000 });
+      await expect(
+        page.getByRole("status").filter({ hasText: /unpaid|belum bayar/i }).first()
+      ).toBeVisible({ timeout: 10000 });
     });
   });
 });

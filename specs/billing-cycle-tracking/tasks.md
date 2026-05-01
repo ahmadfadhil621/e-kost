@@ -54,16 +54,16 @@
 
 ## Phase 3: E2E Tests (written before production code)
 
-- [ ] `e2e/billing-cycle/billing-cycle-breakdown.spec.ts` — tenant detail shows unpaid months
-- [ ] `e2e/billing-cycle/payment-billing-period.spec.ts` — payment form shows billing period dropdown, FIFO default, override
+- [x] `e2e/billing-cycle/billing-cycle-breakdown.spec.ts` — tenant detail shows unpaid months
+- [x] `e2e/billing-cycle/payment-billing-period.spec.ts` — payment form shows billing period dropdown, FIFO default, override
 
 ---
 
 ## Phase 4: Test Validation
 
-- [ ] Gate 1: structural analysis
-- [ ] Gate 2: fault injection
-- [ ] Gate 3: review checklist
+- [x] Gate 1: structural analysis
+- [x] Gate 2: fault injection
+- [x] Gate 3: review checklist
 
 ---
 
