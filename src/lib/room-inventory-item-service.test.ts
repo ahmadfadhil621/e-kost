@@ -262,6 +262,22 @@ describe("RoomInventoryItemService", () => {
     });
 
     describe("bad cases", () => {
+      it("throws when property access is denied", async () => {
+        const propertyAccess = {
+          validateAccess: vi.fn().mockRejectedValue(new Error("Forbidden")),
+        };
+        const service = new RoomInventoryItemService(
+          createMockRepo(),
+          propertyAccess,
+          createMockLogActivity()
+        );
+
+        await expect(
+          service.updateItem("user-1", "prop-1", "item-1", { name: "X" }, "owner")
+        ).rejects.toThrow("Forbidden");
+        expect(propertyAccess.validateAccess).toHaveBeenCalledWith("user-1", "prop-1");
+      });
+
       it("throws when item is not found", async () => {
         const repo = createMockRepo({ findById: vi.fn().mockResolvedValue(null) });
         const service = new RoomInventoryItemService(
@@ -365,6 +381,22 @@ describe("RoomInventoryItemService", () => {
     });
 
     describe("bad cases", () => {
+      it("throws when property access is denied", async () => {
+        const propertyAccess = {
+          validateAccess: vi.fn().mockRejectedValue(new Error("Forbidden")),
+        };
+        const service = new RoomInventoryItemService(
+          createMockRepo(),
+          propertyAccess,
+          createMockLogActivity()
+        );
+
+        await expect(
+          service.deleteItem("user-1", "prop-1", "item-1", "owner")
+        ).rejects.toThrow("Forbidden");
+        expect(propertyAccess.validateAccess).toHaveBeenCalledWith("user-1", "prop-1");
+      });
+
       it("throws when item is not found", async () => {
         const repo = createMockRepo({ findById: vi.fn().mockResolvedValue(null) });
         const service = new RoomInventoryItemService(

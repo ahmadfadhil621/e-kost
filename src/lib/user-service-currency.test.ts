@@ -13,11 +13,29 @@ vi.mock("@/lib/prisma", () => ({
 const { userService } = await import("@/lib/user-service");
 
 describe("userService — currency methods removed (Issue #93)", () => {
-  it("getCurrency does not exist on userService", () => {
-    expect((userService as Record<string, unknown>).getCurrency).toBeUndefined();
+  describe("good cases", () => {
+    it("getCurrency does not exist on userService", () => {
+      expect((userService as Record<string, unknown>).getCurrency).toBeUndefined();
+    });
+
+    it("updateCurrency does not exist on userService", () => {
+      expect((userService as Record<string, unknown>).updateCurrency).toBeUndefined();
+    });
   });
 
-  it("updateCurrency does not exist on userService", () => {
-    expect((userService as Record<string, unknown>).updateCurrency).toBeUndefined();
+  describe("bad cases", () => {
+    it("userService does not expose any currency mutation method", () => {
+      const currencyMethods = Object.keys(userService as object).filter((k) =>
+        k.toLowerCase().includes("currency")
+      );
+      expect(currencyMethods).toHaveLength(0);
+    });
+  });
+
+  describe("edge cases", () => {
+    it("userService still exposes language methods after currency removal", () => {
+      expect(typeof (userService as Record<string, unknown>).getLanguage).toBe("function");
+      expect(typeof (userService as Record<string, unknown>).updateLanguage).toBe("function");
+    });
   });
 });
