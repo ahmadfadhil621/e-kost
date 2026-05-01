@@ -73,7 +73,7 @@ test.describe("property activity log", () => {
       await page.goto(`/properties/${propertyId}`);
 
       await expect(
-        page.getByRole("link", { name: /^activity$|^aktivitas$/i })
+        page.getByRole("main").getByRole("link", { name: /^activity$|^aktivitas$/i })
       ).toBeVisible({ timeout: 10000 });
     });
 
@@ -81,7 +81,7 @@ test.describe("property activity log", () => {
       const propertyId = getPropertyId();
       await page.goto(`/properties/${propertyId}`);
 
-      await page.getByRole("link", { name: /^activity$|^aktivitas$/i }).click();
+      await page.getByRole("main").getByRole("link", { name: /^activity$|^aktivitas$/i }).click();
 
       await expect(page).toHaveURL(`/properties/${propertyId}/activity`, {
         timeout: 10000,
