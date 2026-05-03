@@ -2,6 +2,7 @@
 
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { useDateFormatter } from "@/hooks/use-date-formatter";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export interface MonthSelectorProps {
@@ -17,12 +18,10 @@ export function MonthSelector({
   onPrevious,
   onNext,
 }: MonthSelectorProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const { format } = useDateFormatter();
   const date = new Date(year, month - 1, 1);
-  const monthYearLabel = new Intl.DateTimeFormat(i18n.language, {
-    month: "long",
-    year: "numeric",
-  }).format(date);
+  const monthYearLabel = format(date, { month: "long", year: "numeric" });
 
   return (
     <div className="flex items-center justify-between gap-2">

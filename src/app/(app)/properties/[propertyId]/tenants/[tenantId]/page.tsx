@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useDateFormatter } from "@/hooks/use-date-formatter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -128,10 +129,11 @@ async function fetchTenantPayments(
 type DialogMode = "assign" | "move" | null;
 
 export default function TenantDetailPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
+  const { format } = useDateFormatter();
   const queryClient = useQueryClient();
   const propertyId = params.propertyId as string;
   const tenantId = params.tenantId as string;
@@ -270,7 +272,7 @@ export default function TenantDetailPage() {
           </p>
         </div>
         {roomHistory && roomHistory.length > 0 && (
-          <RoomHistorySection history={roomHistory} t={t} i18n={i18n} />
+          <RoomHistorySection history={roomHistory} t={t} />
         )}
         <NotesSection
           propertyId={propertyId}
@@ -329,10 +331,7 @@ export default function TenantDetailPage() {
                 `${t("tenant.detail.room")}: ${tenant.roomNumber ?? tenant.roomId}`,
                 tenant.assignedAt
                   ? t("tenant.detail.since", {
-                      date: new Intl.DateTimeFormat(i18n.language, {
-                        month: "long",
-                        year: "numeric",
-                      }).format(new Date(tenant.assignedAt)),
+                      date: format(tenant.assignedAt, { month: "long", year: "numeric" }),
                     })
                   : null,
               ]
@@ -377,7 +376,7 @@ export default function TenantDetailPage() {
       </div>
 
       {roomHistory && roomHistory.length > 0 && (
-        <RoomHistorySection history={roomHistory} t={t} i18n={i18n} />
+        <RoomHistorySection history={roomHistory} t={t} />
       )}
 
       <TenantPaymentSection
@@ -577,17 +576,12 @@ export default function TenantDetailPage() {
 function RoomHistorySection({
   history,
   t,
-  i18n,
 }: {
   history: RoomAssignmentEntry[];
   t: (key: string, options?: Record<string, unknown>) => string;
-  i18n: { language: string };
 }) {
-  const fmt = new Intl.DateTimeFormat(i18n.language, {
-    month: "short",
-    year: "numeric",
-    day: "numeric",
-  });
+  const { format } = useDateFormatter();
+  const fmtDate = (d: string) => format(d, { month: "short", year: "numeric", day: "numeric" });
 
   return (
     <div className="space-y-2">
@@ -600,10 +594,10 @@ function RoomHistorySection({
           >
             <span className="font-medium">{entry.roomNumber}</span>
             <div className="text-right text-muted-foreground text-xs">
-              <div>{fmt.format(new Date(entry.startDate))}</div>
+              <div>{fmtDate(entry.startDate)}</div>
               <div>
                 {entry.endDate
-                  ? fmt.format(new Date(entry.endDate))
+                  ? fmtDate(entry.endDate)
                   : t("tenant.roomHistory.present")}
               </div>
             </div>

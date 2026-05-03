@@ -1,10 +1,17 @@
 import { authClient } from "@/lib/auth-client";
 
+export type AuthUser = {
+  id: string;
+  name: string;
+  email: string;
+  timezone?: string | null;
+};
+
 export function useAuth() {
   const { data: session, isPending } = authClient.useSession();
 
   return {
-    user: session?.user ?? null,
+    user: (session?.user ?? null) as AuthUser | null,
     loading: isPending,
     signIn: async (email: string, password: string) => {
       const { error } = await authClient.signIn.email({ email, password });

@@ -5,6 +5,15 @@ import { prisma } from "./prisma";
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   emailAndPassword: { enabled: true },
+  user: {
+    additionalFields: {
+      timezone: {
+        type: "string",
+        required: false,
+        input: false,
+      },
+    },
+  },
   // Trust the current Vercel deployment origin (covers preview deployments)
   ...(process.env.VERCEL_URL && {
     trustedOrigins: [`https://${process.env.VERCEL_URL}`],

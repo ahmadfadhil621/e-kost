@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import type { Room } from "@/domain/schemas/room";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
+import { useDateFormatter } from "@/hooks/use-date-formatter";
 import { Check, X } from "lucide-react";
 
 /** Room data for card display; accepts API shape (date strings) or domain shape (Date). */
@@ -43,8 +44,9 @@ function roomDetailHref(propertyId: string, roomId: string): string {
 }
 
 export function RoomCard({ room, propertyId }: RoomCardProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const formatCurrency = useFormatCurrency();
+  const { format } = useDateFormatter();
   const roomHref = roomDetailHref(propertyId, room.id);
   const typeRent = `${room.roomType} · ${formatCurrency(room.monthlyRent)}${t("room.card.perMonth")}`;
 
@@ -121,10 +123,7 @@ export function RoomCard({ room, propertyId }: RoomCardProps) {
   const activeTenants = room.tenants ?? (room.tenantName ? [{ id: "", name: room.tenantName, assignedAt: null }] : []);
   const formattedSince = room.assignedAt
     ? t("room.card.since", {
-        date: new Intl.DateTimeFormat(i18n.language, {
-          month: "long",
-          year: "numeric",
-        }).format(new Date(room.assignedAt)),
+        date: format(room.assignedAt, { month: "long", year: "numeric" }),
       })
     : null;
   return (

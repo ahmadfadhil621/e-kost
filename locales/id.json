@@ -614,6 +614,14 @@
       "title": "Bahasa",
       "current": "Bahasa saat ini"
     },
+    "timezone": {
+      "label": "Zona Waktu",
+      "description": "Tanggal dan waktu di seluruh aplikasi akan ditampilkan dalam zona waktu ini.",
+      "placeholder": "Pilih zona waktu",
+      "searchPlaceholder": "Cari zona waktu",
+      "saved": "Zona waktu disimpan",
+      "noResults": "Zona waktu tidak ditemukan"
+    },
     "locale": {
       "en": "English",
       "id": "Bahasa Indonesia"

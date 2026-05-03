@@ -9,6 +9,7 @@ import { PropertyProvider } from "@/contexts/property-context";
 import { CurrencyProvider } from "@/contexts/currency-context";
 import { Providers } from "@/components/providers";
 import { useLanguageSync } from "@/hooks/use-language-sync";
+import { useTimezoneSync } from "@/hooks/use-timezone-sync";
 
 function AppLayoutContent({
   children,
@@ -16,6 +17,7 @@ function AppLayoutContent({
   children: React.ReactNode;
 }) {
   useLanguageSync();
+  useTimezoneSync();
   return (
     <div className="flex min-h-screen flex-col">
       <DemoBanner />

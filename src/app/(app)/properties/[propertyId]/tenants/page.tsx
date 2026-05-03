@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
+import { useDateFormatter } from "@/hooks/use-date-formatter";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -43,8 +44,9 @@ async function fetchBalances(propertyId: string): Promise<{ balances: BalanceIte
 
 
 export default function TenantListPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const formatCurrency = useFormatCurrency();
+  const { format } = useDateFormatter();
   const params = useParams();
   const propertyId = params.propertyId as string;
   const [search, setSearch] = useState("");
@@ -137,10 +139,7 @@ export default function TenantListPage() {
                         {t("tenant.detail.room")} {tenant.roomNumber}
                         {tenant.assignedAt && (
                           <> &middot; {t("tenant.detail.since", {
-                            date: new Intl.DateTimeFormat(i18n.language, {
-                              month: "long",
-                              year: "numeric",
-                            }).format(new Date(tenant.assignedAt)),
+                            date: format(tenant.assignedAt, { month: "long", year: "numeric" }),
                           })}</>
                         )}
                       </p>

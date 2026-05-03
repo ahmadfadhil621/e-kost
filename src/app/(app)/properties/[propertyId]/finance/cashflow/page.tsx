@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "next/navigation";
 import { MonthSelector } from "@/components/finance/month-selector";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
+import { useDateFormatter } from "@/hooks/use-date-formatter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { CashflowEntry } from "@/domain/schemas/cashflow";
 
@@ -29,6 +30,7 @@ export default function CashflowPage() {
   const params = useParams();
   const propertyId = params.propertyId as string;
   const formatCurrency = useFormatCurrency();
+  const { format } = useDateFormatter();
   const searchParams = useSearchParams();
 
   const now = useMemo(() => new Date(), []);
@@ -117,10 +119,7 @@ export default function CashflowPage() {
                 <CardContent className="space-y-1">
                   <p className="text-sm font-medium">{entry.description}</p>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(entry.date).toLocaleDateString(
-                      typeof window !== "undefined" ? navigator.language : "en",
-                      { year: "numeric", month: "short", day: "numeric" }
-                    )}
+                    {format(entry.date, { year: "numeric", month: "short", day: "numeric" })}
                   </p>
                 </CardContent>
               </Card>

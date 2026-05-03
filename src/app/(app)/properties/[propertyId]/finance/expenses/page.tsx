@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MonthSelector } from "@/components/finance/month-selector";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
+import { useDateFormatter } from "@/hooks/use-date-formatter";
 import type { Expense } from "@/domain/schemas/expense";
 import type { PropertyRole } from "@/domain/schemas/property";
 
@@ -78,6 +79,7 @@ export default function ExpenseListPage() {
   const params = useParams();
   const propertyId = params.propertyId as string;
   const formatCurrency = useFormatCurrency();
+  const { format } = useDateFormatter();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
@@ -222,16 +224,7 @@ export default function ExpenseListPage() {
                     {formatCurrency(expense.amount)}
                   </p>
                   <p className="text-muted-foreground text-sm">
-                    {expense.date.toLocaleDateString(
-                      typeof window !== "undefined"
-                        ? navigator.language
-                        : "en",
-                      {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      }
-                    )}
+                    {format(expense.date, { year: "numeric", month: "short", day: "numeric" })}
                   </p>
                   {expense.description && (
                     <p className="text-muted-foreground text-sm line-clamp-2">

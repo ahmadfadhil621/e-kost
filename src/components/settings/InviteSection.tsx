@@ -9,6 +9,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDateFormatter } from "@/hooks/use-date-formatter";
 
 const createInviteFormSchema = z.object({
   email: z.string().email(),
@@ -32,6 +33,7 @@ type InviteSectionProps = {
 
 export function InviteSection({ userRole }: InviteSectionProps) {
   const { t } = useTranslation();
+  const { format } = useDateFormatter();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -170,7 +172,7 @@ export function InviteSection({ userRole }: InviteSectionProps) {
                           <div className="mt-0.5 flex gap-2 text-xs text-muted-foreground">
                             <span>{invite.role}</span>
                             <span>·</span>
-                            <span>{t("settings.invites.list.expires")}: {new Date(invite.expiresAt).toLocaleDateString()}</span>
+                            <span>{t("settings.invites.list.expires")}: {format(invite.expiresAt)}</span>
                           </div>
                         </div>
                         <Button

@@ -11,6 +11,7 @@ import { StatusIndicator } from "@/components/room/status-indicator";
 import { InventorySection } from "@/components/room/inventory-section";
 import { Pencil } from "lucide-react";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
+import { useDateFormatter } from "@/hooks/use-date-formatter";
 import {
   Dialog,
   DialogContent,
@@ -108,6 +109,7 @@ export default function RoomDetailPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const formatCurrency = useFormatCurrency();
+  const { format } = useDateFormatter();
   const propertyId = params.propertyId as string;
   const roomId = params.roomId as string;
 
@@ -197,11 +199,7 @@ export default function RoomDetailPage() {
   const isOccupied = room.activeTenantCount > 0;
 
   const createdAt = room.createdAt
-    ? new Date(room.createdAt).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
+    ? format(room.createdAt, { year: "numeric", month: "short", day: "numeric" })
     : "—";
 
   return (

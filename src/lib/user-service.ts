@@ -18,5 +18,23 @@ export const userService = {
     });
     return user.language;
   },
+
+  async getTimezone(userId: string): Promise<string | null> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { timezone: true },
+    });
+    if (!user) { throw new Error(`User not found: ${userId}`); }
+    return user.timezone;
+  },
+
+  async updateTimezone(userId: string, timezone: string): Promise<string> {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { timezone },
+      select: { timezone: true },
+    });
+    return user.timezone!;
+  },
 };
 

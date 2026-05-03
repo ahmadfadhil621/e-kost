@@ -614,6 +614,14 @@
       "title": "Language",
       "current": "Current language"
     },
+    "timezone": {
+      "label": "Timezone",
+      "description": "Dates and times across the app will display in this timezone.",
+      "placeholder": "Select timezone",
+      "searchPlaceholder": "Search timezone",
+      "saved": "Timezone saved",
+      "noResults": "No timezones found"
+    },
     "locale": {
       "en": "English",
       "id": "Bahasa Indonesia"

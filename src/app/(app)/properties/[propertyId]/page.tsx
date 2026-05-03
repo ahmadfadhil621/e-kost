@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
+import { useDateFormatter } from "@/hooks/use-date-formatter";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,17 +46,10 @@ async function fetchDashboardStats(propertyId: string): Promise<DashboardStats> 
   return res.json() as Promise<DashboardStats>;
 }
 
-function formatDate(dateStr: string | Date): string {
-  const d = typeof dateStr === "string" ? new Date(dateStr) : dateStr;
-  return d.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
 export default function PropertyDetailPage() {
   const { t } = useTranslation();
+  const { format } = useDateFormatter();
+  const formatDate = (d: string | Date) => format(d, { year: "numeric", month: "long", day: "numeric" });
   const params = useParams();
   const propertyId = params.propertyId as string;
 

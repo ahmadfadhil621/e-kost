@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { usePropertyContext } from "@/contexts/property-context";
 import { Button } from "@/components/ui/button";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
+import { useDateFormatter } from "@/hooks/use-date-formatter";
 import { OccupancyCard } from "@/components/dashboard/OccupancyCard";
 import { FinanceSummaryCard } from "@/components/dashboard/FinanceSummaryCard";
 import { OutstandingBalancesList } from "@/components/dashboard/OutstandingBalancesList";
@@ -40,19 +41,13 @@ async function fetchDashboard(propertyId: string): Promise<DashboardResponse> {
   return res.json();
 }
 
-function formatDate(d: Date): string {
-  return d.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
 export default function DashboardPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const ctx = usePropertyContext();
   const formatCurrency = useFormatCurrency();
+  const { format } = useDateFormatter();
+  const formatDate = (d: Date) => format(d, { year: "numeric", month: "short", day: "numeric" });
   const [property, setProperty] = useState<PropertyDetail | null>(null);
 
   const activeId = ctx?.activePropertyId ?? null;
