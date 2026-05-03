@@ -21,7 +21,7 @@ vi.mock("next/server", () => ({
 }));
 
 import { NextResponse } from "next/server";
-import { middleware } from "./middleware";
+import { proxy } from "./proxy";
 
 function makeRequest(pathname: string): NextRequest {
   const url = new URL(pathname, "http://localhost");
@@ -48,7 +48,7 @@ function mockUnauthenticated() {
   mockFetch.mockResolvedValue({ ok: false });
 }
 
-describe("middleware", () => {
+describe("proxy", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(NextResponse.redirect).mockReturnValue(
@@ -63,7 +63,7 @@ describe("middleware", () => {
     it("unauthenticated user on / is redirected to /login", async () => {
       mockUnauthenticated();
 
-      await middleware(makeRequest("/"));
+      await proxy(makeRequest("/"));
 
       expect(NextResponse.redirect).toHaveBeenCalledOnce();
       const redirectUrl = vi.mocked(NextResponse.redirect).mock.calls[0][0] as URL;
@@ -74,7 +74,7 @@ describe("middleware", () => {
     it("unauthenticated user on /settings is redirected to /login", async () => {
       mockUnauthenticated();
 
-      await middleware(makeRequest("/settings"));
+      await proxy(makeRequest("/settings"));
 
       expect(NextResponse.redirect).toHaveBeenCalledOnce();
       const redirectUrl = vi.mocked(NextResponse.redirect).mock.calls[0][0] as URL;
@@ -85,7 +85,7 @@ describe("middleware", () => {
     it("authenticated user on / passes through", async () => {
       mockAuthenticated();
 
-      await middleware(makeRequest("/"));
+      await proxy(makeRequest("/"));
 
       expect(NextResponse.next).toHaveBeenCalledOnce();
       expect(NextResponse.redirect).not.toHaveBeenCalled();
@@ -96,7 +96,7 @@ describe("middleware", () => {
     it("unauthenticated user on /login passes through without redirect", async () => {
       mockUnauthenticated();
 
-      await middleware(makeRequest("/login"));
+      await proxy(makeRequest("/login"));
 
       expect(NextResponse.next).toHaveBeenCalledOnce();
       expect(NextResponse.redirect).not.toHaveBeenCalled();
@@ -105,7 +105,7 @@ describe("middleware", () => {
     it("unauthenticated user on /register passes through without redirect", async () => {
       mockUnauthenticated();
 
-      await middleware(makeRequest("/register"));
+      await proxy(makeRequest("/register"));
 
       expect(NextResponse.next).toHaveBeenCalledOnce();
       expect(NextResponse.redirect).not.toHaveBeenCalled();
@@ -116,7 +116,7 @@ describe("middleware", () => {
     it("authenticated user on /login is redirected to /", async () => {
       mockAuthenticated();
 
-      await middleware(makeRequest("/login"));
+      await proxy(makeRequest("/login"));
 
       expect(NextResponse.redirect).toHaveBeenCalledOnce();
       const redirectUrl = vi.mocked(NextResponse.redirect).mock.calls[0][0] as URL;
@@ -127,7 +127,7 @@ describe("middleware", () => {
     it("authenticated user on /register is redirected to /", async () => {
       mockAuthenticated();
 
-      await middleware(makeRequest("/register"));
+      await proxy(makeRequest("/register"));
 
       expect(NextResponse.redirect).toHaveBeenCalledOnce();
       const redirectUrl = vi.mocked(NextResponse.redirect).mock.calls[0][0] as URL;
@@ -138,7 +138,7 @@ describe("middleware", () => {
     it("unauthenticated user on /login/extra passes through (startsWith check)", async () => {
       mockUnauthenticated();
 
-      await middleware(makeRequest("/login/extra"));
+      await proxy(makeRequest("/login/extra"));
 
       expect(NextResponse.next).toHaveBeenCalledOnce();
       expect(NextResponse.redirect).not.toHaveBeenCalled();
@@ -148,7 +148,7 @@ describe("middleware", () => {
       mockUnauthenticated();
       const request = makeRequest("/");
 
-      await middleware(request);
+      await proxy(request);
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.objectContaining({ pathname: "/api/auth/get-session" }),
