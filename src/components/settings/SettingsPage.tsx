@@ -8,7 +8,6 @@ import { useProperty } from "@/contexts/property-context";
 import { useDevStatus } from "@/hooks/use-dev-status";
 import { AVAILABLE_LOCALES } from "@/lib/i18n";
 import { LanguageSelector } from "./LanguageSelector";
-import { TimezoneSelector } from "./TimezoneSelector";
 import { AccountSection } from "./AccountSection";
 import { AppearanceSection } from "./AppearanceSection";
 import { Separator } from "@/components/ui/separator";
@@ -52,8 +51,6 @@ export function SettingsPage() {
         <AppearanceSection />
         <Separator />
         <LanguageSelector availableLocales={[...AVAILABLE_LOCALES]} />
-        <Separator />
-        <TimezoneSelector />
         <Separator />
         <AccountSection
           user={user!}

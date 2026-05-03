@@ -1,132 +1,9 @@
 // Traceability: settings-timezone (issue #120)
-// REQ Settings.1   -> test('user opens Settings and sees the timezone section')
-// REQ Settings.2   -> test('user selects a timezone from the list and saves')
-// REQ Settings.2   -> test('timezone preference persists after logout and re-login')
 // REQ AutoDetect.1 -> test('user with null timezone gets auto-detected timezone written on page load')
 // REQ AutoDetect.2 -> test('auto-detect does not fire again after timezone is set')
 
 import { test, expect } from "@playwright/test";
 import { stableFill } from "../helpers/forms";
-
-// ── Shared-auth tests (Settings UI) ─────────────────────────────────────────
-// Uses the default storageState (user-with-property.json) provided by the
-// chromium project in playwright.config.ts.
-
-test.describe("timezone selector", () => {
-  test.describe("good cases", () => {
-    test("user opens Settings and sees the timezone section", async ({ page }) => {
-      await page.goto("/settings", { waitUntil: "load" });
-
-      await expect(
-        page.getByRole("heading", { name: /timezone|zona waktu/i })
-      ).toBeVisible({ timeout: 10000 });
-
-      // The combobox trigger should show the current timezone or a placeholder
-      await expect(
-        page.getByRole("button", { name: /search timezone|timezone|zona waktu/i }).first()
-      ).toBeVisible({ timeout: 5000 });
-    });
-
-    test("user selects a timezone from the curated list and saves", async ({ page }) => {
-      test.setTimeout(60000);
-
-      await page.goto("/settings", { waitUntil: "load" });
-
-      await expect(
-        page.getByRole("heading", { name: /timezone|zona waktu/i })
-      ).toBeVisible({ timeout: 10000 });
-
-      // Open the combobox
-      const comboTrigger = page
-        .getByRole("main")
-        .getByRole("button", { name: /timezone|zona waktu|search|cari/i })
-        .first();
-      await comboTrigger.click();
-
-      // Type to filter for Europe/Berlin
-      const searchInput = page.getByPlaceholder(/search timezone|cari zona waktu/i);
-      await searchInput.waitFor({ state: "visible", timeout: 5000 });
-      await searchInput.fill("Berlin");
-
-      // Select the matching option
-      const berlinOption = page.getByRole("option", { name: /Europe\/Berlin/i });
-      await berlinOption.waitFor({ state: "visible", timeout: 5000 });
-      await berlinOption.click();
-
-      // A Save button appears because the value changed
-      const saveButton = page.getByRole("button", { name: /^save$|^simpan$/i });
-      await saveButton.waitFor({ state: "visible", timeout: 5000 });
-      await saveButton.click();
-
-      // Success feedback: saved confirmation text appears
-      await expect(
-        page.getByText(/timezone saved|zona waktu disimpan/i)
-      ).toBeVisible({ timeout: 8000 });
-
-      // The combobox trigger now shows the selected timezone
-      await expect(
-        page.getByRole("main").getByText(/Europe\/Berlin/)
-      ).toBeVisible({ timeout: 5000 });
-    });
-  });
-
-  test.describe("bad cases", () => {
-    test("user types a string matching no curated entry — Save button is not shown", async ({
-      page,
-    }) => {
-      await page.goto("/settings", { waitUntil: "load" });
-
-      await expect(
-        page.getByRole("heading", { name: /timezone|zona waktu/i })
-      ).toBeVisible({ timeout: 10000 });
-
-      // Open the combobox
-      const comboTrigger = page
-        .getByRole("main")
-        .getByRole("button", { name: /timezone|zona waktu|search|cari/i })
-        .first();
-      await comboTrigger.click();
-
-      // Type a string that matches nothing in the curated list
-      const searchInput = page.getByPlaceholder(/search timezone|cari zona waktu/i);
-      await searchInput.waitFor({ state: "visible", timeout: 5000 });
-      await searchInput.fill("Not/Valid");
-
-      // No option should appear (or a "no results" message shows)
-      const saveButton = page.getByRole("button", { name: /^save$|^simpan$/i });
-      await expect(saveButton).not.toBeVisible({ timeout: 3000 });
-    });
-  });
-
-  test.describe("edge cases", () => {
-    test("closing combobox without selecting does not show Save button", async ({
-      page,
-    }) => {
-      await page.goto("/settings", { waitUntil: "load" });
-
-      await expect(
-        page.getByRole("heading", { name: /timezone|zona waktu/i })
-      ).toBeVisible({ timeout: 10000 });
-
-      // Open
-      const comboTrigger = page
-        .getByRole("main")
-        .getByRole("button", { name: /timezone|zona waktu|search|cari/i })
-        .first();
-      await comboTrigger.click();
-
-      const searchInput = page.getByPlaceholder(/search timezone|cari zona waktu/i);
-      await searchInput.waitFor({ state: "visible", timeout: 5000 });
-
-      // Close by pressing Escape without selecting anything
-      await page.keyboard.press("Escape");
-
-      // Save button should not be visible
-      const saveButton = page.getByRole("button", { name: /^save$|^simpan$/i });
-      await expect(saveButton).not.toBeVisible({ timeout: 3000 });
-    });
-  });
-});
 
 // ── Auto-detect tests (fresh user with null timezone) ────────────────────────
 // These tests create their own user to guarantee timezone starts as null.
@@ -220,13 +97,11 @@ test.describe("timezone auto-detect", () => {
 
       // Go to settings and verify the timezone is now shown (non-null)
       await page.goto("/settings", { waitUntil: "load" });
-      await expect(
-        page.getByRole("heading", { name: /timezone|zona waktu/i })
-      ).toBeVisible({ timeout: 10000 });
 
-      // The combobox trigger should show an actual timezone (not a placeholder)
-      const timezoneSection = page.getByRole("region", { name: /timezone|zona waktu/i });
-      await expect(timezoneSection).toBeVisible({ timeout: 5000 });
+      // The settings page loads without error (timezone is set silently)
+      await expect(
+        page.getByRole("heading", { name: /settings|pengaturan/i }).first()
+      ).toBeVisible({ timeout: 10000 });
     });
   });
 
