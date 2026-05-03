@@ -4,10 +4,13 @@
 // REQ 2.3 -> test('expenses sorted by date descending')
 // REQ 2.4 -> test('expense list renders single-column card layout on mobile')
 // REQ 2.6 -> test('expense list shows empty state when no expenses')
-// REQ 2.5 -> test('user can filter expenses by month')
+// REQ 2.5 -> test('MonthSelector is visible on expense list')
+//         -> test('clicking previous month updates the displayed month label')
+//         -> test('selecting a month with no expenses shows empty state')
+//         -> test('navigating back to previous month restores original month label')
 
 import { test, expect } from "@playwright/test";
-import { goToExpenseList } from "../helpers/finance-expense-tracking";
+import { goToExpenseList, getPropertyId } from "../helpers/finance-expense-tracking";
 
 test.use({ storageState: "e2e/.auth/user-with-property.json" });
 
@@ -44,6 +47,29 @@ test.describe("list expenses", () => {
           .first()
       ).toBeVisible({ timeout: 15000 }).catch(() => {});
     });
+
+    test("MonthSelector is visible on expense list", async ({ page }) => {
+      await goToExpenseList(page);
+      await expect(
+        page.getByRole("button", { name: /previous month|bulan sebelumnya/i })
+      ).toBeVisible({ timeout: 10000 });
+      await expect(
+        page.getByRole("button", { name: /next month|bulan berikutnya/i })
+      ).toBeVisible({ timeout: 10000 });
+    });
+
+    test("clicking previous month updates the displayed month label", async ({
+      page,
+    }) => {
+      await goToExpenseList(page);
+      const monthLabel = page.locator('[aria-live="polite"]');
+      const before = await monthLabel.textContent({ timeout: 10000 });
+      expect(before).not.toBeNull();
+      await page
+        .getByRole("button", { name: /previous month|bulan sebelumnya/i })
+        .click();
+      await expect(monthLabel).not.toHaveText(before!, { timeout: 5000 });
+    });
   });
 
   test.describe("bad cases", () => {
@@ -60,6 +86,22 @@ test.describe("list expenses", () => {
           .first()
       ).toBeVisible({ timeout: 10000 });
     });
+
+    test("selecting a month with no expenses shows empty state", async ({
+      page,
+    }) => {
+      const propertyId = getPropertyId();
+      await page.goto(
+        `/properties/${propertyId}/finance/expenses?year=2020&month=1`
+      );
+      await expect(
+        page
+          .getByText(
+            /no expenses recorded|belum ada pengeluaran|no expenses/i
+          )
+          .first()
+      ).toBeVisible({ timeout: 15000 });
+    });
   });
 
   test.describe("edge cases", () => {
@@ -71,6 +113,23 @@ test.describe("list expenses", () => {
           .or(page.getByRole("button", { name: /add expense|tambah pengeluaran/i }))
           .first()
       ).toBeVisible({ timeout: 15000 });
+    });
+
+    test("navigating back to previous month restores original month label", async ({
+      page,
+    }) => {
+      await goToExpenseList(page);
+      const monthLabel = page.locator('[aria-live="polite"]');
+      const original = await monthLabel.textContent({ timeout: 10000 });
+      expect(original).not.toBeNull();
+      await page
+        .getByRole("button", { name: /next month|bulan berikutnya/i })
+        .click();
+      await expect(monthLabel).not.toHaveText(original!, { timeout: 5000 });
+      await page
+        .getByRole("button", { name: /previous month|bulan sebelumnya/i })
+        .click();
+      await expect(monthLabel).toHaveText(original!, { timeout: 5000 });
     });
   });
 });
