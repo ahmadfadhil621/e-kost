@@ -434,6 +434,20 @@
       "movedOut": "Cannot record payment: tenant has moved out",
       "notFound": "Payment not found",
       "loadFailed": "Failed to load payment data"
+    },
+    "export": {
+      "button": "Export",
+      "disabledTooltip": "No payments to export",
+      "errorToast": "Failed to export payments",
+      "columns": {
+        "date": "Date",
+        "tenant": "Tenant",
+        "room": "Room",
+        "period": "Period",
+        "amount": "Amount (IDR)",
+        "notes": "Notes"
+      },
+      "rowCapError": "Export limit exceeded: maximum 10,000 rows allowed"
     }
   },
   "balance": {

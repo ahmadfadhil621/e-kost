@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createPaymentSchema } from "@/domain/schemas/payment";
+import { createPaymentSchema, paymentFilterSchema } from "@/domain/schemas/payment";
 import { withPropertyAccess } from "@/lib/property-access";
 import { paymentService } from "@/lib/payment-service-instance";
 
@@ -83,10 +83,27 @@ export async function GET(
     return access.errorResponse;
   }
 
+  const url = new URL(request.url);
+  const rawFilters = {
+    dateFrom: url.searchParams.get("dateFrom") ?? undefined,
+    dateTo: url.searchParams.get("dateTo") ?? undefined,
+  };
+
+  let filters;
+  try {
+    filters = paymentFilterSchema.parse(rawFilters);
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return NextResponse.json({ error: err.issues[0]?.message ?? "Invalid filters" }, { status: 400 });
+    }
+    return NextResponse.json({ error: "Invalid filters" }, { status: 400 });
+  }
+
   try {
     const payments = await paymentService.listPayments(
       access.userId!,
-      propertyId
+      propertyId,
+      filters
     );
     return NextResponse.json(
       payments.map(paymentToJson),

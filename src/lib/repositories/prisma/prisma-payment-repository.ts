@@ -1,4 +1,4 @@
-import type { Payment, PaymentPaginationOptions, PaymentWithCount } from "@/domain/schemas/payment";
+import type { Payment, PaymentExportRow, PaymentFilters, PaymentPaginationOptions, PaymentWithCount } from "@/domain/schemas/payment";
 import type { IPaymentRepository } from "@/domain/interfaces/payment-repository";
 import { prisma } from "@/lib/prisma";
 
@@ -18,6 +18,14 @@ function toNumber(value: unknown): number {
   }
   const n = Number(value);
   return Number.isNaN(n) ? 0 : n;
+}
+
+function buildDateFilter(filters?: PaymentFilters) {
+  if (!filters?.dateFrom && !filters?.dateTo) {return {};}
+  const paymentDate: { gte?: Date; lte?: Date } = {};
+  if (filters.dateFrom) {paymentDate.gte = new Date(filters.dateFrom);}
+  if (filters.dateTo) {paymentDate.lte = new Date(filters.dateTo);}
+  return { paymentDate };
 }
 
 function toPayment(p: {
@@ -73,9 +81,10 @@ export class PrismaPaymentRepository implements IPaymentRepository {
     return p ? toPayment(p) : null;
   }
 
-  async findByProperty(propertyId: string): Promise<Payment[]> {
+  async findByProperty(propertyId: string, filters?: PaymentFilters): Promise<Payment[]> {
+    const dateFilter = buildDateFilter(filters);
     const list = await prisma.payment.findMany({
-      where: { tenant: { propertyId } },
+      where: { tenant: { propertyId }, ...dateFilter },
       include: { tenant: true },
       orderBy: [{ paymentDate: "desc" }, { createdAt: "desc" }],
     });
@@ -145,5 +154,44 @@ export class PrismaPaymentRepository implements IPaymentRepository {
       amount: toNumber(p.amount),
       paymentDate: p.paymentDate,
     }));
+  }
+
+  async findForExport(propertyId: string, filters: PaymentFilters): Promise<PaymentExportRow[]> {
+    const dateFilter = buildDateFilter(filters);
+    const list = await prisma.payment.findMany({
+      where: { tenant: { propertyId }, ...dateFilter },
+      include: {
+        tenant: {
+          include: {
+            room_assignment: {
+              include: { room: { select: { roomNumber: true } } },
+              orderBy: { startDate: "desc" },
+            },
+          },
+        },
+        billing_cycle: true,
+      },
+      orderBy: [{ paymentDate: "desc" }, { createdAt: "desc" }],
+      take: 10_001,
+    });
+
+    return list.map((p) => {
+      const paymentDate = p.paymentDate;
+      const assignment = p.tenant.room_assignment.find(
+        (a) =>
+          a.startDate <= paymentDate &&
+          (a.endDate === null || a.endDate > paymentDate)
+      );
+
+      return {
+        paymentDate,
+        tenantName: p.tenant.name,
+        roomNumber: assignment?.room.roomNumber ?? null,
+        billingCycleYear: p.billing_cycle?.year ?? null,
+        billingCycleMonth: p.billing_cycle?.month ?? null,
+        amount: toNumber(p.amount),
+        note: p.note ?? null,
+      };
+    });
   }
 }

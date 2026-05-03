@@ -55,3 +55,20 @@ export interface PaymentPaginationOptions {
   limit?: number;
   page?: number;
 }
+
+export const paymentFilterSchema = z.object({
+  dateFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  dateTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+});
+
+export type PaymentFilters = z.infer<typeof paymentFilterSchema>;
+
+export interface PaymentExportRow {
+  paymentDate: Date;
+  tenantName: string;
+  roomNumber: string | null;
+  billingCycleYear: number | null;
+  billingCycleMonth: number | null;
+  amount: number;
+  note: string | null;
+}

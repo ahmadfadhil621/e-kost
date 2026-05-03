@@ -434,6 +434,20 @@
       "movedOut": "Tidak dapat mencatat pembayaran: penyewa sudah pindah",
       "notFound": "Pembayaran tidak ditemukan",
       "loadFailed": "Gagal memuat data pembayaran"
+    },
+    "export": {
+      "button": "Ekspor",
+      "disabledTooltip": "Tidak ada pembayaran untuk diekspor",
+      "errorToast": "Gagal mengekspor pembayaran",
+      "columns": {
+        "date": "Tanggal",
+        "tenant": "Penyewa",
+        "room": "Kamar",
+        "period": "Periode",
+        "amount": "Jumlah (IDR)",
+        "notes": "Catatan"
+      },
+      "rowCapError": "Batas ekspor terlampaui: maksimum 10.000 baris diizinkan"
     }
   },
   "balance": {

@@ -1,4 +1,4 @@
-// Traceability: payment-recording + property-settings (issue #104)
+// Traceability: payment-recording + property-settings (issue #104) + finance-payment-export (issue #121)
 // REQ 1.3 -> it('POST returns 201 and payment when body is valid')
 // REQ 1.4 -> it('POST returns 400 when required fields are missing')
 // REQ 1.5 -> it('POST returns 400 when amount is zero or negative')
@@ -12,6 +12,10 @@
 // PROP-1 -> it('POST succeeds for both roles when staffOnlyFinance is false')
 // PROP-2 -> it('POST always succeeds for staff regardless of staffOnlyFinance')
 // PROP-3 -> it('POST always returns 403 for owner when staffOnlyFinance is true')
+// --- issue #121 (filter parity) ---
+// AC-8-list -> it('GET passes dateFrom and dateTo filters to service when provided')
+// AC-8-list -> it('GET passes no filters when no query params')
+// AC-8-list -> it('GET returns 400 when dateFrom format is invalid')
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextResponse } from "next/server";
@@ -600,6 +604,82 @@ describe("POST /api/properties/[propertyId]/payments — staff-only finance mode
           expect(response.status).toBe(403);
         }),
         { numRuns: 100 }
+      );
+    });
+  });
+});
+
+// ── GET /payments — filter parity (issue #121) ─────────────────────────────
+
+describe("GET /api/properties/[propertyId]/payments — filter support (AC-8)", () => {
+  describe("good cases", () => {
+    it("passes dateFrom and dateTo filters to service when provided as query params", async () => {
+      vi.mocked(paymentService.listPayments).mockResolvedValue([]);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/payments?dateFrom=2025-01-01&dateTo=2025-05-31`
+      );
+      const response = await GET(request, { params: Promise.resolve({ propertyId }) });
+
+      expect(response.status).toBe(200);
+      expect(paymentService.listPayments).toHaveBeenCalledWith(
+        "test-user-id",
+        propertyId,
+        { dateFrom: "2025-01-01", dateTo: "2025-05-31" }
+      );
+    });
+
+    it("passes no filters when no query params provided", async () => {
+      vi.mocked(paymentService.listPayments).mockResolvedValue([]);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/payments`
+      );
+      const response = await GET(request, { params: Promise.resolve({ propertyId }) });
+
+      expect(response.status).toBe(200);
+      expect(paymentService.listPayments).toHaveBeenCalledWith(
+        "test-user-id",
+        propertyId,
+        {}
+      );
+    });
+  });
+
+  describe("bad cases", () => {
+    it("returns 400 when dateFrom format is invalid", async () => {
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/payments?dateFrom=not-a-date`
+      );
+      const response = await GET(request, { params: Promise.resolve({ propertyId }) });
+
+      expect(response.status).toBe(400);
+    });
+
+    it("returns 400 when dateTo format is invalid", async () => {
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/payments?dateTo=2025/05/01`
+      );
+      const response = await GET(request, { params: Promise.resolve({ propertyId }) });
+
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe("edge cases", () => {
+    it("passes only dateFrom when dateTo is omitted", async () => {
+      vi.mocked(paymentService.listPayments).mockResolvedValue([]);
+
+      const request = new Request(
+        `http://localhost:3000/api/properties/${propertyId}/payments?dateFrom=2025-01-01`
+      );
+      const response = await GET(request, { params: Promise.resolve({ propertyId }) });
+
+      expect(response.status).toBe(200);
+      expect(paymentService.listPayments).toHaveBeenCalledWith(
+        "test-user-id",
+        propertyId,
+        { dateFrom: "2025-01-01" }
       );
     });
   });
