@@ -35,7 +35,6 @@ function createMockTenantRepo(
     findById: vi.fn(),
     findByProperty: vi.fn(),
     update: vi.fn(),
-    assignRoom: vi.fn(),
     removeRoomAssignment: vi.fn(),
     softDelete: vi.fn(),
     ...overrides,

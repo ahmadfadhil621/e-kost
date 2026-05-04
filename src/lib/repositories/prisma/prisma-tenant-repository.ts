@@ -111,15 +111,6 @@ export class PrismaTenantRepository implements ITenantRepository {
     return toTenant(updated);
   }
 
-  async assignRoom(id: string, roomId: string, billingDayOfMonth: number): Promise<Tenant> {
-    const updated = await prisma.tenant.update({
-      where: { id },
-      data: { roomId, movedInAt: new Date(), billingDayOfMonth },
-      include: { room: { select: { roomNumber: true } } },
-    });
-    return toTenant(updated);
-  }
-
   async removeRoomAssignment(id: string): Promise<Tenant> {
     const updated = await prisma.tenant.update({
       where: { id },

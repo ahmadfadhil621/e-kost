@@ -55,7 +55,6 @@ function createMockTenantRepo(overrides: Partial<ITenantRepository> = {}): ITena
     findById: vi.fn(),
     findByProperty: vi.fn().mockResolvedValue([]),
     update: vi.fn(),
-    assignRoom: vi.fn(),
     removeRoomAssignment: vi.fn(),
     softDelete: vi.fn(),
     ...overrides,

@@ -16,7 +16,6 @@ export interface ITenantRepository {
     id: string,
     data: Partial<{ name: string; phone: string; email: string; billingDayOfMonth: number | null }>
   ): Promise<Tenant>;
-  assignRoom(id: string, roomId: string, billingDayOfMonth: number): Promise<Tenant>;
   moveRoom(
     id: string,
     data: { roomId: string; movedInAt: Date; billingDayOfMonth?: number }

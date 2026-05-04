@@ -149,15 +149,21 @@ async function main() {
     });
     if (!tenant) {
       const movedInAt = monthsAgo(6);
-      tenant = await prisma.tenant.create({
-        data: {
-          propertyId: property.id,
-          roomId: room.id,
-          name: t.name,
-          phone: t.phone,
-          email: t.email,
-          movedInAt,
-        },
+      tenant = await prisma.$transaction(async (tx) => {
+        const created = await tx.tenant.create({
+          data: {
+            propertyId: property.id,
+            roomId: room.id,
+            name: t.name,
+            phone: t.phone,
+            email: t.email,
+            movedInAt,
+          },
+        });
+        await tx.room_assignment.create({
+          data: { tenantId: created.id, roomId: room.id, startDate: movedInAt, endDate: null },
+        });
+        return created;
       });
       await logActivity(
         property.id, demoUser!.id,

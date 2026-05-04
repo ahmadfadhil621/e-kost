@@ -10,7 +10,6 @@ import type {
 import {
   createTenantSchema,
   updateTenantSchema,
-  assignRoomSchema,
 } from "@/domain/schemas/tenant";
 import type { PropertyRole } from "@/domain/schemas/property";
 import type { LogActivityFn } from "@/lib/activity-log-service";
@@ -103,60 +102,6 @@ export class TenantService {
       entityType: "TENANT",
       entityId: id,
       metadata: { tenantName: updated.name },
-    });
-    return updated;
-  }
-
-  async assignRoom(
-    userId: string,
-    propertyId: string,
-    tenantId: string,
-    roomId: string,
-    billingDayOfMonth?: number
-  ): Promise<Tenant> {
-    const role = await this.propertyAccess.validateAccess(userId, propertyId);
-    assignRoomSchema.parse({ roomId, billingDayOfMonth });
-
-    const tenant = await this.tenantRepo.findById(tenantId);
-    if (!tenant || tenant.propertyId !== propertyId) {
-      throw new Error("Tenant not found");
-    }
-    if (tenant.movedOutAt) {
-      throw new Error("Cannot assign room to moved-out tenant");
-    }
-    if (tenant.roomId) {
-      throw new Error("Tenant is already assigned to a room");
-    }
-
-    const room = await this.roomRepo.findById(roomId);
-    if (!room || room.propertyId !== propertyId) {
-      throw new Error("Room not found");
-    }
-    if (room.status === "under_renovation") {
-      throw new Error("Room is under renovation");
-    }
-
-    const allTenants = await this.tenantRepo.findByProperty(propertyId);
-    const activeInRoom = allTenants.filter(
-      (t) => t.roomId === roomId && !t.movedOutAt
-    );
-    if (activeInRoom.length >= room.capacity) {
-      throw new Error("Room is at full capacity");
-    }
-
-    const effectiveDay = billingDayOfMonth ?? new Date().getDate();
-    const updated = await this.tenantRepo.assignRoom(tenantId, roomId, effectiveDay);
-    if (room.status === "available") {
-      await this.roomRepo.updateStatus(roomId, "occupied");
-    }
-    this.logActivity?.({
-      propertyId,
-      actorId: userId,
-      actorRole: role,
-      actionCode: "TENANT_ASSIGNED",
-      entityType: "TENANT",
-      entityId: tenantId,
-      metadata: { tenantName: tenant.name, roomName: room.roomNumber },
     });
     return updated;
   }

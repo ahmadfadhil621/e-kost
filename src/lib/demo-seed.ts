@@ -106,8 +106,15 @@ export async function seedDemoData(ownerId: string): Promise<void> {
     name: string,
     movedInAt: Date
   ) {
-    const tenant = await prisma.tenant.create({
-      data: { propertyId: property.id, roomId: roomMap[roomNumber].id, name, movedInAt },
+    const roomId = roomMap[roomNumber].id;
+    const tenant = await prisma.$transaction(async (tx) => {
+      const created = await tx.tenant.create({
+        data: { propertyId: property.id, roomId, name, movedInAt },
+      });
+      await tx.room_assignment.create({
+        data: { tenantId: created.id, roomId, startDate: movedInAt, endDate: null },
+      });
+      return created;
     });
     await logActivity(
       property.id, ownerId,
