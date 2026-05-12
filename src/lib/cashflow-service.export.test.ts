@@ -317,8 +317,8 @@ describe("CashflowService.exportCashflow", () => {
       expect(tenantCell.value === null || tenantCell.value === "" || tenantCell.value === undefined).toBe(true);
     });
 
-    it("amount column value is numeric (AC-2)", async () => {
-      const row = createExportRow({ amount: 1_500_000 });
+    it("income row amount is positive numeric (AC-2)", async () => {
+      const row = createExportRow({ type: "income", amount: 1_500_000 });
       const repo = createMockCashflowRepo({
         findForExport: vi.fn().mockResolvedValue([row]),
       });
@@ -330,6 +330,21 @@ describe("CashflowService.exportCashflow", () => {
       const sheet = wb.worksheets[0];
       expect(typeof sheet.getRow(2).getCell(5).value).toBe("number");
       expect(sheet.getRow(2).getCell(5).value).toBe(1_500_000);
+    });
+
+    it("expense row amount is shown as negative (AC-2)", async () => {
+      const row = createExportRow({ type: "expense", category: "electricity", tenantName: null, amount: 200_000 });
+      const repo = createMockCashflowRepo({
+        findForExport: vi.fn().mockResolvedValue([row]),
+      });
+      const service = makeService(repo);
+
+      const { buffer } = await service.exportCashflow(userId, propertyId, {}, "Asia/Jakarta", "en");
+
+      const wb = await loadWorkbook(buffer);
+      const sheet = wb.worksheets[0];
+      expect(typeof sheet.getRow(2).getCell(5).value).toBe("number");
+      expect(sheet.getRow(2).getCell(5).value).toBe(-200_000);
     });
 
     it("notes cell shows payment note when present (AC-2)", async () => {

@@ -165,7 +165,7 @@ async function buildCashflowXlsx(
       typeLabel,
       categoryLabel,
       tenantLabel,
-      row.amount,
+      row.type === "expense" ? -row.amount : row.amount,
       notesLabel,
     ]);
 
