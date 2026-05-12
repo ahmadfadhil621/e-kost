@@ -3,6 +3,8 @@ import type {
   Expense,
   CategoryBreakdown,
   ExpenseCategory,
+  ExpenseExportFilters,
+  ExpenseExportRow,
 } from "@/domain/schemas/expense";
 import type { ExpenseCategory as PrismaExpenseCategory } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
@@ -188,6 +190,50 @@ export class PrismaExpenseRepository implements IExpenseRepository {
 
   async delete(id: string): Promise<void> {
     await prisma.expense.delete({ where: { id } });
+  }
+
+  async findForExport(
+    propertyId: string,
+    filters: ExpenseExportFilters
+  ): Promise<ExpenseExportRow[]> {
+    const startOfMonth =
+      filters.year !== undefined && filters.month !== undefined
+        ? new Date(Date.UTC(filters.year, filters.month - 1, 1))
+        : undefined;
+    const endOfMonth =
+      startOfMonth
+        ? new Date(Date.UTC(filters.year!, filters.month!, 0, 23, 59, 59, 999))
+        : undefined;
+
+    const where: {
+      propertyId: string;
+      date?: { gte?: Date; lte?: Date };
+      category?: PrismaExpenseCategory;
+    } = { propertyId };
+
+    if (startOfMonth && endOfMonth) {
+      where.date = { gte: startOfMonth, lte: endOfMonth };
+    }
+    if (filters.category) {
+      const cat = DOMAIN_TO_PRISMA[filters.category];
+      if (cat) {
+        where.category = cat as PrismaExpenseCategory;
+      }
+    }
+
+    const rows = await prisma.expense.findMany({
+      where,
+      orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+      take: 10_001,
+      select: { date: true, category: true, amount: true, description: true },
+    });
+
+    return rows.map((r) => ({
+      date: r.date,
+      category: toDomainCategory(r.category),
+      amount: toNumber(r.amount),
+      description: r.description,
+    }));
   }
 
   async sumByMonth(

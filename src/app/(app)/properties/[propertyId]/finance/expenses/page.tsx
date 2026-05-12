@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "next/navigation";
-import { MoreVertical } from "lucide-react";
+import { Download, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Dialog,
@@ -76,6 +78,7 @@ async function deleteExpense(propertyId: string, expenseId: string): Promise<voi
 
 export default function ExpenseListPage() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const params = useParams();
   const propertyId = params.propertyId as string;
   const formatCurrency = useFormatCurrency();
@@ -125,6 +128,35 @@ export default function ExpenseListPage() {
   });
 
   const canMutateFinance = !(property?.staffOnlyFinance && property?.role === "owner");
+  const hasExpenses = expenses.length > 0;
+
+  async function handleExport() {
+    const url = `/api/properties/${propertyId}/expenses/export?year=${year}&month=${month}`;
+    try {
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        toast({
+          title: (body as { error?: string }).error ?? t("expense.export.errorToast"),
+          variant: "destructive",
+        });
+        return;
+      }
+      const disposition = res.headers.get("Content-Disposition") ?? "";
+      const match = disposition.match(/filename="([^"]+)"/);
+      const filename = match?.[1] ?? "expenses.xlsx";
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename;
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      toast({ title: t("expense.export.errorToast"), variant: "destructive" });
+    }
+  }
 
   const deleteMutation = useMutation({
     mutationFn: (expenseId: string) => deleteExpense(propertyId, expenseId),
@@ -156,13 +188,38 @@ export default function ExpenseListPage() {
     <div className="flex flex-col gap-4 w-full">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-lg font-semibold">{t("expense.list.title")}</h2>
-        {canMutateFinance && (
-          <Button asChild className="min-h-[44px] min-w-[44px]">
-            <Link href={`/properties/${propertyId}/finance/expenses/new`}>
-              {t("finance.addExpense")}
-            </Link>
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="min-h-[44px] min-w-[44px]"
+                    aria-label={t("expense.export.button")}
+                    disabled={!hasExpenses}
+                    onClick={handleExport}
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!hasExpenses && (
+                <TooltipContent>
+                  <p>{t("expense.export.disabledTooltip")}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+          {canMutateFinance && (
+            <Button asChild className="min-h-[44px] min-w-[44px]">
+              <Link href={`/properties/${propertyId}/finance/expenses/new`}>
+                {t("finance.addExpense")}
+              </Link>
+            </Button>
+          )}
+        </div>
       </div>
 
       <MonthSelector

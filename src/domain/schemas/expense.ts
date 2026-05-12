@@ -45,6 +45,21 @@ export const financeSummaryQuerySchema = z.object({
   month: z.coerce.number().int().min(1).max(12),
 });
 
+export const expenseExportFilterSchema = z.object({
+  year: z.coerce.number().int().min(2000).max(2100).optional(),
+  month: z.coerce.number().int().min(1).max(12).optional(),
+  category: z.enum(expenseCategories).optional(),
+});
+
+export type ExpenseExportFilters = z.infer<typeof expenseExportFilterSchema>;
+
+export interface ExpenseExportRow {
+  date: Date;
+  category: ExpenseCategory;
+  amount: number;
+  description: string | null;
+}
+
 export type CreateExpenseInput = z.infer<typeof createExpenseSchema>;
 export type UpdateExpenseInput = z.infer<typeof updateExpenseSchema>;
 

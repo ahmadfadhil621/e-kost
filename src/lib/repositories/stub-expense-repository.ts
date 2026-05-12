@@ -1,5 +1,5 @@
 import type { IExpenseRepository } from "@/domain/interfaces/expense-repository";
-import type { Expense, CategoryBreakdown } from "@/domain/schemas/expense";
+import type { Expense, CategoryBreakdown, ExpenseExportRow } from "@/domain/schemas/expense";
 
 export class StubExpenseRepository implements IExpenseRepository {
   async create(): Promise<Expense> {
@@ -19,6 +19,10 @@ export class StubExpenseRepository implements IExpenseRepository {
   }
 
   async delete(): Promise<void> {
+    throw new Error("Not implemented");
+  }
+
+  async findForExport(): Promise<ExpenseExportRow[]> {
     throw new Error("Not implemented");
   }
 

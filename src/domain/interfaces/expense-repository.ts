@@ -1,6 +1,8 @@
 import type {
   Expense,
   CategoryBreakdown,
+  ExpenseExportFilters,
+  ExpenseExportRow,
 } from "@/domain/schemas/expense";
 
 export interface IExpenseRepository {
@@ -27,6 +29,7 @@ export interface IExpenseRepository {
     }>
   ): Promise<Expense>;
   delete(id: string): Promise<void>;
+  findForExport(propertyId: string, filters: ExpenseExportFilters): Promise<ExpenseExportRow[]>;
   sumByMonth(propertyId: string, year: number, month: number): Promise<number>;
   sumByMonthGroupedByCategory(
     propertyId: string,

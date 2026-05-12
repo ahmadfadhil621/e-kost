@@ -2,6 +2,9 @@ import type { IExpenseRepository } from "@/domain/interfaces/expense-repository"
 import type {
   CreateExpenseInput,
   Expense,
+  ExpenseCategory,
+  ExpenseExportFilters,
+  ExpenseExportRow,
   ExpenseFilters,
   ExpenseSummary,
   UpdateExpenseInput,
@@ -12,6 +15,14 @@ import {
 } from "@/domain/schemas/expense";
 import type { PropertyRole } from "@/domain/schemas/property";
 import type { LogActivityFn } from "@/lib/activity-log-service";
+import ExcelJS from "exceljs";
+
+export class ExportRowCapError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ExportRowCapError";
+  }
+}
 
 export interface IPropertyAccessValidator {
   validateAccess(userId: string, propertyId: string): Promise<PropertyRole>;
@@ -163,4 +174,137 @@ export class ExpenseService {
     const sorted = [...categories].sort((a, b) => b.total - a.total);
     return { totalExpenses, categories: sorted };
   }
+
+  async exportExpenses(
+    userId: string,
+    propertyId: string,
+    filters: ExpenseExportFilters,
+    userTimezone: string,
+    userLocale: string
+  ): Promise<{ buffer: Buffer; filename: string }> {
+    await this.propertyAccess.validateAccess(userId, propertyId);
+
+    const rows = await this.repo.findForExport(propertyId, filters);
+
+    if (rows.length > 10_000) {
+      throw new ExportRowCapError("Export limit exceeded: maximum 10,000 rows allowed");
+    }
+
+    const buffer = await buildExpenseXlsx(rows, userTimezone, userLocale);
+    const filename = buildExpenseFilename(filters, userTimezone);
+
+    return { buffer, filename };
+  }
+}
+
+const CATEGORY_LABELS_EN: Record<ExpenseCategory, string> = {
+  electricity: "Electricity",
+  water: "Water",
+  internet: "Internet",
+  maintenance: "Maintenance",
+  cleaning: "Cleaning",
+  supplies: "Supplies",
+  tax: "Tax",
+  transfer: "Transfer",
+  other: "Other",
+};
+
+const CATEGORY_LABELS_ID: Record<ExpenseCategory, string> = {
+  electricity: "Listrik",
+  water: "Air",
+  internet: "Internet",
+  maintenance: "Perawatan",
+  cleaning: "Kebersihan",
+  supplies: "Perlengkapan",
+  tax: "Pajak",
+  transfer: "Transfer",
+  other: "Lainnya",
+};
+
+function formatDate(date: Date, timezone: string, locale: string): string {
+  const fmt = new Intl.DateTimeFormat(locale, {
+    timeZone: timezone,
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+  const parts = fmt.formatToParts(date);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  if (locale.startsWith("id")) {
+    return `${get("day")}/${get("month")}/${get("year")}`;
+  }
+  return `${get("month")}/${get("day")}/${get("year")}`;
+}
+
+function todayInTimezone(timezone: string): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")}`;
+}
+
+function lastDayOfMonth(year: number, month: number): string {
+  const d = new Date(Date.UTC(year, month, 0));
+  const mm = String(month).padStart(2, "0");
+  const dd = String(d.getUTCDate()).padStart(2, "0");
+  return `${year}-${mm}-${dd}`;
+}
+
+function buildExpenseFilename(filters: ExpenseExportFilters, timezone: string): string {
+  if (filters.year !== undefined && filters.month !== undefined) {
+    const mm = String(filters.month).padStart(2, "0");
+    const firstDay = `${filters.year}-${mm}-01`;
+    const lastDay = lastDayOfMonth(filters.year, filters.month);
+    return `expenses-${firstDay}_to_${lastDay}.xlsx`;
+  }
+  return `expenses-${todayInTimezone(timezone)}.xlsx`;
+}
+
+async function buildExpenseXlsx(
+  rows: ExpenseExportRow[],
+  timezone: string,
+  locale: string
+): Promise<Buffer> {
+  const wb = new ExcelJS.Workbook();
+  const sheet = wb.addWorksheet("Expenses");
+
+  sheet.columns = [
+    { width: 14 },
+    { width: 18 },
+    { width: 18 },
+    { width: 40 },
+  ];
+
+  const isId = locale.startsWith("id");
+  const headers = isId
+    ? ["Tanggal", "Kategori", "Jumlah (IDR)", "Deskripsi"]
+    : ["Date", "Category", "Amount (IDR)", "Description"];
+  const categoryLabels = isId ? CATEGORY_LABELS_ID : CATEGORY_LABELS_EN;
+
+  sheet.addRow(headers);
+
+  for (const row of rows) {
+    sheet.addRow([
+      formatDate(row.date, timezone, locale),
+      categoryLabels[row.category] ?? row.category,
+      row.amount,
+      row.description ?? "",
+    ]);
+  }
+
+  const dataRowCount = rows.length;
+  const totalsRowIndex = dataRowCount + 2;
+  const sumFormula = dataRowCount > 0
+    ? `SUM(C2:C${dataRowCount + 1})`
+    : `SUM(C2:C1)`;
+
+  const totalsRow = sheet.addRow(["", "", { formula: sumFormula }, ""]);
+  totalsRow.getCell(3).numFmt = "#,##0";
+  void totalsRowIndex;
+
+  return Buffer.from(await wb.xlsx.writeBuffer() as ArrayBuffer);
 }

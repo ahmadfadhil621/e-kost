@@ -614,6 +614,18 @@
       "categoryRequired": "Pilih kategori",
       "amountPositive": "Jumlah harus positif",
       "dateRequired": "Tanggal wajib diisi"
+    },
+    "export": {
+      "button": "Ekspor",
+      "disabledTooltip": "Tidak ada pengeluaran untuk diekspor",
+      "errorToast": "Gagal mengekspor pengeluaran",
+      "columns": {
+        "date": "Tanggal",
+        "category": "Kategori",
+        "amount": "Jumlah (IDR)",
+        "description": "Deskripsi"
+      },
+      "rowCapError": "Batas ekspor terlampaui: maksimum 10.000 baris diizinkan"
     }
   },
   "settings": {

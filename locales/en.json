@@ -614,6 +614,18 @@
       "categoryRequired": "Please select a category",
       "amountPositive": "Amount must be a positive number",
       "dateRequired": "Date is required"
+    },
+    "export": {
+      "button": "Export",
+      "disabledTooltip": "No expenses to export",
+      "errorToast": "Failed to export expenses",
+      "columns": {
+        "date": "Date",
+        "category": "Category",
+        "amount": "Amount (IDR)",
+        "description": "Description"
+      },
+      "rowCapError": "Export limit exceeded: maximum 10,000 rows allowed"
     }
   },
   "settings": {
