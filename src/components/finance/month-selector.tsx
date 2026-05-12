@@ -20,7 +20,7 @@ export function MonthSelector({
 }: MonthSelectorProps) {
   const { t } = useTranslation();
   const { format } = useDateFormatter();
-  const date = new Date(year, month - 1, 1);
+  const date = new Date(Date.UTC(year, month - 1, 1, 12, 0, 0));
   const monthYearLabel = format(date, { month: "long", year: "numeric" });
 
   return (
