@@ -5,6 +5,7 @@
 // AC-2 -> test('month navigation updates the cashflow list')
 // AC-3 -> test('empty state is shown when no transactions exist for the selected month')
 // AC-3 -> test('cashflow page renders without horizontal scroll at 320px')
+// issue #126 -> test('cashflow page shows net income total above entry list')
 //
 // NOTE: After implementing this feature, the existing test
 // "net income card is not a link" in e2e/finance-summary-card-navigation/summary-card-navigation.spec.ts
@@ -84,6 +85,44 @@ test.describe("view cashflow", () => {
       // Page title is visible
       await expect(
         page.getByText(/cashflow|arus kas/i).first()
+      ).toBeVisible({ timeout: 10000 });
+    });
+
+    test("cashflow page shows net income total above entry list", async ({
+      page,
+      request,
+      baseURL,
+    }) => {
+      const propertyId = getPropertyId();
+
+      const tenantsRes = await request.get(
+        `${baseURL}/api/properties/${propertyId}/tenants`
+      );
+      const { tenants } = await tenantsRes.json() as { tenants: Array<{ id: string; roomId: string | null; movedOutAt: string | null }> };
+      const activeTenant = tenants.find((t) => t.roomId && !t.movedOutAt);
+
+      test.skip(!activeTenant, "No active tenant available to seed payment");
+
+      const now = new Date();
+      const dateStr = now.toISOString().slice(0, 10);
+
+      await seedPayment(request, baseURL, propertyId, activeTenant!.id, 600_000, dateStr);
+      await seedExpense(request, baseURL, propertyId, 100_000, dateStr);
+
+      await page.goto(`/properties/${propertyId}/finance/cashflow`);
+      await page
+        .getByText(/cashflow|arus kas/i)
+        .first()
+        .waitFor({ state: "visible", timeout: 15000 });
+
+      // Net income total label should be visible
+      await expect(
+        page.getByText(/net income|laba bersih/i).first()
+      ).toBeVisible({ timeout: 10000 });
+
+      // The total should show a + prefix (income > expense in this seed)
+      await expect(
+        page.getByText(/^\+/).first()
       ).toBeVisible({ timeout: 10000 });
     });
 

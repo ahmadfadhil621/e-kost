@@ -13,6 +13,7 @@ import { useFormatCurrency } from "@/hooks/use-format-currency";
 import { useDateFormatter } from "@/hooks/use-date-formatter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { CashflowEntry } from "@/domain/schemas/cashflow";
+import { calculateNetIncome } from "@/lib/cashflow-utils";
 
 async function fetchCashflow(
   propertyId: string,
@@ -74,6 +75,7 @@ export default function CashflowPage() {
   });
 
   const hasEntries = entries.length > 0;
+  const netIncome = calculateNetIncome(entries);
 
   async function handleExport() {
     try {
@@ -162,32 +164,54 @@ export default function CashflowPage() {
       )}
 
       {!isLoading && !error && entries.length > 0 && (
-        <ul className="flex flex-col gap-3 list-none p-0 m-0">
-          {entries.map((entry) => (
-            <li key={entry.id}>
-              <Card className="w-full">
-                <CardHeader className="pb-2">
-                  <CardTitle
-                    className={`text-lg font-semibold tabular-nums ${
-                      entry.type === "income"
-                        ? "text-[hsl(var(--status-available))]"
-                        : "text-[hsl(var(--status-occupied))]"
-                    }`}
-                  >
-                    {entry.type === "income" ? "+" : "−"}
-                    {formatCurrency(entry.amount)}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-1">
-                  <p className="text-sm font-medium">{entry.description}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {format(entry.date, { year: "numeric", month: "short", day: "numeric" })}
-                  </p>
-                </CardContent>
-              </Card>
-            </li>
-          ))}
-        </ul>
+        <>
+          <Card className="w-full">
+            <CardHeader className="pb-2">
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+                {t("finance.cashflow.netTotal")}
+              </p>
+              <CardTitle
+                className={`text-2xl font-bold tabular-nums ${
+                  netIncome > 0
+                    ? "text-finance-profit-positive"
+                    : netIncome < 0
+                      ? "text-finance-profit-negative"
+                      : "text-foreground"
+                }`}
+              >
+                {netIncome >= 0 ? "+" : "−"}
+                {formatCurrency(Math.abs(netIncome))}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+
+          <ul className="flex flex-col gap-3 list-none p-0 m-0">
+            {entries.map((entry) => (
+              <li key={entry.id}>
+                <Card className="w-full">
+                  <CardHeader className="pb-2">
+                    <CardTitle
+                      className={`text-lg font-semibold tabular-nums ${
+                        entry.type === "income"
+                          ? "text-finance-income"
+                          : "text-finance-expense"
+                      }`}
+                    >
+                      {entry.type === "income" ? "+" : "−"}
+                      {formatCurrency(entry.amount)}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-1">
+                    <p className="text-sm font-medium">{entry.description}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(entry.date, { year: "numeric", month: "short", day: "numeric" })}
+                    </p>
+                  </CardContent>
+                </Card>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );

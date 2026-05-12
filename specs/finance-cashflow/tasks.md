@@ -27,3 +27,11 @@
 - [x] Vitest: `src/lib/cashflow-service.fault-injection.test.ts`
 - [x] Vitest: `src/app/api/properties/[propertyId]/finance/cashflow/route.test.ts`
 - [x] Playwright: `e2e/finance-cashflow/view-cashflow.spec.ts`
+
+## Bug Fix: Issue #126 — Cashflow entries all render green
+- [x] Extract `calculateNetIncome` pure utility: `src/lib/cashflow-utils.ts`
+- [x] Vitest: `src/lib/cashflow-utils.test.ts` — Good/Bad/Edge (11 tests)
+- [x] Fix entry colors: `text-finance-income` / `text-finance-expense` (was `--status-available` / `--status-occupied`)
+- [x] Add net income total card above entry list (green when positive, red when negative)
+- [x] Add `finance.cashflow.netTotal` i18n key to `locales/en.json` and `locales/id.json`
+- [x] Add E2E test for net income total display in `view-cashflow.spec.ts`

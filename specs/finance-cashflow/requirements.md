@@ -2,6 +2,7 @@
 
 ## Source
 GitHub Issue #69: [Finance] — Monthly cashflow detail page (unified income + expense timeline)
+GitHub Issue #126: [Finance] — Cashflow entries all render green regardless of type (bug fix + net income total)
 
 ## Acceptance Criteria
 
@@ -24,9 +25,11 @@ GitHub Issue #69: [Finance] — Monthly cashflow detail page (unified income + e
 - Defaults to current month on first load
 - Month navigation via `MonthSelector` (same component as finance overview)
 - Displays a chronological list (date descending) of all income and expense entries
-- Income rows: green amount with `+` prefix
-- Expense rows: red amount with `−` prefix (minus sign)
+- Income rows: green text (`--finance-income`) with `+` prefix
+- Expense rows: red text (`--finance-expense`) with `−` prefix (minus sign)
 - Each row shows: date, description, and amount
+- Net income total card displayed above the entry list; colored green (`--finance-profit-positive`) when positive, red (`--finance-profit-negative`) when negative, neutral when zero
+- Color is never the sole indicator — `+`/`−` prefix satisfies the color + non-color accessibility requirement (WCAG AA)
 - Empty state message when no transactions exist for the selected month
 - Loading skeleton/indicator while fetching
 - Mobile-first: single column, no horizontal scroll at 320px

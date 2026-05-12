@@ -573,6 +573,7 @@
     "cashflow": {
       "title": "Arus Kas",
       "empty": "Tidak ada transaksi bulan ini",
+      "netTotal": "Laba Bersih",
       "export": {
         "button": "Ekspor arus kas ke XLSX",
         "disabledTooltip": "Tidak ada transaksi untuk diekspor",
