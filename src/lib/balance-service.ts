@@ -1,3 +1,4 @@
+import ExcelJS from "exceljs";
 import type { OutstandingBalance } from "@/domain/schemas/dashboard";
 import type { BillingCycleBreakdown, CycleStatus } from "@/domain/schemas/billing-cycle";
 import type { IBillingCycleRepository } from "@/domain/interfaces/billing-cycle-repository";
@@ -30,6 +31,21 @@ export interface BalanceRow {
   totalPayments: number;
 }
 
+export interface OutstandingBalanceExportRow {
+  tenantName: string;
+  roomNumber: string;
+  outstandingBalance: number;
+  monthsOverdue: number;
+  lastPaymentDate: Date | null;
+}
+
+export class ExportRowCapError extends Error {
+  constructor(msg: string) {
+    super(msg);
+    this.name = "ExportRowCapError";
+  }
+}
+
 export interface IBalanceRepository {
   getBalanceRow(
     propertyId: string,
@@ -43,6 +59,10 @@ export interface IBalanceRepository {
     propertyId: string,
     tenantId: string
   ): Promise<{ monthlyRent: number; movedInAt: Date; billingDayOfMonth: number | null } | null>;
+  findForExport(
+    propertyId: string,
+    status?: "paid" | "unpaid"
+  ): Promise<OutstandingBalanceExportRow[]>;
 }
 
 export interface IPropertyAccessValidator {
@@ -220,4 +240,98 @@ export class BalanceService {
       billingDayOfMonth: billingDay,
     };
   }
+
+  async exportOutstandingBalances(
+    userId: string,
+    propertyId: string,
+    status: "paid" | "unpaid" | undefined,
+    userTimezone: string,
+    userLocale: string
+  ): Promise<{ buffer: Buffer; filename: string }> {
+    await this.propertyAccess.validateAccess(userId, propertyId);
+
+    const rows = await this.balanceRepo.findForExport(propertyId, status);
+
+    if (rows.length > 10_000) {
+      throw new ExportRowCapError("Export limit exceeded: maximum 10,000 rows allowed");
+    }
+
+    const buffer = await buildBalanceXlsx(rows, userTimezone, userLocale);
+    const filename = `outstanding-balances-${todayInTimezone(userTimezone)}.xlsx`;
+
+    return { buffer, filename };
+  }
+}
+
+// ── XLSX helpers ────────────────────────────────────────────────────────────
+
+function todayInTimezone(timezone: string): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")}`;
+}
+
+function formatDate(date: Date, timezone: string, locale: string): string {
+  const fmt = new Intl.DateTimeFormat(locale, {
+    timeZone: timezone,
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+  const parts = fmt.formatToParts(date);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  if (locale.startsWith("id")) {
+    return `${get("day")}/${get("month")}/${get("year")}`;
+  }
+  return `${get("month")}/${get("day")}/${get("year")}`;
+}
+
+async function buildBalanceXlsx(
+  rows: OutstandingBalanceExportRow[],
+  timezone: string,
+  locale: string
+): Promise<Buffer> {
+  const wb = new ExcelJS.Workbook();
+  const sheet = wb.addWorksheet("Outstanding Balances");
+
+  sheet.columns = [
+    { width: 24 },
+    { width: 10 },
+    { width: 18 },
+    { width: 14 },
+    { width: 18 },
+  ];
+
+  const isId = locale.startsWith("id");
+  const headers = isId
+    ? ["Penyewa", "Kamar", "Tunggakan (IDR)", "Bulan Tunggak", "Pembayaran Terakhir"]
+    : ["Tenant", "Room", "Amount Owed (IDR)", "Months Overdue", "Last Payment Date"];
+  const neverLabel = isId ? "Belum pernah" : "Never";
+
+  sheet.addRow(headers);
+
+  for (const row of rows) {
+    const lastPayment = row.lastPaymentDate === null
+      ? neverLabel
+      : formatDate(row.lastPaymentDate, timezone, locale);
+    sheet.addRow([
+      row.tenantName,
+      row.roomNumber,
+      row.outstandingBalance,
+      row.monthsOverdue,
+      lastPayment,
+    ]);
+  }
+
+  const dataRowCount = rows.length;
+  const sumRange = dataRowCount > 0 ? `C2:C${dataRowCount + 1}` : `C2:C1`;
+  sheet.addRow(["", "", { formula: `SUM(${sumRange})` }, "", ""]);
+
+  const arrayBuffer = await wb.xlsx.writeBuffer();
+  return Buffer.from(arrayBuffer);
 }

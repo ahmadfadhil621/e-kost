@@ -62,3 +62,26 @@ export function createBalanceRow(
     ...overrides,
   };
 }
+
+/** Row shape returned by balance repository for export (issue #123). */
+export interface OutstandingBalanceExportRow {
+  tenantName: string;
+  roomNumber: string;
+  outstandingBalance: number;
+  monthsOverdue: number;
+  lastPaymentDate: Date | null;
+}
+
+export function createOutstandingBalanceExportRow(
+  overrides: Partial<OutstandingBalanceExportRow> = {}
+): OutstandingBalanceExportRow {
+  return {
+    tenantName: overrides.tenantName ?? "John Doe",
+    roomNumber: overrides.roomNumber ?? "A101",
+    outstandingBalance: overrides.outstandingBalance ?? 1_500_000,
+    monthsOverdue: overrides.monthsOverdue ?? 2,
+    lastPaymentDate: overrides.lastPaymentDate !== undefined
+      ? overrides.lastPaymentDate
+      : new Date("2025-03-01"),
+  };
+}

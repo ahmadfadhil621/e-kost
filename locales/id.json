@@ -376,6 +376,20 @@
       "phoneRequired": "Telepon wajib diisi",
       "emailRequired": "Email wajib diisi",
       "invalidEmail": "Masukkan alamat email yang valid"
+    },
+    "export": {
+      "button": "Ekspor",
+      "disabledTooltip": "Tidak ada penyewa untuk diekspor",
+      "errorToast": "Gagal mengekspor",
+      "neverPaid": "Belum pernah",
+      "columns": {
+        "tenant": "Penyewa",
+        "room": "Kamar",
+        "amountOwed": "Tunggakan (IDR)",
+        "monthsOverdue": "Bulan Tunggak",
+        "lastPaymentDate": "Pembayaran Terakhir"
+      },
+      "rowCapError": "Batas ekspor terlampaui: maksimum 10.000 baris diizinkan"
     }
   },
   "payment": {

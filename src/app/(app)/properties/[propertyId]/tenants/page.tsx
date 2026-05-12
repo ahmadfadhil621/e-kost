@@ -7,11 +7,18 @@ import { useFormatCurrency } from "@/hooks/use-format-currency";
 import { useDateFormatter } from "@/hooks/use-date-formatter";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
+import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { BalanceStatusIndicator } from "@/components/balance/balance-status-indicator";
 import { TenantFilterBar, type TenantFilterValue } from "@/components/tenant/tenant-filter-bar";
 import { useDebounce } from "@/hooks/use-debounce";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type TenantSummary = {
   id: string;
@@ -102,9 +109,37 @@ export default function TenantListPage() {
     <div className="space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-lg font-semibold">{t("tenant.list.title")}</h2>
-        <Button asChild className="min-h-[44px] min-w-[44px]">
-          <Link href={`/properties/${propertyId}/tenants/new`}>{t("tenant.list.addTenant")}</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span tabIndex={filteredTenants.length === 0 ? 0 : undefined}>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="min-h-[44px] min-w-[44px]"
+                    aria-label={t("tenant.export.button")}
+                    disabled={filteredTenants.length === 0}
+                    onClick={() => {
+                      const qs = filter === "missing_rent" ? "?status=unpaid" : "";
+                      window.location.href = `/api/properties/${propertyId}/tenants/export${qs}`;
+                    }}
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {filteredTenants.length === 0 && (
+                <TooltipContent>
+                  <p>{t("tenant.export.disabledTooltip")}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+          <Button asChild className="min-h-[44px] min-w-[44px]">
+            <Link href={`/properties/${propertyId}/tenants/new`}>{t("tenant.list.addTenant")}</Link>
+          </Button>
+        </div>
       </div>
 
       {tenants.length > 0 && (

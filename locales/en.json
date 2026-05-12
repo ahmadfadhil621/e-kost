@@ -376,6 +376,20 @@
       "phoneRequired": "Phone is required",
       "emailRequired": "Email is required",
       "invalidEmail": "Please enter a valid email address"
+    },
+    "export": {
+      "button": "Export",
+      "disabledTooltip": "No tenants to export",
+      "errorToast": "Failed to export",
+      "neverPaid": "Never",
+      "columns": {
+        "tenant": "Tenant",
+        "room": "Room",
+        "amountOwed": "Amount Owed (IDR)",
+        "monthsOverdue": "Months Overdue",
+        "lastPaymentDate": "Last Payment Date"
+      },
+      "rowCapError": "Export limit exceeded: maximum 10,000 rows allowed"
     }
   },
   "payment": {

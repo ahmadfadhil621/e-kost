@@ -1,4 +1,4 @@
-import type { IBalanceRepository, BalanceRow } from "@/lib/balance-service";
+import type { IBalanceRepository, BalanceRow, OutstandingBalanceExportRow } from "@/lib/balance-service";
 import { prisma } from "@/lib/prisma";
 
 function toNumber(value: unknown): number {
@@ -108,5 +108,48 @@ export class PrismaBalanceRepository implements IBalanceRepository {
       movedInAt: tenant.movedInAt,
       billingDayOfMonth: tenant.billingDayOfMonth,
     };
+  }
+
+  async findForExport(
+    propertyId: string,
+    status?: "paid" | "unpaid"
+  ): Promise<OutstandingBalanceExportRow[]> {
+    const tenants = await prisma.tenant.findMany({
+      where: { propertyId, movedOutAt: null, roomId: { not: null } },
+      include: {
+        room: true,
+        payments: { orderBy: { paymentDate: "desc" }, take: 10_001 },
+      },
+    });
+
+    const rows: OutstandingBalanceExportRow[] = tenants.map((t) => {
+      const monthlyRent = t.room ? toNumber(t.room.monthlyRent) : 0;
+      const totalRentOwed = monthlyRent * monthsElapsed(t.movedInAt);
+      const totalPayments = t.payments.reduce((sum, p) => sum + toNumber(p.amount), 0);
+      const outstandingBalance = Math.max(0, totalRentOwed - totalPayments);
+      const monthsOverdue = monthlyRent > 0 ? Math.ceil(outstandingBalance / monthlyRent) : 0;
+      const lastPayment = t.payments[0] ?? null;
+      return {
+        tenantName: t.name,
+        roomNumber: t.room?.roomNumber ?? "",
+        outstandingBalance,
+        monthsOverdue,
+        lastPaymentDate: lastPayment ? lastPayment.paymentDate : null,
+      };
+    });
+
+    let filtered = rows;
+    if (status === "unpaid") {
+      filtered = rows.filter((r) => r.outstandingBalance > 0);
+    } else if (status === "paid") {
+      filtered = rows.filter((r) => r.outstandingBalance <= 0);
+    }
+
+    // Sort by outstandingBalance desc, then tenantName asc
+    filtered.sort((a, b) =>
+      b.outstandingBalance - a.outstandingBalance || a.tenantName.localeCompare(b.tenantName)
+    );
+
+    return filtered;
   }
 }
