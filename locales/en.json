@@ -572,7 +572,12 @@
     "addExpense": "Add expense",
     "cashflow": {
       "title": "Cashflow",
-      "empty": "No transactions for this month"
+      "empty": "No transactions for this month",
+      "export": {
+        "button": "Export cashflow to XLSX",
+        "disabledTooltip": "No transactions to export",
+        "errorToast": "Failed to export cashflow"
+      }
     },
     "staffSummary": {
       "title": "Cash Accountability",

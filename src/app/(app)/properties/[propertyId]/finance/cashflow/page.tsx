@@ -4,6 +4,10 @@ import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "next/navigation";
+import { Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useToast } from "@/hooks/use-toast";
 import { MonthSelector } from "@/components/finance/month-selector";
 import { useFormatCurrency } from "@/hooks/use-format-currency";
 import { useDateFormatter } from "@/hooks/use-date-formatter";
@@ -27,6 +31,7 @@ async function fetchCashflow(
 
 export default function CashflowPage() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const params = useParams();
   const propertyId = params.propertyId as string;
   const formatCurrency = useFormatCurrency();
@@ -68,6 +73,38 @@ export default function CashflowPage() {
     staleTime: 60_000,
   });
 
+  const hasEntries = entries.length > 0;
+
+  async function handleExport() {
+    try {
+      const res = await fetch(
+        `/api/properties/${propertyId}/finance/cashflow/export?year=${year}&month=${month}`,
+        { credentials: "include" }
+      );
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        toast({
+          title: (body as { error?: string }).error ?? t("finance.cashflow.export.errorToast"),
+          variant: "destructive",
+        });
+        return;
+      }
+      const disposition = res.headers.get("Content-Disposition") ?? "";
+      const match = disposition.match(/filename="([^"]+)"/);
+      const filename = match?.[1] ?? "cashflow.xlsx";
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename;
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      toast({ title: t("finance.cashflow.export.errorToast"), variant: "destructive" });
+    }
+  }
+
   if (!propertyId) {
     return (
       <div className="space-y-4">
@@ -78,7 +115,32 @@ export default function CashflowPage() {
 
   return (
     <div className="flex flex-col gap-6 w-full">
-      <h2 className="text-lg font-semibold">{t("finance.cashflow.title")}</h2>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-lg font-semibold">{t("finance.cashflow.title")}</h2>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="min-h-[44px] min-w-[44px]"
+                  aria-label={t("finance.cashflow.export.button")}
+                  disabled={!hasEntries}
+                  onClick={handleExport}
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {!hasEntries && (
+              <TooltipContent>
+                <p>{t("finance.cashflow.export.disabledTooltip")}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      </div>
 
       <MonthSelector
         year={year}

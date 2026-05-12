@@ -1,5 +1,5 @@
 import type { ICashflowRepository } from "@/domain/interfaces/cashflow-repository";
-import type { CashflowEntry } from "@/domain/schemas/cashflow";
+import type { CashflowEntry, CashflowExportFilters, CashflowExportRow } from "@/domain/schemas/cashflow";
 import { prisma } from "@/lib/prisma";
 
 function toNumber(value: unknown): number {
@@ -64,6 +64,67 @@ export class PrismaCashflowRepository implements ICashflowRepository {
     }));
 
     const merged = [...incomeEntries, ...expenseEntries].sort((a, b) =>
+      b._sortKey.localeCompare(a._sortKey)
+    );
+
+    return merged.map(({ _sortKey: _sk, ...entry }) => entry);
+  }
+
+  async findForExport(
+    propertyId: string,
+    filters: CashflowExportFilters
+  ): Promise<CashflowExportRow[]> {
+    const where: { gte?: Date; lte?: Date } = {};
+    if (filters.year !== undefined && filters.month !== undefined) {
+      where.gte = new Date(Date.UTC(filters.year, filters.month - 1, 1));
+      where.lte = new Date(Date.UTC(filters.year, filters.month, 0, 23, 59, 59, 999));
+    }
+
+    const dateFilter = where.gte ? { gte: where.gte, lte: where.lte } : undefined;
+
+    const [payments, expenses] = await Promise.all([
+      prisma.payment.findMany({
+        where: {
+          tenant: { propertyId },
+          ...(dateFilter ? { paymentDate: dateFilter } : {}),
+        },
+        include: { tenant: true },
+        orderBy: [{ paymentDate: "desc" }, { createdAt: "desc" }],
+      }),
+      prisma.expense.findMany({
+        where: {
+          propertyId,
+          ...(dateFilter ? { date: dateFilter } : {}),
+        },
+        orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+      }),
+    ]);
+
+    type RawExportRow = CashflowExportRow & { _sortKey: string };
+
+    const incomeRows: RawExportRow[] = payments.map((p) => ({
+      id: p.id,
+      date: p.paymentDate,
+      type: "income" as const,
+      category: null,
+      tenantName: p.tenant.name,
+      amount: toNumber(p.amount),
+      notes: p.note ?? null,
+      _sortKey: `${p.paymentDate.toISOString()}|${p.createdAt.toISOString()}`,
+    }));
+
+    const expenseRows: RawExportRow[] = expenses.map((e) => ({
+      id: e.id,
+      date: e.date,
+      type: "expense" as const,
+      category: e.category.toLowerCase(),
+      tenantName: null,
+      amount: toNumber(e.amount),
+      notes: e.description ?? null,
+      _sortKey: `${e.date.toISOString()}|${e.createdAt.toISOString()}`,
+    }));
+
+    const merged = [...incomeRows, ...expenseRows].sort((a, b) =>
       b._sortKey.localeCompare(a._sortKey)
     );
 

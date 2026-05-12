@@ -572,7 +572,12 @@
     "addExpense": "Tambah pengeluaran",
     "cashflow": {
       "title": "Arus Kas",
-      "empty": "Tidak ada transaksi bulan ini"
+      "empty": "Tidak ada transaksi bulan ini",
+      "export": {
+        "button": "Ekspor arus kas ke XLSX",
+        "disabledTooltip": "Tidak ada transaksi untuk diekspor",
+        "errorToast": "Gagal mengekspor arus kas"
+      }
     },
     "staffSummary": {
       "title": "Akuntabilitas Kas",

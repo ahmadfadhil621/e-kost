@@ -1,4 +1,4 @@
-import type { CashflowEntry } from "@/domain/schemas/cashflow";
+import type { CashflowEntry, CashflowExportRow, CashflowExportFilters } from "@/domain/schemas/cashflow";
 
 export interface ICashflowRepository {
   findByPropertyAndMonth(
@@ -6,4 +6,8 @@ export interface ICashflowRepository {
     year: number,
     month: number
   ): Promise<CashflowEntry[]>;
+  findForExport(
+    propertyId: string,
+    filters: CashflowExportFilters
+  ): Promise<CashflowExportRow[]>;
 }
